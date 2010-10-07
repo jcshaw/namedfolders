@@ -1,0 +1,13 @@
+REGEDIT4
+; Create two shortcuts for standard Window's directories
+; stdu - std directories for current user
+; stda - std directories for all users
+
+; Создать два псевдонима для стандартных директорий Windows.
+; stdu - для директорий текущего пользователя
+; stda - для стандартных директорий всех пользователей.
+
+[HKEY_CURRENT_USER\Software\Far\Plugins\NamedFolders\Keys]
+"stda"="$HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\\"
+"stdu"="$HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\\"
+

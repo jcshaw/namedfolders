@@ -1,0 +1,10 @@
+REGEDIT4
+; Pattern for translation command "cs:soft" to "cd: :soft"
+; Шаблон для преобразования команды "cs:soft" в "cd: :soft"
+
+
+[HKEY_CURRENT_USER\Software\Far\Plugins\NamedFolders\CommandPatterns]
+"cs:"="[command]= ;[name]=:[name]"
+
+
+

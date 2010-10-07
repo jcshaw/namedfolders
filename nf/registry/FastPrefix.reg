@@ -1,0 +1,21 @@
+REGEDIT4
+
+; FastPrefix.reg
+; Pressing ':' is equal to typing 'cd:'
+; По нажатию : в командной строке набирается cd: 
+; работает так же в русской раскладке 
+; За идею спасибо Антону Синицину 
+
+[HKEY_CURRENT_USER\Software\Far\KeyMacros\Shell\:]
+@=""
+"Sequence"="c d :"
+"Description"="Pressing ':' is equal to typing 'cd:'"
+"DisableOutput"=dword:00000001
+"EmptyCommandLine"=dword:00000001
+
+
+[HKEY_CURRENT_USER\Software\Far\KeyMacros\Shell\є]
+"Sequence"="\"cd:\" $KbdSwitch"
+"DisableOutput"=dword:00000001
+"Description"="NamedFolders - Fast Prefix (в русской раскладке)"
+"EmptyCommandLine"=dword:00000001

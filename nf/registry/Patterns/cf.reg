@@ -1,0 +1,10 @@
+REGEDIT4
+; Pattern for translation command "cf:FileMask" to "cd:--f FileMask"
+; Шаблон для преобразования команды "cf:FileMask" в "cd:--f FileMask"
+
+
+[HKEY_CURRENT_USER\Software\Far\Plugins\NamedFolders\CommandPatterns]
+"cf:"="[command]=--f "
+
+
+

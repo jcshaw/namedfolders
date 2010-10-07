@@ -1,0 +1,142 @@
+/*
+* Far Named Folders 3.x
+* Copyright (c) 2002-2010 by Victor Derevyanko
+* www: http://code.google.com/p/namedfolders/
+* e-mail: dvpublic0@gmail.com
+*/
+
+#include "StdAfx.h"
+#include "configuredialog.h"
+#include "Kernel.h"
+#include <cmath>
+
+using namespace nf;
+using namespace nf::Private;
+
+namespace
+{
+	struct {
+		int control_id;
+		tsetting_flags settings_id;
+	} main_dw_settings[] = 
+	{
+		{ID_SHOW_INDISK_MENU, nf::ST_SHOW_IN_DISK_MENU}
+		,{ID_SHOW_INPLUGINS_MENU, nf::ST_SHOW_IN_PLUGINS_MENU}
+		,{ID_CONFIRM_OVERRIDE, nf::ST_CONFIRM_OVERRIDE}
+		,{ID_CONFIRM_DELETE, nf::ST_CONFIRM_DELETE}
+		,{ID_CONFIRM_DELETE_CATALOGS, nf::ST_CONFIRM_DELETE_NOT_EMPTY_CATALOGS}
+		,{ID_CONFIRM_IMPLICIT_CREATING, nf::ST_CONFIRM_IMPLICIT_CREATION}
+		,{ID_CONFIRM_IMPLICIT_DELETION, nf::ST_CONFIRM_IMPLICIT_DELETION}
+		,{ID_CONFIRM_GO_TO_NEAREST, nf::ST_CONFIRM_GO_TO_NEAREST}
+		,{ID_ALWAYS_EXPAND_SHORTCUTS, nf::ST_ALWAYS_EXPAND_SHORTCUTS}
+		,{ID_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE, nf::ST_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE}
+		,{ID_HISTORY_IN_APPLY_COMMAND_DIALOG, nf::ST_HISTORY_IN_DIALOG_APPLY_COMMAND}
+		,{ID_TEMPORARY_AS_HIDDEN, nf::ST_SHOW_TEMPORARY_AS_HIDDEN}
+		,{ID_EDIT_MENU_DISK_FAST_KEY, nf::ST_EDIT_MENU_DISK_FAST_KEY}
+		,{ID_USE_SINGLE_MENU_MODE, nf::ST_USE_SINGLE_MENU_MODE}
+		,{ID_SUBDIRECTORIES_AS_ALIASES, nf::ST_SUBDIRECTORIES_AS_ALIASES}
+	};
+	struct {
+		int control_id;
+		tsetting_strings settings_id;
+	} main_str_settings[] = 
+	{
+		{ID_EDIT_PREFIX, nf::STS_PREFIXES}
+		,{ID_EDIT_PANELWIDTH, nf::STS_PANELWIDTH}
+		,{ID_EDIT_MASKS_SOFT_EXCEPTIONS, nf::ST_SOFT_MASKS_TO_IGNORE_COMMA_SEPARETED}
+		,{ID_EDIT_ASTERIXMODE, nf::ST_ASTERIX_MODE}
+	};
+	const unsigned int NUM_MAIN_DW_SETTINGS = sizeof(main_dw_settings) / sizeof(main_dw_settings[0]);
+	const unsigned int NUM_MAIN_STR_SETTINGS = sizeof(main_str_settings) / sizeof(main_str_settings[0]);
+}
+
+CConfigureDialog::CConfigureDialog() 
+	: dialogT(DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, L"Settings")
+	, m_dwParams(max(nf::NUMBER_FLAG_SETTINGS, NUM_MAIN_DW_SETTINGS))
+	, m_strParams(max(nf::NUMBER_STRING_SETTINGS, NUM_MAIN_STR_SETTINGS))
+{
+	SetDialogItems();
+}
+
+CConfigureDialog::~CConfigureDialog()
+{
+}
+
+UINT CConfigureDialog::ShowModal()
+{
+	CSettings::GetInstance().ReloadSettings();
+	dde_registry(false);
+	dde_main_dialog(true);
+
+//вызываем диалог настроек
+	int nChoosedItem;
+	while (true) {
+		if (! Execute(nChoosedItem)) break;
+		switch (nChoosedItem)
+		{
+		case ID_CANCEL: 
+			return 0;
+		case ID_OK: 
+		{	//записываем настройки
+			dde_main_dialog(false);
+			dde_registry(true);
+			CSettings::GetInstance().SaveSettings();
+			return 0;
+		} break;
+		default: assert(false);
+		}
+	} //while
+
+	return 0;
+}
+
+void CConfigureDialog::dde_registry(bool bSaveToRegistry)
+{
+	if (bSaveToRegistry) {
+		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
+			CSettings::GetInstance().SetValue(main_dw_settings[i].settings_id, m_dwParams[main_dw_settings[i].settings_id]);
+		}
+
+		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
+			CSettings::GetInstance().SetValue(main_str_settings[i].settings_id, m_strParams[main_str_settings[i].settings_id]); //!TODO: OEM ?
+		}
+	} else {
+		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
+			m_dwParams[main_dw_settings[i].settings_id] = static_cast<BYTE>(CSettings::GetInstance().GetValue(main_dw_settings[i].settings_id));
+		}
+
+		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
+			m_strParams[main_str_settings[i].settings_id] = CSettings::GetInstance().GetValue(main_str_settings[i].settings_id);
+		}
+	}
+}
+
+void CConfigureDialog::dde_main_dialog(bool bSaveToControls)
+{
+	if (bSaveToControls) {
+		//считываем настройки из векторов в элементы диалога
+		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
+			if (nf::ST_EDIT_MENU_DISK_FAST_KEY != main_dw_settings[i].settings_id) {
+				GetDialogItemsRef()[main_dw_settings[i].control_id].Selected = m_dwParams[main_dw_settings[i].settings_id];
+			}
+		}
+		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
+			lstrcpy( const_cast<wchar_t*>(GetDialogItemsRef()[main_str_settings[i].control_id].PtrData)
+				, m_strParams[main_str_settings[i].settings_id].c_str()); //!TODO: OEM ?
+		}
+
+	//ST_EDIT_MENU_DISK_FAST_KEY храним как DWORD, показываем как строку
+		const_cast<wchar_t&>(GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[0]) = _T('0') + static_cast<int>(m_dwParams[nf::ST_EDIT_MENU_DISK_FAST_KEY]);
+		const_cast<wchar_t&>(GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[1]) = 0;
+	} else 	{	//сохраняем настройки из контролов в вектора
+		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
+			if (nf::ST_EDIT_MENU_DISK_FAST_KEY != main_dw_settings[i].settings_id) {
+				m_dwParams[main_dw_settings[i].settings_id] = this->IsDialogItemSelected(main_dw_settings[i].control_id);
+			}
+		}
+		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
+			m_strParams[main_str_settings[i].settings_id] = this->GetDialogItemValue(main_str_settings[i].control_id);
+		}
+		m_dwParams[nf::ST_EDIT_MENU_DISK_FAST_KEY] = GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[0] - _T('0');
+	}
+}

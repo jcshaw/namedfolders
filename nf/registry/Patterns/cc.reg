@@ -1,0 +1,12 @@
+REGEDIT4
+; Fast access to subdirectories of the current directory
+; "cd:abc" -> "cd:--df .\abc" 
+; "cd:abc\" -> "cd:--df .\\abc"
+; "cd:abc\*\" -> "cd:--df .\*\abc"
+; and so on
+
+[HKEY_CURRENT_USER\Software\Far\Plugins\NamedFolders\CommandPatterns]
+"cc:"="[command]=--df ;[name]=.;[path]=[name]"
+
+
+
