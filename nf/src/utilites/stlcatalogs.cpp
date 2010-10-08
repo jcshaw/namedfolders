@@ -18,6 +18,7 @@
 #include "strings_utils.h"
 #include "PanelInfoWrap.h"
 
+using namespace nf;
 using namespace sc;
 
 CCatalog::CCatalog() 

@@ -148,12 +148,10 @@ namespace
 namespace
 {
 	tstring get_pair_second(std::pair<tstring, tstring> const& t) {return t.second;}
-	tstring get_evar_packed_string(std::pair<tstring, tstring> const& t)
-	{
+	tstring get_evar_packed_string(std::pair<tstring, tstring> const& t) {
 		return t.first + CHAR_LEADING_VALUE_ENVVAR + t.second;
 	}
-	tstring get_regkey_packed_string(std::pair<tstring, tstring> const& t)
-	{
+	tstring get_regkey_packed_string(std::pair<tstring, tstring> const& t) {
 		return t.first + CHAR_LEADING_VALUE_ENVVAR//CHAR_LEADING_VALUE_REGKEY 
 			+ t.second;
 	}
@@ -257,8 +255,7 @@ bool nf::Selectors::GetShortcutByPathPattern(HANDLE hPlugin
 											 , nf::tshortcut_info& sh)
 {
 	//!TODO
-	while (true)
-	{
+	while (true) {
 		nf::tshortcuts_list list;
 
 		switch(cmd.kind) {

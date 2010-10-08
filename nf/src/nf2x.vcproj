@@ -68,7 +68,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="C:\Program Files (x86)\Far2\Plugins\NamedFolders/NamedFolders.dll"
+				OutputFile="C:\Program Files\Far2\Plugins\NamedFolders/NamedFolders.dll"
+				Version=""
 				LinkIncremental="2"
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
@@ -380,11 +381,23 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Source Files"
+			Name="Utils"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
 			>
 			<File
+				RelativePath=".\utilites\catalog_names.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\catalog_names.h"
+				>
+			</File>
+			<File
 				RelativePath=".\utilites\codec_for_values.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\codec_for_values.h"
 				>
 			</File>
 			<File
@@ -392,35 +405,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\dialogs\CommandPatternsDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\ConfigureDialog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\far\confirmations.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\DialogApplyCommand.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\DialogEditCatalog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\DialogEditPattern.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\DialogEditShortcut.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\DialogMove.cpp"
+				RelativePath=".\utilites\CommandPatterns.h"
 				>
 			</File>
 			<File
@@ -428,7 +413,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\executor\Executor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\executor\executor_addons.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\executor\executor_addons.h"
 				>
 			</File>
 			<File
@@ -436,11 +429,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\far\far_impl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\main\header.cpp"
+				RelativePath=".\executor\executor_select.h"
 				>
 			</File>
 			<File
@@ -448,19 +437,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\far\Menu2.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\far\menus_impl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\nf2x.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\far\open_plugin.cpp"
+				RelativePath=".\main\Kernel.h"
 				>
 			</File>
 			<File
@@ -468,7 +445,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\utilites\registry_remover.cpp"
+				RelativePath=".\utilites\Parser.h"
 				>
 			</File>
 			<File
@@ -476,7 +453,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\utilites\searcherpaths.h"
+				>
+			</File>
+			<File
 				RelativePath=".\utilites\select_variants.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\select_variants.h"
 				>
 			</File>
 			<File
@@ -484,15 +469,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\utilites\settings.h"
+				>
+			</File>
+			<File
 				RelativePath=".\utilites\StartSoftShortcut.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\stdafx.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\stlcatalogs.cpp"
+				RelativePath=".\utilites\StartSoftShortcut.h"
 				>
 			</File>
 			<File
@@ -514,151 +499,6 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc"
-			>
-			<File
-				RelativePath=".\utilites\codec_for_values.h"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\CommandPatterns.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\CommandPatternsDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\ConfigureDialog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\far\confirmations.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\DialogApplyCommand.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\DialogEditCatalog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\DialogEditPattern.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\DialogEditShortcut.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\DialogMove.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dialogs\dialogsT.h"
-				>
-			</File>
-			<File
-				RelativePath=".\executor\Executor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\executor\executor_addons.h"
-				>
-			</File>
-			<File
-				RelativePath=".\executor\executor_select.h"
-				>
-			</File>
-			<File
-				RelativePath=".\far\far_impl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\external\farkeys.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\main\header.h"
-				>
-			</File>
-			<File
-				RelativePath=".\main\Kernel.h"
-				>
-			</File>
-			<File
-				RelativePath=".\far\lang.h"
-				>
-			</File>
-			<File
-				RelativePath=".\far\Menu2.h"
-				>
-			</File>
-			<File
-				RelativePath=".\far\menus_impl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\far\open_plugin.h"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\Parser.h"
-				>
-			</File>
-			<File
-				RelativePath=".\external\plugin.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\Registry.h"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\registry_remover.h"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\regnotify.h"
-				>
-			</File>
-			<File
-				RelativePath=".\resource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\searcherpaths.h"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\select_variants.h"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\settings.h"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\StartSoftShortcut.h"
-				>
-			</File>
-			<File
-				RelativePath=".\stdafx.h"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\stlcatalogs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\main\stlsoft_def.h"
-				>
 			</File>
 			<File
 				RelativePath=".\utilites\strings_utils.h"
@@ -706,8 +546,184 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Dialogs"
+			>
+			<File
+				RelativePath=".\dialogs\CommandPatternsDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\CommandPatternsDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\ConfigureDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\ConfigureDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\DialogApplyCommand.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\DialogApplyCommand.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\DialogEditCatalog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\DialogEditCatalog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\DialogEditPattern.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\DialogEditPattern.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\DialogEditShortcut.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\DialogEditShortcut.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\DialogMove.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\DialogMove.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dialogs\dialogsT.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Far"
+			>
+			<File
+				RelativePath=".\far\confirmations.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\far\confirmations.h"
+				>
+			</File>
+			<File
+				RelativePath=".\far\far_impl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\far\far_impl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\external\farkeys.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\far\lang.h"
+				>
+			</File>
+			<File
+				RelativePath=".\far\Menu2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\far\Menu2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\far\menus_impl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\far\menus_impl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\far\open_plugin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\far\open_plugin.h"
+				>
+			</File>
+			<File
+				RelativePath=".\external\plugin.hpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Registry"
+			>
+			<File
+				RelativePath=".\utilites\Registry.h"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\registry_remover.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\registry_remover.h"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\regnotify.h"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\stlcatalogs.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\stlcatalogs.h"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath=".\main\header.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\main\header.h"
+			>
+		</File>
+		<File
+			RelativePath=".\nf2x.cpp"
+			>
+		</File>
 		<File
 			RelativePath="ReadMe.txt"
+			>
+		</File>
+		<File
+			RelativePath=".\resource.h"
+			>
+		</File>
+		<File
+			RelativePath=".\stdafx.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\stdafx.h"
+			>
+		</File>
+		<File
+			RelativePath=".\main\stlsoft_def.h"
 			>
 		</File>
 	</Files>

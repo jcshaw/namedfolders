@@ -12,9 +12,8 @@
 #include "registry_functions.h"
 
 //работа с каталогами в стиле stl
-
-namespace sc
-{
+namespace nf {
+namespace sc {
 
 typedef WinSTL::reg_value_sequence_t shortcuts_sequence;
 typedef WinSTL::reg_key_sequence_t subcatalogs_sequence;
@@ -108,5 +107,6 @@ private: //members
 	basic_class m_key;
 	tstring m_CatalogPath;
 };
-
 } //sc
+
+} //nf

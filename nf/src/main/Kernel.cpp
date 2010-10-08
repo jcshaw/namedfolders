@@ -15,6 +15,7 @@
 #include "strings_utils.h"
 #include "CommandPatterns.h"
 #include "select_variants.h"
+#include "catalog_names.h"
 
 using namespace nf;
 
@@ -109,7 +110,7 @@ bool nf::Shell::GetShortcutValue(tshortcut_info const& sh, tstring& value)
 
 bool nf::Shell::MoveShortcut(tshortcut_info const& sh, tstring const& new_shortcut_path, tshortcut_info &sh2)
 {	//переместить псевдоним по указанному пути.
-	//если путь закнчивается на / то весь путь - это каталог
+	//если путь заканчивается на / то весь путь - это каталог
 	//если нет - то последнее имя - новое имя псевдонима
 	//каталог может содержать ..
 	

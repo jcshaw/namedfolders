@@ -56,11 +56,6 @@ namespace Utils
 		, wchar_t SlashChar
 		, bool bRemoveTrailingChar);
 	std::pair<tstring, tstring> DivideString(tstring const& SrcStr, wchar_t ch);
-	tstring ExtractCatalogName(tstring const& srcPath);
-	bool ExpandCatalogPath(tstring const &srcCatalog
-		, tstring targetCatalog
-		, tstring& destCatalog);
-	tstring MakePathCompact(tstring const &srcCatalog, tstring const &root);
 
 // string helper functions
 	tstring ReplaceStringAll(tstring SrcStr, tstring const& FromStr, tstring const& ToStr);

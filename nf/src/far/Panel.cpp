@@ -20,6 +20,7 @@
 #include "Executor.h"
 #include "strings_utils.h"
 #include "Parser.h"
+#include "catalog_names.h"
 
 using namespace nf;
 using namespace Panel;

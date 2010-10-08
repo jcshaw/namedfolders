@@ -173,6 +173,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\utilites\catalog_names.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\utilites\CommandPatterns.cpp"
 				>
 			</File>
@@ -237,7 +241,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UtilsTest.cpp"
+				RelativePath=".\ut\UtilsTest.cpp"
 				>
 			</File>
 		</Filter>
@@ -246,6 +250,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\utilites\catalog_names.h"
+				>
+			</File>
 			<File
 				RelativePath=".\ut\CommandPatternsTest.h"
 				>
@@ -267,7 +275,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UtilsTest.h"
+				RelativePath=".\ut\UtilsTest.h"
 				>
 			</File>
 		</Filter>

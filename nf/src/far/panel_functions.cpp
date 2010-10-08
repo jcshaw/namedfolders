@@ -18,6 +18,7 @@
 #include "DialogMove.h"
 
 #include "executor/Executor.h"
+#include "catalog_names.h"
 
 
 namespace nf {

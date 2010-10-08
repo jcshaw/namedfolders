@@ -54,7 +54,7 @@ void CloseAndStartAnotherPlugin(HANDLE hPlugin
 
 		if (! bOpenBoth) {
 			ks_buffer.push_back(VK_TAB);
-			for (int i = 0; i < prefix.size(); ++i) {
+			for (unsigned int i = 0; i < prefix.size(); ++i) {
 				ks_buffer.push_back(static_cast<DWORD>(prefix[i]));
 			}
 			ks_buffer.push_back(VK_RETURN);
