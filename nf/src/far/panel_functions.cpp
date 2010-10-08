@@ -70,10 +70,11 @@ BOOL nf::Panel::MoveItems(CPanel* pPanel, PanelInfo const &pi, bool bCopy) {
 		for (int i = 0; i < pi.SelectedItemsNumber; ++i) {
 			tstring new_path = dlg.GetItemName();
 
-			//плагин предлагает переименовать "/11", указываем "22" получаем каталог, вместо псевдонима.
-			if (! new_path.empty() && new_path[0] != SLASH_CATS_CHAR) {
-				new_path = SLASH_CATS_CHAR + new_path;
-			}
+			//!TODO: разобраться; добавлять слеш тут просто так нельзя, иначе нарушается работа ExpandCatalogPath
+// 			//плагин предлагает переименовать "/11", указываем "22" получаем каталог, вместо псевдонима.
+// 			if (! new_path.empty() && new_path[0] != SLASH_CATS_CHAR) {
+// 				new_path = SLASH_CATS_CHAR + new_path;
+// 			}
 
 			if (IsSelectedItemIsCatalog(pPanel, pi, i)) {
 				tstring new_catalog_name;

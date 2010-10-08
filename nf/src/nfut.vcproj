@@ -236,6 +236,10 @@
 				RelativePath=".\ut\test_far_impl.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\UtilsTest.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -260,6 +264,10 @@
 			</File>
 			<File
 				RelativePath=".\ut\test_far_impl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UtilsTest.h"
 				>
 			</File>
 		</Filter>

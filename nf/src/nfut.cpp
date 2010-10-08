@@ -6,6 +6,7 @@
 #include "CommandPatternsTest.h"
 #include "ParserTest.h"
 #include "SearcherPathsTest.h"
+#include "UtilsTest.h"
 
 #include <boost/test/unit_test.hpp>
 using boost::unit_test::test_suite;
@@ -14,7 +15,7 @@ struct PluginStartupInfo g_PluginInfo; //emulation
 //////////////////////////////////////////////////////////////////////////
 test_suite*
 init_unit_test_suite( int, char* [] ) {
-	test_suite* test= BOOST_TEST_SUITE( "Parser" );
+	test_suite* test= BOOST_TEST_SUITE( "NF" );
 
 	test->add( BOOST_TEST_CASE( &nf::ut::test_DetailedCommand ));
 	test->add( BOOST_TEST_CASE( &nf::ut::test_TransformCommand ));
@@ -22,6 +23,8 @@ init_unit_test_suite( int, char* [] ) {
 	test->add( BOOST_TEST_CASE( &nf::ut::test_ImplicitCommands));
 	test->add( BOOST_TEST_CASE( &nf::ut::test_ExtractPrefix));
 	test->add( BOOST_TEST_CASE( &nf::ut::test_ParseEnvVarPath ));
+	test->add( BOOST_TEST_CASE( &nf::ut::test_ExpandCatalogPath));
+	
 
 	return test;
 }

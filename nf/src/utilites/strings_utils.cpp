@@ -159,3 +159,76 @@ tstring Utils::ExtractCatalogName(tstring const& srcPath) {
 	RemoveLeadingChars(filename, SLASH_CATS_CHAR);
 	return filename;
 }
+
+
+bool Utils::ExpandCatalogPath(tstring const &srcCatalog
+							  , tstring targetCatalog
+							  , tstring& destCatalog)
+{	//expand ".." in targetCatalog
+	//"1/2/3/" ".." -> "1/2/../3" = "1/3"
+	//"1/2/3/4/" "../../7" -> "1/2/3/../../7"="1/7"
+	//"1/2/3/4/" "../../7" -> "1/2/3/../../7/4"="1/7/4"
+	//"1/2/3/" "/5/6" -> "/5/6"
+	//"1/2/3/" "/5/6/" -> /5/6/3"
+	//"1/2/3/" "5/6" -> 1/2/5/6
+	//"1/2/3/" "5/6/" -> 1/2/5/6/3
+	const tstring ROOT(L"../");
+	if (! targetCatalog.size()) return false;
+
+	bool bRelatedRoot = (*(targetCatalog.begin()) == SLASH_CATS_CHAR);
+	bool bRelatedCurrentCatalog = (*(targetCatalog.end()-1) == SLASH_CATS_CHAR);
+	Utils::AddTrailingCharIfNotExists(targetCatalog, SLASH_CATS);
+	if (targetCatalog.size() >= ROOT.size()) {
+		tstring::const_reverse_iterator p1 = targetCatalog.rbegin();  
+		tstring::const_reverse_iterator p2 = ROOT.rbegin();
+		while (p2 != ROOT.rend()) {
+			wchar_t const& ch1 = *p1;
+			wchar_t const& ch2 = *p2;
+			if (*p1 == *p2) {
+				++p1;
+				++p2;
+			} else break;
+		}
+		if (p2 == ROOT.rend()) bRelatedCurrentCatalog = true;
+	}
+
+	tstring src_path;
+	tstring src_catalog_name;
+	Utils::DividePathFilename(srcCatalog, src_path, src_catalog_name, SLASH_CATS_CHAR, true);
+	Utils::AddTrailingCharIfNotExists(src_path, SLASH_CATS);
+
+	if (bRelatedRoot) {
+		destCatalog.swap(targetCatalog);
+	} else {
+		destCatalog.swap(src_path);
+		destCatalog.append(targetCatalog);
+	} 
+	if (bRelatedCurrentCatalog) {
+		Utils::RemoveTrailingChars(destCatalog, SLASH_CATS_CHAR);
+		destCatalog.append(src_catalog_name);
+	}
+
+	destCatalog = MakePathCompact(destCatalog, ROOT);
+
+	return true;
+}
+
+tstring Utils::MakePathCompact(tstring const &srcCatalog, tstring const &root) {
+	// make path compact (all ".." will be collapsed)
+	tstring destCatalog = srcCatalog;
+	Utils::AddLeadingCharIfNotExists(destCatalog, SLASH_CATS);
+	tstring::size_type npos;
+	while ((npos = destCatalog.find(root)) != tstring::npos) {
+		tstring::size_type npos2 = 
+			destCatalog.find_last_of(SLASH_CATS_CHAR, npos-root.size());
+		if ((npos2 == tstring::npos)  || npos2 > npos) {
+			destCatalog = L"";
+			return destCatalog;	//дальше подниматься некуда
+		}
+		destCatalog.erase(npos2, npos-npos2+root.size()-1);
+	}
+
+	Utils::RemoveTrailingChars(destCatalog, SLASH_CATS_CHAR);
+	return destCatalog;
+}
+
