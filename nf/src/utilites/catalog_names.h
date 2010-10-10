@@ -1,5 +1,6 @@
 #pragma once
 
+#include "header.h"
 #include "strings_utils.h"
 
 namespace Utils {
@@ -16,4 +17,8 @@ namespace Utils {
 	namespace Private {
 		tstring mix_paths(std::list<tstring> const& s1, std::list<tstring> const& s2, wchar_t destDelimeter);
 	}
+
+	bool PrepareMovingShortcut(nf::tshortcut_info const &srcSh
+		, tstring const &targetPath
+		, nf::tshortcut_info &destSh);
 }

@@ -32,6 +32,8 @@ namespace Shell {
 		, tstring const& new_shortcut_path
 		, tshortcut_info &new_shortcut
 	);
+
+	bool PrepareMovingShortcut(tshortcut_info const &srcSh, tstring const &new_shortcut_path, tshortcut_info &destSh);
 	bool CopyShortcut(tshortcut_info const&shortcut
 		, tstring const& new_shortcut_path
 		, tshortcut_info &new_shortcut

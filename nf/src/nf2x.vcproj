@@ -68,7 +68,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="C:\Program Files\Far2\Plugins\NamedFolders/NamedFolders.dll"
+				OutputFile="C:\Program Files (x86)\Far2\Plugins\NamedFolders/NamedFolders.dll"
 				Version=""
 				LinkIncremental="2"
 				ModuleDefinitionFile="$(ProjectName).def"

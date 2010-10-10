@@ -10,7 +10,7 @@ tstring Utils::ExtractCatalogName(tstring const& srcPath) {
 	tstring path;
 	tstring filename;
 	DividePathFilename(srcPath, path, filename, SLASH_CATS_CHAR, true);
-	RemoveLeadingChars(filename, SLASH_CATS_CHAR);
+	RemoveLeadingCharsOnPlace(filename, SLASH_CATS_CHAR);
 	return filename;
 }
 
@@ -72,17 +72,19 @@ bool Utils::ExpandCatalogPath(tstring const &srcCatalog
 	if (*(targetCatalog.begin()) == SLASH_CATS_CHAR) { 
 		tstring dest = GetCanonicalCatalogName(targetCatalog);
 		if (dest == GetCanonicalCatalogName(srcCatalog)) return false;
-		destCatalog.swap(dest);
-		return true;
+		if (dest != L"/..") {
+			destCatalog.swap(dest);
+			return true;
+		}
 	}
 //relative target catalog
 	bool bend_slash = (*(targetCatalog.end()-1) == SLASH_CATS_CHAR);
 
 	std::list<tstring> src_tokens;
-	Utils::SplitStringByRegex(srcCatalog.c_str(), src_tokens, SLASH_CATS);
+	Utils::SplitStringByRegex(Utils::TrimChar(srcCatalog, SLASH_CATS_CHAR).c_str(), src_tokens, SLASH_CATS);
 	
 	std::list<tstring> target_tokens;
-	Utils::SplitStringByRegex(targetCatalog.c_str(), target_tokens, SLASH_CATS);
+	Utils::SplitStringByRegex(Utils::TrimChar(targetCatalog, SLASH_CATS_CHAR).c_str(), target_tokens, SLASH_CATS);
 
 	destCatalog = Private::mix_paths(src_tokens, target_tokens, SLASH_CATS_CHAR);
 	return true;
@@ -131,7 +133,7 @@ bool Utils::ExpandCatalogPath(tstring const &srcCatalog
 // 		destCatalog.append(targetCatalog);
 // 	} 
 // 	if (bRelatedCurrentCatalog) {
-// 		Utils::RemoveTrailingChars(destCatalog, SLASH_CATS_CHAR);
+// 		Utils::RemoveTrailingCharsOnPlace(destCatalog, SLASH_CATS_CHAR);
 // 		destCatalog.append(src_catalog_name);
 // 	}
 // 
@@ -155,7 +157,7 @@ tstring Utils::MakePathCompact(tstring const &srcCatalog, tstring const &root) {
 		destCatalog.erase(npos2, npos-npos2+root.size()-1);
 	}
 
-	Utils::RemoveTrailingChars(destCatalog, SLASH_CATS_CHAR);
+	Utils::RemoveTrailingCharsOnPlace(destCatalog, SLASH_CATS_CHAR);
 	return destCatalog;
 }
 
@@ -166,4 +168,28 @@ tstring Utils::GetCanonicalCatalogName(tstring const& srcCatalog) {
 	if (*(dest.begin()) != SLASH_CATS_CHAR) dest = SLASH_CATS_CHAR + dest;
  	
 	return dest; //!TODOstd::tolower(dest, std::locale(""));
+}
+
+bool Utils::PrepareMovingShortcut(nf::tshortcut_info const &srcSh, tstring const &targetPath, nf::tshortcut_info &destSh) {
+	//we are going to move/copy shortcut to specified path
+	//if path is finished with "/", then whole path is catalog
+	//otherwise, last name is path is new name of shorcut
+	//path can contain ".." and "."
+	destSh = srcSh;
+	if (! targetPath.empty()) {
+		if (*targetPath.rbegin() != SLASH_CATS_CHAR) {
+			std::pair<tstring, tstring> catalog_name = Utils::DivideString(targetPath, SLASH_CATS_CHAR);
+			destSh.catalog.swap(catalog_name.first);
+			Utils::RemoveLeadingCharsOnPlace(catalog_name.second, SLASH_CATS_CHAR);
+			if (! catalog_name.second.empty()) destSh.shortcut.swap(catalog_name.second);
+		} else {
+			destSh.catalog = destSh.catalog + SLASH_CATS + targetPath;
+		}
+	}
+
+	if (! destSh.catalog.empty() 
+		&& ! Utils::ExpandCatalogPath(srcSh.catalog, destSh.catalog, destSh.catalog)) {
+		return false;
+	}
+	return true;
 }

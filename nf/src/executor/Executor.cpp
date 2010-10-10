@@ -210,7 +210,7 @@ namespace
 //!TODO: рефакторинг
 //удаляем ТОЛЬКО ОДИН лидирующий слеш
 		if (LocalPath.size() > 1 && LocalPath[0] == L'\\') LocalPath.erase(LocalPath.begin());
-//		Utils::RemoveLeadingChars(LocalPath, _T('\\'));
+//		Utils::RemoveLeadingCharsOnPlace(LocalPath, _T('\\'));
 		if (SrcParsed.bValueEnabled)
 		{
 			std::list<tstring> list;
@@ -331,7 +331,7 @@ bool nf::Commands::AddCatalog(HANDLE hPlugin, nf::tcatalog_info const &cat)
 	tstring parent;
 	tstring c;
 	Utils::DividePathFilename(cat, parent, c, SLASH_CATS_CHAR, false);
-	Utils::RemoveLeadingChars(c, SLASH_CATS_CHAR);
+	Utils::RemoveLeadingCharsOnPlace(c, SLASH_CATS_CHAR);
 	return Shell::InsertCatalog(c.c_str(), parent.c_str());
 }
 

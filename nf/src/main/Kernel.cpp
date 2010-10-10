@@ -24,7 +24,7 @@ size_t nf::Shell::SelectShortcuts(tstring shortcut_pattern
 								, tshortcuts_list& list)
 {	//найти все ярлыки удовлетворяющие переданному шаблону
 	if (!shortcut_pattern.size()) shortcut_pattern = L"*";
-	Utils::RemoveTrailingChars(catalog, SLASH_CATS_CHAR);
+	Utils::RemoveTrailingCharsOnPlace(catalog, SLASH_CATS_CHAR);
 	Shell::SelectShortcuts(catalog, shortcut_pattern, list, true);
 	if (list.size()) return Shell::SortByRelevance(list, tstring(catalog), tstring(shortcut_pattern));
 	return 0;
@@ -35,8 +35,8 @@ bool nf::Shell::InsertShortcut(nf::tshortcut_info const&sh
 							   , bool bOverride)
 {	//добавить новый псевдоним в каталог
 	tstring catalog_name = sh.catalog;
-	Utils::RemoveLeadingChars(catalog_name, SLASH_CATS_CHAR);
-	Utils::RemoveTrailingChars(catalog_name, SLASH_CATS_CHAR);
+	Utils::RemoveLeadingCharsOnPlace(catalog_name, SLASH_CATS_CHAR);
+	Utils::RemoveTrailingCharsOnPlace(catalog_name, SLASH_CATS_CHAR);
 
 	sc::CCatalog c(catalog_name);
 	if (! bOverride) {
@@ -74,7 +74,7 @@ bool nf::Shell::ModifyShortcut(tshortcut_info const& from, tshortcut_info const&
 
 bool nf::Shell::InsertCatalog(tstring catalog, wchar_t const* Parent)
 {
-	Utils::RemoveTrailingChars(catalog, SLASH_CATS_CHAR);
+	Utils::RemoveTrailingCharsOnPlace(catalog, SLASH_CATS_CHAR);
 
 	sc::CCatalog c(Parent);
 	return c.InsertSubcatalog(catalog);
@@ -109,47 +109,22 @@ bool nf::Shell::GetShortcutValue(tshortcut_info const& sh, tstring& value)
 }
 
 bool nf::Shell::MoveShortcut(tshortcut_info const& sh, tstring const& new_shortcut_path, tshortcut_info &sh2)
-{	//переместить псевдоним по указанному пути.
-	//если путь заканчивается на / то весь путь - это каталог
-	//если нет - то последнее имя - новое имя псевдонима
-	//каталог может содержать ..
-	
-	sh2 = sh;
-	if (*new_shortcut_path.rend() != SLASH_CATS_CHAR) {	
-		std::pair<tstring, tstring> catalog_name = Utils::DivideString(new_shortcut_path, SLASH_CATS_CHAR);
-		sh2.catalog.swap(catalog_name.first);
-		Utils::RemoveLeadingChars(catalog_name.second, SLASH_CATS_CHAR);
-		if (! catalog_name.second.empty()) sh2.shortcut.swap(catalog_name.second);
-	}
-
-	if (! sh2.catalog.empty() && ! Utils::ExpandCatalogPath(sh.catalog, sh2.catalog, sh2.catalog)) return false;
-	return Shell::ModifyShortcut(sh, sh2, 0);
+{	
+	if (Utils::PrepareMovingShortcut(sh, new_shortcut_path, sh2)) {
+		return Shell::ModifyShortcut(sh, sh2, 0);
+	} else return false;
 }
 
-bool nf::Shell::CopyShortcut(tshortcut_info const& sh
+bool nf::Shell::CopyShortcut(tshortcut_info const& sh 
 							 , tstring const& new_shortcut_path
 							 , tshortcut_info &sh2)
-{	//скопировать псевдоним по указанному пути.
-	//если путь закнчивается на / то весь путь - это каталог
-	//если нет - то последнее имя - новое имя псевдонима
-	//каталог может содержать ..
-
-	sh2 = sh;
-	if (*new_shortcut_path.rend() != SLASH_CATS_CHAR)
-	{	
-		tstring name;
-		Utils::DividePathFilename(new_shortcut_path, sh2.catalog, name, SLASH_CATS_CHAR, false);
-		Utils::RemoveLeadingChars(name, SLASH_CATS_CHAR);
-		if (! name.empty()) sh2.shortcut.swap(name);
-	}
-
-	tstring value;
-	if (! Shell::GetShortcutValue(sh, value)) return false;
-
-	if (! sh2.catalog.empty() && ! Utils::ExpandCatalogPath(sh.catalog, sh2.catalog, sh2.catalog)) return false;
-	return Shell::InsertShortcut(sh2, value, false);
+{	
+	if (Utils::PrepareMovingShortcut(sh, new_shortcut_path, sh2)) {
+		tstring value;
+		if (! Shell::GetShortcutValue(sh, value)) return false;
+		return Shell::InsertShortcut(sh2, value, false);
+	} else return false;
 }
-
 
 
 

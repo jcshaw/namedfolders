@@ -74,7 +74,7 @@ CPanel::CPanel(tstring catalog)
 	//get_hPlugin не подходит, т.к. экземпляр панели еще не создан
 {
 	m_CurrentCatalog = SLASH_CATS + catalog;
-	Utils::RemoveTrailingChars(m_CurrentCatalog, SLASH_CATS_CHAR);
+	Utils::RemoveTrailingCharsOnPlace(m_CurrentCatalog, SLASH_CATS_CHAR);
 	UpdateListItems();
 }
 

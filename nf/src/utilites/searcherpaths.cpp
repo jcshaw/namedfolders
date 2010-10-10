@@ -240,7 +240,7 @@ bool CSearcherPaths::search_multisubdir(wchar_t const* RootDir
 		{
 			parent = Utils::ExtractParentDirectory(parent);
 			if (parent.empty()) return true; //если родительской директории нет, поиск завершен
-			Utils::RemoveTrailingChars(parent, SLASH_DIRS_CHAR);	//!TODO: 
+			Utils::RemoveTrailingCharsOnPlace(parent, SLASH_DIRS_CHAR);	//!TODO: 
 
 			m_Sp.SearchSubdir(parent, Name, list);
 		

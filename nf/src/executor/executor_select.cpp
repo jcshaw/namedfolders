@@ -172,7 +172,7 @@ bool nf::Selectors::GetCatalog(HANDLE hPlugin
 	}
 
 	tstring catalog_name = cmd.catalog;
-	Utils::RemoveTrailingChars(catalog_name, SLASH_CATS_CHAR);
+	Utils::RemoveTrailingCharsOnPlace(catalog_name, SLASH_CATS_CHAR);
 	Shell::SelectCatalogs(catalog_name.c_str(), list);
 	Utils::AddLeadingCharIfNotExists(catalog_name, SLASH_CATS);
 

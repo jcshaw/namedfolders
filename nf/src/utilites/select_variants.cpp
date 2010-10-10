@@ -69,7 +69,7 @@ namespace
 		, bool bSearchInSubcatalogs
 		, tstring Catalog)
 	{
-		Utils::RemoveTrailingChars(Catalog, SLASH_CATS_CHAR);
+		Utils::RemoveTrailingCharsOnPlace(Catalog, SLASH_CATS_CHAR);
 		sc::CCatalog c(Catalog, 0, false);
 
 		//перебираем все постоянные псевдонимы
@@ -88,7 +88,7 @@ namespace
 			{
 				sc::catalogs_sequence_item cv(*p);
 				tstring subcatalog_name = cv.GetName();
-				Utils::RemoveTrailingChars(subcatalog_name,  SLASH_CATS_CHAR);
+				Utils::RemoveTrailingCharsOnPlace(subcatalog_name,  SLASH_CATS_CHAR);
 				tstring cat2 = Utils::CombinePath(Catalog, subcatalog_name, SLASH_CATS);
 				select_shortcuts(Func, bSearchInSubcatalogs, cat2);
 				++p;
@@ -175,7 +175,7 @@ int nf::Shell::SelectShortcutsByPath(tstring catalog
 									 , bool bExactCoincidence //!TODO
 									 , bool bSearchInSubcatalogs)
 {
-	Utils::RemoveTrailingChars(catalog, SLASH_CATS_CHAR);
+	Utils::RemoveTrailingCharsOnPlace(catalog, SLASH_CATS_CHAR);
 	sc::CCatalog c(catalog, false);
 
 	tstring value_pattern_oem = nf::Parser::ConvertToMask(L"*") + value_pattern + tstring_oem(L"*");

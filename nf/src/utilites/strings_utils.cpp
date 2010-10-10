@@ -20,7 +20,7 @@ void Utils::DividePathFilename(tstring const &src
 {
 	path = src;
 	if (bRemoveTrailingChar) 
-		RemoveTrailingChars(path, slashChar);
+		RemoveTrailingCharsOnPlace(path, slashChar);
 	
 	tstring::size_type npos = path.find_last_of(slashChar);
 	if (npos != tstring::npos) {
@@ -122,11 +122,11 @@ tstring Utils::ReplaceStringAll(tstring srcStr, tstring const& fromStr, tstring 
 	return srcStr;
 }
 
-void Utils::RemoveLeadingChars(tstring &str, wchar_t ch) {
-	boost::trim_left_if(str, boost::bind(std::equal_to<wchar_t>(), _1, ch));
+void Utils::RemoveLeadingCharsOnPlace(tstring &str, wchar_t charToRemove) {
+	boost::trim_left_if(str, boost::bind(std::equal_to<wchar_t>(), _1, charToRemove));
 }
-void Utils::RemoveTrailingChars(tstring &str, wchar_t ch) {
-	boost::trim_right_if(str, boost::bind(std::equal_to<wchar_t>(), _1, ch));
+void Utils::RemoveTrailingCharsOnPlace(tstring &str, wchar_t charToRemove) {
+	boost::trim_right_if(str, boost::bind(std::equal_to<wchar_t>(), _1, charToRemove));
 }
 
 void Utils::AddTrailingCharIfNotExists(tstring &Str, wchar_t const* ch) {

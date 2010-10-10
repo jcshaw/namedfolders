@@ -122,7 +122,7 @@ namespace
 			//просто переходим в директорию в которой лежит этот файл
 			//!TODO: было бы здорово позиционироваться на этом файле.
 			Utils::DividePathFilename(SrcPath, SrcPath, DestFilename, SLASH_DIRS_CHAR, false);
-			Utils::RemoveLeadingChars(DestFilename, SLASH_DIRS_CHAR);
+			Utils::RemoveLeadingCharsOnPlace(DestFilename, SLASH_DIRS_CHAR);
 		}
 
 		return true;

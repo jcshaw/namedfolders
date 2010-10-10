@@ -266,7 +266,7 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin
 	{
 		shortcut_pattern = cmd.local_directory;
 		catalog_pattern = cmd.shortcut;
-		Utils::RemoveLeadingChars(shortcut_pattern, SLASH_DIRS_CHAR);
+		Utils::RemoveLeadingCharsOnPlace(shortcut_pattern, SLASH_DIRS_CHAR);
 	}
 //проверяем команду :
 //если вызов в виде cd: :soft то пользователь хочет, чтобы 

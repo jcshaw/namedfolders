@@ -59,8 +59,24 @@ namespace Utils
 
 // string helper functions
 	tstring ReplaceStringAll(tstring SrcStr, tstring const& FromStr, tstring const& ToStr);
-	void RemoveLeadingChars(tstring &str, wchar_t ch);
-	void RemoveTrailingChars(tstring &str, wchar_t ch);
+	void RemoveLeadingCharsOnPlace(tstring &str, wchar_t charToRemove);
+	void RemoveTrailingCharsOnPlace(tstring &str, wchar_t charToRemove);
+	inline tstring RemoveLeadingChars(tstring const &str, wchar_t charToRemove) {
+		tstring ret = str;
+		RemoveLeadingCharsOnPlace(ret, charToRemove);
+		return ret;
+	}
+	inline tstring RemoveTrailingChars(tstring const &str, wchar_t charToRemove) {
+		tstring ret = str;
+		RemoveTrailingCharsOnPlace(ret, charToRemove);
+		return ret;
+	}
+	inline tstring TrimChar(tstring const& srcStr, wchar_t charToRemove) {
+		tstring ret = srcStr;
+		RemoveLeadingCharsOnPlace(ret, charToRemove);
+		RemoveTrailingCharsOnPlace(ret, charToRemove);
+		return ret;
+	}
 
 	void AddLeadingCharIfNotExists(tstring &str, wchar_t const* ch);
 	void AddTrailingCharIfNotExists(tstring &str, wchar_t const* ch);
