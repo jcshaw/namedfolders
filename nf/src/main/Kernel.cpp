@@ -91,7 +91,7 @@ bool nf::Shell::Private::remove_catalog(tstring const& SourceCatalog, tstring co
 	if (! pTargetCatalog) return rr.Erase(src_key);
 
 	tstring target_catalog;
-	if (! Utils::ExpandCatalogPath(SourceCatalog, *pTargetCatalog, target_catalog)) return false;
+	if (! Utils::ExpandCatalogPath(SourceCatalog, *pTargetCatalog, target_catalog, false)) return false;
 
 	tstring target_key = sc::CCatalog(target_catalog).GetCatalogRegkey();
 

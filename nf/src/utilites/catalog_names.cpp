@@ -24,16 +24,23 @@ tstring Utils::ExtractCatalogName(tstring const& srcPath) {
 // a/b, a/b/c/../../../d/e/../../../f -> f
 // a/b .. -> b
 // a/b . -> a/b
-tstring Utils::Private::mix_paths(std::list<tstring> const& s1, std::list<tstring> const& s2, wchar_t destDelimeter) {
+tstring Utils::Private::mix_paths(std::list<tstring> const& s1
+								  , std::list<tstring> const& s2
+								  , wchar_t destDelimeter
+								  , bool bForMovingShortcuts) {
 	std::list<tstring> dest;
 	std::copy(s1.begin(), s1.end(), std::back_inserter(dest));
 	if (s2.size() == 1 && *s2.begin() == L"..") {
-		tstring last_name = dest.back();
-		dest.pop_back();
-		if (! dest.empty()) dest.pop_back();
-		dest.push_back(last_name);
+		if (! bForMovingShortcuts) {
+			tstring last_name = dest.back();
+			dest.pop_back();
+			if (! dest.empty()) dest.pop_back();
+			dest.push_back(last_name);
+		} else {
+			if (! dest.empty()) dest.pop_back();
+		}
 	} else {
-		bool bfirst = true;
+		bool bfirst = ! bForMovingShortcuts;
 		BOOST_FOREACH(tstring const& token, s2) {
 			if (token != L".") {
 				if (token == L".." ) {
@@ -62,7 +69,8 @@ tstring Utils::Private::mix_paths(std::list<tstring> const& s1, std::list<tstrin
 //it can be started from '/' (this is absolute path) or from any other token (relative path)
 bool Utils::ExpandCatalogPath(tstring const &srcCatalog
 							  , tstring const& targetCatalog
-							  , tstring& destCatalog)
+							  , tstring& destCatalog
+							  , bool bForMovingShortcuts)
 {
 //target catalog is empty
 	if (! targetCatalog.size()) return false;  //catalog is not specified
@@ -86,7 +94,7 @@ bool Utils::ExpandCatalogPath(tstring const &srcCatalog
 	std::list<tstring> target_tokens;
 	Utils::SplitStringByRegex(Utils::TrimChar(targetCatalog, SLASH_CATS_CHAR).c_str(), target_tokens, SLASH_CATS);
 
-	destCatalog = Private::mix_paths(src_tokens, target_tokens, SLASH_CATS_CHAR);
+	destCatalog = Private::mix_paths(src_tokens, target_tokens, SLASH_CATS_CHAR, bForMovingShortcuts);
 	return true;
 }
 
@@ -178,17 +186,26 @@ bool Utils::PrepareMovingShortcut(nf::tshortcut_info const &srcSh, tstring const
 	destSh = srcSh;
 	if (! targetPath.empty()) {
 		if (*targetPath.rbegin() != SLASH_CATS_CHAR) {
-			std::pair<tstring, tstring> catalog_name = Utils::DivideString(targetPath, SLASH_CATS_CHAR);
-			destSh.catalog.swap(catalog_name.first);
-			Utils::RemoveLeadingCharsOnPlace(catalog_name.second, SLASH_CATS_CHAR);
-			if (! catalog_name.second.empty()) destSh.shortcut.swap(catalog_name.second);
+			tstring name;
+			Utils::DividePathFilename(targetPath, destSh.catalog, name, SLASH_CATS_CHAR, false);
+			Utils::RemoveLeadingCharsOnPlace(name, SLASH_CATS_CHAR);
+			if (! name.empty()) {
+				if (name == L"..") {
+					destSh.catalog += L"/..";
+				} else {
+					destSh.shortcut.swap(name);
+				}
+			}
 		} else {
 			destSh.catalog = destSh.catalog + SLASH_CATS + targetPath;
 		}
 	}
 
 	if (! destSh.catalog.empty() 
-		&& ! Utils::ExpandCatalogPath(srcSh.catalog, destSh.catalog, destSh.catalog)) {
+		&& ! Utils::ExpandCatalogPath(srcSh.catalog, destSh.catalog
+			, destSh.catalog
+			, true //moving/copying shortcuts
+		)) {
 		return false;
 	}
 	return true;

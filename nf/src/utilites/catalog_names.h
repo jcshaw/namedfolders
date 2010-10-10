@@ -11,11 +11,14 @@ namespace Utils {
 	//destCatalog - full name of new catalog.
 	bool ExpandCatalogPath(tstring const &srcCatalog
 		, tstring const& targetCatalog
-		, tstring& destCatalog);
+		, tstring& destCatalog
+		, bool bForMovingShortcuts);
 	tstring MakePathCompact(tstring const &srcCatalog, tstring const &root);
 	tstring GetCanonicalCatalogName(tstring const& srcCatalog);
 	namespace Private {
-		tstring mix_paths(std::list<tstring> const& s1, std::list<tstring> const& s2, wchar_t destDelimeter);
+		tstring mix_paths(std::list<tstring> const& s1, std::list<tstring> const& s2
+			, wchar_t destDelimeter
+			, bool bForMovingShortcuts);
 	}
 
 	bool PrepareMovingShortcut(nf::tshortcut_info const &srcSh
