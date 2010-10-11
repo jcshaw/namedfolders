@@ -78,7 +78,7 @@ namespace Utils
 		return ret;
 	}
 
-	void AddLeadingCharIfNotExists(tstring &str, wchar_t const* ch);
+	void AddLeadingCharIfNotExistsOnPlace(tstring &str, wchar_t const* ch);
 	void AddTrailingCharIfNotExists(tstring &str, wchar_t const* ch);
 
 	bool iFindFirst(tstring const& SrcStr, tstring const& SubStr);

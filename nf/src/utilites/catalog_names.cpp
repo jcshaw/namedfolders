@@ -55,8 +55,12 @@ tstring Utils::Private::mix_paths(std::list<tstring> const& s1
 			}
 		}
 	}
+	return Private::sequence_to_string(dest, destDelimeter);
+}
+
+tstring Utils::Private::sequence_to_string(std::list<tstring> const& srcSequence, wchar_t destDelimeter) {
 	tstring ret;
-	BOOST_FOREACH(tstring const& token, dest) {
+	BOOST_FOREACH(tstring const& token, srcSequence) {
 		ret += destDelimeter + token;
 	}
 	return ret;
@@ -98,115 +102,80 @@ bool Utils::ExpandCatalogPath(tstring const &srcCatalog
 	return true;
 }
 
-// bool Utils::ExpandCatalogPath(tstring const &srcCatalog
-// 							  , tstring targetCatalog
-// 							  , tstring& destCatalog)
-// {	//expand ".." in targetCatalog
-// 	//"1/2/3/" ".." -> "1/2/../3" = "1/3"
-// 	//"1/2/3/4/" "../../7" -> "1/2/3/../../7"="1/7"
-// 	//"1/2/3/4/" "../../7" -> "1/2/3/../../7/4"="1/7/4"
-// 	//"1/2/3/" "/5/6" -> "/5/6"
-// 	//"1/2/3/" "/5/6/" -> /5/6/3"
-// 	//"1/2/3/" "5/6" -> 1/2/5/6
-// 	//"1/2/3/" "5/6/" -> 1/2/5/6/3
-// 	const tstring ROOT(L"../");
-// 	if (! targetCatalog.size()) return false;
-// 
-// 	bool bRelatedRoot = (*(targetCatalog.begin()) == SLASH_CATS_CHAR);
-// 	bool bRelatedCurrentCatalog = (*(targetCatalog.end()-1) == SLASH_CATS_CHAR);
-// 	Utils::AddTrailingCharIfNotExists(targetCatalog, SLASH_CATS);
-// 	if (targetCatalog.size() >= ROOT.size()) {
-// 		tstring::const_reverse_iterator p1 = targetCatalog.rbegin();  
-// 		tstring::const_reverse_iterator p2 = ROOT.rbegin();
-// 		while (p2 != ROOT.rend()) {
-// 			wchar_t const& ch1 = *p1;
-// 			wchar_t const& ch2 = *p2;
-// 			if (*p1 == *p2) {
-// 				++p1;
-// 				++p2;
-// 			} else break;
-// 		}
-// 		if (p2 == ROOT.rend()) bRelatedCurrentCatalog = true;
-// 	}
-// 
-// 	tstring src_path;
-// 	tstring src_catalog_name;
-// 	Utils::DividePathFilename(srcCatalog, src_path, src_catalog_name, SLASH_CATS_CHAR, true);
-// 	Utils::AddTrailingCharIfNotExists(src_path, SLASH_CATS);
-// 
-// 	if (bRelatedRoot) {
-// 		destCatalog.swap(targetCatalog);
-// 	} else {
-// 		destCatalog.swap(src_path);
-// 		destCatalog.append(targetCatalog);
-// 	} 
-// 	if (bRelatedCurrentCatalog) {
-// 		Utils::RemoveTrailingCharsOnPlace(destCatalog, SLASH_CATS_CHAR);
-// 		destCatalog.append(src_catalog_name);
-// 	}
-// 
-// 	destCatalog = MakePathCompact(destCatalog, ROOT);
-// 
-// 	return true;
-// }
-
-tstring Utils::MakePathCompact(tstring const &srcCatalog, tstring const &root) {
+tstring Utils::MakePathCompact(tstring const &srcCatalog, bool bKeepExceededColons) {
 	// make path compact (all ".." will be collapsed)
-	tstring destCatalog = srcCatalog;
-	Utils::AddLeadingCharIfNotExists(destCatalog, SLASH_CATS);
-	tstring::size_type npos;
-	while ((npos = destCatalog.find(root)) != tstring::npos) {
-		tstring::size_type npos2 = 
-			destCatalog.find_last_of(SLASH_CATS_CHAR, npos-root.size());
-		if ((npos2 == tstring::npos)  || npos2 > npos) {
-			destCatalog = L"";
-			return destCatalog;	//дальше подниматься некуда
-		}
-		destCatalog.erase(npos2, npos-npos2+root.size()-1);
-	}
+	std::list<tstring> src_tokens;
+	Utils::SplitStringByRegex(Utils::TrimChar(srcCatalog, SLASH_CATS_CHAR).c_str(), src_tokens, SLASH_CATS);
 
-	Utils::RemoveTrailingCharsOnPlace(destCatalog, SLASH_CATS_CHAR);
-	return destCatalog;
+	unsigned int count_reduced_names = 0;
+	std::list<tstring> dest_tokens;
+	BOOST_REVERSE_FOREACH(tstring const& token, src_tokens) {
+		if (token == L"..") {
+			++count_reduced_names;
+		} else if (token == L".") {
+			//just skip it
+		} else {
+			if (0 != count_reduced_names) {
+				--count_reduced_names;
+			} else {
+				dest_tokens.push_front(token);
+			}
+		}
+	}
+	if (bKeepExceededColons) {
+		while (0 != count_reduced_names) {
+			dest_tokens.push_front(L"..");
+			--count_reduced_names;
+		}
+	}
+	return Private::sequence_to_string(dest_tokens, SLASH_CATS_CHAR);
 }
 
 
 tstring Utils::GetCanonicalCatalogName(tstring const& srcCatalog) {
 // 	//!TODO: makepathcompact, lowercase	
-	tstring dest = MakePathCompact(srcCatalog, L"../");
-	if (*(dest.begin()) != SLASH_CATS_CHAR) dest = SLASH_CATS_CHAR + dest;
- 	
-	return dest; //!TODOstd::tolower(dest, std::locale(""));
+	tstring dest = MakePathCompact(srcCatalog, false);
+	if (! dest.empty()) Utils::AddLeadingCharIfNotExistsOnPlace(dest, SLASH_CATS);
+	boost::algorithm::to_lower(dest, std::locale(""));
+	return dest;
 }
 
 bool Utils::PrepareMovingShortcut(nf::tshortcut_info const &srcSh, tstring const &targetPath, nf::tshortcut_info &destSh) {
 	//we are going to move/copy shortcut to specified path
 	//if path is finished with "/", then whole path is catalog
-	//otherwise, last name is path is new name of shorcut
+	//otherwise, last name is path is new name of shortcut
 	//path can contain ".." and "."
 	destSh = srcSh;
 	if (! targetPath.empty()) {
-		if (*targetPath.rbegin() != SLASH_CATS_CHAR) {
-			tstring name;
-			Utils::DividePathFilename(targetPath, destSh.catalog, name, SLASH_CATS_CHAR, false);
-			Utils::RemoveLeadingCharsOnPlace(name, SLASH_CATS_CHAR);
-			if (! name.empty()) {
-				if (name == L"..") {
-					destSh.catalog += L"/..";
-				} else {
-					destSh.shortcut.swap(name);
-				}
+		tstring name;
+		tstring dest_catalog;
+		Utils::DividePathFilename(targetPath, dest_catalog, name, SLASH_CATS_CHAR, false);
+		Utils::RemoveLeadingCharsOnPlace(name, SLASH_CATS_CHAR);
+
+		if (Utils::IsCatalogPathRelated(targetPath)) {
+			dest_catalog = MakePathCompact(dest_catalog, true);
+			if (! dest_catalog.empty()) {
+				destSh.catalog = destSh.catalog + dest_catalog;
 			}
 		} else {
-			destSh.catalog = destSh.catalog + SLASH_CATS + targetPath;
+			destSh.catalog.swap(dest_catalog);
+		}
+
+		if (! name.empty()) {
+			if (name == L"..") {
+				destSh.catalog += L"/..";
+			} else {
+				destSh.shortcut.swap(name);
+			}
 		}
 	}
 
-	if (! destSh.catalog.empty() 
-		&& ! Utils::ExpandCatalogPath(srcSh.catalog, destSh.catalog
+	if (! destSh.catalog.empty()) {
+		Utils::ExpandCatalogPath(srcSh.catalog, destSh.catalog
 			, destSh.catalog
 			, true //moving/copying shortcuts
-		)) {
-		return false;
+		);
 	}
+
 	return true;
 }

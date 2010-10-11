@@ -17,8 +17,9 @@ test_suite*
 init_unit_test_suite( int, char* [] ) {
 	test_suite* test= BOOST_TEST_SUITE( "NF" );
 
-	test->add( BOOST_TEST_CASE( &nf::ut::test_PrepareMovingShortcut));
+	test->add( BOOST_TEST_CASE( &nf::ut::test_GetCanonicalCatalogName));
 	test->add( BOOST_TEST_CASE( &nf::ut::test_ExpandCatalogPath));
+	test->add( BOOST_TEST_CASE( &nf::ut::test_PrepareMovingShortcut));
 	
 	test->add( BOOST_TEST_CASE( &nf::ut::test_DetailedCommand ));
 	test->add( BOOST_TEST_CASE( &nf::ut::test_TransformCommand ));

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <functional>
 #include "stlcatalogs.h"
+#include "Registry.h"
 
 #include "Kernel.h"
 #include "Registry.h"
@@ -100,13 +101,15 @@ bool CCatalog::DeleteSubcatalog(tstring const& Name)
 bool CCatalog::GetShortcutInfo(tstring const& name_ansi, bool bTemporary, tstring &value)
 {	
 	//Если псевдоним начинается с префикса "." - значит это субдиректория в текущем каталоге
-	if (name_ansi.size() && name_ansi[0] == '\\')
-	{
+	if (name_ansi.size() && name_ansi[0] == '\\') {
 		tstring subdirectory(name_ansi, 1, name_ansi.size()-1);
 		value = Utils::CombinePath(CPanelInfoWrap(INVALID_HANDLE_VALUE).GetPanelCurDir(true), subdirectory, SLASH_DIRS);
 	} else {
 		tstring name_reg_format = name_ansi;
-		basic_class key(m_key.get_key_handle(), GetKeyName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS), KEY_ALL_ACCESS);
+		tstring subkey = GetKeyName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS);
+		if (! nf::Registry::IsSubkeyExist(m_key.get_key_handle(), subkey.c_str())) return false;
+
+		basic_class key(m_key.get_key_handle(), subkey.c_str(), KEY_ALL_ACCESS);
 		DWORD size = 256;
 		DWORD type;
 		DWORD ErrorCode;

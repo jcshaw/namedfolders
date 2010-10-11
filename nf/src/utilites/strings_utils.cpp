@@ -133,7 +133,7 @@ void Utils::AddTrailingCharIfNotExists(tstring &Str, wchar_t const* ch) {
 	if (! boost::ends_with(Str, ch)) 
 		Str += ch;
 }
-void Utils::AddLeadingCharIfNotExists(tstring &Str, wchar_t const* ch) {
+void Utils::AddLeadingCharIfNotExistsOnPlace(tstring &Str, wchar_t const* ch) {
 	if (! boost::starts_with(Str, ch)) 
 		Str.insert(0, ch);
 }
