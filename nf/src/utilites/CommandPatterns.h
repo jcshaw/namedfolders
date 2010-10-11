@@ -57,9 +57,7 @@ public:
 		, tstring &DestCmd) const;
 };	//CommandPatterns
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	namespace Private
-	{	//вытащил этот класс наружу только для UnitTesting 
+	namespace Private {	 //Private namespace is visible for unit testing
 		class DetailedCommand
 		{
 			typedef std::vector<tstring> tlistparts;

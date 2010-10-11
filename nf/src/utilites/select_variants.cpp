@@ -178,7 +178,7 @@ int nf::Shell::SelectShortcutsByPath(tstring catalog
 	Utils::RemoveTrailingCharsOnPlace(catalog, SLASH_CATS_CHAR);
 	sc::CCatalog c(catalog, false);
 
-	tstring value_pattern_oem = nf::Parser::ConvertToMask(L"*") + value_pattern + tstring_oem(L"*");
+	tstring value_pattern_oem = nf::Parser::ConvertToMask(L"*") + value_pattern + tstring(L"*");
 	return select_shortcuts_ex(DestList, value_pattern_oem, bSearchInSubcatalogs, catalog, true);
 }
 

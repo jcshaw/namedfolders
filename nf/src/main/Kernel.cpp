@@ -19,21 +19,18 @@
 
 using namespace nf;
 
-size_t nf::Shell::SelectShortcuts(tstring shortcut_pattern
-								, tstring catalog
-								, tshortcuts_list& list)
-{	//найти все ярлыки удовлетворяющие переданному шаблону
-	if (!shortcut_pattern.size()) shortcut_pattern = L"*";
-	Utils::RemoveTrailingCharsOnPlace(catalog, SLASH_CATS_CHAR);
-	Shell::SelectShortcuts(catalog, shortcut_pattern, list, true);
-	if (list.size()) return Shell::SortByRelevance(list, tstring(catalog), tstring(shortcut_pattern));
+size_t nf::Shell::SelectShortcuts(tstring shPattern
+								, tstring srcCatalog
+								, tshortcuts_list& destList)
+{	//find all shortcuts that fit to specified pattern
+	if (!shPattern.size()) shPattern = L"*";
+	Utils::RemoveTrailingCharsOnPlace(srcCatalog, SLASH_CATS_CHAR);
+	Shell::SelectShortcuts(srcCatalog, shPattern, destList, true);
+	if (destList.size()) return Shell::SortByRelevance(destList, tstring(srcCatalog), tstring(shPattern));
 	return 0;
 }
 
-bool nf::Shell::InsertShortcut(nf::tshortcut_info const&sh
-							   , tstring value
-							   , bool bOverride)
-{	//добавить новый псевдоним в каталог
+bool nf::Shell::InsertShortcut(nf::tshortcut_info const&sh, tstring value, bool bOverride) {
 	tstring catalog_name = sh.catalog;
 	Utils::RemoveLeadingCharsOnPlace(catalog_name, SLASH_CATS_CHAR);
 	Utils::RemoveTrailingCharsOnPlace(catalog_name, SLASH_CATS_CHAR);
@@ -41,23 +38,21 @@ bool nf::Shell::InsertShortcut(nf::tshortcut_info const&sh
 	sc::CCatalog c(catalog_name);
 	if (! bOverride) {
 		tstring buf;
-		if (c.GetShortcutInfo(sh.shortcut, sh.bIsTemporary, buf)) return false; //такой псевдоним уже есть...
+		if (c.GetShortcutInfo(sh.shortcut, sh.bIsTemporary, buf)) return false; //the shortcut already exists
 	}
 	tstring oem_value = value;
 	c.SetShortcut(sh.shortcut, oem_value, sh.bIsTemporary);
 	return true;
 }
 
-bool nf::Shell::DeleteShortcut(tshortcut_info const&sh)
-{	//удалить псевдоним
+bool nf::Shell::DeleteShortcut(tshortcut_info const&sh) {	
 	sc::CCatalog c(sh.catalog);
 	c.DeleteShortcut(sh.shortcut, sh.bIsTemporary);
 
 	return true;
 }
 
-bool nf::Shell::ModifyShortcut(tshortcut_info const& from, tshortcut_info const& to, tstring* pnew_value)
-{	//обновить свойства псевдонима
+bool nf::Shell::ModifyShortcut(tshortcut_info const& from, tshortcut_info const& to, tstring* pnew_value) {	
 	tstring value;
 	if (! pnew_value) 	{
 		Shell::GetShortcutValue(from, value);
@@ -72,26 +67,24 @@ bool nf::Shell::ModifyShortcut(tshortcut_info const& from, tshortcut_info const&
 }
 
 
-bool nf::Shell::InsertCatalog(tstring catalog, wchar_t const* Parent)
-{
+bool nf::Shell::InsertCatalog(tstring catalog, wchar_t const* Parent) {
 	Utils::RemoveTrailingCharsOnPlace(catalog, SLASH_CATS_CHAR);
 
 	sc::CCatalog c(Parent);
 	return c.InsertSubcatalog(catalog);
 }
 
-bool nf::Shell::Private::remove_catalog(tstring const& SourceCatalog, tstring const* pTargetCatalog, bool bDeleteSource)
-{
-	//переместить каталог и все вложенные в него каталоги и псевдонимы
-	//в другой каталог; если последний не указан 
-	//удалить каталог и все вложенные в него каталоги и псевдонимы
+bool nf::Shell::Private::remove_catalog(tstring const& srcCatalog, tstring const* pTargetCatalog, bool bDeleteSource) {
+//переместить каталог и все вложенные в него каталоги и псевдонимы
+//в другой каталог; если последний не указан 
+//удалить каталог и все вложенные в него каталоги и псевдонимы
 	nf::registry_remover rr;
 
-	tstring src_key = sc::CCatalog(SourceCatalog).GetCatalogRegkey();
+	tstring src_key = sc::CCatalog(srcCatalog).GetCatalogRegkey();
 	if (! pTargetCatalog) return rr.Erase(src_key);
 
 	tstring target_catalog;
-	if (! Utils::ExpandCatalogPath(SourceCatalog, *pTargetCatalog, target_catalog, false)) return false;
+	if (! Utils::ExpandCatalogPath(srcCatalog, *pTargetCatalog, target_catalog, false)) return false;
 
 	tstring target_key = sc::CCatalog(target_catalog).GetCatalogRegkey();
 
@@ -115,14 +108,11 @@ bool nf::Shell::MoveShortcut(tshortcut_info const& sh, tstring const& new_shortc
 	} else return false;
 }
 
-bool nf::Shell::CopyShortcut(tshortcut_info const& sh 
-							 , tstring const& new_shortcut_path
-							 , tshortcut_info &sh2)
-{	
-	if (Utils::PrepareMovingShortcut(sh, new_shortcut_path, sh2)) {
+bool nf::Shell::CopyShortcut(tshortcut_info const& srcSh, tstring const& targetPath, tshortcut_info &destSh) {	
+	if (Utils::PrepareMovingShortcut(srcSh, targetPath, destSh)) {
 		tstring value;
-		if (! Shell::GetShortcutValue(sh, value)) return false;
-		return Shell::InsertShortcut(sh2, value, false);
+		if (! Shell::GetShortcutValue(srcSh, value)) return false;
+		return Shell::InsertShortcut(destSh, value, false);
 	} else return false;
 }
 

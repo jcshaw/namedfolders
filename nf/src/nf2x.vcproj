@@ -646,6 +646,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\far\MenuDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\far\MenuDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\far\menus_impl.cpp"
 				>
 			</File>

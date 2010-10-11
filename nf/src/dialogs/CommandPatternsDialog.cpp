@@ -1,9 +1,12 @@
 #include "stdafx.h"
 #include ".\commandpatternsdialog.h"
+
+#include <algorithm>
+#include <boost/foreach.hpp>
+
 #include "lang.h"
 #include "settings.h"
 #include "DialogEditPattern.h"
-#include <algorithm>
 #include "confirmations.h"
 
 using namespace nf;
@@ -18,14 +21,12 @@ namespace
 	{
 		MenuItems.resize(List.size());
 
-		nf::Patterns::tlist_command_patterns::const_iterator p = List.begin();
 		int i = 0;
-		while (p != List.end()) {
-			MenuItems[i].Text = p->first.c_str();
+		BOOST_FOREACH(nf::Patterns::tcommand_pattern const& pattern, List) {
+			MenuItems[i].Text = pattern.first.c_str();
 			MenuItems[i].Selected = 0;
 			MenuItems[i].Checked = 0;
 			MenuItems[i].Separator = 0;
-			++p;
 			++i;
 		}
 	}
@@ -38,8 +39,7 @@ void nf::Patterns::EditPatterns(nf::Patterns::CommandsManager &cm)
 
 	std::vector<FarMenuItem> MenuItems;
 
-	while (true)
-	{
+	while (true) {
 		nf::Patterns::tlist_command_patterns list;
 		cm.GetListRegisteredCommands(list);
 		::LoadListPatternsToMenu(cm, list, MenuItems);

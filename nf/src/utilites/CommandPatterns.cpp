@@ -5,6 +5,7 @@ using namespace nf;
 using namespace Patterns;
 
 #include <boost/regex.hpp>
+#include <boost/foreach.hpp>
 
 #include "stlsoft_def.h"
 #include "parser.h"
@@ -252,13 +253,9 @@ void nf::Patterns::Private::DetailedCommand::listPartsToCommand(tlistparts const
 
 //////////////////////////////////////////////////////////////////////////
 // CommandPatterns
-CommandPatterns::CommandPatterns(tlist_command_patterns const&ListPatterns)
-{
-	tlist_command_patterns::const_iterator p = ListPatterns.begin();
-	while (p != ListPatterns.end())
-	{	//!TODO: оптимизировать стандартным алгоритмом
-		m_PP.insert(*p);//std::make_pair(p->prefix, p->pattern)*/);
-		++p;
+CommandPatterns::CommandPatterns(tlist_command_patterns const& listPatterns) {
+	BOOST_FOREACH(nf::Patterns::tcommand_pattern const& pattern, listPatterns) {
+		m_PP.insert(pattern);
 	}
 }
 
@@ -289,13 +286,15 @@ bool CommandPatterns::TransformCommand(tstring const& Pattern
 
 //////////////////////////////////////////////////////////////////////////
 //CommandsManager
-namespace
-{
-	inline bool PrefixIsValid(tstring const& Prefix)
-	{
-		//валидный префикс заканчивается двоеточием
+namespace {
+	inline bool is_prefix_valid(tstring const& Prefix) {
+		//valid prefix is ended by char ':'
 		if (! Prefix.size()) return false;
 		return Prefix[Prefix.size()-1] == L':';
+	}
+
+	inline bool equal_prefixes(tcommand_pattern &p, tstring const& Prefix) {
+		return p.first == Prefix;
 	}
 }
 
@@ -309,29 +308,22 @@ CommandsManager::~CommandsManager()
 
 }
 
-bool CommandsManager::SetCommand(tstring const& Prefix, tstring const& Pattern)
-{
-	assert(PrefixIsValid(Prefix));
+bool CommandsManager::SetCommand(tstring const& Prefix, tstring const& Pattern) {
+	assert(is_prefix_valid(Prefix));
 	return m_Key.SetValue(Prefix.c_str(), Pattern.c_str());
 }
 
-bool CommandsManager::CheckIfPrefixIsFree(tstring const& Prefix)
-{
-	assert(PrefixIsValid(Prefix));
+bool CommandsManager::CheckIfPrefixIsFree(tstring const& Prefix) {
+	assert(is_prefix_valid(Prefix));
 	tstring dummy;
 	return ! m_Key.GetValue(Prefix.c_str(), dummy);
 }
 
-bool CommandsManager::RemoveCommand(tstring const& Prefix)
-{
-	assert(PrefixIsValid(Prefix));
+bool CommandsManager::RemoveCommand(tstring const& Prefix) {
+	assert(is_prefix_valid(Prefix));
 	return m_Key.DeleteValue(Prefix.c_str());
 }
 
-inline bool equal_prefixes(tcommand_pattern &p, tstring const& Prefix)
-{
-	return p.first == Prefix;
-}
 bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd
 												  , tstring &DestCmd) const
 {
@@ -342,14 +334,13 @@ bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd
 	GetListRegisteredCommands(all_commands);
 	CommandPatterns cp(all_commands);
 	
-	while(true)
-	{
+	while(true) {
 		tstring prefix = nf::Parser::ExtractPrefix(DestCmd);
 	//если такой префикс не зарегистрирован в качестве шаблонного
 	//или если такой префикс уже был испольован (вложенная рекурсия)
 	//то возвращаем команду которая получилась к настоящему моменту		
 		tlist_command_patterns::const_iterator p = all_commands.begin();
-			std::find_if(all_commands.begin(), all_commands.end(), boost::bind(equal_prefixes, _1, prefix));
+		std::find_if(all_commands.begin(), all_commands.end(), boost::bind(equal_prefixes, _1, prefix));
 		if ((p == all_commands.end())
 			|| (std::find(used_commands.begin(), used_commands.end(), prefix) != used_commands.end()))
 		{	
@@ -365,32 +356,23 @@ bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd
 	return true;
 }
 
-namespace 
-{
-	inline int append(std::list<tcommand_pattern> &DestList, WinSTL::reg_value_sequence_t::value_type const& Value)
-	{
-		DestList.push_back(std::make_pair(Value.name(), Value.value_sz())); 
-		return 0;
-	}
-	inline int tstring_append(tstring& Src, tstring const& ToAppend) {return Src+= ToAppend, 0;}
-	typedef WinSTL::reg_value_sequence_t tsequence;
-}
-
-void CommandsManager::GetListRegisteredCommands(std::list<tcommand_pattern> &ListPatterns) const
-{
+void CommandsManager::GetListRegisteredCommands(std::list<tcommand_pattern> &ListPatterns) const {
 	assert(ListPatterns.empty());
 	WinSTL::reg_key_t key(static_cast<HKEY>(m_Key), L"");
-	::tsequence seq(key);
-	std::for_each(seq.begin(), seq.end(), boost::bind(append, boost::ref(ListPatterns), _1));
+	WinSTL::reg_value_sequence_t seq(key);
+	BOOST_FOREACH(WinSTL::reg_value_sequence_t::value_type const& value, seq) {
+		ListPatterns.push_back(std::make_pair(value.name(), value.value_sz())); 
+	}
 }
 
 tstring CommandsManager::GetListCommandPrefixes() const
-{	//список префиксов зарегистрированных для шаблонных команд
+{	//get total list of prefixes registered for template commands 
 	tstring list_prefixes;
 	list_prefixes.reserve(256);
 	WinSTL::reg_key_t key(static_cast<HKEY>(m_Key), L"");
-	::tsequence seq(key);
-	std::for_each(seq.begin(), seq.end()
-		, boost::bind(&tstring_append, boost::ref(list_prefixes), boost::bind(&::tsequence::value_type::name, _1)));
+	WinSTL::reg_value_sequence_t seq(key);
+	BOOST_FOREACH(WinSTL::reg_value_sequence_t::value_type const& value, seq) {
+		list_prefixes += value.name();
+	}
 	return list_prefixes;
 }

@@ -16,8 +16,7 @@ namespace Menu
 {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 // интерфейс класса меню
-	class tmenu
-	{
+	class tmenu {
 	public:
 		enum {
 			FG_SHOW_SINGLE_VARIANT = 0x1	//показывать меню даже если вариант единственный 

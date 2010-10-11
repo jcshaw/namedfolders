@@ -13,6 +13,7 @@
 #include <list>
 #include <functional>
 #include <shlwapi.h>
+#include <boost/foreach.hpp>
 
 #include "header.h"
 #include "strings_utils.h"
@@ -108,21 +109,9 @@ namespace
 		return 0 != hkey;
 	}
 
-	int append_if(std::list<std::pair<tstring, tstring> > &DestList, tstring SubkeyPatternName, WinSTL::reg_value_sequence_t::value_type const& Value)
-	{	//путь заносим в виде: имя ключа, путь
-		//если указан SubkeyPatternName, оставляем только те переменные, пути которых 
-		//удовлетворяют шаблону SubkeyPatternName*
-		if (! SubkeyPatternName.empty()) SubkeyPatternName += L"*";
-		if (SubkeyPatternName.empty() || nf::Parser::IsTokenMatchedToPattern(Value.name(), SubkeyPatternName, true))
-		{
-			DestList.push_back(std::make_pair(Value.name(), Value.value_expand_sz())); //CHAR_LEADING_VALUE_ENVVAR
-		}
-		return 0;	
-	}
-
 	void GetListPairsForRegKey(tstring const &RegKeyName
-		, tstring const& SubkeyPatternName
-		, std::list<std::pair<tstring, tstring> > &DestListPaths)
+		, tstring const& subkeyPatternName
+		, std::list<tpair_strings> &DestListPaths)
 	{	//получить список <ключ реестра, путь>, удовлетворяющих шаблону KeyPattern
 		tstring subkey;
 		HKEY hkey;
@@ -130,16 +119,24 @@ namespace
 
 		WinSTL::reg_key_t c(hkey, subkey.c_str());
 		WinSTL::reg_value_sequence_t s(c);
-		std::for_each(s.begin(), s.end(), boost::bind(append_if, boost::ref(DestListPaths), boost::ref(SubkeyPatternName),_1) );
+		BOOST_FOREACH(WinSTL::reg_value_sequence_t::value_type const& value, s) {
+			//путь заносим в виде: имя ключа, путь
+			//если указан subkeyPatternName, оставляем только те переменные, пути которых 
+			//удовлетворяют шаблону subkeyPatternName*
+			tstring subkey_pattern_name = subkeyPatternName;
+			if (! subkeyPatternName.empty()) subkey_pattern_name += L"*";
+			if (subkeyPatternName.empty() || nf::Parser::IsTokenMatchedToPattern(value.name(), subkey_pattern_name, true)) {
+				DestListPaths.push_back(std::make_pair(value.name(), value.value_expand_sz())); //CHAR_LEADING_VALUE_ENVVAR
+			}
+		}
 	}
 
-	void copy_list_paths(std::list<std::pair<tstring, tstring> > const& SrcList
+	void copy_list_paths(std::list<tpair_strings> const& srcList
 		, std::list<tstring> &DestList
-		, tstring (*f)(std::pair<tstring, tstring> const& ))
-	{
-		for (std::list<std::pair<tstring, tstring> >::const_iterator p = SrcList.begin(); p != SrcList.end(); ++p)
-		{	
-			DestList.push_back(f(*p));
+		, tstring (*f)(tpair_strings const& ))
+	{		
+		BOOST_FOREACH(tpair_strings const& kvp, srcList) {
+			DestList.push_back(f(kvp));
 		}
 	}
 
@@ -147,11 +144,11 @@ namespace
 
 namespace
 {
-	tstring get_pair_second(std::pair<tstring, tstring> const& t) {return t.second;}
-	tstring get_evar_packed_string(std::pair<tstring, tstring> const& t) {
+	tstring get_pair_second(tpair_strings const& t) {return t.second;}
+	tstring get_evar_packed_string(tpair_strings const& t) {
 		return t.first + CHAR_LEADING_VALUE_ENVVAR + t.second;
 	}
-	tstring get_regkey_packed_string(std::pair<tstring, tstring> const& t) {
+	tstring get_regkey_packed_string(tpair_strings const& t) {
 		return t.first + CHAR_LEADING_VALUE_ENVVAR//CHAR_LEADING_VALUE_REGKEY 
 			+ t.second;
 	}
@@ -162,7 +159,7 @@ void nf::Selectors::GetAllPathForEnvvar(HANDLE hPlugins
 										, tstring const &VarName
 										, std::list<tstring> &DestListPaths)
 {	//получить полный список вариантов именованных директорий 
-	std::list<std::pair<tstring, tstring> > list_var_paths;
+	std::list<tpair_strings> list_var_paths;
 	tstring additional_local_path; //!TODO: что делать с этим значением?
 	::GetListPairsForEnvVar(VarName, list_var_paths, additional_local_path);
 
@@ -182,7 +179,7 @@ void nf::Selectors::GetAllPathForRegKey(HANDLE hPlugins
 {	//получить полный список вариантов именованных директорий 	
 	//	Utils::RemoveLeadingChars(LocalPath, SLASH_DIRS_CHAR);
 	//	if (LocalPath.size()) LocalPath = L"*" + LocalPath;
-	std::list<std::pair<tstring, tstring> > list_var_paths;
+	std::list<tpair_strings> list_var_paths;
 	::GetListPairsForRegKey(RegKeyName, VarName, list_var_paths);
 
 	copy_list_paths(list_var_paths, DestListPaths, get_pair_second);
@@ -208,7 +205,7 @@ bool nf::Selectors::GetPathByEnvvarPattern(HANDLE hPlugin
 										   , tstring const &LocalPath
 										   , tstring &DestPath)
 {
-	std::list<std::pair<tstring, tstring> > list_var_paths;
+	std::list<tpair_strings> list_var_paths;
 	tstring additional_local_path;
 	::GetListPairsForEnvVar(VarName, list_var_paths, additional_local_path);
 	if (! LocalPath.empty()) {
@@ -220,7 +217,7 @@ bool nf::Selectors::GetPathByEnvvarPattern(HANDLE hPlugin
 	if (list_var_paths.size() == 1) {
 		DestPath = (*list_var_paths.begin()).second;
 	} else {
-		std::pair<tstring, tstring> result;
+		tpair_strings result;
 		if (! Menu::SelectEnvVar(list_var_paths, result)) return false;
 		DestPath = result.second;
 	}
@@ -234,7 +231,7 @@ bool nf::Selectors::GetPathByRegKey(HANDLE hPlugins
 									, tstring &result_path	//выбранная пользователем директория из всех возможных директорий
 									)
 {
-	std::list<std::pair<tstring, tstring> > list_var_paths;
+	std::list<tpair_strings> list_var_paths;
 	::GetListPairsForRegKey(RegkeyName
 		, LocalPath	//!TODO: здесь только первое имя из localpath
 		, list_var_paths);

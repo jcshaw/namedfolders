@@ -19,13 +19,8 @@
 
 #include <stlsoft/memory/auto_buffer.hpp>
 
-//сохраняем данные в реестре в OEM кодировке
-//Внимание: внутри программы строки храняться в виде Ansi
-//Far работает с OEM кодировкой
-//функции поиска так же OEM
-
 typedef std::basic_string<wchar_t> tstring;
-typedef tstring tstring_oem;
+typedef std::pair<tstring, tstring> tpair_strings;
 
 //typedef std::basic_string<char> tstring;
 

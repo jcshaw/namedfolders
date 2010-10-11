@@ -9,19 +9,17 @@
 #pragma once 
 #include "stdafx.h"
 #include "far_impl.h"
-#include "kernel.h"
-#include "executor.h"
+
+#include <cassert>
+#include <Shlwapi.h>
+#include <boost/foreach.hpp>
+
 #include "strings_utils.h"
 #include "executor_addons.h"
 #include "executor_select.h"
 #include "PanelInfoWrap.h"
-#include "settings.h"
 #include "Menu2.h"
-#include "Panel.h"
 #include "PanelUpdater.h"
-
-#include <cassert>
-#include <Shlwapi.h>
 
 extern struct PluginStartupInfo g_PluginInfo; 
 
@@ -29,20 +27,19 @@ int FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath) {
 	return g_PluginInfo.CmpName(Pattern, String, SkipPath);
 }
 
-
 void CloseAndStartAnotherPlugin(HANDLE hPlugin
 								, tstring const& Command
 								, bool bActivePanel
 								, bool bOpenBoth)
-{	//"нажимаем" все кнопки Command + Enter
+{	//"press" all keys - Command + Enter
 	using namespace nf;
-	//игнорируем все префиксы кроме первого
+	//ignore all prefixes except first one 
 	tstring prefix = CSettings::GetInstance().GetPrimaryPluginPrefix();
 
 	ULONG add_size = 1 + 4 + static_cast<int>(prefix.size()); //CTRL+Y + TAB + ENTER + TAB + "cd:" + ENTER  
 
 	std::vector<DWORD> ks_buffer;
-	//вначале всегда добавляем Ctrl + Y
+	//always add Ctrl + Y at the beginning (!TODO: why)
 	ks_buffer.push_back(int('y') | KEY_CTRL);
 
 	if (! bActivePanel) {
@@ -78,25 +75,19 @@ void CloseAndStartAnotherPlugin(HANDLE hPlugin
 	assert(bSuccess);
 }
 
-namespace
-{
-
+namespace {
 	void open_path_and_close_plugin(CPanelInfoWrap &Plugin
 									, bool bClosePlugin
 									, bool bActivePanel
-									, tstring DirANSI
+									, tstring srcDir
 									, tstring const& FileNameANSI)
 	{
-		//Символы "/" надо заменить символами "\"
-		//защита от UNIX-пользователей :)
-		DirANSI =  Utils::ReplaceStringAll(DirANSI, SLASH_CATS, SLASH_DIRS);
+		srcDir = Utils::ReplaceStringAll(srcDir, SLASH_CATS, SLASH_DIRS); // "/" are replaced by "\" - protection from UNIX-users
 
-		tstring dir_oem = DirANSI;
-		Plugin.SetPanelDir(bActivePanel, dir_oem);
+		Plugin.SetPanelDir(bActivePanel, srcDir);
 		Plugin.RedrawPanel(bActivePanel);
 
-		if (! FileNameANSI.empty())
-		{
+		if (! FileNameANSI.empty()) {
 			int current_item = nf::Panel::CPanelItemFinder(FileNameANSI.c_str())(); 
 			int top_item = (static_cast<LONG>(current_item) > 
 				Plugin.GetPanelInfo(true).PanelRect.bottom)
@@ -105,23 +96,22 @@ namespace
 			Plugin.UpdateAndRedraw(true, current_item, top_item);
 		};
 
-		if (bClosePlugin) Plugin.ClosePlugin(dir_oem);
+		if (bClosePlugin) Plugin.ClosePlugin(srcDir);
 	}
 
 	bool find_path_and_filename(HANDLE hPlugin
-		, tstring &SrcPath
-		, nf::twhat_to_search_t WhatToSearch
+		, tstring &srcPath
+		, nf::twhat_to_search_t whatToSearch
 		, tstring const& Path
 		, tstring &DestFilename)
 	{
-		if (! nf::Selectors::GetPath(hPlugin, SrcPath, Path, SrcPath, WhatToSearch)) 
+		if (! nf::Selectors::GetPath(hPlugin, srcPath, Path, srcPath, whatToSearch)) 
 		{
 			return false;
-		} else if (! ::PathIsDirectory(SrcPath.c_str())) {
-			//теряем информацию об имени файла
-			//просто переходим в директорию в которой лежит этот файл
-			//!TODO: было бы здорово позиционироваться на этом файле.
-			Utils::DividePathFilename(SrcPath, SrcPath, DestFilename, SLASH_DIRS_CHAR, false);
+		} else if (! ::PathIsDirectory(srcPath.c_str())) {
+			//open directory where file is located; currently, we lost filename.
+			//!TODO: it world be perfect to position on this file
+			Utils::DividePathFilename(srcPath, srcPath, DestFilename, SLASH_DIRS_CHAR, false);
 			Utils::RemoveLeadingCharsOnPlace(DestFilename, SLASH_DIRS_CHAR);
 		}
 
@@ -181,21 +171,17 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 	}; 
 
 	return true;
-}	//open_shortcut_on_panel
-
-
-
+}	
 
 bool SelectAndOpenPathOnPanel(HANDLE hPlugin
 							  , std::list<std::pair<tstring, tstring> > const& SrcListAliasPath
 							  , nf::twhat_to_search_t WhatToSearch)
-{	//предложить меню для выбора требуемого варианта, затем открыть выбранный путь
+{	//suggest to select required variant from menu, then open selected path
 
-	//показывем просто список директорий, без имени псевдонима
-	std::list<tstring> paths;	//список всех возможных путей
-	for (std::list<std::pair<tstring, tstring> >::const_iterator p = SrcListAliasPath.begin(); p != SrcListAliasPath.end(); ++p)
-	{
-		paths.push_back(p->second);
+	//show list directories, without shortcut names
+	std::list<tstring> paths;	//all possible paths
+	BOOST_FOREACH(tpair_strings const& kvp, SrcListAliasPath) {
+		paths.push_back(kvp.second);
 	}
 	tstring dest_path;
 	if (! nf::Menu::SelectPath(paths, dest_path)) return false;

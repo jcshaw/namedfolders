@@ -68,28 +68,23 @@ tstring CCatalog::GetCatalogRegkey() const
 	return get_far_reg_key();
 }
 
-bool CCatalog::SetShortcut(tstring const& Name, tstring const& Value, bool bTemporary)
-{	//добавить/обновить псевдоним
+bool CCatalog::SetShortcut(tstring const& Name, tstring const& Value, bool bTemporary) {	
 	nf::CRegistry r(m_key.get_key_handle(), GetKeyName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS));
 	r.SetValue(Name, Value);
 	return true;
 }
-bool CCatalog::InsertSubcatalog(tstring const& name)
-{	//добавить подкаталог
+bool CCatalog::InsertSubcatalog(tstring const& name) {
 	nf::CRegistry newkey(m_key.get_key_handle(), GetKeyName(REG_SUB_CATALOGS));
 	nf::CRegistry hkey(newkey, name.c_str());
 	return true;
 }
 
-//операции удаления ярлычков и каталогов
-bool CCatalog::DeleteShortcut(tstring const& name, bool bTemporary)
-{
+bool CCatalog::DeleteShortcut(tstring const& name, bool bTemporary) {
 	basic_class key(m_key.get_key_handle(), GetKeyName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS), KEY_ALL_ACCESS);
 	return ERROR_SUCCESS == ::RegDeleteValue(key.get_key_handle(), name.c_str());
 }
 
-bool CCatalog::DeleteSubcatalog(tstring const& Name)
-{
+bool CCatalog::DeleteSubcatalog(tstring const& Name) {
 	tstring name = Name;
 	if (*name.begin() == SLASH_CATS_CHAR) name.erase(name.begin());
 
@@ -97,9 +92,7 @@ bool CCatalog::DeleteSubcatalog(tstring const& Name)
 	return ERROR_SUCCESS == ::RegDeleteKey(r, name.c_str());
 }
 
-//операции получения значений псевдоним
-bool CCatalog::GetShortcutInfo(tstring const& name_ansi, bool bTemporary, tstring &value)
-{	
+bool CCatalog::GetShortcutInfo(tstring const& name_ansi, bool bTemporary, tstring &value) {	
 	//Если псевдоним начинается с префикса "." - значит это субдиректория в текущем каталоге
 	if (name_ansi.size() && name_ansi[0] == '\\') {
 		tstring subdirectory(name_ansi, 1, name_ansi.size()-1);

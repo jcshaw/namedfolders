@@ -35,8 +35,7 @@ public:
 typedef sequence_item<WinSTL::reg_value_t> shortcuts_sequence_item;
 typedef sequence_item<WinSTL::reg_key_t> catalogs_sequence_item;
 		
-class CCatalog 
-{
+class CCatalog {
 	typedef WinSTL::reg_key_t basic_class;
 	typedef enum tregs_enum	{REG_STATIC_KEYS, REG_TEMP_KEYS, REG_SUB_CATALOGS, REG_B_SUB_CATALOGS_B};
 public:
@@ -66,9 +65,8 @@ public:
 	}
 	//size_t number_temporary_shortcuts() const;
 
-public:	//Операции с последовательностями
-	inline basic_class GetSequenceShortcuts(bool bTemporary) //последовательность вложенных в каталог псевдонимов
-	{
+public:	
+	inline basic_class GetSequenceShortcuts(bool bTemporary) {
 		wchar_t const* subkey = GetKeyName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS);
 		if (m_key.has_sub_key(subkey)) {
 			return basic_class(m_key.get_key_handle(), subkey);
@@ -76,8 +74,7 @@ public:	//Операции с последовательностями
 			return m_key.create_sub_key(subkey);
 		}
 	}
-	inline basic_class GetSequenceSubcatalogs()//последовательность вложенных в каталог подкаталогов
-	{
+	inline basic_class GetSequenceSubcatalogs() {
 		wchar_t const* subkey = GetKeyName(REG_SUB_CATALOGS);
 		if (m_key.has_sub_key(subkey)) {
 			return basic_class(m_key.get_key_handle(), subkey);
