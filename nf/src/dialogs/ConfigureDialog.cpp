@@ -72,8 +72,7 @@ UINT CConfigureDialog::ShowModal()
 	int nChoosedItem;
 	while (true) {
 		if (! Execute(nChoosedItem)) break;
-		switch (nChoosedItem)
-		{
+		switch (nChoosedItem) {
 		case ID_CANCEL: 
 			return 0;
 		case ID_OK: 
@@ -96,7 +95,6 @@ void CConfigureDialog::dde_registry(bool bSaveToRegistry)
 		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
 			CSettings::GetInstance().SetValue(main_dw_settings[i].settings_id, m_dwParams[main_dw_settings[i].settings_id]);
 		}
-
 		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
 			CSettings::GetInstance().SetValue(main_str_settings[i].settings_id, m_strParams[main_str_settings[i].settings_id]); //!TODO: OEM ?
 		}
@@ -104,7 +102,6 @@ void CConfigureDialog::dde_registry(bool bSaveToRegistry)
 		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
 			m_dwParams[main_dw_settings[i].settings_id] = static_cast<BYTE>(CSettings::GetInstance().GetValue(main_dw_settings[i].settings_id));
 		}
-
 		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
 			m_strParams[main_str_settings[i].settings_id] = CSettings::GetInstance().GetValue(main_str_settings[i].settings_id);
 		}
@@ -121,8 +118,7 @@ void CConfigureDialog::dde_main_dialog(bool bSaveToControls)
 			}
 		}
 		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
-			lstrcpy( const_cast<wchar_t*>(GetDialogItemsRef()[main_str_settings[i].control_id].PtrData)
-				, m_strParams[main_str_settings[i].settings_id].c_str()); //!TODO: OEM ?
+			GetDialogItemsRef().SetFarDialogItemData(main_str_settings[i].control_id, m_strParams[main_str_settings[i].settings_id].c_str());
 		}
 
 	//ST_EDIT_MENU_DISK_FAST_KEY храним как DWORD, показываем как строку

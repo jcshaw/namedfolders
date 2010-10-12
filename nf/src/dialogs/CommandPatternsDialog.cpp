@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <boost/foreach.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "lang.h"
 #include "settings.h"
@@ -12,22 +13,22 @@
 using namespace nf;
 using namespace Patterns;
 
-
-namespace
-{
-	void LoadListPatternsToMenu(nf::Patterns::CommandsManager const &cm
+namespace {
+	void load_list_patterns_to_menu(nf::Patterns::CommandsManager const &cm
 		, nf::Patterns::tlist_command_patterns const &List
-		, std::vector<FarMenuItem> &MenuItems)
+		, std::vector<FarMenuItem> &menuItems
+		, std::vector<boost::shared_ptr<tstring> > &itemBuffers)
 	{
-		MenuItems.resize(List.size());
+		menuItems.reserve(List.size());
+		itemBuffers.reserve(List.size());
 
-		int i = 0;
 		BOOST_FOREACH(nf::Patterns::tcommand_pattern const& pattern, List) {
-			MenuItems[i].Text = pattern.first.c_str();
-			MenuItems[i].Selected = 0;
-			MenuItems[i].Checked = 0;
-			MenuItems[i].Separator = 0;
-			++i;
+			FarMenuItem mi;
+			memset(&mi, 0, sizeof(FarMenuItem));
+			boost::shared_ptr<tstring> t(new tstring(pattern.first));
+			mi.Text = (*t).c_str();
+			menuItems.push_back(mi);
+			itemBuffers.push_back(t);
 		}
 	}
 }
@@ -37,12 +38,13 @@ void nf::Patterns::EditPatterns(nf::Patterns::CommandsManager &cm)
 	const int NUM_BREAK_KEYS = 4;
 	static int BreakKeys[NUM_BREAK_KEYS+1] = {VK_F4, VK_INSERT, VK_DELETE, VK_ESCAPE, 0};	
 
-	std::vector<FarMenuItem> MenuItems;
-
 	while (true) {
+		std::vector<FarMenuItem> menu_items;
+		std::vector<boost::shared_ptr<tstring> > mi_buffers;
+
 		nf::Patterns::tlist_command_patterns list;
 		cm.GetListRegisteredCommands(list);
-		::LoadListPatternsToMenu(cm, list, MenuItems);
+		::load_list_patterns_to_menu(cm, list, menu_items, mi_buffers);
 
 		int selected_key;
 		int nSelectedItem = g_PluginInfo.Menu(g_PluginInfo.ModuleNumber	//!TODO: в этом меню фильтр сейчас не действует...
@@ -55,21 +57,19 @@ void nf::Patterns::EditPatterns(nf::Patterns::CommandsManager &cm)
 			, L"Patterns"
 			, &BreakKeys[0]
 			, &selected_key
-			, &MenuItems[0]
-			, static_cast<int>(MenuItems.size())
+			, (menu_items.size() == 0 ? 0 : &menu_items[0])
+			, static_cast<int>(menu_items.size())
 		);
 
 		//find selected item
 		nf::Patterns::tlist_command_patterns::const_iterator pSelectedItem = list.begin();
-		std::advance(pSelectedItem, nSelectedItem);
+		if (nSelectedItem > 0) std::advance(pSelectedItem, nSelectedItem);
 
-		switch (selected_key)
-		{
+		switch (selected_key) {
 		case 1: //Insert
 			{
 				nf::Patterns::DialogEditPattern dlg;
-				if (dlg.ShowModal())
-				{
+				if (dlg.ShowModal()) {
 					//if (! cm.CheckIfPrefixIsFree(dlg.GetResultPrefix()))
 					//!TODO: перезапись существующего префикса
 					cm.SetCommand(dlg.GetResultPrefix(), dlg.GetResultPattern());				
@@ -77,23 +77,19 @@ void nf::Patterns::EditPatterns(nf::Patterns::CommandsManager &cm)
 			}
 			break;
 		case 2: //Delete
-			if (pSelectedItem != list.end())
-			{
+			if (pSelectedItem != list.end()) {
 				if (nf::Confirmations::AskForDelete(pSelectedItem->first) == nf::Confirmations::R_DELETE)
 					cm.RemoveCommand(pSelectedItem->first); //prefix
 			}
 			break;
 		case 3: return;
 		default: //Edit
-			if (pSelectedItem != list.end())
-			{
+			if (pSelectedItem != list.end()) {
 				nf::Patterns::DialogEditPattern dlg(pSelectedItem->first	//prefix
 					, pSelectedItem->second //pattern
 				);
-				if (dlg.ShowModal())
-				{
-					if (pSelectedItem->first != dlg.GetResultPrefix())
-					{
+				if (dlg.ShowModal()) {
+					if (pSelectedItem->first != dlg.GetResultPrefix()) {
 						cm.RemoveCommand(pSelectedItem->first);
 					}
 					//if (! cm.CheckIfPrefixIsFree(dlg.GetResultPrefix()))

@@ -9,11 +9,9 @@
 
 #include "Kernel.h"
 #include "settings.h"
-namespace nf
-{
 
-namespace Menu
-{
+namespace nf {
+namespace Menu {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 // интерфейс класса меню
 	class tmenu {
@@ -44,8 +42,7 @@ namespace Menu
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 //€рлыки
-	class tshortcuts_menu : public tmenu
-	{
+	class tshortcuts_menu : public tmenu {
 	public:
 		tshortcuts_menu() : tmenu(L"Del, F2-F6", L"MenuSelect", 0, nf::ST_SELECT_SH_MENU_MODE) {}
 		enum {
@@ -68,8 +65,7 @@ namespace Menu
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 //программы
-	class tsoft_menu : public tmenu
-	{
+	class tsoft_menu : public tmenu {
 	public:
 		tsoft_menu() : tmenu(L"F11, Ctrl+Enter, Shift+Enter, F2, F3", L""
 			, tmenu::FG_SHOW_SINGLE_VARIANT
@@ -106,8 +102,7 @@ namespace Menu
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 //переменные среды
-	class tenv_menu : public tmenu
-	{
+	class tenv_menu : public tmenu {
 	public:
 		tenv_menu() : tmenu(L"F2, F3", L"", 0, nf::ST_SELECT_SH_MENU_MODE_EV) {}
 		enum {

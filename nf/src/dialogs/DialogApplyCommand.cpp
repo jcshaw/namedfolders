@@ -23,18 +23,15 @@ CDialogApplyCommand::~CDialogApplyCommand(void)
 {
 }
 
-UINT CDialogApplyCommand::ShowModal()
-{
-	//вызываем диалог редактированик имени каталога
+UINT CDialogApplyCommand::ShowModal() {
 	int nChoosedItem;
 
-	if (Execute(nChoosedItem))
-		if (nChoosedItem != ID_CANCEL)
-		{	//редактируем имя каталога
+	if (Execute(nChoosedItem)) {
+		if (nChoosedItem != ID_CANCEL) {	
 			m_Command =  this->GetDialogItemValue(ID_EDIT);
 			return 1;
 		}
-
+	}
 	return 0;
 }
 

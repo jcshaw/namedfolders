@@ -117,8 +117,7 @@ namespace nf {
 		// при добавлении изменить функцию GetCommandAsString и парсер
 	} _tcommands_kinds;
 
-	typedef struct tparsed_command
-	{
+	typedef struct tparsed_command {
 		unsigned long flags;//комбинаци€  tcommand_flags -
 		//в какие пол€ занесены значени€ 
 		//+ дополнительна€ информаци€ о команде
@@ -130,12 +129,19 @@ namespace nf {
 		tstring param;			//один или несколько параметров
 	} _tparsed_command;
 
-	typedef struct tshortcut_info
-	{
+	typedef struct tshortcut_info {
 		tstring catalog;	//каталог в котором находитс€ псевдоним
 		tstring shortcut;	//название €рлыка
 		bool bIsTemporary;	//временный
 	} _tshortcut_info;
+
+	inline tshortcut_info MakeShortcut(tstring const& srcCatalog, tstring const& srcShortcut, bool bTemporary) {
+		tshortcut_info sh;
+		sh.bIsTemporary = bTemporary;
+		sh.shortcut = srcShortcut;
+		sh.catalog = srcCatalog;
+		return sh;
+	}
 
 	typedef tstring tcatalog_info;	//информаци€ о каталоге (путь относительно корневого каталога)
 

@@ -3,16 +3,9 @@
 #include "header.h"
 #include "CommandPatterns.h"
 
-namespace nf
-{
-
-namespace Patterns
-{
-/************************************************************************/
-// Редактировать список зарегистрированных паттернов
-/************************************************************************/
-	void EditPatterns(nf::Patterns::CommandsManager &cm);
-
-} // Patterns
-
+namespace nf {
+	namespace Patterns {
+	// Edit list of registered patterns.
+		void EditPatterns(nf::Patterns::CommandsManager &cm);
+	} 
 } //nf

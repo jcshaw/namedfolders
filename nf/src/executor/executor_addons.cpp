@@ -55,12 +55,17 @@ namespace
 
 		//получаем значения всех переменных среды, которые удовлетворяют шаблону VarPattern
 		//генерируем список всех директорий на которые ссылаются выбранные переменные среды
+		if (_wenviron == NULL) {
+			//see msdn: In a program that uses main, _wenviron is initially NULL because the environment is composed of multibyte-character strings. 
+			//On the first call to _wgetenv or _wputenv, a corresponding wide-character string environment is created and is pointed to by _wenviron.
+			_wgetenv(L"");
+		}
 		wchar_t **penv = _wenviron;
 		while (*penv != NULL) {
 			tstring senv = *penv;
 			std::size_t pos = senv.find(L"=");
 			if (pos != tstring::npos) {
-				assert(pos+1 < senv.size());
+				assert(pos+1 <= senv.size());
 				tstring env_name(senv.c_str(), pos);
 				tstring pe(senv.c_str(), pos+1, senv.size() - pos);
 

@@ -121,7 +121,9 @@ namespace nf {
 			}
 		}
 		bool Execute(int &nChoosenItem) {
-			assert(m_DialogHandle == 0);
+			if (m_DialogHandle == 0) {
+				g_PluginInfo.DialogFree(m_DialogHandle);
+			}
 			m_DialogHandle = g_PluginInfo.DialogInit(
 				m_PluginInfo.ModuleNumber 
 				, -1 

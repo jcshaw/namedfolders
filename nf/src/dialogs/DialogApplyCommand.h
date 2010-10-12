@@ -42,12 +42,12 @@ public:
 		//перечисл€ем все требуемые элементы диалога
 		const int left = 3;
 		GetDialogItemsRef()
-			<< &far_di_doublebox(ID_DOUBLEBOX,
-			lg::DLG_APPLY_COMMAND_TITLE
-			, 1, 1, DIALOG_WIDTH-2, DIALOG_HEIGHT-2) 
-			<< &far_di_text(ID_TEXT, 
-			lg::DLG_APPLY_COMMAND_TEXT
-			, left, 2, left+14)
+			<< &far_di_doublebox(ID_DOUBLEBOX
+				, lg::DLG_APPLY_COMMAND_TITLE
+				, 1, 1, DIALOG_WIDTH-2, DIALOG_HEIGHT-2) 
+			<< &far_di_text(ID_TEXT
+				, lg::DLG_APPLY_COMMAND_TEXT
+				, left, 2, DIALOG_WIDTH-2)
 			<< &far_di_edit(ID_EDIT, left, 3, DIALOG_WIDTH-4, L""
 				, DIF_HISTORY
 				, 1

@@ -59,8 +59,7 @@ namespace nf {
 		};
 	} //Private
 
-class CConfigureDialog : public dialogT
-{
+class CConfigureDialog : public dialogT {
 	nf::tautobuffer_byte m_dwParams;
 	std::vector<tstring> m_strParams;
 
@@ -85,7 +84,7 @@ public:
 			<< &far_di_button(ID_OK, lg::MSG_OK, 25, 18, 0, FALSE, FALSE, TRUE) //default button
 
 			<< &far_di_edit(ID_EDIT_MASKS_SOFT_EXCEPTIONS, left_half, 16, right-1, L"")
-			<< &far_di_text(ID_TEXT_MASKS_SOFT_EXCEPTIONS, lg::CFG_MASKS_SOFT_EXCEPTIONS, left, 16, left+14)		
+			<< &far_di_text(ID_TEXT_MASKS_SOFT_EXCEPTIONS, lg::CFG_MASKS_SOFT_EXCEPTIONS, left, 16, left_half)		
 
 			<< &far_di_singlebox(ID_LINE4, 0, left, 15, right, 15) 
 

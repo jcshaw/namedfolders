@@ -108,9 +108,7 @@ bool nf::Selectors::GetShortcut(HANDLE hPlugin
 {
 	//псевдоалиас "."
 	if (cmd.shortcut == L".") {
-		DestSh.bIsTemporary = false;
-		DestSh.catalog = L"";
-		DestSh.shortcut = L".";
+		DestSh = nf::MakeShortcut(L"", L".", false);
 		return true;
 	}
 
@@ -118,15 +116,11 @@ bool nf::Selectors::GetShortcut(HANDLE hPlugin
 		nf::tshortcuts_list list;
 		size_t nexact = Shell::SelectShortcuts(cmd.shortcut.c_str(), cmd.catalog.c_str(), list);
 
-		//если найден один единственный точный вариант
-		//но есть и другие варианты
-		//то, в зависимости от настроек, 
-		//переходим прямо к нему 
-		//либо предлагаем выбрать другие варианты
-
+		//if we have single exactly matched variant and there are some other (not exact) variants
+		//then there are two possible scenario depending on settings: return exact variant or show menu
 		bool bExpand = (nexact == 1) 
 			? CSettings::GetInstance().GetValue(nf::ST_ALWAYS_EXPAND_SHORTCUTS) != 0
-			: ! list.empty();	//требуется выбирать из меню..
+			: ! list.empty();	//variant should be selected from menu
 
 		if (bExpand) {
 			int n = Menu::SelectShortcut(list, DestSh);
@@ -140,7 +134,7 @@ bool nf::Selectors::GetShortcut(HANDLE hPlugin
 			}
 			return false;
 		}
-	} //while
+	} 
 }
 
 
@@ -150,11 +144,7 @@ bool nf::Selectors::GetAllShortcuts(HANDLE hPlugin
 {	//выбрать все подходящие псевдонимы из списка
 	size_t nexact = Shell::SelectShortcuts(cmd.shortcut.c_str(), cmd.catalog.c_str(), DestList);
 	if (cmd.shortcut == L".") {	//псевдоалиас "."
-		nf::tshortcut_info sh;
-		sh.bIsTemporary = false;
-		sh.catalog = L"";
-		sh.shortcut = L".";
-		DestList.push_back(sh);
+		DestList.push_back(nf::MakeShortcut(L"",  L".", false));
 	}
 	return ! DestList.empty();
 }
@@ -181,8 +171,7 @@ bool nf::Selectors::GetCatalog(HANDLE hPlugin
 	//если найден один единственный точный вариант
 	//то переходим прямо к нему - иначе предлагаем выбрать варианты
 	bool bExpand = list.size() > 1;	//требуется выбирать из меню..
-	if (bExpand)
-	{
+	if (bExpand) {
 		int n = Menu::SelectCatalog(list, DestCatalog);
 		return n > 0;
 	} else {

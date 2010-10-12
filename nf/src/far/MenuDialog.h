@@ -52,9 +52,8 @@ namespace nf {
 		}
 
 		class CMenuDialog {
-			enum {FIRST_COLUMN_MAX_WIDTH=50, MAX_WIDTH = 128};
 		public:
-			typedef std::pair<int, tvariant_value> tmenu_item;	//first = номер элемента в tlist_far_menu_items
+			typedef std::pair<int, tvariant_value> tmenu_item;	//first = item number in tlist_far_menu_items
 			typedef std::vector<tmenu_item> tlist_menu_items;
 
 			typedef std::vector<FarMenuItem> tlist_far_menu_items; 
@@ -62,20 +61,10 @@ namespace nf {
 
 			CMenuDialog(tmenu &M, tlist_menu_items &listItemsRef, tlist_far_menu_buffers &buffersRef);
 			bool ShowMenu(tvariant_value &DestValue, int &DestRetCode);
-		private:
-			tvariant_value const*const find_selected_item(int nSelectedItem);
+		private:			
 			std::pair<size_t, size_t> get_column_widths();
-			inline bool is_satisfy_to_filter(std::list<tstring> const& Filter
-				, tstring SrcStr	//константая ссылка здесь не проходит, в релизи висим.. //!TODO
-				)
-			{	// Строка SrcStr удовлетворяем всем элементам фильтра
-				return std::find_if(Filter.begin(), Filter.end()
-					, boost::bind(std::logical_not<bool>(), boost::bind<bool>(Utils::iFindFirst, SrcStr, _1))) == Filter.end();
-			}
 			void set_items_visibility(tstring const& Filter, int Level);
-			void load_items(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers);
-			void append_farmenu_item(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers, tstring const& Value);
-			int fill_menu_break_keys_buf(const int BufSize, int *buf, int &DestNumDefaultBreakKeys);
+			void load_items(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers); 
 			int show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem);
 		private:
 			tmenu &m_Menu;
