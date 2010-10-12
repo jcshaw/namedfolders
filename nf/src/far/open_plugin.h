@@ -6,8 +6,7 @@
 */
 #pragma once
 
-namespace nf 
-{
+namespace nf {
 	HANDLE OpenFromPluginsMenu();
 	std::pair<HANDLE, bool>  OpenFromCommandLine(wchar_t const* pCmd );
 }

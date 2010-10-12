@@ -116,6 +116,15 @@ namespace {
 	};
 }
 
+
+nf::Menu::CMenuDialog::CMenuDialog(tmenu &M, tlist_menu_items &listItemsRef, tlist_far_menu_buffers &buffersRef) 
+: m_Menu(M)
+, m_List(listItemsRef)
+, m_bFilterFullUpdateMode(true)
+, m_Buffers(buffersRef)
+{
+
+}
 int nf::Menu::CMenuDialog::fill_menu_break_keys_buf( const int BufSize, int *buf, int &DestNumDefaultBreakKeys )
 {
 	int nbuf_count = 0;
@@ -126,8 +135,8 @@ int nf::Menu::CMenuDialog::fill_menu_break_keys_buf( const int BufSize, int *buf
 		assert(nbuf_count < BufSize);
 	}
 	DestNumDefaultBreakKeys = nbuf_count;
-	const char first_letter = 'A';
-	const char last_letter = 'Z';
+	const wchar_t first_letter = L'A';
+	const wchar_t last_letter = L'Z';
 	assert(BufSize > nbuf_count + (2*(last_letter - first_letter) + 1) + 1 + 10);
 
 	buf[nbuf_count++] = VK_BACK; //стирание, 1 символ
@@ -139,7 +148,7 @@ int nf::Menu::CMenuDialog::fill_menu_break_keys_buf( const int BufSize, int *buf
 		buf[nbuf_count++] = i;  //английские буквы
 		buf[nbuf_count++] = MAKELONG(i, PKF_SHIFT);  //русские буквы (с шифтом)
 	}
-	for (unsigned int i = '0'; i <= '9'; ++i) buf[nbuf_count++] = i;	 //цифры, 10 символов
+	for (unsigned int i = L'0'; i <= L'9'; ++i) buf[nbuf_count++] = i;	 //цифры, 10 символов
 	for (unsigned int i = 0; i < number_additional_chars; ++i) {
 		buf[nbuf_count++] = additional_chars[i];
 	}
@@ -149,7 +158,7 @@ int nf::Menu::CMenuDialog::fill_menu_break_keys_buf( const int BufSize, int *buf
 }
 
 int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem) {
-	const int MAX_SIZE = 512;	//!TODO: лишний расход памяти
+	const int MAX_SIZE = 512;	//!TODO: use autobuffer
 	int buf[MAX_SIZE];
 	int num_custom_break_codes = 0;
 	int num_break_keys = fill_menu_break_keys_buf(MAX_SIZE, buf, num_custom_break_codes);
@@ -158,12 +167,6 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 	if (m_Filter.size()) {
 		if (title.size()) title += L": ";
 		title += m_Filter;
-	}
-
-	std::vector<FarMenuItem> list_items; //!TODO: avoid additional copying
-	list_items.reserve(MenuItems.size());
-	BOOST_FOREACH(nf::tFarMenuItem_wrapper const& w, MenuItems) {
-		list_items.push_back(w.FarMenuItem);
 	}
 
 	nSelectedItem = g_PluginInfo.Menu (
@@ -177,7 +180,7 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 		, m_Menu.m_HelpTopic.c_str()
 		, &buf[0]
 		, &BreakCode
-		, &list_items[0]
+		, &MenuItems[0]
 		, static_cast<int>(MenuItems.size())
 	);
 	if (BreakCode == -1) {
@@ -219,7 +222,8 @@ bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &DestValue, int &DestRetCode
 
 	while (true) {
 		tlist_far_menu_items menu_items;
-		load_items(menu_items);
+		tlist_far_menu_buffers menu_buffers;
+		load_items(menu_items, menu_buffers);
 
 		int break_code = 0;
 		int nselected_item = 0;
@@ -241,8 +245,7 @@ bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &DestValue, int &DestRetCode
 	};
 }
 
-std::pair<size_t, size_t> nf::Menu::CMenuDialog::get_column_widths()
-{
+std::pair<size_t, size_t> nf::Menu::CMenuDialog::get_column_widths() {
 	//определяем максимальную ширину первого и второго столбца
 	//у видимых элементов
 	std::pair<size_t, size_t> widths = std::make_pair(0, 0);
@@ -269,8 +272,7 @@ nf::Menu::tvariant_value const*const nf::Menu::CMenuDialog::find_selected_item( 
 	return NULL;
 }
 
-void nf::Menu::CMenuDialog::set_items_visibility( tstring const& Filter, int Level )
-{
+void nf::Menu::CMenuDialog::set_items_visibility(tstring const& Filter, int Level) {
 	//определяем, какие элементы будут видимы 
 	//строки формируем без ограничения ширины, чтобы искать фильтр по полной строке.
 	menu_string_maker_visitor string_maker(m_Menu.GetCurrentMenuMode(), std::make_pair(1024, 1024));
@@ -280,9 +282,7 @@ void nf::Menu::CMenuDialog::set_items_visibility( tstring const& Filter, int Lev
 
 	for (tlist_menu_items::iterator p = m_List.begin(); p != m_List.end(); ++p) {
 		if ((! m_bFilterFullUpdateMode) && (p->first < 0) && (p->first > -(Level-1))) continue;
-		if (filters.empty() || is_satisfy_to_filter(filters, boost::apply_visitor(string_maker, p->second))
-			)
-		{
+		if (filters.empty() || is_satisfy_to_filter(filters, boost::apply_visitor(string_maker, p->second))	) {
 			p->first = nitems++;
 		} else {
 			p->first = -Level;
@@ -290,30 +290,33 @@ void nf::Menu::CMenuDialog::set_items_visibility( tstring const& Filter, int Lev
 	}
 }
 
-void nf::Menu::CMenuDialog::load_items( tlist_far_menu_items &menu_items ) /*!TODO: заменить вектор массивом */
-{
+void nf::Menu::CMenuDialog::load_items(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers) {
 	//загружаем в меню только видимые элементы
-	assert(menu_items.empty());
-	menu_items.reserve(m_List.size());
+	assert(destMenuItems.empty());
+	destMenuItems.reserve(m_List.size());
 
 	set_items_visibility(m_Filter, static_cast<int>(m_Filter.size()) );	//определяем, какие элементы видимые
 	std::pair<size_t, size_t> widths = get_column_widths();	//находим максимальную ширину столбцов
 	menu_string_maker_visitor string_maker(m_Menu.GetCurrentMenuMode(), widths);
-	for (tlist_menu_items::iterator p = m_List.begin(); p != m_List.end(); ++p) {
-		if (p->first >= 0) append_menu_item(menu_items, boost::apply_visitor(string_maker, p->second));
+	BOOST_FOREACH(tmenu_item const& mi, m_List) {
+		if (mi.first >= 0) {
+			append_farmenu_item(destMenuItems, destMenuBuffers, boost::apply_visitor(string_maker, mi.second));
+		}
 	}
 }
 
-void nf::Menu::CMenuDialog::append_menu_item( tlist_far_menu_items &DestListFarItems, tstring const& Value )
-{
-	tFarMenuItem_wrapper m;
-	m.FarMenuItem.Checked = 0;
-	m.FarMenuItem.Selected = 0;
-	m.FarMenuItem.Separator = 0;
-	m.pBufferText.reset(new tstring(Value));
-	if (m.pBufferText->size() > MAX_WIDTH) {
-		m.pBufferText->erase(MAX_WIDTH, m.pBufferText->size() - MAX_WIDTH);
-	} //safe_copy(m.bufferText, Value, MAX_WIDTH);	
-	m.FarMenuItem.Text = &(*m.pBufferText)[0];
-	DestListFarItems.push_back(m);
+void nf::Menu::CMenuDialog::append_farmenu_item(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers, tstring const& Value) {
+	FarMenuItem m;
+	m.Checked = 0;
+	m.Selected = 0;
+	m.Separator = 0;
+	boost::shared_ptr<tstring> buffer;
+	buffer.reset(new tstring(Value));
+	if (buffer->size() > MAX_WIDTH) {
+		buffer->erase(MAX_WIDTH, buffer->size() - MAX_WIDTH);
+	} 
+	m.Text = &(*buffer)[0];
+	destMenuItems.push_back(m);
+	destMenuBuffers.push_back(buffer);
+	assert(destMenuItems.size() == destMenuBuffers.size());
 }

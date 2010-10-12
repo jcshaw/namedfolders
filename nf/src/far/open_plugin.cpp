@@ -29,32 +29,32 @@ namespace
 
 HANDLE nf::OpenFromPluginsMenu()
 {
-	std::vector<tFarMenuItem_wrapper> MenuItems(NUM_ITEMS);
+	std::vector<FarMenuItem> MenuItems(NUM_ITEMS);
+	std::vector<boost::shared_ptr<tstring> > menu_buffers(NUM_ITEMS);
 	for (unsigned int i = 0; i < NUM_ITEMS; ++i) {
-		MenuItems[i].pBufferText.reset(new tstring(GetMsg(PLUGINSMENU_ITEMS[i])));
-		MenuItems[i].FarMenuItem.Text = &(*MenuItems[i].pBufferText)[0];	
-		MenuItems[i].FarMenuItem.Selected = 0;
-		MenuItems[i].FarMenuItem.Checked = 0;
-		MenuItems[i].FarMenuItem.Separator = 0;
+		menu_buffers[i].reset(new tstring(GetMsg(PLUGINSMENU_ITEMS[i])));
+		MenuItems[i].Text = &(*menu_buffers[i])[0];	
+		MenuItems[i].Selected = 0;
+		MenuItems[i].Checked = 0;
+		MenuItems[i].Separator = 0;
 	}
 
 	int nSelectedItem = g_PluginInfo.Menu(g_PluginInfo.ModuleNumber
 		, -1
 		, -1
-		, 0	//макс кол-во видимых элементов
+		, 0	//max count of visible items - regulated by FAR
 		, FMENU_AUTOHIGHLIGHT | FMENU_WRAPMODE
 		, L""
 		, L""
 		, L""
 		, 0
 		, 0
-		, &MenuItems[0].FarMenuItem
+		, &MenuItems[0]
 		, static_cast<int>(MenuItems.size())
 	);
 
 	if (-1 == nSelectedItem) return INVALID_HANDLE_VALUE;	//user has canceled menu
-
-		
+	
 	switch(nSelectedItem) {
 	case 0:
 		return new nf::Panel::CPanel();

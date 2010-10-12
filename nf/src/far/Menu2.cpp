@@ -23,14 +23,16 @@ namespace {
 		int select_from_menu(TList const &ListItems, typename Policy::R &DestValue)
 	{
 		CMenuDialog::tlist_menu_items list;
+		CMenuDialog::tlist_far_menu_buffers buffers;
 		list.reserve(ListItems.size());
+		buffers.reserve(ListItems.size());
 
-		for (typename TList::const_iterator p = ListItems.begin(); p != ListItems.end(); ++p) {
-			list.push_back(std::make_pair(-1, tvariant_value(Policy::Encode(*p))));	//-1 - в список элементов farmenu не добавлен
+		BOOST_FOREACH(TList::value_type const& value, ListItems) {
+			list.push_back(std::make_pair(-1, tvariant_value(Policy::Encode(value))));	//-1 means, that the item hasn't add to farmenu 
 		}
 
 		TMenu menu;
-		CMenuDialog dlg(menu, list);
+		CMenuDialog dlg(menu, list, buffers);
 
 		int result_code;
 		tvariant_value result_value;

@@ -17,12 +17,6 @@
 #include "panel_types.h"
 
 namespace nf {
-
-	struct tFarMenuItem_wrapper { //!TODO: remove it
-		FarMenuItem FarMenuItem;
-		boost::shared_ptr<tstring> pBufferText; //we need shared ptr to allow store this structs in containers
-	};
-
 	namespace Panel {
 
 class CPanel {

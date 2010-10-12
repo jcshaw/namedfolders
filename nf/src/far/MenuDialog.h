@@ -3,6 +3,7 @@
 #include <boost/variant.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "strings_utils.h"
 #include "Panel.h"
@@ -50,43 +51,42 @@ namespace nf {
 			};
 		}
 
-class CMenuDialog {
-	enum {FIRST_COLUMN_MAX_WIDTH=50, MAX_WIDTH = 128};
-public:
-	typedef std::pair<int, tvariant_value> tmenu_item;	//first = номер элемента в tlist_far_menu_items
-	typedef std::vector<tmenu_item> tlist_menu_items;
-	typedef std::vector<tFarMenuItem_wrapper> tlist_far_menu_items; //second item is buffers for 
+		class CMenuDialog {
+			enum {FIRST_COLUMN_MAX_WIDTH=50, MAX_WIDTH = 128};
+		public:
+			typedef std::pair<int, tvariant_value> tmenu_item;	//first = номер элемента в tlist_far_menu_items
+			typedef std::vector<tmenu_item> tlist_menu_items;
 
-	CMenuDialog(tmenu &M, tlist_menu_items &List) 
-		: m_Menu(M)
-		, m_List(List)
-		, m_bFilterFullUpdateMode(true) {}
+			typedef std::vector<FarMenuItem> tlist_far_menu_items; 
+			typedef std::vector<boost::shared_ptr<tstring> > tlist_far_menu_buffers;
 
-	bool ShowMenu(tvariant_value &DestValue, int &DestRetCode);
-private:
-	tvariant_value const*const find_selected_item(int nSelectedItem);
-	std::pair<size_t, size_t> get_column_widths();
-	inline bool is_satisfy_to_filter(std::list<tstring> const& Filter
-		, tstring SrcStr	//константая ссылка здесь не проходит, в релизи висим.. //!TODO
-		)
-	{	// Строка SrcStr удовлетворяем всем элементам фильтра
-		return std::find_if(Filter.begin(), Filter.end()
-			, boost::bind(std::logical_not<bool>(), boost::bind<bool>(Utils::iFindFirst, SrcStr, _1))) == Filter.end();
-	}
-	void set_items_visibility(tstring const& Filter, int Level);
-	void load_items(tlist_far_menu_items &menu_items);	//!TODO: заменить вектор массивом;
-	void append_menu_item(tlist_far_menu_items &DestListFarItems, tstring const& Value);
-	int fill_menu_break_keys_buf(const int BufSize, int *buf, int &DestNumDefaultBreakKeys);
-	int show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem);
-private:
-	tmenu &m_Menu;
-	tlist_menu_items &m_List;
-	tstring m_Filter;	//введенный фильтр (только английские буквы)
-	bool m_bFilterFullUpdateMode; 
-	//при добавлении очередной буквы к фильтру нет необходимости проверять
-	//строки, которые не попали в результаты предыдущего поиска
-	//т.е. здесь возможна оптимизация, которая и реализуется через этот флаг
-};
+			CMenuDialog(tmenu &M, tlist_menu_items &listItemsRef, tlist_far_menu_buffers &buffersRef);
+			bool ShowMenu(tvariant_value &DestValue, int &DestRetCode);
+		private:
+			tvariant_value const*const find_selected_item(int nSelectedItem);
+			std::pair<size_t, size_t> get_column_widths();
+			inline bool is_satisfy_to_filter(std::list<tstring> const& Filter
+				, tstring SrcStr	//константая ссылка здесь не проходит, в релизи висим.. //!TODO
+				)
+			{	// Строка SrcStr удовлетворяем всем элементам фильтра
+				return std::find_if(Filter.begin(), Filter.end()
+					, boost::bind(std::logical_not<bool>(), boost::bind<bool>(Utils::iFindFirst, SrcStr, _1))) == Filter.end();
+			}
+			void set_items_visibility(tstring const& Filter, int Level);
+			void load_items(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers);
+			void append_farmenu_item(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers, tstring const& Value);
+			int fill_menu_break_keys_buf(const int BufSize, int *buf, int &DestNumDefaultBreakKeys);
+			int show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem);
+		private:
+			tmenu &m_Menu;
+			tlist_menu_items &m_List;
+			tlist_far_menu_buffers &m_Buffers;
+			tstring m_Filter;	//введенный фильтр (только английские буквы)
+			bool m_bFilterFullUpdateMode; 
+			//при добавлении очередной буквы к фильтру нет необходимости проверять
+			//строки, которые не попали в результаты предыдущего поиска
+			//т.е. здесь возможна оптимизация, которая и реализуется через этот флаг
+		};
 	} //Menu
 
 }

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "header.h"
-namespace nf
-{
+namespace nf {
 	namespace Menu {
 		int SelectShortcut(nf::tshortcuts_list const &SrcList, nf::tshortcut_info& DestSh);
 		int SelectSoft(nf::tshortcuts_list const &SrcList, nf::tshortcut_info& DestSh);
