@@ -272,13 +272,10 @@ CSearchSystemPolice::SearchSubdir(tstring const& RootDir0
 				? WinSTL::findfile_sequence_t::files
 				: WinSTL::findfile_sequence_t::files | WinSTL::findfile_sequence_t::directories)
 		);
-	WinSTL::findfile_sequence_t::const_iterator p = f.begin();
-	while (p != f.end())
-	{
-		tstring full_filename = Utils::CombinePath(RootDir0, (*p).get_filename(), SLASH_DIRS);
+	BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
+		tstring full_filename = Utils::CombinePath(RootDir0, t.get_filename(), SLASH_DIRS);
 		list.push_back(full_filename);
-		++p;
-	} //while
+	}
 }
 
 void  nf::SearchPathsPolices::
@@ -300,12 +297,8 @@ CSearchFarPolice::SearchSubdir(tstring const& RootDir
 				? WinSTL::findfile_sequence_t::files
 				: WinSTL::findfile_sequence_t::files | WinSTL::findfile_sequence_t::directories)
  	);
-	WinSTL::findfile_sequence_t::const_iterator p = f.begin();
-	while (p != f.end())
-	{
-		tstring file_name = (*p).get_filename();
-//		tstring t1 = convert_from_OEM_to_ANSI(file_name);
-//		tstring t2 = convert_from_OEM_to_ANSI(Name);
+	BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
+		tstring file_name = t.get_filename();
 		if (nf::Parser::IsTokenMatchedToPatternOEM(file_name, Name, false)
 			|| (file_name == Name)	//прямое сравнение на случай, если в пути используются квадратные скобки
 			)
@@ -313,7 +306,6 @@ CSearchFarPolice::SearchSubdir(tstring const& RootDir
 			tstring full_filename = tstring(RootDir) + tstring(SLASH_DIRS) + file_name;
 			list.push_back(full_filename);
 		};
-		++p;
-	} //while
+	} 
 
 }

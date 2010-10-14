@@ -15,8 +15,7 @@ namespace nf
 //выполнить команду (все команды кроме открытия панели)
 	bool ExecuteCommand(nf::tparsed_command &cmd);
 
-	namespace Commands
-	{
+	namespace Commands {
 	//открыть в FAR
 		bool OpenShortcut(HANDLE hPlugin
 			, nf::tshortcut_info const& sh
@@ -52,27 +51,15 @@ namespace nf
 		bool AddShortcutForBothPanels(HANDLE hPlugin, nf::tcatalog_info const &cat, tstring const& sh, bool bTemporary, bool bImplicit);
 		bool AddCatalog(HANDLE hPlugin, nf::tcatalog_info const &cat);
 
-
-		std::pair<tstring, tstring>
-		get_implicit_name_and_value(HANDLE hPlugin = INVALID_HANDLE_VALUE
+		tpair_strings get_implicit_name_and_value(HANDLE hPlugin = INVALID_HANDLE_VALUE
 			, bool bGetDataFromActivePanel = true	//с активной или неактивной панели брать данные
 		);
 		bool IsCatalogIsEmpty(nf::tcatalog_info const& cat);
 
 	//класс для удаления одного/нескольких каталогов и/или псевдонимов
-		struct Deleter
-		{
-			Deleter(std::list<nf::tshortcut_info> const& Shortcuts
-				, std::list<nf::tcatalog_info> const& Catalogs
-				, bool bImplicit = false);
-			static int DeleteShortcut(nf::tshortcut_info const&Shortcut, bool bImplicit = false);
-			static int DeleteCatalog(nf::tcatalog_info const&Catalog, bool bImplicit = false);
-
-			int Del();
-		private:
-			std::list<nf::tshortcut_info> const& m_Shortcuts;
-			std::list<nf::tcatalog_info> const& m_Catalogs;
-			bool m_bImplicit;
-		};
+		int DeleteShortcut(nf::tshortcut_info const& Shortcut, bool bImplicit = false);
+		int DeleteCatalog(nf::tcatalog_info const& Catalog, bool bImplicit = false);
+		int DeleteCatalogsAndShortcuts(std::list<nf::tshortcut_info> const& listSh
+			, std::list<nf::tcatalog_info> const& listCatalogs, bool bImplicit);
 	} 
 };

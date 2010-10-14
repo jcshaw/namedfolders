@@ -7,7 +7,9 @@
 #include "StdAfx.h"
 #include <cassert>
 #include <vector>
+#include <list>
 #include <shlwapi.h>
+#include <boost/foreach.hpp>
 
 #include "PanelInfoWrap.h"
 #include "executor.h"
@@ -23,128 +25,122 @@
 #include "far_impl.h"
 
 extern struct PluginStartupInfo g_PluginInfo; 
+using namespace nf;
 
-bool nf::ExecuteCommand(nf::tparsed_command &cmd)
-{
-	CPanelInfoWrap plugin(INVALID_HANDLE_VALUE);
-	nf::tshortcut_info sh;
-	nf::tcatalog_info cat;
+namespace {
+	bool delete_shortcut(nf::tparsed_command &cmd, CPanelInfoWrap &plugin, bool bImplicit) {
+		nf::tshortcut_info sh;
+		if (bImplicit) { //search shortcuts for current NF-catalog, user should select required shortcut
+			if (! nf::Selectors::GetShortcutByPathPattern(plugin
+				, plugin.GetPanelCurDir(true)
+				, cmd
+				, sh)) return false;
+		} else { //ask user to select shortcut
+			if (! nf::Selectors::GetShortcut(plugin, cmd, sh)) return false;
+		}
+		//remove selected shortcut
+		return DR_DELETE == nf::Commands::DeleteShortcut(sh, bImplicit);	
+	}
 
-	const bool bSingleMenuMode_OpenLocalDirectory = CSettings::GetInstance().GetValue(nf::ST_USE_SINGLE_MENU_MODE) != 0;
-
-	switch(cmd.kind) 
-	{
-	case nf::QK_OPEN_SHORTCUT: //cd:
-	case nf::QK_SEARCH_DIRECTORIES_AND_FILES:
-	case nf::QK_SEARCH_FILE:
-		{
-			//что ищем?
-			nf::twhat_to_search_t what_to_search = nf::WTS_DIRECTORIES;
-			switch (cmd.kind)
-			{
-			case nf::QK_SEARCH_FILE: what_to_search = nf::WTS_FILES; break;
-			case nf::QK_SEARCH_DIRECTORIES_AND_FILES: what_to_search = nf::WTS_DIRECTORIES_AND_FILES; break;
-			};
-
-			if (! cmd.local_directory.empty() && bSingleMenuMode_OpenLocalDirectory) {
-				//найти все подходящие псевдонимы, определить для них все пути 
-				//потом дать пользователю выбрать путь (не псевдоним!) и открыть его
-				nf::tshortcuts_list list_all_shortcuts;
-				if (Selectors::GetAllShortcuts(plugin, cmd, list_all_shortcuts)) {
-					return nf::Commands::OpenShortcut(plugin, list_all_shortcuts, cmd.local_directory, true, what_to_search);
-				}
+	bool insert_shortcut(nf::tparsed_command &cmd, CPanelInfoWrap &plugin, bool bImplicit, bool bTemporary) {
+		nf::tcatalog_info cat;
+		if (bImplicit) cmd.shortcut = nf::Commands::get_implicit_name_and_value().first;
+		if (cmd.shortcut.empty()) {	//create catalog
+			return nf::Shell::InsertCatalog(cmd.catalog);
+		} else { //select best fitted catalog
+			if (! nf::Selectors::GetCatalog(plugin, cmd, cat)) return false;
+			//add new shortcut to selected catalog
+			if ((nf::QK_INSERT_BOTH == cmd.kind) || (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind)) {
+				return nf::Commands::AddShortcutForBothPanels(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
 			} else {
-				//найти один, наиболее подходящий псевдоним - дать пользователю выбрать среди псевдонимов нужный
-				//затем для только выбранного псевдонима определить все подходящие пути, дать пользователю выбрать путь и т.д.
-				if (nf::Selectors::GetShortcut(plugin, cmd, sh)) {	
-				//открыть путь соответствующий псевдониму
-					return nf::Commands::OpenShortcut(plugin, sh, cmd.local_directory, true, what_to_search);
-				} else return false;
+				return nf::Commands::AddShortcut(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
+			}
+		} //if
+		return false;
+	}
+
+	nf::twhat_to_search_t get_what_to_search(nf::tparsed_command &cmd) {
+		nf::twhat_to_search_t what_to_search = nf::WTS_DIRECTORIES;
+		switch (cmd.kind) {
+		case nf::QK_SEARCH_FILE: what_to_search = nf::WTS_FILES; break;
+		case nf::QK_SEARCH_DIRECTORIES_AND_FILES: what_to_search = nf::WTS_DIRECTORIES_AND_FILES; break;
+		};
+		return what_to_search;
+	}
+
+	bool open_shortcut( nf::tparsed_command &cmd, CPanelInfoWrap& plugin, nf::twhat_to_search_t whatToSearch) {
+		nf::tshortcut_info sh;
+		if (! cmd.local_directory.empty() && CSettings::GetInstance().GetValue(nf::ST_USE_SINGLE_MENU_MODE) != 0) {
+			//find all fitted shortcuts, find all paths form them 
+			//give possibility to user select path (not shortcut) and open it
+			nf::tshortcuts_list list_all_shortcuts;
+			if (Selectors::GetAllShortcuts(plugin, cmd, list_all_shortcuts)) {
+				return nf::Commands::OpenShortcut(plugin, list_all_shortcuts, cmd.local_directory, true, whatToSearch);
+			}
+		} else {
+			//find single best fitted shortcut (user selects required shortcut from the list)
+			//then find all paths for selected shortcut, give user possibility to select path, etc
+			if (nf::Selectors::GetShortcut(plugin, cmd, sh)) {
+				return nf::Commands::OpenShortcut(plugin, sh, cmd.local_directory, true, whatToSearch);
 			} 
-		} break;
-	case nf::QK_OPEN_BY_PATH:	//cd:~ 
-		//найти наиболее подходящий псевдоним
+		} 
+		return false;
+	}
+
+	bool open_by_path(CPanelInfoWrap &plugin, nf::tparsed_command &cmd) {
+		nf::tshortcut_info sh; //find most fitted shortcut 
 		if (! nf::Selectors::GetShortcutByPathPattern(plugin
 			, plugin.GetPanelCurDir(true)
 			, cmd
 			, sh)) return false;
-		//открыть путь соответствующий псевдониму
+		//open directory that is corresponded to selected shortcut
 		return nf::Commands::OpenShortcut(plugin, sh, cmd.local_directory);
-		break;
+	}
+
+	bool delete_catalog(CPanelInfoWrap plugin, nf::tparsed_command & cmd) {
+		nf::tcatalog_info cat;		
+		if (! nf::Selectors::GetCatalog(plugin, cmd, cat)) return false;
+		return DR_DELETE == nf::Commands::DeleteCatalog(cat);
+	}
+
+}
+
+bool nf::ExecuteCommand(nf::tparsed_command &cmd)
+{
+	CPanelInfoWrap plugin(INVALID_HANDLE_VALUE);
+
+	switch(cmd.kind) {
+	case nf::QK_OPEN_SHORTCUT: //cd:
+	case nf::QK_SEARCH_DIRECTORIES_AND_FILES:
+	case nf::QK_SEARCH_FILE: 
+		return open_shortcut(cmd, plugin, get_what_to_search(cmd));
+	case nf::QK_OPEN_BY_PATH:	//cd:~ 
+		return open_by_path(plugin, cmd);
 	case nf::QK_OPEN_ENVIRONMENT_VARIABLE: //cd:%
 		return nf::Selectors::OpenEnvVar(plugin, cmd.shortcut, cmd.param);
 	case nf::QK_OPEN_NETWORK:	/*cd:\\*/
-		break;
+		return false; //!TODO: check
 	case nf::QK_INSERT_SHORTCUT:	//cd::
 	case nf::QK_INSERT_BOTH:				//cd:::
 	case nf::QK_INSERT_SHORTCUT_IMPLICIT: //cd::
 	case nf::QK_INSERT_BOTH_TEMPORARY:	//cd:+:
 	case nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT: //cd:+
 	case nf::QK_INSERT_SHORTCUT_TEMPORARY: //cd:+
-		{
-			bool bTemporary = ((nf::QK_INSERT_SHORTCUT_TEMPORARY == cmd.kind) 
-							|| (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind)
-							|| (nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT == cmd.kind));
-			bool bImplicit =  ((nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT == cmd.kind) 
-							|| (nf::QK_INSERT_SHORTCUT_IMPLICIT == cmd.kind));
-
-			if (bImplicit) 
-				cmd.shortcut = nf::Commands::get_implicit_name_and_value().first;
-
-			if (cmd.shortcut.empty())
-			{	//создать каталог
-				Shell::InsertCatalog(cmd.catalog);
-
-			} else {
-				//найти наиболее подходящий каталог
-				if (! nf::Selectors::GetCatalog(plugin, cmd, cat)) 
-				{
-					return false;
-				}
-
-				//добавить новый псевдоним в выбранный каталог
-				if ((nf::QK_INSERT_BOTH == cmd.kind) || (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind))
-					return nf::Commands::AddShortcutForBothPanels(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
-				else 
-					return nf::Commands::AddShortcut(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
-			} //if
-		} break;
-
-	case nf::QK_DELETE_SHORTCUT_IMPLICIT:
-	case nf::QK_DELETE_SHORTCUT:	//cD:-
-		{
-			bool bImplicit = nf::QK_DELETE_SHORTCUT_IMPLICIT == cmd.kind;
-			
-			if (bImplicit)
-			{
-				//найти псевдонимы для текущего каталога
-				//пользователь должен выбрать наилучший..
-				//cmd.shortcut = get_implicit_name();	
-				//!TODO: проверить 
-				if (! nf::Selectors::GetShortcutByPathPattern(plugin
-					, plugin.GetPanelCurDir(true)
-					, cmd
-					, sh)) return false;
-			
-			} else 
-			{
-				//найти наиболее подходящий псевдоним
-				if (! nf::Selectors::GetShortcut(plugin, cmd, sh)) 
-					return false;
-			}
-
-			//удалить псевдоним
-			return DR_DELETE == nf::Commands::Deleter::DeleteShortcut(sh, nf::QK_DELETE_SHORTCUT_IMPLICIT == cmd.kind);	
-		} break;
+		return insert_shortcut(cmd, plugin 
+			, ((nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT == cmd.kind)  //implicit
+				|| (nf::QK_INSERT_SHORTCUT_IMPLICIT == cmd.kind))
+			, ((nf::QK_INSERT_SHORTCUT_TEMPORARY == cmd.kind)   //temporary
+				|| (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind)
+				|| (nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT == cmd.kind))
+		);
+	case nf::QK_DELETE_SHORTCUT_IMPLICIT: //cd:-
+		return delete_shortcut(cmd, plugin, true);
+	case nf::QK_DELETE_SHORTCUT:	//cD:-alias
+		return delete_shortcut(cmd, plugin, false);
 	case nf::QK_DELETE_CATALOG:	//cD:-
-		//найти наиболее подходящий каталог
-		if (! nf::Selectors::GetCatalog(plugin, cmd, cat)) return false;
-		//удалить каталог
-		return DR_DELETE == nf::Commands::Deleter::DeleteCatalog(cat);
-		break;
+		return delete_catalog(plugin, cmd);
 	case nf::QK_START_SOFT_SHORTCUT:
 		return Start::OpenSoftShortcut(plugin, cmd);
-		break;
 	default:;
 	}
 	return false;
@@ -185,10 +181,8 @@ inline void select_panel(CPanelInfoWrap &plugin, nf::tshortcut_value_parsed_pair
 
 //////////////////////////////////////////////////////////////////////////
 // Open shortcut
-namespace 
-{
-	tstring get_shortcut_value_ex(CPanelInfoWrap &Plugin, nf::tshortcut_info const& SrcSh)
-	{
+namespace {
+	tstring get_shortcut_value_ex(CPanelInfoWrap &Plugin, nf::tshortcut_info const& SrcSh) {
 		tstring dest_value;
 		if (nf::Shell::GetShortcutValue(SrcSh, dest_value)) return dest_value;
 		
@@ -264,22 +258,18 @@ bool nf::Commands::OpenShortcut(HANDLE hPlugin
 								, nf::twhat_to_search_t WhatToSearch)
 {	//открыть один из возможных псевдонимов
 	//учесть локальные пути, сразу показать список всех возможных директорий (а не псевдонимов, затем директорий)
-
 	CPanelInfoWrap plugin(hPlugin);
 	//получаем значения для каждого из алиасов
-	std::list<std::pair<tstring, tstring> > list_alias_path;
-	for (nf::tshortcuts_list::const_iterator p = SrcList.begin(); p != SrcList.end(); ++p)
-	{
-		tstring value = get_shortcut_value_ex(plugin, *p);
-		if (! value.empty())
-		{
+	std::list<tpair_strings> list_alias_path;
+	BOOST_FOREACH(nf::tshortcut_info const& kvp, SrcList) { 
+		tstring value = get_shortcut_value_ex(plugin, kvp);
+		if (! value.empty()) {
 			nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(value);	
 		//если две директории - помещаем в список обе
-			::append_paths(hPlugin, *p, vp.first, LocalPath, WhatToSearch, list_alias_path);
-			::append_paths(hPlugin, *p, vp.second, LocalPath, WhatToSearch, list_alias_path);
+			::append_paths(hPlugin, kvp, vp.first, LocalPath, WhatToSearch, list_alias_path);
+			::append_paths(hPlugin, kvp, vp.second, LocalPath, WhatToSearch, list_alias_path);
 		}
 	}
-
 	//предлагаем пользователю выбрать требуемый путь
 	return ::SelectAndOpenPathOnPanel(hPlugin, list_alias_path, WhatToSearch);
 }
@@ -315,7 +305,7 @@ void nf::Commands::OpenPathInExplorer(tstring const& s)
 	tstring path = tstring(L"explorer \"") + s + L"\"";
 
 	nf::tautobuffer_char sv(path.size() + 1);
-	::lstrcpy(&sv[0], path.c_str());
+	::lstrcpyW(&sv[0], path.c_str());
 
 	STARTUPINFO si;
 	memset(&si, 0, sizeof(STARTUPINFO));
@@ -340,18 +330,15 @@ bool nf::Commands::AddShortcut(HANDLE hPlugin
 							   ,tstring const& Value
 							   , bool bImplicit)
 {
-	if (sh.shortcut.empty()) return false;	//name of shortcut is absent
+	if (sh.shortcut.empty()) return false;
 
-	//проверить не существует ли уже точно такой псевдоним
+	//check if exactly same shortcut already exists 
 	sc::CCatalog c(sh.catalog);
+	if (bImplicit) if (! nf::Confirmations::AskForImplicitInsert(hPlugin, sh, Value)) return false;
 	tstring v;
-	if (bImplicit)
-		if (! nf::Confirmations::AskForImplicitInsert(hPlugin, sh, Value)) return false;
-	if (c.GetShortcutInfo(sh.shortcut, sh.bIsTemporary, v))
-	{
+	if (c.GetShortcutInfo(sh.shortcut, sh.bIsTemporary, v)) {
 		if (! nf::Confirmations::AskForOverride(hPlugin, sh, v)) return false;
 	}
-
 	return Shell::InsertShortcut(sh, Value, true) != 0;
 }
 
@@ -362,16 +349,9 @@ bool nf::Commands::AddShortcut(HANDLE hPlugin
 							   , bool bImplicit)
 {
 	if (sh.empty()) return false;	//name of shortcut is absent
-
-	nf::tshortcut_info info;
-	info.catalog = cat;
-	info.shortcut = sh;
-	info.bIsTemporary = bTemporary;
-
-	CPanelInfoWrap plugin(hPlugin);
-	tstring cur_dir = plugin.GetPanelCurDir(true);
-
-	return nf::Commands::AddShortcut(hPlugin, info, cur_dir.c_str(), bImplicit);
+	return nf::Commands::AddShortcut(hPlugin, nf::MakeShortcut(cat, sh, bTemporary)
+		, CPanelInfoWrap(hPlugin).GetPanelCurDir(true).c_str()
+		, bImplicit);
 }
 
 bool nf::Commands::AddShortcutForBothPanels(HANDLE hPlugin
@@ -380,34 +360,24 @@ bool nf::Commands::AddShortcutForBothPanels(HANDLE hPlugin
 											, bool bTemporary
 											, bool bImplicit)
 {
-	if (sh.empty()) return false;	//name of shortcut is absent
+	if (sh.empty()) return false;	
 
 	CPanelInfoWrap plugin(hPlugin);
-	tstring cur_dir1 = plugin.GetPanelCurDir(true);
-	tstring cur_dir2 = plugin.GetPanelCurDir(false);
-
-	tstring value = nf::EncodeValues(cur_dir1, cur_dir2);
-
-	nf::tshortcut_info info;
-	info.catalog = cat;
-	info.shortcut = sh;
-	info.bIsTemporary = bTemporary;
-
-	return nf::Commands::AddShortcut(hPlugin, info, value.c_str(), bImplicit);
+	return nf::Commands::AddShortcut(hPlugin
+		, nf::MakeShortcut(cat, sh, bTemporary)
+		, nf::EncodeValues(plugin.GetPanelCurDir(true), plugin.GetPanelCurDir(false)).c_str()
+		, bImplicit);
 }
 
 //////////////////////////////////////////////////////////////////////////
 // misc
-bool nf::Commands::IsCatalogIsEmpty(nf::tcatalog_info const& cat)
-{
+bool nf::Commands::IsCatalogIsEmpty(nf::tcatalog_info const& cat) {
 	sc::CCatalog c(cat);
 	return (0 == c.GetNumberSubcatalogs()) && (0 == c.GetNumberShortcuts());
 }
 
-std::pair<tstring, tstring>
-nf::Commands::get_implicit_name_and_value(HANDLE hPlugin, bool bGetDataFromActivePanel)
-{
-	std::pair<tstring, tstring> result;
+tpair_strings nf::Commands::get_implicit_name_and_value(HANDLE hPlugin, bool bGetDataFromActivePanel) {
+	tpair_strings result;
 	CPanelInfoWrap plugin(hPlugin);
 	result.second = plugin.GetPanelCurDir(bGetDataFromActivePanel);
 	result.first = ::PathFindFileName(result.second.c_str());
@@ -443,107 +413,62 @@ nf::Commands::get_implicit_name_and_value(HANDLE hPlugin, bool bGetDataFromActiv
 	return result;
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Deleter
-
-nf::Commands::Deleter::Deleter(std::list<nf::tshortcut_info> const& Shortcuts
-							   , std::list<nf::tcatalog_info> const& Catalogs
-							   , bool bImplicit)
-							   : m_Shortcuts(Shortcuts)
-							   , m_Catalogs(Catalogs)
-							   , m_bImplicit(bImplicit)
-{
-
+int nf::Commands::DeleteShortcut(nf::tshortcut_info const& srcSh, bool bImplicit) {
+	std::list<nf::tshortcut_info> shortcuts;
+	shortcuts.push_back(srcSh);
+	return DeleteCatalogsAndShortcuts(shortcuts, std::list<nf::tcatalog_info>(), bImplicit);
 }
 
-int nf::Commands::Deleter::DeleteShortcut(nf::tshortcut_info const&Shortcut, bool bImplicit)
-{
-	std::list<nf::tshortcut_info>  Shortcuts;
-	std::list<nf::tcatalog_info>  Catalogs;
-	Shortcuts.push_back(Shortcut);
-	return Deleter(Shortcuts, Catalogs, bImplicit).Del();
+int nf::Commands::DeleteCatalog(nf::tcatalog_info const& srcCatalog, bool bImplicit) {
+	std::list<nf::tcatalog_info> catalogs;
+	catalogs.push_back(srcCatalog);
+	return DeleteCatalogsAndShortcuts(std::list<nf::tshortcut_info>(), catalogs, bImplicit);
 }
 
-int nf::Commands::Deleter::DeleteCatalog(nf::tcatalog_info const&Catalog, bool bImplicit)
-{
-	std::list<nf::tshortcut_info>  Shortcuts;
-	std::list<nf::tcatalog_info>  Catalogs;
-	Catalogs.push_back(Catalog);
-	return Deleter(Shortcuts, Catalogs, bImplicit).Del();
-}
+int nf::Commands::DeleteCatalogsAndShortcuts(std::list<nf::tshortcut_info> const& listSh
+											 , std::list<nf::tcatalog_info> const& listCatalogs
+											 , bool bImplicit)
+{	//delete selected catalogs and shortcuts; ask confirmations from user (if they are turned on in settings)
+	//return total count of deleted shortcuts and catalogs
+	using namespace nf::Confirmations;
+	int count_deleted = 0;	//total count of deleted catalogs and shortcuts
 
-int nf::Commands::Deleter::Del()
-{	//удалить выбранные каталоги и псевдонимы
-	//запросить необходимые подтверждения у пользователя (если они включены в настройках)
-	//возвращаем количество удаленных каталогов и псевдонимов
-
-	bool bConfirmDelete = CSettings::GetInstance().GetValue(nf::ST_CONFIRM_DELETE) != 0;
 	bool bConfirmImplicit = CSettings::GetInstance().GetValue(nf::ST_CONFIRM_IMPLICIT_DELETION) != 0;	
 	bool bConfirmNotEmpty = CSettings::GetInstance().GetValue(nf::ST_CONFIRM_DELETE_NOT_EMPTY_CATALOGS) != 0;
+	bool bConfirmDelete = CSettings::GetInstance().GetValue(nf::ST_CONFIRM_DELETE) != 0 || (bConfirmImplicit && bImplicit); 
+	bool bSeveral = (listSh.size() + listCatalogs.size()) > 1;
 
-	bConfirmDelete = bConfirmDelete || (bConfirmImplicit && m_bImplicit); 
-
-	bool bSeveral = (m_Shortcuts.size() + m_Catalogs.size()) > 1;
-
-	using namespace nf::Confirmations;
-
-	int count_deleted = 0;	//сколько всего удалено каталогов и псевдонимов
-
-	//удаляем каталоги
-	std::list<nf::tcatalog_info>::const_iterator pc = m_Catalogs.begin();
-	while (pc != m_Catalogs.end())
-	{
-		bool bDelete = true;
-		if (bConfirmDelete)
-		{
-			switch (nf::Confirmations::AskForDelete(*pc, false, bSeveral))
-			{
+	//delete catalogs
+	BOOST_FOREACH(nf::tcatalog_info const& t, listCatalogs) {
+		if (bConfirmDelete) {
+			switch (nf::Confirmations::AskForDelete(t, false, bSeveral)) {
 			case R_DELETEALL: bConfirmDelete = false; break;
 			case R_CANCEL: return count_deleted;
-			case R_SKIP: bDelete = false;
+			case R_SKIP: continue;
 			}
 		}
-		if (bConfirmNotEmpty)
-		{
-			if (! nf::Commands::IsCatalogIsEmpty(*pc))
-			{	//каталог пуст
-				switch (nf::Confirmations::AskForDelete(*pc, true, bSeveral))
-				{
-				case R_DELETEALL: bConfirmNotEmpty = false; break;
-				case R_CANCEL: return count_deleted;
-				case R_SKIP: bDelete = false;
-				}
+		if (bConfirmNotEmpty && (! nf::Commands::IsCatalogIsEmpty(t))) {	
+			switch (nf::Confirmations::AskForDelete(t, true, bSeveral)) {
+			case R_DELETEALL: bConfirmNotEmpty = false; break;
+			case R_CANCEL: return count_deleted;
+			case R_SKIP: continue;
 			}
 		}
-		if (bDelete)
-		{
-			Shell::DeleteCatalog(*pc);
-			++count_deleted;
-		}
-
-		++pc;
+		Shell::DeleteCatalog(t);
+		++count_deleted;
 	}
 
-	std::list<nf::tshortcut_info>::const_iterator psh = m_Shortcuts.begin();
-	while (psh != m_Shortcuts.end())
-	{
-		bool bDelete = true;
-		if (bConfirmDelete)
-		{
-			switch (nf::Confirmations::AskForDelete(*psh, bSeveral))
-			{
+	//delete shortcuts
+	BOOST_FOREACH(nf::tshortcut_info const& sh, listSh) {
+		if (bConfirmDelete) {
+			switch (nf::Confirmations::AskForDelete(sh, bSeveral)) {
 			case R_DELETEALL: bConfirmDelete = false; break;
 			case R_CANCEL: return count_deleted;
-			case R_SKIP: bDelete = false;
+			case R_SKIP: continue;
 			}
 		}
-		if (bDelete)
-		{
-			Shell::DeleteShortcut(*psh);
-			++count_deleted;
-		}
-		++psh;
-	}
-	
+		Shell::DeleteShortcut(sh);
+		++count_deleted;
+	}	
 	return count_deleted;
 }

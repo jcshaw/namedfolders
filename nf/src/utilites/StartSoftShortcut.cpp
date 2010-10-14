@@ -9,6 +9,7 @@
 #include "startsoftshortcut.h"
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
 #include <ShlObj.h>  
 #include <shellapi.h>
 #include <comdef.h>
@@ -98,17 +99,13 @@ void CStartSoftShortcut::load_data()
 void CStartSoftShortcut::load_sub_catalogs(tstring const& RelatedPathOem)
 {
 	tstring RootPath = Utils::CombinePath(m_RootPathOem, RelatedPathOem, SLASH_DIRS);
-	WinSTL::findfile_sequence_t f(RootPath.c_str(), L"*.*", 
-		WinSTL::findfile_sequence_t::directories);
-	WinSTL::findfile_sequence_t::const_iterator p = f.begin();
-	while (p != f.end())
-	{
-		tstring dir_name = Utils::CombinePath(RelatedPathOem, (*p).get_filename(), SLASH_DIRS);
+	WinSTL::findfile_sequence_t f(RootPath.c_str(), L"*.*", WinSTL::findfile_sequence_t::directories);
+	BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
+		tstring dir_name = Utils::CombinePath(RelatedPathOem, t.get_filename(), SLASH_DIRS);
 		tstring dir_nameInt = dir_name;
 		if (is_dir_matched_to_pattern(dir_nameInt)) load_shortcuts(dir_name);
 		load_sub_catalogs(dir_name);
-		++p;
-	} //while
+	}
 }
 
 void CStartSoftShortcut::load_shortcuts(tstring const& RelatedPathOem)
@@ -116,38 +113,31 @@ void CStartSoftShortcut::load_shortcuts(tstring const& RelatedPathOem)
 	tstring RootPathOem = Utils::CombinePath(m_RootPathOem, RelatedPathOem, SLASH_DIRS);
 	WinSTL::findfile_sequence_t f(RootPathOem.c_str(), L"*.*", 
 		WinSTL::findfile_sequence_t::files);
-	WinSTL::findfile_sequence_t::const_iterator p = f.begin();
-	while (p != f.end())
-	{
+	BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
 		nf::tshortcut_info sh;
-		sh.shortcut = (*p).get_filename();
-		if (is_matched_to_pattern(sh.shortcut))
-		{
+		sh.shortcut = t.get_filename();
+		if (is_matched_to_pattern(sh.shortcut)) {
 			sh.catalog = RelatedPathOem;
 			sh.bIsTemporary = static_cast<bool>(m_bTemporaryValue != 0);
 			assert(static_cast<int>(sh.bIsTemporary) == m_bTemporaryValue);	
 				//!TODO: индексы больше 1 не должны потер€тьс€...
 			m_Data.push_back(sh);
 		}
-		++p;
 	} //while
 }
 
 namespace
 {
-	class minimizer
-	{
+	class minimizer {
 		tstring m_Folder;
 	public:
 		minimizer(tstring const &Folder) : m_Folder(Folder) {}
 
-		bool is_catalog_not_started_from(nf::tshortcut_info const &src)
-		{
+		bool is_catalog_not_started_from(nf::tshortcut_info const &src) {
 			std::size_t pos = src.catalog.find(m_Folder, 0);
 			return (pos == tstring::npos) || (pos != 0);
 		}
-		nf::tshortcut_info remove_start_substring(nf::tshortcut_info const &src)
-		{
+		nf::tshortcut_info remove_start_substring(nf::tshortcut_info const &src) {
 			nf::tshortcut_info sh = src;
 			assert(sh.catalog.size() >= m_Folder.size());
 			sh.catalog.erase(0, m_Folder.size());
@@ -215,20 +205,17 @@ namespace
 		//получаем путь к каталогу StartMenu дл€ всех пользователей и дл€ текущего пользовател€
 		wchar_t buffer[MAX_PATH];
 		int ncount_dirs = 0;
-		if (SHGetSpecialFolderPath(0, &buffer[0], CSIDL_STARTMENU, FALSE))
-		{
+		if (SHGetSpecialFolderPath(0, &buffer[0], CSIDL_STARTMENU, FALSE)) {
 			Paths.push_back(buffer);
 			ncount_dirs++;
 		}
 
-		if (SHGetSpecialFolderPath(0, &buffer[0], CSIDL_COMMON_STARTMENU, FALSE))
-		{
+		if (SHGetSpecialFolderPath(0, &buffer[0], CSIDL_COMMON_STARTMENU, FALSE)) {
 			Paths.push_back(buffer);
 			ncount_dirs++;
 		}
 
-		if (!ncount_dirs) 
-		{
+		if (!ncount_dirs)  {
 			// ¬ win9x под VMWare почему то не срабатывают функции SHGetSpecialFolderPath
 			// на вс€кий случай обходим через одно место 
 			//!TODO
@@ -351,7 +338,7 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin
 // 						value = 0;
 // 					}
 // 
-  					MessageBox(0, boost::lexical_cast<tstring>(value).c_str(), L"1", MB_OK);
+//  					MessageBox(0, boost::lexical_cast<tstring>(value).c_str(), L"1", MB_OK);
 // 					MessageBox(0, path.c_str(), L"path2", MB_OK);
 // 					MessageBox(0, params.c_str(), L"params2", MB_OK);
 				}

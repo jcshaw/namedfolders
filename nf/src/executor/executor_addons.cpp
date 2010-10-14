@@ -277,10 +277,8 @@ bool nf::Selectors::GetShortcutByPathPattern(HANDLE hPlugin
 			return false;
 		} 
 		int nCodeRet = Menu::SelectShortcut(list, sh);
-		if (nCodeRet == -1)
-		{
-			//удалить выбраный псевдоним..
-			nf::Commands::Deleter::DeleteShortcut(sh, false);
+		if (nCodeRet == -1) { //удалить выбраный псевдоним..
+			nf::Commands::DeleteShortcut(sh, false);
 			continue;
 		} else return nCodeRet != 0;
 	}; //while

@@ -113,20 +113,18 @@ bool nf::Parser::ParseString(tstring const &source,
 }
 
 bool nf::Parser::GetCommandKind(tstring const& source
-							, nf::tcommands_kinds &kind
-							, tstring &prefix
-							, tstring &csdp)
+								, nf::tcommands_kinds &kind
+								, tstring &prefix
+								, tstring &csdp)
 {
-	for (int i = 0; i < re::NUM_COMMANDS; ++i)
-	{
+	for (int i = 0; i < re::NUM_COMMANDS; ++i) {
 		tstring rexp(re::RE_PREFIX);
 		rexp += re::LIST_RE[i];	
 
 		nf::tregex expression(rexp.c_str());
 		
 		nf::tsmatch what;
-		if (boost::regex_match(source, what, expression))
-		{
+		if (boost::regex_match(source, what, expression)) {
 			prefix = what[1];
 			csdp = what[3];
 			kind = re::LIST_COMMANDS[i];

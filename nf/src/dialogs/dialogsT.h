@@ -163,7 +163,9 @@ namespace nf {
 			return fdi.PtrData;
 		}
 		bool IsDialogItemSelected(int dialogItemId) {
-			return GetDialogItemsRef()[dialogItemId].Selected != 0;
+			assert(m_DialogHandle != 0);
+			return g_PluginInfo.SendDlgMessage(m_DialogHandle, DM_GETCHECK, dialogItemId, 0) == BSTATE_CHECKED;
+			//return GetDialogItemsRef()[dialogItemId].Selected != 0;
 		}
 	private:
 		static LONG_PTR WINAPI dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {

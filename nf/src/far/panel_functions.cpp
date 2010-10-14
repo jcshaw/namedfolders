@@ -35,9 +35,8 @@ namespace nf {
 			PluginPanelItem *ppi = allocate_PluginPanelItem(pPanel, FCTL_GETSELECTEDPANELITEM, 0);
 			ScopeGuard sc_ppf_release = MakeGuard(&deallocate_PluginPanelItem, ppi);
 
-			sh.bIsTemporary = ppi->FindData.dwFileAttributes && FILE_ATTRIBUTE_TEMPORARY;
-			sh.catalog = pPanel->GetCurrentCatalog();
-			sh.shortcut = ppi->FindData.lpwszFileName;
+			sh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FindData.lpwszFileName
+				, ppi->FindData.dwFileAttributes && FILE_ATTRIBUTE_TEMPORARY);
 		}
 	}
 }
@@ -126,8 +125,7 @@ bool nf::Panel::EditShortcut(CPanel* pPanel, nf::tshortcut_info const &shortcut_
 	nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(value);
 
 	nf::CDialogEditShortcut dlg(sh, vp.first.value, vp.second.value, false);
-	if (dlg.ShowModal())
-	{
+	if (dlg.ShowModal()) {
 		CPanelUpdater pu(pPanel, pi.CurrentItem);
 		nf::tshortcut_info const& sh2 = dlg.GetShortcutInfo();
 		tstring value2 = nf::EncodeValues(dlg.GetValueForActivePanel(), dlg.GetValueForInActivePanel());
@@ -239,7 +237,7 @@ void nf::Panel::DeleteSelectedCatalogsAndShortcuts(CPanel *pPanel, PanelInfo con
 		}
 	}
 	//удаляем их и, если хотя бы один из них был удален, обновляем панель
-	if (nf::Commands::Deleter(list_sh, list_c, false).Del()) pu.UpdateActivePanel(); 
+	if (nf::Commands::DeleteCatalogsAndShortcuts(list_sh, list_c, false)) pu.UpdateActivePanel(); 
 }
 
 void nf::Panel::UpdateCursorPositionOnFarPanel(CPanel *pPanel, PanelInfo const& pi) {

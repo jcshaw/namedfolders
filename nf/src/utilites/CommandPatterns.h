@@ -42,8 +42,7 @@ public:
 // Для шаблона задается: префикс + список значений переменных (через точку с запятой)
 // Например: $Name=$Prefix;$Catalog=abc;$Command=--f 
 /************************************************************************/
-class CommandPatterns
-{
+class CommandPatterns {
 	typedef std::map<tstring, tstring, Utils::CmpStringLessCI> tmap;	//prefix - patterns
 	tmap m_PP;
 public:

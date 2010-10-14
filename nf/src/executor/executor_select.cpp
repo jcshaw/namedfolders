@@ -125,7 +125,7 @@ bool nf::Selectors::GetShortcut(HANDLE hPlugin
 		if (bExpand) {
 			int n = Menu::SelectShortcut(list, DestSh);
 			if (n == -1) {	//удалить выбраный псевдоним..
-				nf::Commands::Deleter::DeleteShortcut(DestSh, false);
+				nf::Commands::DeleteShortcut(DestSh, false);
 			} else return n > 0;
 		} else {
 			if (!list.empty()) {

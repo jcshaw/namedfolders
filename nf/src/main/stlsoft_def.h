@@ -20,23 +20,28 @@
 #include <winstl/filesystem/findvolume_sequence.hpp>
 #pragma warning(default: 4267 4290)
 
-namespace WinSTL
-{
-// объ€вл€ем типы winstl дл€ wchar_t
-#ifdef UNICODE
+namespace WinSTL {
 	typedef winstl::findfile_sequence_w findfile_sequence_t;
 	typedef winstl::findvolume_sequence_w findvolume_sequence_t;
 	typedef winstl::reg_key_sequence_w reg_key_sequence_t;
 	typedef winstl::reg_key_w reg_key_t;
 	typedef winstl::reg_value_sequence_w  reg_value_sequence_t;
 	typedef winstl::reg_value_w reg_value_t;
-#else
-	typedef winstl::findfile_sequence_a findfile_sequence_t;
-	typedef winstl::findvolume_sequence_a findvolume_sequence_t;
-	typedef winstl::reg_key_sequence_a reg_key_sequence_t;
-	typedef winstl::reg_key_a reg_key_t;
-	typedef winstl::reg_value_sequence_a  reg_value_sequence_t;
-	typedef winstl::reg_value_a reg_value_t;
-#endif
+}
+
+#include <boost/foreach.hpp>
+namespace boost { 
+	//possibility to use BOOST_FOREACH with WinSTL::findfile_sequence_t
+	//WinSTL::findfile_sequence_t doesn't contain "iterator"
+	// specialize range_mutable_iterator and range_const_iterator in namespace boost
+	template<>
+	struct range_mutable_iterator<WinSTL::findfile_sequence_t> {
+		typedef WinSTL::findfile_sequence_t::const_iterator type;
+	};
+// 
+// 	template<>
+// 	struct range_const_iterator<WinSTL::findfile_sequence_t> {
+// 		typedef WinSTL::findfile_sequence_t::const_iterator type;
+// 	};
 }
 
