@@ -71,23 +71,20 @@ namespace nf {
 		, VAL_REGISTRY_KEY			//ссылка на ключ реестра; переменные в этом ключе содержат пути, из которых нужно произвести выбор
 	} _tshortcutvalue_type;
 
-	typedef struct tshortcut_value_parsed
-	{
+	typedef struct tshortcut_value_parsed {
 		bool bValueEnabled;
 		tshortcutvalue_type ValueType;
 		tstring value;
 	} _tshortcut_value_parsed;
 	typedef std::pair<tshortcut_value_parsed, tshortcut_value_parsed> tshortcut_value_parsed_pair;
 
-	enum twhat_to_search_t
-	{
+	enum twhat_to_search_t {
 		WTS_DIRECTORIES = 1
 		, WTS_FILES = 2
 		, WTS_DIRECTORIES_AND_FILES = 3
 	};
 
-	typedef enum tcommand_flags 
-	{
+	typedef enum tcommand_flags {
 		FGC_ENABLED_SHORTCUT = 0x1			//название €рлычка указано
 		,FGC_ENABLED_LOCAL_DIRECTORY = 0x2	//дальнейший путь указан (только при OPEN)
 		,FGC_ENABLED_PARAM = 0x4			//указаны один или несколько параметров
@@ -95,8 +92,7 @@ namespace nf {
 		,FGC_ENABLED_PREFIX = 0x20			//указан префикс
 	} _tcommand_flags;
 
-	typedef enum tcommands_kinds 
-	{	
+	typedef enum tcommands_kinds {	
 		QK_OPEN_SHORTCUT				//cd:
 		,QK_INSERT_SHORTCUT				//cd::путь
 		,QK_INSERT_SHORTCUT_TEMPORARY	//cd:+

@@ -178,18 +178,12 @@ inline void select_panel(CPanelInfoWrap &plugin, nf::tshortcut_value_parsed_pair
 	if (bReverseValues) std::swap(Values.first, Values.second);
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-// Open shortcut
 namespace {
 	tstring get_shortcut_value_ex(CPanelInfoWrap &Plugin, nf::tshortcut_info const& SrcSh) {
 		tstring dest_value;
 		if (nf::Shell::GetShortcutValue(SrcSh, dest_value)) return dest_value;
-		
-		//возможно это псевдоалиасы - cd:path (полный путь или точка)		
-		if (SrcSh.shortcut == L".") return Plugin.GetPanelCurDir(true);
-		else if (::PathFileExists(SrcSh.shortcut.c_str())) return SrcSh.shortcut;
-
+		if (SrcSh.shortcut == L".") return Plugin.GetPanelCurDir(true); //pseudo-alias "."
+		if (::PathFileExists(SrcSh.shortcut.c_str())) return SrcSh.shortcut; //pseudo-alias "full path"
 		return L"";
 	}
 
@@ -198,57 +192,32 @@ namespace {
 		, nf::tshortcut_value_parsed SrcParsed
 		, tstring const &LocalPath0
 		, nf::twhat_to_search_t WhatToSearch
-		, std::list<std::pair<tstring, tstring> > &DestList)
+		, std::list<tpair_strings> &DestList)
 	{
-		tstring LocalPath = LocalPath0;
-//!TODO: рефакторинг
-//удаляем ТОЛЬКО ОДИН лидирующий слеш
-		if (LocalPath.size() > 1 && LocalPath[0] == L'\\') LocalPath.erase(LocalPath.begin());
-//		Utils::RemoveLeadingCharsOnPlace(LocalPath, _T('\\'));
-		if (SrcParsed.bValueEnabled)
-		{
+		tstring local_path = LocalPath0;		
+		if (! local_path.empty()) { //remove only one and only one leading slash
+			if (*local_path.begin() == L'\\') local_path.erase(local_path.begin());
+		}
+		if (SrcParsed.bValueEnabled) {
 			std::list<tstring> list;
-			switch (SrcParsed.ValueType)
-			{
+			switch (SrcParsed.ValueType) {
 			case nf::VAL_ENVIRONMENT_VARIABLE: nf::Selectors::GetAllPathForEnvvar(hPlugin, SrcParsed.value, list); break;
-			case nf::VAL_REGISTRY_KEY: nf::Selectors::GetAllPathForRegKey(hPlugin, SrcParsed.value
-										, LocalPath //передать сюда только первый токен LocalPath, для этих директорий LocalPath учитывать без первого токена
-										, list); break;
+			case nf::VAL_REGISTRY_KEY: 
+				nf::Selectors::GetAllPathForRegKey(hPlugin, SrcParsed.value
+					, local_path //!TODO: передать сюда только первый токен LocalPath, для этих директорий LocalPath учитывать без первого токена
+					, list); break;
 			case nf::VAL_DIRECT_PATH: list.push_back(SrcParsed.value); break;
 			case nf::VAL_TYPE_NET_DIRECTORY:;	//! TODO: пока не поддерживается
-			default: //определяем всевозможные директории для локального пути
-				//!TODO: LocalPath нужно учесть потом, для всех сразу
+			default: //find all possible directories for local path
 				nf::Selectors::GetPath(hPlugin, SrcParsed.value
-					, LocalPath
+					, local_path
 					, WhatToSearch, list);
-			} //switch
-			//!TODO: учесть LocalPath
-			for (std::list<tstring>::const_iterator p = list.begin(); p != list.end(); ++p)
-			{
-				DestList.push_back(std::make_pair(SrcSh.shortcut, *p));
+			} 			
+			BOOST_FOREACH(tstring const& path, list) {
+				DestList.push_back(std::make_pair(SrcSh.shortcut, path));
 			}
 		}
 	}
-}
-
-bool nf::Commands::OpenShortcut(HANDLE hPlugin
-								, nf::tshortcut_info const& sh
-								, tstring const &LocalPath
-								, bool bOpenOnActivePanel
-								, nf::twhat_to_search_t WhatToSearch)
-{	//открыть один псевдоним
-	CPanelInfoWrap plugin(hPlugin);
-	tstring value = get_shortcut_value_ex(plugin, sh);
-
-	nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(value);
-	select_panel(plugin, vp, bOpenOnActivePanel);
-
-	bool bOpenBoth = vp.first.bValueEnabled && vp.second.bValueEnabled;
-	if (vp.second.bValueEnabled) ::OpenShortcutOnPanel(hPlugin, vp.second, LocalPath, false, bOpenBoth, false, WhatToSearch);
-	if (vp.first.bValueEnabled) ::OpenShortcutOnPanel(hPlugin, vp.first, LocalPath, true, bOpenBoth
-		, (hPlugin != INVALID_HANDLE_VALUE), WhatToSearch);
-
-	return true;
 }
 
 bool nf::Commands::OpenShortcut(HANDLE hPlugin
@@ -275,7 +244,6 @@ bool nf::Commands::OpenShortcut(HANDLE hPlugin
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
 bool nf::Commands::OpenPath(HANDLE hPlugin, tstring const& path)
 {	//открыть заданную директорию на активной панели
 	nf::tshortcut_value_parsed ap;		//active panel
@@ -287,22 +255,17 @@ bool nf::Commands::OpenPath(HANDLE hPlugin, tstring const& path)
 	return true;
 }
 
-bool nf::Commands::OpenShortcutInExplorer(HANDLE hPlugin
-										  , nf::tshortcut_info const& sh
-										  , tstring const &path)
-{
+bool nf::Commands::OpenShortcutInExplorer(HANDLE hPlugin, nf::tshortcut_info const& sh, tstring const &path) {
 	tstring value;
 	Shell::GetShortcutValue(sh, value);
 	nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(value);
 	if (vp.first.bValueEnabled) nf::Commands::OpenPathInExplorer(vp.first.value);
 	if (vp.second.bValueEnabled) nf::Commands::OpenPathInExplorer(vp.second.value);
-
 	return TRUE;
 }
 
-void nf::Commands::OpenPathInExplorer(tstring const& s)
-{
-	tstring path = tstring(L"explorer \"") + s + L"\"";
+void nf::Commands::OpenPathInExplorer(tstring const& srcPath) {
+	tstring path = tstring(L"explorer \"") + srcPath + L"\"";
 
 	nf::tautobuffer_char sv(path.size() + 1);
 	::lstrcpyW(&sv[0], path.c_str());
@@ -314,10 +277,7 @@ void nf::Commands::OpenPathInExplorer(tstring const& s)
 	::CreateProcess(0, &sv[0], NULL, NULL, 0, 0, NULL, 0, &si, &pi);
 }
 
-//////////////////////////////////////////////////////////////////////////
-// add
-bool nf::Commands::AddCatalog(HANDLE hPlugin, nf::tcatalog_info const &cat)
-{
+bool nf::Commands::AddCatalog(HANDLE hPlugin, nf::tcatalog_info const &cat) {
 	tstring parent;
 	tstring c;
 	Utils::DividePathFilename(cat, parent, c, SLASH_CATS_CHAR, false);
@@ -325,52 +285,35 @@ bool nf::Commands::AddCatalog(HANDLE hPlugin, nf::tcatalog_info const &cat)
 	return Shell::InsertCatalog(c.c_str(), parent.c_str());
 }
 
-bool nf::Commands::AddShortcut(HANDLE hPlugin
-							   , nf::tshortcut_info const &sh
-							   ,tstring const& Value
-							   , bool bImplicit)
-{
+bool nf::Commands::AddShortcut(HANDLE hPlugin, nf::tshortcut_info const &sh, tstring const& srcValue, bool bImplicit) {
 	if (sh.shortcut.empty()) return false;
 
 	//check if exactly same shortcut already exists 
 	sc::CCatalog c(sh.catalog);
-	if (bImplicit) if (! nf::Confirmations::AskForImplicitInsert(hPlugin, sh, Value)) return false;
+	if (bImplicit) if (! nf::Confirmations::AskForImplicitInsert(hPlugin, sh, srcValue)) return false;
 	tstring v;
 	if (c.GetShortcutInfo(sh.shortcut, sh.bIsTemporary, v)) {
 		if (! nf::Confirmations::AskForOverride(hPlugin, sh, v)) return false;
 	}
-	return Shell::InsertShortcut(sh, Value, true) != 0;
+	return Shell::InsertShortcut(sh, srcValue, true) != 0;
 }
 
-bool nf::Commands::AddShortcut(HANDLE hPlugin
-							   , nf::tcatalog_info const &cat
-							   , tstring const& sh
-							   , bool bTemporary
-							   , bool bImplicit)
-{
+bool nf::Commands::AddShortcut(HANDLE hPlugin, nf::tcatalog_info const &cat, tstring const& sh, bool bTemp, bool bImplicit) {
 	if (sh.empty()) return false;	//name of shortcut is absent
-	return nf::Commands::AddShortcut(hPlugin, nf::MakeShortcut(cat, sh, bTemporary)
+	return nf::Commands::AddShortcut(hPlugin, nf::MakeShortcut(cat, sh, bTemp)
 		, CPanelInfoWrap(hPlugin).GetPanelCurDir(true).c_str()
 		, bImplicit);
 }
 
-bool nf::Commands::AddShortcutForBothPanels(HANDLE hPlugin
-											, nf::tcatalog_info const &cat
-											, tstring const& sh
-											, bool bTemporary
-											, bool bImplicit)
-{
+bool nf::Commands::AddShortcutForBothPanels(HANDLE hPlugin, nf::tcatalog_info const &cat, tstring const& sh, bool bTemp, bool bImplicit) {
 	if (sh.empty()) return false;	
-
 	CPanelInfoWrap plugin(hPlugin);
 	return nf::Commands::AddShortcut(hPlugin
-		, nf::MakeShortcut(cat, sh, bTemporary)
+		, nf::MakeShortcut(cat, sh, bTemp)
 		, nf::EncodeValues(plugin.GetPanelCurDir(true), plugin.GetPanelCurDir(false)).c_str()
 		, bImplicit);
 }
 
-//////////////////////////////////////////////////////////////////////////
-// misc
 bool nf::Commands::IsCatalogIsEmpty(nf::tcatalog_info const& cat) {
 	sc::CCatalog c(cat);
 	return (0 == c.GetNumberSubcatalogs()) && (0 == c.GetNumberShortcuts());
@@ -384,8 +327,7 @@ tpair_strings nf::Commands::get_implicit_name_and_value(HANDLE hPlugin, bool bGe
 	tstring &s = result.first;
 
 	tstring::iterator ps = s.begin();
-	while (ps != s.end())
-	{ //first char shouldn't be command characther - skip if it is one.
+	while (ps != s.end()) { //first char mustn't be command character - skip if it is one.
 		switch(*ps) {
 		case L'%':
 //		case L'&':
@@ -400,7 +342,7 @@ tpair_strings nf::Commands::get_implicit_name_and_value(HANDLE hPlugin, bool bGe
 		break;
 	}
 
-	//other characters should't be & (FAR) and %, | (NF) 
+	//other characters shouldn't be & (FAR) and %, | (NF) 
 	while (ps != s.end()) {
 		switch(*ps) {
 		case L'%':

@@ -10,24 +10,25 @@
 #include "codec_for_values.h"
 #include "PanelInfoWrap.h"
 
-namespace nf 
-{
-//выполнить команду (все команды кроме открытия панели)
-	bool ExecuteCommand(nf::tparsed_command &cmd);
+namespace nf {
+	bool ExecuteCommand(nf::tparsed_command &cmd); //execute command (all commands except opening panel);
 
 	namespace Commands {
-	//открыть в FAR
-		bool OpenShortcut(HANDLE hPlugin
-			, nf::tshortcut_info const& sh
-			, tstring const &path
-			, bool bOpenOnActivePanel = true
-			, nf::twhat_to_search_t WhatToSearch = nf::WTS_DIRECTORIES);	//!TODO: remove
-
 		bool OpenShortcut(HANDLE hPlugin
 			, nf::tshortcuts_list const& SrcList
 			, tstring const &path
 			, bool bOpenOnActivePanel = true
 			, nf::twhat_to_search_t WhatToSearch = nf::WTS_DIRECTORIES);
+		inline bool OpenShortcut(HANDLE hPlugin
+			, nf::tshortcut_info const& sh
+			, tstring const &path
+			, bool bOpenOnActivePanel = true
+			, nf::twhat_to_search_t WhatToSearch = nf::WTS_DIRECTORIES) 
+		{
+			nf::tshortcuts_list list;
+			list.push_back(sh);
+			return OpenShortcut(hPlugin, list, path, bOpenOnActivePanel, WhatToSearch);
+		}
 
 		bool OpenShortcutInExplorer(HANDLE hPlugin
 			, nf::tshortcut_info const& sh

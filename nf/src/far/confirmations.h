@@ -13,54 +13,46 @@
 #include "lang.h"
 
 namespace nf {
-//запросить подтверждение операции у пользователя
-//возвращаемые значения: 
-//		0 - отменить операцию
-//		1 - подтверждение отменено пользователем в настройках
-//		2 - пользователь явно подтвердил операцию
-	namespace Confirmations
-	{
+//ask user to confirm operation
+//possible return values:
+//		0 - cancel operation
+//		1 - confirmation is canceled in settings
+//		2 - user has confirmed the operation
+	namespace Confirmations {
 		typedef enum tconfirm_delete_result {R_DELETE, R_DELETEALL, R_SKIP, R_CANCEL};
 
 		UINT AskForOverride(HANDLE hPlugin, nf::tshortcut_info const&cmd, tstring const& value);
 		UINT AskForImplicitInsert(HANDLE hPlugin, nf::tshortcut_info const&cmd, tstring const& value);
-		UINT AskToGoToNearest(HANDLE hPlugin
-			, wchar_t const* OriginalDirectory
-			, wchar_t const* NearestDirectory);
+		UINT AskToGoToNearest(HANDLE hPlugin, tstring const& srcDir, tstring const& nearestDir);
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-//предупреждения об удалении псевдонима или каталога или нескольких псевдонимов и каталогов
-		namespace Private
-		{	//private на нужен чтобы реализовать inline
+//confirmation to delete shortcut(s)/catalog(s)
+		namespace Private {
 			nf::Confirmations::tconfirm_delete_result
 				ask_for_delete_general(tstring const& Title, int Msg0, int Msg1, bool bSeveral);
-		} //Private
-
-		inline tconfirm_delete_result AskForDelete(nf::tshortcut_info const& sh, bool bSeveral)
-		{	//удаление псевдонимов
+		}
+//shortcuts
+		inline tconfirm_delete_result AskForDelete(nf::tshortcut_info const& sh, bool bSeveral) {
 			return Private::ask_for_delete_general(sh.shortcut
 				, lg::MSG_DELETE_SHORTCUT
 				, lg::CONFIRM_DELETE_SHORTCUT
 				, bSeveral);
 		}
-		
+//catalogs		
 		inline tconfirm_delete_result AskForDelete(nf::tcatalog_info const& cat
-			, bool bNotEmptyCatalogConfirmation //нужно предупредить, что удаляется не пустой каталог
-			, bool bSeveral)	//каталог удаляется вместе с другими каталогами и/или псевдонимами
-		{	//удаление каталогов
+			, bool bNotEmptyCatalogConfirmation //ask confirmation for deletion if catalog is not empty
+			, bool bSeveral)	//delete catalog with other catalogs/shortcuts
+		{	
 			return Private::ask_for_delete_general(cat
 				, bNotEmptyCatalogConfirmation ? lg::MSG_DELETE_CATALOG_NOT_EMPTY : lg::MSG_DELETE_CATALOG
 				, lg::CONFIRM_DELETE_CATALOG
 				, bSeveral);
 		}
-
-		inline tconfirm_delete_result AskForDelete(tstring const& Item)	
-		{	//общий случай - удаление элемента
+//general case: any items
+		inline tconfirm_delete_result AskForDelete(tstring const& Item)	 {	
 			return Private::ask_for_delete_general(Item
 				, lg::MSG_DELETE
 				, lg::CONFIRM_DELETE
 				, false);
 		}
-
-	} //Confirmations
+	} 
 };

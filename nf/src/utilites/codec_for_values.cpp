@@ -21,21 +21,18 @@ namespace
 
 
 //заменить спецсимволы экранированными значени€ми 
-	inline tstring get_screened(tstring s)
-	{		
+	inline tstring get_screened(tstring s) {		
 		return Utils::ReplaceStringAll(s, STR_AMP, STR_AMP_SCREENED);
 	};
 //заменить экранированные символы спец символами
-	inline tstring get_unscreened(tstring s)
-	{
+	inline tstring get_unscreened(tstring s) {
 		return Utils::ReplaceStringAll(s, STR_AMP_SCREENED, STR_AMP); //!TODO: UT
 	}
 
 	nf::tshortcutvalue_type get_value_type(tstring const& value)
 	{	//определ€ем по префиксу тип именованной директории
 		if (! value.size()) return nf::VAL_TYPE_LOCAL_DIRECTORY;
-		if (value.size() > 2)
-		{
+		if (value.size() > 2) {
 			switch(value[0]) {
 			case L'\\':
 				if (value[1] == SLASH_DIRS_CHAR) return nf::VAL_TYPE_NET_DIRECTORY;
@@ -48,8 +45,7 @@ namespace
 		};
 
 		tstring::size_type npos = value.find_first_of(L':');
-		if (npos != tstring::npos &&  npos > 1) 
-		{
+		if (npos != tstring::npos &&  npos > 1) {
 			if (*value.begin() != L'[')	//метасимвол дл€ имени диска... //!TODO: все ли учтено?
 				return nf::VAL_TYPE_PLUGIN_DIRECTORY;
 		}
@@ -61,24 +57,19 @@ namespace
 tstring nf::EncodeValues(tstring const& FirstPanelValue, tstring const& SecondPanelValue)
 {
 	if (SecondPanelValue.empty()) return get_screened(FirstPanelValue);
-	return get_screened(FirstPanelValue) + tstring(DEVCHAR) + get_screened(SecondPanelValue);
+	return get_screened(FirstPanelValue) + DEVCHAR + get_screened(SecondPanelValue);
 }
 
-//декодировать значение €рлыка
-tshortcut_value_parsed_pair nf::DecodeValues(tstring const& Value)
-{
+tshortcut_value_parsed_pair nf::DecodeValues(tstring const& Value) {
 	tshortcut_value_parsed_pair result;
 	size_t n = Value.find(DEVCHAR);
-	if (n == tstring::npos) n = Value.find(DEVCHAR_DEPRECATED);	
-		//пока поддерживам псевдонимы созданные в версии 2.0 beta 1
-	if (n == tstring::npos)
-	{
+	if (n == tstring::npos) n = Value.find(DEVCHAR_DEPRECATED);	 //support of shortcuts created in 2.0 beta 1.
+	if (n == tstring::npos) { 
 		result.first.bValueEnabled = true;
 		result.first.value = get_unscreened(Value);
 		result.first.ValueType = get_value_type(Value);
 		result.second.bValueEnabled = false;
-	} else 
-	{
+	} else {
 		tstring v2 = get_unscreened(Value);
 		result.first.bValueEnabled = true;
 		result.first.value.assign(v2.c_str(), 0, n);

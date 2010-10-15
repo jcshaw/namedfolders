@@ -14,19 +14,19 @@
 /************************************************************************/
 #include "strings_utils.h"
 
-namespace nf
-{
-	namespace SearchPathsPolices
-	{
-
-		struct CSearchPolice
-		{
+namespace nf {
+	//поиск директорий ведется системными функциям
+	//системные функции позволяют задать маску поиска с использованием метасимволов * и ?
+	//если требуется поддержка дополнительного метасимвола [], объявленного в FAR
+	//необходимо вначале найти все директории, затем проверить их совпадение с шаблоном средствами FAR
+	//в итоге два варианта поиска для класса CSearcherPaths задаются в Search
+	namespace Search {
+		struct CSearchPolice {
 			CSearchPolice(twhat_to_search_t WhatToSearch) :  m_WhatToSearch(WhatToSearch) {}
 		//выполнить поиск поддиректории по заданному шаблону имени директории
-			virtual void  SearchSubdir(tstring const& RootDir
-				, tstring const& Name
-				, std::list<tstring> &list) const = 0;
-			twhat_to_search_t GetWhatToSearch() const {return m_WhatToSearch;}
+			virtual void  SearchSubdir(tstring const& RootDir, tstring const& Name, std::list<tstring> &list) const = 0;
+			twhat_to_search_t GetWhatToSearch() const {
+				return m_WhatToSearch; }
 		private:
 			twhat_to_search_t m_WhatToSearch;
 		};
@@ -36,39 +36,17 @@ namespace nf
 			//все найденные имена автоматически считаются совпавшими с шаблоном
 		public:
 			CSearchSystemPolice(twhat_to_search_t WhatToSearch) : CSearchPolice(WhatToSearch) {}
-			virtual void SearchSubdir(tstring const& RootDir
-				, tstring const& Name
-				, std::list<tstring> &list) const;
+			virtual void SearchSubdir(tstring const& RootDir, tstring const& Name, std::list<tstring> &list) const;
 		};
 
 		class CSearchFarPolice : public CSearchPolice
 		{	//находим все директорий, а затем проверяем совпадение имен с шаблоном
 			//средствами Far
 		public:
-			CSearchFarPolice(twhat_to_search_t WhatToSearch) 
-				: CSearchPolice(WhatToSearch) {}
-			virtual void SearchSubdir(tstring const& RootDir
-				, tstring const& Name
-				, std::list<tstring> &list) const;
+			CSearchFarPolice(twhat_to_search_t WhatToSearch) : CSearchPolice(WhatToSearch) {}
+			virtual void SearchSubdir(tstring const& RootDir, tstring const& Name, std::list<tstring> &list) const;
 		};
-	};
 
-	//поиск директорий ведется системными функциям
-	//системные функции позволяют задать маску поиска с использованием метасимволов * и ?
-	//если требуется поддержка дополнительного метасимвола [], объявленного в FAR
-	//необходимо вначале найти все директории, затем проверить их совпадение с шаблоном средствами FAR
-	//в итоге два варианта поиска для класса CSearcherPaths задаются в SearchPathsPolices
-	class CSearcherPaths {	
-	public:
-		typedef std::list<tstring> tlist;
-
-		CSearcherPaths(tlist& Results
-			, SearchPathsPolices::CSearchPolice &sp
-			, twhat_to_search_t WhatToSearch = WTS_DIRECTORIES) 
-			: m_Results(Results)
-			, m_Sp(sp)
-			, m_WhatToSearch(WhatToSearch)
-		{}
 		// поиск директории, вложенной в текущую, по шаблону {[\dir]|[\\dir]|[\\\dir]|..}+
 		// вариант поиска имени в текущей директории определяется кол-вом слешей.
 		// "\dir"  - поиск dir только в текущей директории
@@ -76,38 +54,21 @@ namespace nf
 		// "\\\dir" и т.д.
 		//? "\*\dir" - поиск имени dir во всех вложенных директориях
 		//? ".dir" - переход dir начиная с директории на один уровень выше, "..dir" на два уровня выше и т.д.
-		inline bool SearchByPattern(wchar_t const* PatternOEM, tstring const &RootDirOEM)
-		{
-				tstring RootDirANSI = RootDirOEM;
-				tstring PatternANSI = PatternOEM;
-				return SearchByPatternOEM(PatternANSI.c_str(), RootDirANSI);
-		}
+		bool SearchByPattern(tstring const& srcPattern, tstring const &rootDir, Search::CSearchPolice &searchPolice, std::list<tstring>& dest);
 
 		//найти все директории, удовлетворяющие паттерну
 		//PathPattern должен содержать полный локальный путь вида
 		//C:\path1\path2\...\pathN
 		//причем C - любая одна буква или один из метасимволов ?, * или [a-z]
 		//В токенах pathXXX могут встречаться метасимволы ?, * или [a,b-z]
-		inline bool SearchMatched(tstring PathPatternOEM)
-		{
-			tstring PatternANSI = PathPatternOEM;
-			return SearchMatchedOEM(PatternANSI);
+		bool SearchMatched(tstring const& PathPattern, Search::CSearchPolice &searchPolice, std::list<tstring>& dest);
+
+		namespace Private {
+			wchar_t const* extract_name(wchar_t const* srcPattern, tstring &destName, int &destLevel);
+			bool search_multisubdir(tstring const& RootDir, tstring const& Name, int level
+				, Search::CSearchPolice &searchPolice
+				, std::list<tstring> &dest);
 		}
-
-	private: //operations
-		inline void insert_result(tstring const& srcDir) {
-			m_Results.push_back(srcDir);
-		}
-		bool search_multisubdir(wchar_t const* RootDir, wchar_t const* Name, int level, tlist &list);
-		wchar_t const* extract_name(wchar_t const* Pattern, tstring &Name, int &Level);
-
-		bool SearchByPatternOEM(wchar_t const* Pattern, tstring const &RootDir);
-		bool SearchMatchedOEM(tstring PathPattern);
-
-	private: //members
-		tlist& m_Results;
-		SearchPathsPolices::CSearchPolice const &m_Sp;
-		twhat_to_search_t m_WhatToSearch;
-	}; //CSearcherPaths
+	}
 
 };//nf

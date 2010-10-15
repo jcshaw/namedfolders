@@ -7,14 +7,13 @@
 #pragma once
 #include "header.h"
 
-//кодирование/декодирование значений псевдонимов
-namespace nf 
-{
-//закодировать два значения (для обоих панелей) в одну строку
+//encode/decode values of shortcuts
+namespace nf {
+//encode two shortcut values (for both paneles) to single string
 	tstring EncodeValues(tstring const& ValueFirstPanel
 		, tstring const& ValueSecondPanel);
 
-//декодировать значение псевдонима, определить типы директорий для каждой из панелей
+//decode value of shortcut, determine type of directory for each panel
 	tshortcut_value_parsed_pair DecodeValues(tstring const& Value);
 
 }

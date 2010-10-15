@@ -1,0 +1,374 @@
+.Language=English,English
+.PluginContents=Named Folders
+@Contents
+$^#Plugin for FAR "Named Folders".#
+$^#Version 2.5.2 beta, August 2006#
+$^#Copyright (c) 2002-2006 by Victor Derevyanko#
+.
+  Program-Plugin #Named Folders# for #Far#.
+
+  #Named Folders# is a tool for fast jumping to 
+~net, local or emulated folders~@NamedFolderPaths@. You
+can give short name for any folder then use this name to open this
+folder in the active Far panel.
+  You can use command "cd: soft" to fast launch programs from Start Menu.
+
+  This plugin can be used through 
+~command line~@HowUseComandLine@ or 
+~virtual panel~@HowUsePanel@.
+
+  Don't hesitate to send me, 
+~author~@Author@ of this plugin, 
+your suggestions, comments and questions.
+
+  I want to express my thanks to Eugene Roshal and Far Group - for FAR. 
+Brilliant program!
+
+  ~Command patterns~@Patterns@ - short notations for frequently used commands.
+
+  ~Settings~@Settings@ - settings of the plugin.
+
+  ~reg-files~@Reg@  - description of registry files.
+
+
+@NamedFolderPaths
+$^#Named folders paths#
+
+
+  You can specify named folder explicitly (local path, network path) or implicitly
+(local path with metacharacters, environment variable, registry key). Implicit form
+forces the plugin to search proper directories and to show to user all appropriated 
+variants through ~menu of variants~@MenuSelect@.
+
+  #Variants of named folders paths#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  #Local path# - path to local folders should be specified as "c:\path1\path2".
+  It's possible to use in these paths metacharacters of FAR (?, *, [a, b-z]). Scope "*" is not spreaded to
+subfolders (* is not matched to slash). So, you should specify explicitly the depth of searching by
+number of slashes. I.e. #c:\a# - search "a" in folders directly embedded in "c:\". 
+#c:\\a# - search "a" in theses folders and in their direct subfolders. And so on.
+  You can use "." instead of "\" to make search in reverse direction (in parent folders).
+  You can use "\*\" and "\," to search in all subfolders and all parent folders correspondingly.
+
+  #Network paths# - "\\Computer\path1\path2".
+
+  #Environment variable# - "%path%".  In the case of such path, the plugin will show all
+exists directories, specified in the environment variable with name "path" (through semicolons).
+
+  #Registy key# - "$HKEY_LOCAL_MACHINE\\Software...".  Such path will force the plugin to find all
+variables in the specified registry key and show to user all exists paths specified in these variables.
+See ~sample~@Reg@.
+
+@HowUseComandLine
+$^#How use plugin through command line#
+  #General commands syntax#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  In the general case the command of plugin is writting as
+  #cd:[command][catalog/][name][\path]# 
+
+  #[catalog/]# - virtual catalog of the plugin;
+  #[name]# - shortcut of named folder;
+  #[\path]# - path related from the named folder.
+
+  In the most cases, it's possible to use #*# and #?# in this names.
+
+  #Opening shortcut#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  #cd:name# - open on the active FAR panel the named folder for shortcut #name#. 
+  #cd:catalog/name# - the same, but the plugin will search #name# in the catalog #catalog# 
+and its subcatalogs only.
+  #cd:name\path# - after opening #name# open related path #path#.
+  #cd:~~text# - find all shortcuts which named folders paths contain #text#.
+  #cd:path# - open specified path. Path must be absolute local path and may contains metacharacters.
+You can use ".RelativePath" to search "RelativePath" relatively current directory.
+
+  #Search files#
+  #~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  #cd:--f sh\path# - search all files matched "path" in named folder corresponded to alias "sh". Open directory which
+contains selected file.
+  #cd:--df sh\path# - search all files and subdirectories matched "path" in named folder corresponded to alias "sh". 
+Open selected subdirectory or subdirectory which contains selected file.
+  The distributive of the plugin contains files "cdf.reg" and "cf.reg" to set command patterns for
+these commands.
+
+  #Creation of catalogs and shortcuts#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  #cd::name# - create constant shortcut in the root catalog;
+  #cd::catalog/name# - create constant shortcut in the #catalog#;
+  #cd:+name# - create temporary shortcut (it will be deleted automatically after rebooting);
+  #cd:::name# - create single shortcut for two directories (opened on active and inactive FAR panels);
+  #cd::+name# - the same, but shortcut will be temporary;
+  #cd::#, #cd:::#, #cd:+#, #cd::+# - create shortcut with the name equal to the name of currently opened directory.
+  #cd::catalog/# - create catalog.
+
+  #Deleting catalogs and shortcuts#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  #cd:-name# - delete shortcut;
+  #cd:-catalog/name# - delete shortcut from specified catalog;
+  #cd:-# - delete shortcut for currently opened directory or its subdirectories;
+  #cd:-catalog/# - delete catalog.
+
+  #Opening of the plugin panel#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  #cd:# - open virtual panel;
+  #cd:catalog/# - open virtual panel and jump to the specified catalog; 
+
+  #Execute program from #Start# menu#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  #cd: soft# - search shortcuts in Start Menu with names matched to "*soft*" and show list of them.
+Press Enter to execute program, Shift-Enter to open program's path in Far, Ctrl-Enter to open
+program's path in Explorer. It's possible to set in the ~settings~@Settings@ dialog list of masks for shortcuts that should be skipped.
+You can use parameters: #cd: soft params#
+
+  #Additional method to execute plugin command#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  It's possible to execute any command through "Command execution dialog".
+
+@Settings
+$^#Settings#
+
+  #Always show all variants# - if this flag is on, then the plugin shows list of all available variants  
+even if exact match is available (last one will be on the top of the list).  Otherwise, the
+plugin automatically selects exact match.
+
+
+  #Confirmations#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+	#Delete# - confirm deletion of any shortcut/catalog.
+
+	#Always show all variants# - show menu of variants always, event if only single variant was found.
+	#Open \\ as net:\\# - open network paths through Network plugin (it can be useful in the case 
+of password protected directories).
+	#Aliases mask expand mode# - specify how to expand masks in the local paths.
+  0 - a -> *a*
+  1 - a -> a*
+  2 - a -> a
+  For example, "cd:x\a\*b\c":
+	0 - *a*\b*\*c*
+  1 - a*\b*\c*
+  2 - a\b*\c
+
+	#Use single menu mode# - specify the behavior of the "cd:a\b" commands. If this flag is set off, 
+the plugin shows two menus: first for aliases "a*' and second for paths, 
+available for the alias, selected by the user in the first menu. 
+If this flag is set on, the plugin shows single menu with all paths 
+available for all aliases. 
+
+	#Subdirectories as aliases# - "cd:a" will search "a" in the list of aliases and in the list of subdirectories of
+the current directory. All subdirectories are displayed in the list of aliases as ".\abc"
+
+	#Panel mode# - Panel of Named Folder in the mode Ctrl+8 uses non-standart settings of the panel - 
+to show additional column with the states of directories. So, you can't set withds of columns for
+this mode through standart FAR-dialog. This option allows to do it. Width settings is written in the 
+form "Types of columns";"With of columns". By default: "N,Z,C0;10,0,5". 
+Please see for detailes ~the documentation of the FAR.~@:PanelViewModes@.
+	
+
+
+@HowUsePanel
+$^#How use virtual file panel "Named folders"#
+
+  You can open this panel through the #Change disk menu#, #Plugins command# menu or by using the command "cd:".
+
+  It's possible to use next keys.
+  #Shift+F4# - create new shortcut; See ~paths~@NamedFolderPaths@ for possible named folders values.
+  #F4# - modify shortcuts properties;
+  #F5# - copy selected shortcuts or/and catalogs;
+  #F6# - move selected shortcuts or/and catalogs;
+  #F7# - create catalog. 
+  #F8# - delete selected shortcuts or/and catalogs;
+  #Enter# - open selected named folder;
+  #Shift+Enter# - open selected named folder in the Windows Explorer;
+  #Ctrl+Enter# - open selected named folder in the inactive FAR panel.
+  #Ctrl+R# - refresh panel.
+  #Ctrl+PgUp# - go to the parent catalog.
+
+  Also it's possible to copy any directory to the plugins panel - shortcut for this 
+directory will be created implicitly.
+
+@DialogExecuteCommand
+
+$^#Execution Command Dialog
+  Execution command dialog is alternative for command line.
+You can use it to execute ~same command as in the command line~@HowUseComandLine@. 
+In comparison with command line this dialog give additional possibilities:
+  - it's not necessary to type prefix #cd:#; 
+  - this dialog supports the commands history (you can switch it on/of in the ~settings~@Settings@)
+  - through dialog you can execute any plugin command at any time. 
+(you can't use #cd:# in command line (beginning at Far 1.70b5) if any virtual panel is opened). 
+	
+  To quick opening #Execution command dialog# use #Ctrl+D# (you should execute #ApplyCommand.reg# to 
+switch on this possibility).
+
+@MenuSelect
+$^#Variants menu#
+	
+ #Variants menu# allows users to select required shortcut from the list, when 
+plugin find several shortcuts matched to users command. 
+
+  In this menu you can use several keys.
+
+  Use #Enter# to choose selected shortcut; 
+  Use #Del# to delete selected shortcut;
+  Use #F2#-#F6# to change display mode.
+  #F2# - display shortcuts only;
+  #F3# - display values of shortcuts only;
+  #F4# - display shortcuts and values;
+  #F5# - display shortcuts and their catalogs;
+  #F6# - display all: catalogs, shortcuts and their values.
+
+  Use #F11# - to switch showing catalogs mode (between normal mode
+and pseudo-treelike one).
+
+  The plugin remembers selected mode.
+
+	You can filter variants in menu. F.e. try to type "abc cde". Then
+menu will show only paths which contains "abc" AND "cde". 
+
+@DialogEditCatalog
+$^#Edit catalog#
+
+!TODO
+
+@DialogEditShortcut
+$^#Edit shortcut#
+
+!TODO
+
+@DialogMove
+$^#Move catalogs and shortcuts#
+
+!TODO
+
+@DialogPatterns
+$^#Edit command patterns#
+
+
+see ~Command patterns~@Patterns@. 
+
+  #Commands in the patterns menu#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+#F4# - edit selecte pattern.
+#Ins# - insert new pattern.
+#Del# - delete pattern.
+#Esc# - exit menu.
+
+
+@Patterns
+$^#Patterns of the commands#
+
+  Patterns allow us to short notations for frequently used commands. Separated prefix is assigned to each pattern.
+When user execute pattern command, the plugin modify text of the command as consistent with the pattern and 
+then execute this modified command.
+
+  #Example of pattern#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  Let's create pattern for command "cd: :soft". We want to make this command more short - "cs:soft".
+Create such pattern:
+  Prefix: "cs:"
+  Pattern: "[command]= ;[name]=:[name]"
+  The plugin will modify any command, executed through "cs:" in accordance with two rules:
+  1) #[command]= #. The command must be always " ".
+  2) #[name]=:[name]# The colon must be added before name of shortcut.
+  So in accord to this pattern all commands like "cs:soft", "cs:+soft", "cs:~~soft" will be 
+translated to "cs: :soft".
+  Tags #command# and #name# in the left parts of equalities are refereed to the parts of the result command.
+Tags in the right parts are refereed to the parts of original command.
+
+  #Parts of command#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+  In the general case, any command of the plugin can be written as:
+  #[Prefix][Command][Catalog][CDelim][Name][PDelim][Path][Params]#
+where:  
+  #Prefix# - prefix, f.e. "cd:"
+  #Command# - command (f.e. ":", "::", "--f",  etc)
+  #Catalog# - catalog (f.e., "catalog")
+  #CDelim# - delimiter between catalog and shortcut (always "/");
+  #Name# - name of shortcut (or name of the program in the command "cd: soft")
+  #PDelim# - delimiter between shortcut and local path (usually "\", but it can be equal to "\\", ".", "\*\" ð etc)
+  #Path# - local path (path related named folder)
+  #Params# - parameters of the command.
+  You can assign in the pattern only one transformation rule to any part of the command. If transformation rule is not
+specified, the part of the command will not be modified.
+
+  #Additional examples.#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+#Direct access to the shortcut#. You can assign prefix to direct access to named folder. 
+Then you can use names of subdirectories of this named folder as shortcuts. 
+ Prefix: ShortuctName
+ Command: [name]=[prefix]\[name]*
+Example: Create shortcut "zp" for directory "z:\projects", then use "zp:prj1", "zp:prj2" to jump to the directory of
+concrete project.
+
+#Direct access to catalog#. You can omit name of catalog - it will be automatically substituted to all commands.
+ Prefix: CatalogName
+ Command: [catalog]=CatalogName
+
+#Search files#. New command --f demonstrates syntax of all future commands of the plugin: --CommandName.
+This is not short commands, so you can use patterns to create short notation for them.
+ Prefix: cf
+ Command: [command]=--f
+See reg file: "cf.reg"
+
+#Remove restrictions for search level#. 
+ Prefix: cg
+ Command: [pdelim]=\*\
+Example: cg:.\b - search "b" in ALL subfolders of the current directory.
+
+#Separated prefix for "cd: soft". Always store current path in the clipboard.
+ Prefix: cs
+ Command: [command]= ;[name]=:[name]
+See reg file: "cs.reg"
+
+#Search in the current directory#. 
+  Prefix: cc
+  Command: [command]=--df ;[name]=.;[path]=[name]
+Examples:
+  cc:abc\\\ -> cc:.\\\abc
+See reg file: "cc.reg"
+
+
+@Author
+$^#Far Named Folders - the plugin for Far Manager.#
+Copyright (c) 2002-2006 by Victor Derevyanko
+
+  This program is FREEWARE.
+   
+  The author is not responsible for any consequences of using
+this product, though in testing he didn't find anything terrible in it.
+
+  Author: Victor Derevyanko
+  Russia, Krasnoyarsk.
+  E-Mail: #wingspan@@yandex.ru#
+  ICQ:    #85829961#
+  #http://www.rammus.ru#
+
+@Reg
+$^#Content of reg-files#
+
+
+ #FastPrefix.reg#: set #:# to "cd:".
+
+ #ApplyCommand.reg#: set hot key #Ctrl+D# for "Command execution dialog"
+
+ #StdPaths.reg#: create two shortcuts "stda" ð "stdu" for system folders
+(for all users and current user correspondingly). This is an example of using Registry Key as the value of named folders.
+
+ #SoftIgnoreMasks.reg#  create in the registry list of mask for shortcuts, tha should be ignored 
+by "cd: soft" (*readme* and *uninstall*).
+ 
+ #Subfolder Patterns# - several convenient ~command patterns.~@Patterns@

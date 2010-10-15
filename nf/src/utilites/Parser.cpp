@@ -80,43 +80,33 @@ namespace re	//регулярные выражения
 using namespace nf;
 using namespace Parser;
 
-bool nf::Parser::ParseString(tstring const &source, 
-						  nf::tparsed_command &t)
+bool nf::Parser::ParseString(tstring const &srcStr, nf::tparsed_command &t)
 {
 	tstring csdp;
 	t.flags = 0;
 
-	if (! GetCommandKind(source, t.kind, t.prefix,  csdp)) return false;
+	if (! GetCommandKind(srcStr, t.kind, t.prefix,  csdp)) return false;
 	if (! t.prefix.empty()) t.flags = t.flags | nf::FGC_ENABLED_PREFIX;
 
-	if (t.kind == nf::QK_START_SOFT_SHORTCUT)
-	{
+	if (t.kind == nf::QK_START_SOFT_SHORTCUT) {
 		nf::tregex expression(re::RE_SOFT);
 		nf::tsmatch what;
-		if (boost::regex_match(csdp, what, expression))
-		{
+		if (boost::regex_match(csdp, what, expression)) {
 			t.catalog = L"";
 			t.local_directory = L"";
 			t.shortcut = what[1] + tstring(L" ") + what[2];
 			t.param = L"";	//!TODO: сейчас параметры сохраняем в shortcut
 		}
-	} else 
-	if (ParseCSDP(csdp, t.catalog, t.shortcut, t.local_directory, t.param))
-	{
+	} else if (ParseCSDP(csdp, t.catalog, t.shortcut, t.local_directory, t.param)) {
 		if (! t.catalog.empty()) t.flags = t.flags | nf::FGC_ENABLED_CATALOG;
 		if (! t.shortcut.empty()) t.flags = t.flags | nf::FGC_ENABLED_SHORTCUT;
 		if (! t.local_directory.empty()) t.flags = t.flags | nf::FGC_ENABLED_LOCAL_DIRECTORY;
 		if (! t.param.empty()) t.flags = t.flags | nf::FGC_ENABLED_PARAM;
 	};
-
 	return true;
 }
 
-bool nf::Parser::GetCommandKind(tstring const& source
-								, nf::tcommands_kinds &kind
-								, tstring &prefix
-								, tstring &csdp)
-{
+bool nf::Parser::GetCommandKind(tstring const& source, nf::tcommands_kinds &kind, tstring &prefix, tstring &csdp) {
 	for (int i = 0; i < re::NUM_COMMANDS; ++i) {
 		tstring rexp(re::RE_PREFIX);
 		rexp += re::LIST_RE[i];	
@@ -131,19 +121,15 @@ bool nf::Parser::GetCommandKind(tstring const& source
 			return true;
 		}
 	}
-
 	return false;
 }
 
-namespace
-{
+namespace {
 	void remove_prefix_from_shortcut(tstring &s)
-	{	//если строка s содержит префикс (\w\w+:), то удаляем его из s
-		//сделано, чтобы исключить случаи cd:cd:
+	{	//если строка s содержит префикс (\w\w+:), то удаляем его из s; сделано, чтобы исключить случаи cd:cd:
 		size_t npos = s.find(L':');
 		if (npos != tstring::npos)
-		if (npos > 1)
-		{
+		if (npos > 1) {
 			s.erase(0, npos+1);
 		}
 	}
@@ -154,8 +140,7 @@ bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &
 {	//разделить каталог/ярлычек\директорию на составляющие
 	tregex expression(re::RE_CSD);
 	tsmatch what;
-	if (boost::regex_match(csdp, what, expression))
-	{
+	if (boost::regex_match(csdp, what, expression)) {
 		c = what[1];
 		s = what[2];
 		remove_prefix_from_shortcut(s);
@@ -168,38 +153,22 @@ bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &
 	return false;
 }
 
-bool nf::Parser::IsTokenMatchedToPattern(tstring const &stoken
-										 , tstring const &spattern
-										 , bool bAddTrailingAsterix)
-{
-	//Функция FAR корректно отрабатывает только с OEM
-	tstring t1 = stoken;
-	tstring t2 = spattern;
-	return IsTokenMatchedToPatternOEM(t1, t2, bAddTrailingAsterix);
-}
-
-bool nf::Parser::IsTokenMatchedToPatternOEM(tstring const& stoken
-										, tstring const &spattern
-										, bool bAddTrailingAsterix)
-{
+bool nf::Parser::IsTokenMatchedToPattern(tstring const& srcToken, tstring const &srcPattern, bool bAddTrailingAsterix) {
 	//	сравнение без учета регистра с учетом метасимволов ? и * (один символ и любое кол-во символов)
 	//	"a*" соответствует "abc" и "a",  "b?" соответствует "ba" и "bc"
-	tstring p = spattern;
 	if (bAddTrailingAsterix) {
-		tstring p = spattern + tstring(L"*");
-		return FarCmpName(p.c_str(), stoken.c_str(), FALSE) != 0;
+		tstring p = srcPattern + tstring(L"*");
+		return FarCmpName(p.c_str(), srcToken.c_str(), FALSE) != 0;
 	} else {
-		return FarCmpName(spattern.c_str(), stoken.c_str(), FALSE) != 0;
+		return FarCmpName(srcPattern.c_str(), srcToken.c_str(), FALSE) != 0;
 	}
 }
 
-bool nf::Parser::IsContainsMetachars(tstring const& sToken)
-{
-	return (boost::regex_search(sToken, tsmatch(), tregex( re::RE_SEARCH_META)));
+bool nf::Parser::ContainsMetachars(tstring const& sToken) {
+	return (boost::regex_search(sToken, tsmatch(), tregex(re::RE_SEARCH_META)));
 }
 
-bool nf::Parser::IsContainsMetachars_InTokensOnly(tstring const& sToken)
-{
+bool nf::Parser::IsContainsMetachars_InTokensOnly(tstring const& sToken) {
 	return (boost::regex_search(sToken, tsmatch(), tregex(re::RE_SEARCH_META_INTOKENS_ONLY)));
 }
 
@@ -208,48 +177,42 @@ bool nf::Parser::IsContainsMetachars_InTokensOnly(tstring const& sToken)
 // распарсить путь в котором указана переменная среды
 // возможные варианты: "VarName", "%VarName", "%VarName%", "%VarName%LocalPath", "VarName%"
 // возвращает true, если название VarName задано не точно (варианты 1, 2)
-bool nf::Parser::ParseEnvVarPath(tstring const& Src
-								 , tstring& VarName
-								 , tstring& LocalPath)
-{
-	LocalPath.clear();
+bool nf::Parser::ParseEnvVarPath(tstring const& srcStr, tstring& varName, tstring& localPath) {
+	localPath.clear();
 	tsmatch what;
-	if (! boost::regex_search(Src, what, tregex(re::RE_EV))) 
-	{
-		VarName = Src;
+	if (! boost::regex_search(srcStr, what, tregex(re::RE_EV))) {
+		varName = srcStr;
 		return false;
 	}
-	VarName = what[1];
-	LocalPath = what[3];
+	varName = what[1];
+	localPath = what[3];
 	return ! tstring(what[2]).empty();
 }
 
-tstring nf::Parser::ExtractPrefix(tstring const &CommandString)
-{
-//можем обойтись без регулярного выражения
-	if (CommandString.empty()) return L"";
+tstring nf::Parser::ExtractPrefix(tstring const &srcCommand) {
+//regexp is not necessary here
+	if (srcCommand.empty()) return L"";
 
-	tstring::const_iterator p = std::find(++CommandString.begin(), CommandString.end(), L':');
-	if (p == CommandString.end()) return L"";
+	tstring::const_iterator p = std::find(++srcCommand.begin(), srcCommand.end(), L':');
+	if (p == srcCommand.end()) return L"";
 
-	return tstring(CommandString.begin(), p + 1);
+	return tstring(srcCommand.begin(), p + 1);
 }
 
-tstring nf::Parser::ConvertToMask(tstring const& SrcStr)
-{	
+tstring nf::Parser::ConvertToMask(tstring const& srcStr) {	
 	//добавляем звездочки только если маска, указанная пользователем, не содержит метасимволов
 	//если у нас маска \a\b*\c то она должна обрабатываться как маска \*a*\b*\*c* 
 	//поэтому обрабатываем a, b*, c по отдельности
 	//правило преобразование маски a -> *a* определяется режимом настроек
-	if (nf::Parser::IsContainsMetachars(SrcStr)) return SrcStr;
+	if (nf::Parser::ContainsMetachars(srcStr)) return srcStr;
 
 	tstring mode = CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE);
 	//1: a -> a*
 	//2: a -> a
 	//0: a -> *a*
 
-	tstring result = SrcStr;
-	if (mode == L"2") return SrcStr;
+	tstring result = srcStr;
+	if (mode == L"2") return srcStr;
 	result.push_back(L'*');	
 	if (mode == L"1") return result;
 

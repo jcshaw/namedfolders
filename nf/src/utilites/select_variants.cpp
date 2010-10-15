@@ -30,7 +30,7 @@ namespace {
 		, tstring const& srcPattern
 		, bool bIsTemporary)
 	{
-		if (nf::Parser::IsTokenMatchedToPatternOEM(sv.GetName(), srcPattern)) {
+		if (nf::Parser::IsTokenMatchedToPattern(sv.GetName(), srcPattern)) {
 			DestList.push_back(nf::MakeShortcut(Catalog, sv.GetName(), bIsTemporary));
 		}
 		return 0;
@@ -103,7 +103,7 @@ namespace {
 			//для виртуальных панелей current_directory может быть пустой
 			if (! current_directory.empty()) {
 				//tstring pattern = nf::Parser::ConvertToMask(ShortcutPatternOEM);
-				tstring pattern = Parser::IsContainsMetachars(shPattern) 
+				tstring pattern = Parser::ContainsMetachars(shPattern) 
 						? shPattern
 						: shPattern + L"*";	//ищем субдиректории как 'b*', а не как '*b*', чтобы исключить лишние срабатывния
 				WinSTL::findfile_sequence_t f(current_directory.c_str()
@@ -169,7 +169,7 @@ namespace
 		BOOST_FOREACH(sc::subcatalogs_sequence::value_type &t, f) {
 			sc::catalogs_sequence_item cv(t);
 			tstring catalog_name = cv.GetName().c_str();
-			if (! nf::Parser::IsTokenMatchedToPatternOEM(catalog_name, smask)) continue;
+			if (! nf::Parser::IsTokenMatchedToPattern(catalog_name, smask)) continue;
 
 			//для каждого найденного совпадения осуществляем рекурсивный поиск для следующих элементов шаблона
 			sc::CCatalog subc(cv, &c);

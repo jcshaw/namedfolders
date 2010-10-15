@@ -39,7 +39,7 @@ namespace {
 		if (! p.bValueEnabled) return 0;
 		if (p.ValueType != nf::VAL_TYPE_LOCAL_DIRECTORY) return 0;
 
-		return 2 << (nf::Parser::IsContainsMetachars(p.value) 
+		return 2 << (nf::Parser::ContainsMetachars(p.value) 
 			? STATE_UNKNOWN
 			: static_cast<ULONG>(::PathFileExists(p.value.c_str()) 
 				? STATE_EXISTS

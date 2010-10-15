@@ -26,14 +26,13 @@ namespace
 {
 	int count_dirs_fp(wchar_t const* dir, wchar_t const* mask)
 	{
-		nf::CSearcherPaths::tlist results;
-		nf::SearchPathsPolices::CSearchFarPolice sfp(nf::WTS_DIRECTORIES);
-		nf::CSearcherPaths sp(results, sfp);
-		sp.SearchByPattern(mask, dir);
+		std::list<tstring> results;
+		nf::Search::CSearchFarPolice sfp(nf::WTS_DIRECTORIES);
+		nf::Search::SearchByPattern(mask, dir, sfp, results);
 		int n = static_cast<int>(results.size());
 
 		std::wcout << mask << std::endl;
-		nf::CSearcherPaths::tlist::const_iterator p = results.begin();
+		std::list<tstring>::const_iterator p = results.begin();
 		while (p != results.end()) 
 		{
 			std::wcout <<*p << std::endl;

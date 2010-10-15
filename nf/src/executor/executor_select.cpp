@@ -32,86 +32,66 @@
 extern struct PluginStartupInfo g_PluginInfo; 
 extern struct FarStandardFunctions g_FSF;
 
-
 using namespace nf;
 
 //найти все пути, подходящие для Value и LocalPath
 //и вернуть их полный список в DestListPaths
 void nf::Selectors::GetPath(HANDLE hPlugin
 							, tstring const &Value
-							, tstring const &LocalPath0
-							, nf::twhat_to_search_t WhatToSearch
-							, std::list<tstring> &DestListPaths)
+							, tstring const &localPath0
+							, nf::twhat_to_search_t whatToSearch
+							, std::list<tstring> &destListPaths)
 {
 	//p может содержать метасимволы
 	//находим все директории, удовлетворяющие panel.value
 
-	//комбинации символов указывающие на поиск неограниченной глубины
-	//заменяем спецсимволами
-	tstring LocalPath = LocalPath0;
-	LocalPath = Utils::ReplaceStringAll(LocalPath, L".*.", DEEP_REVERSE_SEARCH);
-	LocalPath = Utils::ReplaceStringAll(LocalPath, L"\\*\\", DEEP_DIRECT_SEARCH);
-	LocalPath = Utils::ReplaceStringAll(LocalPath, LEVEL_UP_TWO_POINTS, DEEP_UP_DIRECTORY);
+	//комбинации символов указывающие на поиск неограниченной глубины заменяем спецсимволами
+	tstring local_path = localPath0;
+	local_path = Utils::ReplaceStringAll(local_path, L".*.", DEEP_REVERSE_SEARCH);
+	local_path = Utils::ReplaceStringAll(local_path, L"\\*\\", DEEP_DIRECT_SEARCH);
+	local_path = Utils::ReplaceStringAll(local_path, LEVEL_UP_TWO_POINTS, DEEP_UP_DIRECTORY);
 
-
-	if (nf::Parser::IsContainsMetachars(Value))
-	{	//при поиске начальной директории всегда ищем и директории 
-		nf::SearchPathsPolices::CSearchFarPolice ssp(nf::WTS_DIRECTORIES);
-		//		nf::SearchPathsPolices::CSearchSystemPolice ssp(false, false);
-		nf::CSearcherPaths sp(DestListPaths, ssp);
-		sp.SearchMatched(Value);
+	if (nf::Parser::ContainsMetachars(Value)) {	//при поиске начальной директории всегда ищем и директории 
+		nf::Search::CSearchFarPolice ssp(nf::WTS_DIRECTORIES); //nf::Search::CSearchSystemPolice ssp(false, false);
+		nf::Search::SearchMatched(Value, ssp, destListPaths);
 	} else {
-		DestListPaths.push_back(Value);
+		destListPaths.push_back(Value);
 	}
-
-	if (! LocalPath.empty())
-	{	//учитываем локальный путь относительно каждой найденной директории	
+	if (! local_path.empty()) {	//учитываем локальный путь относительно каждой найденной директории	
 		std::list<tstring> list_paths;
-//		LocalPath = Parser::ConvertToMask(LocalPath);
-
-		nf::SearchPathsPolices::CSearchSystemPolice ssp(WhatToSearch);
-		nf::CSearcherPaths sp(list_paths, ssp);
-		std::for_each(DestListPaths.begin(), DestListPaths.end()
-			, boost::bind(&nf::CSearcherPaths::SearchByPattern, &sp, LocalPath.c_str(), _1));
-		DestListPaths.swap(list_paths);
+		nf::Search::CSearchSystemPolice ssp(whatToSearch);
+		BOOST_FOREACH(tstring const& path, destListPaths) {
+			nf::Search::SearchByPattern(local_path.c_str(), path, ssp, list_paths);
+		}
+		destListPaths.swap(list_paths);
 	}
 }
 
-
-bool nf::Selectors::GetPath(HANDLE hPlugin
-							, tstring const &SrcPath
-							, tstring const &LocalPath0
-							, tstring &ResultPath
-							, nf::twhat_to_search_t WhatToSearch)
+bool nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcPath, tstring const &localPath0, tstring &destPath
+							, nf::twhat_to_search_t whatToSearch)
 {
 	//найти все пути, подходящие для Value и LocalPath
 	//дать возможность пользователю выбрать требуемый путь 
 	//и вернуть его в ResultPath
 	std::list<tstring> value_paths;
-	GetPath(hPlugin, SrcPath, LocalPath0, WhatToSearch, value_paths);
+	GetPath(hPlugin, srcPath, localPath0, whatToSearch, value_paths);
 	value_paths.sort();
 	//при игре в \ и .. легко могут появиться множественные варианты одного и того же файла
 	value_paths.unique();
 
 	//меню выбора вариантов
-	if (! value_paths.empty()) return Menu::SelectPath(value_paths, ResultPath) != 0;
-
+	if (! value_paths.empty()) return Menu::SelectPath(value_paths, destPath) != 0;
 	return false;
 };
 
-
 //выбрать наиболее подходящий псевдоним из списка вариантов
 //выбор на основе имени псевдонима
-bool nf::Selectors::GetShortcut(HANDLE hPlugin
-								, nf::tparsed_command const &cmd
-								, nf::tshortcut_info& DestSh)
-{
+bool nf::Selectors::GetShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd, nf::tshortcut_info& DestSh) {
 	//псевдоалиас "."
 	if (cmd.shortcut == L".") {
 		DestSh = nf::MakeShortcut(L"", L".", false);
 		return true;
 	}
-
 	while (true) {
 		nf::tshortcuts_list list;
 		size_t nexact = Shell::SelectShortcuts(cmd.shortcut.c_str(), cmd.catalog.c_str(), list);
@@ -137,27 +117,21 @@ bool nf::Selectors::GetShortcut(HANDLE hPlugin
 	} 
 }
 
-
-bool nf::Selectors::GetAllShortcuts(HANDLE hPlugin
-									, nf::tparsed_command const &cmd
-									, nf::tshortcuts_list& DestList)
-{	//выбрать все подходящие псевдонимы из списка
-	size_t nexact = Shell::SelectShortcuts(cmd.shortcut.c_str(), cmd.catalog.c_str(), DestList);
+bool nf::Selectors::GetAllShortcuts(HANDLE hPlugin, nf::tparsed_command const &cmd, nf::tshortcuts_list& destList) {	
+	//выбрать все подходящие псевдонимы из списка
+	size_t nexact = Shell::SelectShortcuts(cmd.shortcut.c_str(), cmd.catalog.c_str(), destList);
 	if (cmd.shortcut == L".") {	//псевдоалиас "."
-		DestList.push_back(nf::MakeShortcut(L"",  L".", false));
+		destList.push_back(nf::MakeShortcut(L"",  L".", false));
 	}
-	return ! DestList.empty();
+	return ! destList.empty();
 }
 
 //выбрать наиболее подходящий каталог из списка вариантов
-bool nf::Selectors::GetCatalog(HANDLE hPlugin
-							   , nf::tparsed_command const &cmd
-							   , nf::tcatalog_info &DestCatalog)
-{
+bool nf::Selectors::GetCatalog(HANDLE hPlugin, nf::tparsed_command const &cmd, nf::tcatalog_info &destCatalog) {
 	nf::tcatalogs_list list;
 
 	if (cmd.catalog.empty()) {
-		DestCatalog = L"";
+		destCatalog = L"";
 		return true;		//корневой каталог - выбирать нечего...
 	}
 
@@ -172,39 +146,31 @@ bool nf::Selectors::GetCatalog(HANDLE hPlugin
 	//то переходим прямо к нему - иначе предлагаем выбрать варианты
 	bool bExpand = list.size() > 1;	//требуется выбирать из меню..
 	if (bExpand) {
-		int n = Menu::SelectCatalog(list, DestCatalog);
+		int n = Menu::SelectCatalog(list, destCatalog);
 		return n > 0;
 	} else {
-		DestCatalog = *list.begin();
+		destCatalog = *list.begin();
 		return true;
 	}
 }
 
-
-bool nf::Selectors::FindBestDirectory(HANDLE hPlugin
-									 , nf::tshortcut_value_parsed const &p
-									 , tstring &DestDir)
+bool nf::Selectors::FindBestDirectory(HANDLE hPlugin, nf::tshortcut_value_parsed const &p, tstring &destDir)
 {	//найти наилучшую директории 
 	//если требуемой директории нет - найти ближайшую
 	assert(p.ValueType != nf::VAL_TYPE_PLUGIN_DIRECTORY);	//остальные типы должны открывать через эмуляцию нажатия клавиш
-	tstring dir_oem = p.value;
+	tstring dir = p.value;
 
-	if (! ::PathFileExists(dir_oem.c_str()))
-	{	//находим ближайшую директорию
-		nf::tautobuffer_char buf(dir_oem.size()+1);	
-		lstrcpy(&buf[0], dir_oem.c_str());
+	if (! ::PathFileExists(dir.c_str())) {	//find nearest directory
+		nf::tautobuffer_char buf(dir.size()+1);	
+		lstrcpy(&buf[0], dir.c_str());
 
 		do {
 			if (! ::PathRemoveFileSpec(&buf[0])) return false; //ближайшей директории не оказалось..
 		} while (! ::PathFileExists(&buf[0]));
 
-		//!todo предложение удалить
-		//!подтвердить переход в ближайшую директорию
-		if (! nf::Confirmations::AskToGoToNearest(hPlugin, dir_oem.c_str(), &buf[0])) return false;
-		dir_oem = &buf[0];
+		if (! nf::Confirmations::AskToGoToNearest(hPlugin, dir, &buf[0])) return false;
+		dir = &buf[0];
 	}
-
-	DestDir = dir_oem;
+	destDir.swap(dir);
 	return true;
-
-} //find_best_dir
+} 

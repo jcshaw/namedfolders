@@ -30,36 +30,17 @@
 
 using namespace nf;
 
-namespace 
-{
-	void GetListPairsForEnvVar(tstring const &VarPattern, std::list<std::pair<tstring, tstring> > &ListPairs
-		, tstring &DestLocalPath)
-	{	//получить список <имя переменная среды, путь>, удовлетворяющих шаблону VarPattern
-		//Если VarPattern задана в виде %VarPattern% или %VarPattern то 
-		//расширяем VarPattern в переменную среды средствами NF
+namespace {
 
-		tstring variable_name;
-
-		//определяем имя переменной, локальный путь
-		//а так же, задано ли имя переменной полностью, или это маска
-		//если имя переменной задано без концевого % то это маска (это определяет функция ParseEnvVarPath)
-		//если концевой % есть, но в имене есть метасимволы - это тоже маска, причем концевые звездочки к ней добавлять не надо
-		//иначе это полное имя переменной
-		bool bIncompleteVarPatternPattern  = ! nf::Parser::ParseEnvVarPath(VarPattern, variable_name, DestLocalPath);
-		bool bMetachars = nf::Parser::IsContainsMetachars(VarPattern); //в имени есть метасимволы
-
-		tstring& mask = (bIncompleteVarPatternPattern && (! bMetachars))
-			? //tstring(L"*") +  //нет необходимости искать по шаблону "*маска*", шаблон "маска*" удобнее пользователям
-			variable_name + tstring(L"*")
-			: variable_name;
-
-		//получаем значения всех переменных среды, которые удовлетворяют шаблону VarPattern
+	void gen_list_envvars(tstring const& srcMask, std::list<tpair_strings> &listPairs, bool bIncompleteName) {
+		//получаем значения всех переменных среды, которые удовлетворяют шаблону varPattern
 		//генерируем список всех директорий на которые ссылаются выбранные переменные среды
 		if (_wenviron == NULL) {
 			//see msdn: In a program that uses main, _wenviron is initially NULL because the environment is composed of multibyte-character strings. 
 			//On the first call to _wgetenv or _wputenv, a corresponding wide-character string environment is created and is pointed to by _wenviron.
 			_wgetenv(L"");
 		}
+		tstring full_mask = L"*" + srcMask;
 		wchar_t **penv = _wenviron;
 		while (*penv != NULL) {
 			tstring senv = *penv;
@@ -69,35 +50,46 @@ namespace
 				tstring env_name(senv.c_str(), pos);
 				tstring pe(senv.c_str(), pos+1, senv.size() - pos);
 
-				if (nf::Parser::IsTokenMatchedToPattern(env_name, mask, false)) {
+				bool bmask_in_name = nf::Parser::IsTokenMatchedToPattern(env_name, srcMask, false);
+				if (bmask_in_name || bIncompleteName) {
 					std::list<tstring> list_tokens;
 					Utils::SplitStringByRegex(pe, list_tokens, L";");
-					for (std::list<tstring>::iterator beg = list_tokens.begin(); beg != list_tokens.end(); ++beg)
-						if (::PathFileExists(beg->c_str()) && ::PathIsDirectory(beg->c_str())) {
-							ListPairs.push_back(std::make_pair(env_name, *beg));	//CHAR_LEADING_VALUE_ENVVAR
+					BOOST_FOREACH(tstring const& token, list_tokens) {
+						if (bmask_in_name || (bIncompleteName && nf::Parser::IsTokenMatchedToPattern(token, full_mask, false))) 
+						{ //srcMask matched to name OR (if srcMask is incomplete) srcMask matched to directory
+							if (::PathFileExists(token.c_str()) && ::PathIsDirectory(token.c_str())) {
+								listPairs.push_back(std::make_pair(env_name, token));	
+							}
 						}
-				} else 
-					if (bIncompleteVarPatternPattern) 
-					{	//имя переменной задано не полностью
-						//поэтому ищем маску не только в имени переменной, 
-						//но и в директориях, на которые она ссылается			
-						std::list<tstring> list_tokens;
-						Utils::SplitStringByRegex(pe, list_tokens, L";");
-						for (std::list<tstring>::iterator beg = list_tokens.begin(); beg != list_tokens.end(); ++beg)
-							if (nf::Parser::IsTokenMatchedToPattern(*beg, mask, false))
-								if (::PathFileExists(beg->c_str()) && ::PathIsDirectory(beg->c_str())) {
-									ListPairs.push_back(std::make_pair(env_name, *beg));
-								}
 					}
+				} 
 			}
 			++penv;
 		}
+	}
+	void get_list_pairs_for_envvar(tstring const &varPattern, std::list<tpair_strings> &listPairs, tstring &destLocalPath) 
+	{	//получить список <имя переменная среды, путь>, удовлетворяющих шаблону varPattern
+		//Если varPattern задана в виде %varPattern% или %varPattern то 
+		//расширяем varPattern в переменную среды средствами NF
+
+		tstring variable_name;
+
+		//определяем имя переменной, локальный путь
+		//а так же, задано ли имя переменной полностью, или это маска
+		//если имя переменной задано без концевого % то это маска (это определяет функция ParseEnvVarPath)
+		//если концевой % есть, но в имене есть метасимволы - это тоже маска, причем концевые звездочки к ней добавлять не надо
+		//иначе это полное имя переменной
+		bool bIncompleteVarPatternPattern  = ! nf::Parser::ParseEnvVarPath(varPattern, variable_name, destLocalPath);
+		bool bMetachars = nf::Parser::ContainsMetachars(varPattern); //в имени есть метасимволы
+
+		tstring mask = (bIncompleteVarPatternPattern && (! bMetachars))
+			? variable_name + tstring(L"*") //"mask*" is more convenient in practice then "*mask*"
+			: variable_name;
+
+		gen_list_envvars(mask, listPairs, bIncompleteVarPatternPattern);
 	};
 
-	bool decode_reg_key(tstring const& path
-		, HKEY &hkey
-		, tstring &SubKeyPath)
-	{
+	bool decode_reg_key(tstring const& path, HKEY &hkey, tstring &SubKeyPath) {
 		//$HKEY_CURRENT_USER\Software ->  hkey=HKEY_CURRENT_USER, SubKeyPath=Software
 		hkey = 0;
 		size_t npos = min(static_cast<unsigned int>(path.find_first_of(SLASH_DIRS)), 
@@ -135,98 +127,62 @@ namespace
 			}
 		}
 	}
-
-	void copy_list_paths(std::list<tpair_strings> const& srcList
-		, std::list<tstring> &DestList
-		, tstring (*f)(tpair_strings const& ))
-	{		
-		BOOST_FOREACH(tpair_strings const& kvp, srcList) {
-			DestList.push_back(f(kvp));
-		}
-	}
-
 }	//namespace
 
-namespace
-{
-	tstring get_pair_second(tpair_strings const& t) {return t.second;}
-	tstring get_evar_packed_string(tpair_strings const& t) {
-		return t.first + CHAR_LEADING_VALUE_ENVVAR + t.second;
-	}
-	tstring get_regkey_packed_string(tpair_strings const& t) {
-		return t.first + CHAR_LEADING_VALUE_ENVVAR//CHAR_LEADING_VALUE_REGKEY 
-			+ t.second;
-	}
-}
-
-
-void nf::Selectors::GetAllPathForEnvvar(HANDLE hPlugins
-										, tstring const &VarName
-										, std::list<tstring> &DestListPaths)
+void nf::Selectors::GetAllPathForEnvvar(HANDLE hPlugins, tstring const &varName, std::list<tstring> &destListPaths)
 {	//получить полный список вариантов именованных директорий 
 	std::list<tpair_strings> list_var_paths;
 	tstring additional_local_path; //!TODO: что делать с этим значением?
-	::GetListPairsForEnvVar(VarName, list_var_paths, additional_local_path);
+	::get_list_pairs_for_envvar(varName, list_var_paths, additional_local_path);
 
-	//названия переменных нам не нужны, только пути
-	copy_list_paths(list_var_paths, DestListPaths, get_pair_second);
+	//we don't need names of environment variables, we need only their paths
+	BOOST_FOREACH(tpair_strings const& kvp, list_var_paths) {
+		destListPaths.push_back(kvp.second);
+	}
 
-	//из списка сразу исключаем повторяющиеся элементы 
-	DestListPaths.sort(Utils::CmpStringEqualCI());
-	DestListPaths.unique(Utils::CmpStringEqualCI());
+	//remove duplicates from the list
+	destListPaths.sort(Utils::CmpStringEqualCI());
+	destListPaths.unique(Utils::CmpStringEqualCI());
 }
 
-
-void nf::Selectors::GetAllPathForRegKey(HANDLE hPlugins
-										, tstring const &RegKeyName
-										, tstring const &VarName
-										, std::list<tstring> &DestListPaths)
+void nf::Selectors::GetAllPathForRegKey(HANDLE hPlugins, tstring const &regKeyName, tstring const &varName
+										, std::list<tstring> &destListPaths)
 {	//получить полный список вариантов именованных директорий 	
-	//	Utils::RemoveLeadingChars(LocalPath, SLASH_DIRS_CHAR);
-	//	if (LocalPath.size()) LocalPath = L"*" + LocalPath;
 	std::list<tpair_strings> list_var_paths;
-	::GetListPairsForRegKey(RegKeyName, VarName, list_var_paths);
-
-	copy_list_paths(list_var_paths, DestListPaths, get_pair_second);
+	::GetListPairsForRegKey(regKeyName, varName, list_var_paths);
+	BOOST_FOREACH(tpair_strings const& kvp, list_var_paths) {
+		destListPaths.push_back(kvp.second);
+	}
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////
-
-bool nf::Selectors::OpenEnvVar(HANDLE hPlugin
-							   , tstring const &VarName
-							   , tstring const &LocalPath)
-{
+bool nf::Selectors::OpenEnvVar(HANDLE hPlugin, tstring const &VarName, tstring const &LocalPath) {
 	tstring result_path;
 	if (! nf::Selectors::GetPathByEnvvarPattern(hPlugin, VarName, LocalPath, result_path)) return false;
-	//открываем директорию на панели плагина
-	return nf::Commands::OpenPath(hPlugin, result_path);			
+	return nf::Commands::OpenPath(hPlugin, result_path);
 };
 
-//////////////////////////////////////////////////////////////////////////
 bool nf::Selectors::GetPathByEnvvarPattern(HANDLE hPlugin
-										   , tstring const &VarName
-										   , tstring const &LocalPath
-										   , tstring &DestPath)
+										   , tstring const &varName
+										   , tstring const &localPath
+										   , tstring &destPath)
 {
 	std::list<tpair_strings> list_var_paths;
 	tstring additional_local_path;
-	::GetListPairsForEnvVar(VarName, list_var_paths, additional_local_path);
-	if (! LocalPath.empty()) {
+	::get_list_pairs_for_envvar(varName, list_var_paths, additional_local_path);
+	if (! localPath.empty()) {
 		additional_local_path = additional_local_path.empty()
-			? LocalPath
-			: Utils::CombinePath(additional_local_path, LocalPath, L"\\");
+			? localPath
+			: Utils::CombinePath(additional_local_path, localPath, L"\\");
 		}
 
 	if (list_var_paths.size() == 1) {
-		DestPath = (*list_var_paths.begin()).second;
+		destPath = (*list_var_paths.begin()).second;
 	} else {
 		tpair_strings result;
 		if (! Menu::SelectEnvVar(list_var_paths, result)) return false;
-		DestPath = result.second;
+		destPath = result.second;
 	}
-	if (! additional_local_path.empty()) DestPath = Utils::CombinePath(DestPath, additional_local_path, L"\\");
+	if (! additional_local_path.empty()) destPath = Utils::CombinePath(destPath, additional_local_path, L"\\");
 	return true;
 };
 
@@ -241,47 +197,38 @@ bool nf::Selectors::GetPathByRegKey(HANDLE hPlugins
 		, LocalPath	//!TODO: здесь только первое имя из localpath
 		, list_var_paths);
 
-	std::pair<tstring, tstring> result;
+	tpair_strings result;
 	if (! Menu::SelectPathByRegKey(list_var_paths, result)) return false;
 	result_path = result.second;
 	return true;
 }
 
 
-//////////////////////////////////////////////////////////////////////////
 //выбрать наиболее подходящий псевдоним из списка вариантов
 //выбор на основе директории, на которую ссылается псевдоним...
 bool nf::Selectors::GetShortcutByPathPattern(HANDLE hPlugin
-											 , tstring const &current_path
+											 , tstring const &curPath
 											 , nf::tparsed_command const &cmd
 											 , nf::tshortcut_info& sh)
 {
-	//!TODO
 	while (true) {
 		nf::tshortcuts_list list;
 
 		switch(cmd.kind) {
 		case nf::QK_DELETE_SHORTCUT_IMPLICIT:
-			Shell::SelectShortcutsByPath(L""
-				, current_path.c_str()
-				, list
-				, true);
+			Shell::SelectShortcutsByPath(L"", curPath, list, true);
 			break;
 		case nf::QK_OPEN_BY_PATH:
-			Shell::SelectShortcutsByPath(cmd.catalog.c_str()
-				, cmd.shortcut.c_str()
-				, list
-				, false);
+			Shell::SelectShortcutsByPath(cmd.catalog, cmd.shortcut, list, false);
 			break;
 		default:
 			return false;
 		} 
 		int nCodeRet = Menu::SelectShortcut(list, sh);
-		if (nCodeRet == -1) { //удалить выбраный псевдоним..
+		if (nCodeRet == -1) { //delete selected shortcut
 			nf::Commands::DeleteShortcut(sh, false);
 			continue;
 		} else return nCodeRet != 0;
-	}; //while
-
+	}; 
 }
 

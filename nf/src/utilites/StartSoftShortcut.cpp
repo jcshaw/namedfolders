@@ -69,13 +69,13 @@ CStartSoftShortcut::CStartSoftShortcut(wchar_t const* RootPathInt
 									   , m_Data(Data)
 									   , m_bTemporaryValue(bTemporaryValue)
 {
-	if (! nf::Parser::IsContainsMetachars(m_Pattern))
+	if (! nf::Parser::ContainsMetachars(m_Pattern))
 	{
 		//если пользователь ввел маску - искать по маске
 		//иначе искать "*шаблон*"
 		m_Pattern = L"*" + m_Pattern + L"*";
 	}
-	if (! nf::Parser::IsContainsMetachars(m_PatternDir))
+	if (! nf::Parser::ContainsMetachars(m_PatternDir))
 	{
 		//если пользователь ввел маску - искать по маске
 		//иначе искать "*шаблон*"
