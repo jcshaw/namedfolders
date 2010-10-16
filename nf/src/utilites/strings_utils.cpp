@@ -11,6 +11,15 @@
 #include <boost/bind.hpp>
 #include <Shlwapi.h>
 
+namespace {
+	inline tstring get_compact_path(tstring const& srcStr, size_t MaxSize) {
+		if (srcStr.size() <= MaxSize) return srcStr;
+		nf::tautobuffer_char buf(srcStr.size() + 1);
+		lstrcpy(&buf[0], srcStr.c_str());
+		PathCompactPathEx(&buf[0], srcStr.c_str(), static_cast<unsigned int>(MaxSize), 0);
+		return &buf[0];
+	}
+}
 
 void Utils::DividePathFilename(tstring const &src
 						  , tstring &path
@@ -35,12 +44,10 @@ void Utils::DividePathFilename(tstring const &src
 		path += slashChar + filename;
 		filename.clear();
 	}
-
 }
 
-std::pair<tstring, tstring> Utils::DivideString(tstring const& srcStr, wchar_t ch)
-{
-	std::pair<tstring, tstring> result;
+tpair_strings Utils::DivideString(tstring const& srcStr, wchar_t ch) {
+	tpair_strings result;
 	size_t npos = srcStr.find_first_of(ch);
 	if (npos != srcStr.npos) {
 		result.first.assign(srcStr, 0, npos);
@@ -52,7 +59,6 @@ std::pair<tstring, tstring> Utils::DivideString(tstring const& srcStr, wchar_t c
 	return result;
 }
 
-//////////////////////////////////////////////////////////////////////////
 tstring Utils::ExtractParentDirectory(tstring const& srcDir)
 {	//extracts parent directory from srcDir 
 	//returns empty string if there are no parent directory
@@ -70,17 +76,6 @@ tstring Utils::ExtractParentDirectory(tstring const& srcDir)
 	return L"";
 }
 
-//////////////////////////////////////////////////////////////////////////
-inline tstring get_compact_path(tstring const& srcStr, size_t MaxSize)
-{
-	if (srcStr.size() <= MaxSize) return srcStr;
-	nf::tautobuffer_char buf(srcStr.size() + 1);
-	lstrcpy(&buf[0], srcStr.c_str());
-	PathCompactPathEx(&buf[0], srcStr.c_str(), static_cast<unsigned int>(MaxSize), 0);
-	return &buf[0];
-}
-
-
 tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, size_t Width1)
 {	//!TODO: попробовать реализовать через stream - код будет короче, как насчет размера плагина
 	tstring result;
@@ -92,8 +87,7 @@ tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, size
 	return result;
 }
 
-tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, tstring Value3, size_t Width1, size_t Width2)
-{
+tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, tstring Value3, size_t Width1, size_t Width2) {
 	tstring result;
 	result.reserve(Width1 + Width2 + Value3.size() + 2);
 
@@ -143,8 +137,7 @@ bool Utils::iFindFirst(tstring const& SrcStr, tstring const& SubStr) {
 	//return  boost::ifind_first(srcStr, SubStr); //additional 20 кб
 }
 
-tstring Utils::CombinePath(tstring const& Path1, tstring const& Path2, wchar_t const* Delimiter)
-{
+tstring Utils::CombinePath(tstring const& Path1, tstring const& Path2, wchar_t const* Delimiter) {
 	if ( (! boost::starts_with(Path2, Delimiter)) && (! boost::ends_with(Path1, Delimiter))) {
 		return Path1 + Delimiter + Path2;
 	}

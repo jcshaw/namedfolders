@@ -13,42 +13,11 @@
 #include "Kernel.h"
 #include "Parser.h"
 
-namespace Start 
-{
-	class CStartSoftShortcut
-	{
-		tstring m_RootPathOem;
-		tstring m_Pattern;
-		tstring m_PatternDir;
-		nf::tshortcuts_list& m_Data;
-		int m_bTemporaryValue;	//по значению Temporary различаем пути, к которым принадлежат €рлыки
-		
-	public:
-		CStartSoftShortcut(wchar_t const* RootPathInt
-			, wchar_t const* Pattern
-			, wchar_t const* PatternDir
-			, nf::tshortcuts_list& Data
-			, int bTemporaryValue);
-		~CStartSoftShortcut(void);
-	private:
-		void load_data();
-		void load_sub_catalogs(tstring const& RelatedPathOem);
-		void load_shortcuts(tstring const& RelatedPathOem);
-
-		inline bool is_matched_to_pattern(tstring const& FileName)
-		{
-			return nf::Parser::IsTokenMatchedToPattern(FileName, m_Pattern, false);
-		}
-		inline bool is_dir_matched_to_pattern(tstring const& DirName)
-		{
-			return nf::Parser::IsTokenMatchedToPattern(DirName, m_PatternDir, false);
-		}
-	};
-
+namespace Start {
 	bool OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd);
-	bool GetShortcutProgramPath(tstring const& PathToShortcut
-		, tstring &TargetProgramDirectory);
-};
-
+	bool GetShortcutProgramPath(tstring const& PathToShortcut, tstring &destPath, bool bRemoveFileName);
+	void LoadShortcuts(tstring const& srcRootPath, tstring const& srcPattern, tstring const& PatternDir, int bTemporaryValue
+		, nf::tshortcuts_list& destData);
+}
 
 #pragma warning(default: 4800)

@@ -57,19 +57,16 @@ public:
 };	//CommandPatterns
 
 	namespace Private {	 //Private namespace is visible for unit testing
-		class DetailedCommand
-		{
+		class DetailedCommand {
 			typedef std::vector<tstring> tlistparts;
 			tlistparts const m_SrcParts;
 			tlistparts m_DestParts;
 		public:
 			DetailedCommand(nf::tparsed_command const &SrcCmd);
 			void ApplyPattern(tstring const& Pattern);
-			bool GetResultCommand(nf::tparsed_command &DestCmd) const;
 			tstring GetResultString() const;
 		private:
 			tlistparts commandToListParts(nf::tparsed_command const &SrcCmd) const;
-			void listPartsToCommand(tlistparts const& SrcListParts, nf::tparsed_command &DestCmd) const;
 		};	//DetailedCommand
 	}
 

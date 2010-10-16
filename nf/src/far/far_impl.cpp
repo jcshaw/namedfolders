@@ -99,22 +99,17 @@ namespace {
 		if (bClosePlugin) Plugin.ClosePlugin(srcDir);
 	}
 
-	bool find_path_and_filename(HANDLE hPlugin
-		, tstring &srcPath
-		, nf::twhat_to_search_t whatToSearch
-		, tstring const& Path
-		, tstring &DestFilename)
+	bool find_path_and_filename(HANDLE hPlugin, tstring &srcPath, nf::twhat_to_search_t whatToSearch
+		, tstring const& Path, tstring &fnDest) 
 	{
-		if (! nf::Selectors::GetPath(hPlugin, srcPath, Path, srcPath, whatToSearch)) 
-		{
+		if (! nf::Selectors::GetPath(hPlugin, srcPath, Path, srcPath, whatToSearch))  {
 			return false;
 		} else if (! ::PathIsDirectory(srcPath.c_str())) {
 			//open directory where file is located; currently, we lost filename.
 			//!TODO: it world be perfect to position on this file
-			Utils::DividePathFilename(srcPath, srcPath, DestFilename, SLASH_DIRS_CHAR, false);
-			Utils::RemoveLeadingCharsOnPlace(DestFilename, SLASH_DIRS_CHAR);
+			Utils::DividePathFilename(srcPath, srcPath, fnDest, SLASH_DIRS_CHAR, false);
+			Utils::RemoveLeadingCharsOnPlace(fnDest, SLASH_DIRS_CHAR);
 		}
-
 		return true;
 	}
 } //namespace 
@@ -173,21 +168,20 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 	return true;
 }	
 
-bool SelectAndOpenPathOnPanel(HANDLE hPlugin
-							  , std::list<std::pair<tstring, tstring> > const& SrcListAliasPath
-							  , nf::twhat_to_search_t WhatToSearch)
+bool SelectAndOpenPathOnPanel(HANDLE hPlugin, std::list<tpair_strings> const& listAliasPaths, nf::twhat_to_search_t whatToSearch
+							  , bool bActivePanel)
 {	//suggest to select required variant from menu, then open selected path
 
 	//show list directories, without shortcut names
 	std::list<tstring> paths;	//all possible paths
-	BOOST_FOREACH(tpair_strings const& kvp, SrcListAliasPath) {
+	BOOST_FOREACH(tpair_strings const& kvp, listAliasPaths) {
 		paths.push_back(kvp.second);
 	}
 	tstring dest_path;
 	if (! nf::Menu::SelectPath(paths, dest_path)) return false;
 
 	tstring dest_filename;
-	if (! find_path_and_filename(hPlugin, dest_path, WhatToSearch, L"", dest_filename)) return false;
-	::open_path_and_close_plugin(CPanelInfoWrap(hPlugin), false, true, dest_path, dest_filename);
+	if (! find_path_and_filename(hPlugin, dest_path, whatToSearch, L"", dest_filename)) return false;
+	::open_path_and_close_plugin(CPanelInfoWrap(hPlugin), false, bActivePanel, dest_path, dest_filename);
 	return true;
 }

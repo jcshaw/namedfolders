@@ -9,8 +9,7 @@
 #include "strings_utils.h"
 
 using namespace nf;
-namespace 
-{
+namespace {
 	wchar_t const* DEVCHAR_DEPRECATED = L"\n";	
 		//первый разделитель значений для двух панелей
 		//оставлен для совместимости

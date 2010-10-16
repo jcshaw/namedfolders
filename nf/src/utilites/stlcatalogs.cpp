@@ -28,8 +28,7 @@ CCatalog::CCatalog()
 }
 
 //конструктор для каталога вложенного в текущий
-CCatalog::CCatalog(tstring SubCatalog, CCatalog const *pParent, bool bCreateIfNotExists)
-{
+CCatalog::CCatalog(tstring SubCatalog, CCatalog const *pParent, bool bCreateIfNotExists) {
 	m_CatalogPath = get_combined_path(SubCatalog.c_str(), pParent);
 	tstring regkey = GetCatalogRegkey();
 	if (bCreateIfNotExists) nf::CRegistry(HKEY_CURRENT_USER, regkey.c_str());
@@ -44,8 +43,7 @@ CCatalog::CCatalog(CCatalog const &catalog)
 }
 
 //конструктор для создания обертки вокруг итератора последовательности каталогов
-CCatalog::CCatalog(sc::catalogs_sequence_item &c, CCatalog const *pParent) 
-{
+CCatalog::CCatalog(sc::catalogs_sequence_item &c, CCatalog const *pParent) {
 	m_CatalogPath = get_combined_path(c.GetName().c_str(), pParent);
 	m_key = basic_class(HKEY_CURRENT_USER, GetCatalogRegkey(), KEY_ALL_ACCESS);		
 }

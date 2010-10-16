@@ -240,10 +240,9 @@ bool nf::Commands::OpenShortcut(HANDLE hPlugin
 		}
 	}
 	//предлагаем пользователю выбрать требуемый путь
-	return ::SelectAndOpenPathOnPanel(hPlugin, list_alias_path, WhatToSearch);
+	return ::SelectAndOpenPathOnPanel(hPlugin, list_alias_path, WhatToSearch, bOpenOnActivePanel);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 bool nf::Commands::OpenPath(HANDLE hPlugin, tstring const& path)
 {	//открыть заданную директорию на активной панели
 	nf::tshortcut_value_parsed ap;		//active panel

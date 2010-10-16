@@ -18,10 +18,9 @@ using namespace Patterns;
 #include <boost/bind.hpp>
 #pragma warning(default: 4244 4267)
 
-namespace 
-{
+namespace {
 	
-	enum {	//порядок важен, см. GetResultString
+	enum {	//order is important, see GetResultString
 		ID_PREFIX		//префикс cd или др.
 		, ID_COMMAND	//команда
 		, ID_CATALOG	//каталог 
@@ -33,8 +32,7 @@ namespace
 		
 		, NUM_PARTS
 	};
-	wchar_t const *VAR_NAMES[static_cast<int>(NUM_PARTS)] = 
-	{
+	wchar_t const *VAR_NAMES[static_cast<int>(NUM_PARTS)] =  {
 		L"prefix"
 		, L"command"
 		, L"catalog"
@@ -44,10 +42,8 @@ namespace
 		, L"path"
 		, L"param"
 	};
-	tstring GetCommandAsString(nf::tcommands_kinds kind)
-	{
-		switch (kind)
-		{
+	tstring get_command_as_string(nf::tcommands_kinds kind) {
+		switch (kind) {
 		case nf::QK_OPEN_SHORTCUT: return L"";
 		case nf::QK_INSERT_SHORTCUT: return L":";
 		case nf::QK_INSERT_SHORTCUT_TEMPORARY: return L"+";
@@ -72,11 +68,9 @@ namespace
 		} //switch
 	}
 
-
-	class applier
-	{	
-		boost::basic_regex<wchar_t>  m_RE;
-		boost::basic_regex<wchar_t>  m_SubRE;
+	class applier {	
+		boost::basic_regex<wchar_t> m_RE;
+		boost::basic_regex<wchar_t> m_SubRE;
 		typedef std::map<tstring, int, Utils::CmpStringLessCI> tvarnames;
 		tvarnames m_VarNames;
 		std::vector<tstring> const& m_SrcParts;
@@ -88,8 +82,7 @@ namespace
 			, m_RE(applier::get_regexp(), boost::regex_constants::icase)
 			, m_SubRE(applier::get_sub_regexp(), boost::regex_constants::icase)
 		{ 
-			for (int i = 0; i < NUM_PARTS; ++i) 
-			{
+			for (int i = 0; i < NUM_PARTS; ++i) {
 				m_VarNames.insert(std::make_pair(VAR_NAMES[i], i));
 			}
 			m_DestParts[ID_PREFIX] = L"cd:";
@@ -99,8 +92,7 @@ namespace
 			//левая часть - имя переменной - задает новое значение для DestCmd
 			//правая часть - текст и переменные (идентифицирующие значение SrcCmd)
 			boost::match_results<wchar_t const*> what;
-			if (boost::regex_match(AssignExp.c_str(), what, m_RE))
-			{
+			if (boost::regex_match(AssignExp.c_str(), what, m_RE)) {
 				tstring DestVarName = what[1];
 				tvarnames::const_iterator pdest = m_VarNames.find(DestVarName);
 				if (pdest == m_VarNames.end()) return false;	//left side contains unknown variable
@@ -111,8 +103,7 @@ namespace
 			return false;
 		}
 	private:
-		tstring parse_right_part(tstring const& Expression)
-		{
+		tstring parse_right_part(tstring const& Expression) {
 			//!std::basic_stringstream<wchar_t> result;	
 				//можно использовать string stream, но это стоит 27 кб в релизе...
 				//поэтому заменяем его строкой с заранее выделенной памятью
@@ -122,14 +113,11 @@ namespace
 			std::size_t move = 0;
 			int cVarsTotal = 0;
 			int cEmptyVars = 0;
-			while (move < Expression.size(), boost::regex_search(Expression.c_str() + move, sub_what, m_SubRE))
-			{	
+			while (move < Expression.size(), boost::regex_search(Expression.c_str() + move, sub_what, m_SubRE)) {	
 				move += sub_what[0].length();
-				if (! tstring(sub_what[1]).empty())
-				{	//variable
+				if (! tstring(sub_what[1]).empty()) {	//variable
 					tvarnames::const_iterator p = m_VarNames.find(tstring(sub_what[1]));
-					if (p != m_VarNames.end())
-					{
+					if (p != m_VarNames.end()) {
 						tstring var_value = m_SrcParts[p->second];
 						result += var_value;
 						if (var_value.empty()) ++cEmptyVars;
@@ -137,8 +125,7 @@ namespace
 						result +=  tstring(L"[") + tstring(sub_what[2]) + tstring(L"]");	//unknown variable
 					}
 					++cVarsTotal;
-				} else 
-				{	//text
+				} else { //text
 					result += sub_what[2];
 				}
 			}
@@ -147,12 +134,10 @@ namespace
 		//команда "zp:" должна открывать директорию, а не показывать список всех поддиректорий
 			return (cVarsTotal == cEmptyVars && cEmptyVars) ? L"" : result;
 		}
-		inline static tstring get_regexp()
-		{	//регулярное выражение конструируем из имен переменных заданных в VAR_NAMES
+		inline static tstring get_regexp() { //регулярное выражение конструируем из имен переменных заданных в VAR_NAMES
 			return L"\\[([^]]+)\\]\\s*=\\s*(.+)";	//(\\[([^]]+)\\])|(.+)
 		}
-		inline static tstring get_sub_regexp()
-		{	//регулярное выражение конструируем из имен переменных заданных в VAR_NAMES
+		inline static tstring get_sub_regexp() { //регулярное выражение конструируем из имен переменных заданных в VAR_NAMES
 			return L"\\[([^]]+)\\]|([^][]+)";
 		}
 	};
@@ -165,8 +150,7 @@ nf::Patterns::Private::DetailedCommand::DetailedCommand(nf::tparsed_command cons
 	m_DestParts = m_SrcParts;
 }
 	
-void nf::Patterns::Private::DetailedCommand::ApplyPattern(tstring const& Pattern)
-{
+void nf::Patterns::Private::DetailedCommand::ApplyPattern(tstring const& Pattern) {
 	//шаблон состоит из одной или более операций присваивания,
 	//разделенных ';'. Последовательно выполняем их все
 	std::list<tstring> list_tokens;
@@ -184,13 +168,8 @@ void nf::Patterns::Private::DetailedCommand::ApplyPattern(tstring const& Pattern
 		&& (m_DestParts[ID_SPDELIM].empty()) ) m_DestParts[ID_SPDELIM] = SLASH_DIRS;
 	//!TODO: если указан каталог и локальная директория, но не указан псевдоним?
 }
-bool nf::Patterns::Private::DetailedCommand::GetResultCommand(nf::tparsed_command &DestCmd) const
-{
-	listPartsToCommand(m_DestParts, DestCmd);
-	return true;
-}
-tstring nf::Patterns::Private::DetailedCommand::GetResultString() const
-{
+
+tstring nf::Patterns::Private::DetailedCommand::GetResultString() const {
 	tstring result;
 	result.reserve(m_DestParts[ID_SHORCUT].size() + m_DestParts[ID_PATH].size() + 10);
 	for (int i = 0; i < NUM_PARTS; ++i) {
@@ -200,8 +179,7 @@ tstring nf::Patterns::Private::DetailedCommand::GetResultString() const
 }
 
 nf::Patterns::Private::DetailedCommand::tlistparts 
-nf::Patterns::Private::DetailedCommand::commandToListParts(nf::tparsed_command const &SrcCmd) const
-{
+nf::Patterns::Private::DetailedCommand::commandToListParts(nf::tparsed_command const &SrcCmd) const {
 	tlistparts parts(NUM_PARTS);
 	//копируем составляющие команды в вектор с индексами ID_XXX
 	//локальная директория и каталог могут содержать слеши, вычленяем их в отдельные составляющие
@@ -209,21 +187,18 @@ nf::Patterns::Private::DetailedCommand::commandToListParts(nf::tparsed_command c
 	parts[ID_PREFIX] = SrcCmd.prefix;
 	parts[ID_PARAM] = SrcCmd.param;
 	parts[ID_SHORCUT] = SrcCmd.shortcut;
-	parts[ID_COMMAND] = GetCommandAsString(SrcCmd.kind);
-	if (! SrcCmd.catalog.empty())
-	{	//переносим из названия каталога завершающие слешы в m_csdelim
+	parts[ID_COMMAND] = get_command_as_string(SrcCmd.kind);
+	if (! SrcCmd.catalog.empty()) {	//переносим из названия каталога завершающие слешы в m_csdelim
 		tstring & catalog = parts[ID_CATALOG];
 		catalog = SrcCmd.catalog;
 		tstring::size_type pos = catalog.find(SLASH_CATS);
-		if (pos != tstring::npos) 
-		{
+		if (pos != tstring::npos) {
 			parts[ID_CSDELIM].assign(parts[ID_CATALOG], pos, catalog.size() - pos);
 			catalog.erase(pos, catalog.size() - pos);
 		}
 	}
 
-	if (! SrcCmd.local_directory.empty())
-	{	//переносим из начала названия локальной директории слешы и точки в m_spdelim
+	if (! SrcCmd.local_directory.empty()) {	//переносим из начала названия локальной директории слешы и точки в m_spdelim
 		tstring &path = parts[ID_PATH];
 		path = SrcCmd.local_directory; 
 		tstring::iterator p = path.begin();
@@ -242,12 +217,6 @@ nf::Patterns::Private::DetailedCommand::commandToListParts(nf::tparsed_command c
 		}	
 	}
 	return parts;	//i hope, clever compiler will optimize it 	
-}	//ExtractParts
-
-void nf::Patterns::Private::DetailedCommand::listPartsToCommand(tlistparts const& SrcListParts, nf::tparsed_command &DestCmd) const
-{
-	tstring command = GetResultString();
-	nf::Parser::ParseString(command, DestCmd);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -286,10 +255,10 @@ bool CommandPatterns::TransformCommand(tstring const& Pattern
 //////////////////////////////////////////////////////////////////////////
 //CommandsManager
 namespace {
-	inline bool is_prefix_valid(tstring const& Prefix) {
+	inline bool is_prefix_valid(tstring const& prefix) {
 		//valid prefix is ended by char ':'
-		if (! Prefix.size()) return false;
-		return Prefix[Prefix.size()-1] == L':';
+		if (! prefix.size()) return false;
+		return prefix[prefix.size()-1] == L':';
 	}
 
 	inline bool equal_prefixes(tcommand_pattern &p, tstring const& Prefix) {
@@ -323,9 +292,7 @@ bool CommandsManager::RemoveCommand(tstring const& Prefix) {
 	return m_Key.DeleteValue(Prefix.c_str());
 }
 
-bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd
-												  , tstring &DestCmd) const
-{
+bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd, tstring &DestCmd) const {
 	tlist_command_patterns all_commands;
 	std::list<tstring> used_commands;
 	DestCmd = SrcCmd;

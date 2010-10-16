@@ -7,7 +7,9 @@
 #include "StdAfx.h"
 #include "registry_remover.h"
 #include <list>
+#include <boost/foreach.hpp>
 #include <shlwapi.h>
+
 #include "stlsoft_def.h"
 
 
@@ -19,18 +21,16 @@ STDAPI_(DWORD) SHCopyKeyA_c(HKEY hkeySrc, LPCSTR pszSrcSubKey, HKEY hkeyDest, DW
 	HKEY hkeyFrom;
 	DWORD dwRet;
 
-	if (pszSrcSubKey)
+	if (pszSrcSubKey) {		
 		dwRet = RegOpenKeyExA(hkeySrc, pszSrcSubKey, 0, MAXIMUM_ALLOWED, &hkeyFrom);
-	else if (hkeySrc)    
-	{
+	} else if (hkeySrc) {
 		dwRet = ERROR_SUCCESS;
 		hkeyFrom = hkeySrc;
-	}
-	else
+	} else {
 		dwRet = ERROR_INVALID_PARAMETER;
+	}
 
-	if (dwRet == ERROR_SUCCESS)
-	{
+	if (dwRet == ERROR_SUCCESS) {
 		DWORD dwIndex;
 		DWORD cchValueSize;
 		DWORD cchClassSize;
@@ -100,14 +100,13 @@ STDAPI_(DWORD) SHCopyKeyA_c(HKEY hkeySrc, LPCSTR pszSrcSubKey, HKEY hkeyDest, DW
 	return dwRet;
 }
 
-STDAPI_(DWORD) SHCopyKeyW_c(HKEY hkeySrc, LPCWSTR pwszSrcSubKey, HKEY hkeyDest, DWORD fReserved)
-{
+STDAPI_(DWORD) SHCopyKeyW_c(HKEY hkeySrc, LPCWSTR pwszSrcSubKey, HKEY hkeyDest, DWORD fReserved) {
 	CHAR sz[MAX_PATH];
-	if (pwszSrcSubKey)
+	if (pwszSrcSubKey) {
 		WideCharToMultiByte(CP_ACP, 0, pwszSrcSubKey, -1, sz, ARRAYSIZE_local(sz), NULL, NULL);
+	}
 	return SHCopyKeyA_c(hkeySrc, pwszSrcSubKey ? sz : NULL, hkeyDest, fReserved);
 }
-
 
 namespace
 {
@@ -117,79 +116,57 @@ namespace
 		std::list<tstring> sub_keys;
 		WinSTL::reg_key_t rk(Key.get_key_handle(), SubKey);
 		WinSTL::reg_key_sequence_t seq(rk);
-		WinSTL::reg_key_sequence_t::const_iterator p = seq.begin();
-		while (p != seq.end())
-		{
-			sub_keys.push_back((*p).name().c_str());
-			++p;
+		BOOST_FOREACH(WinSTL::reg_key_sequence_t::value_type const& key, seq) {
+			sub_keys.push_back(key.name().c_str());
 		};
-		while(! sub_keys.empty())
-		{
+		while(! sub_keys.empty()) {
 			bRet &= recursive_delete_key(rk,  (*sub_keys.begin()).c_str());
 			sub_keys.erase(sub_keys.begin());
 		}
-
 		bRet &= ERROR_SUCCESS == ::RegDeleteKey(Key.get_key_handle(), SubKey);
 		return bRet;
 	}
+
 	bool copy_key(wchar_t const* SrcKey, wchar_t const* TargetKey)
-	{	//скопировать содержимое ключа реестра
-		//сохраняем содержимое в файл (в памяти)
-		//и восстанавливаем в новом ключе из файла
+	{	//copy registry key content to memory, store it to memory file and restore in new registry key from the file
 		HKEY hKeyTarget;
 		if (ERROR_SUCCESS != 
 			RegCreateKeyEx(HKEY_CURRENT_USER, TargetKey, 0, NULL, 0
 			, KEY_ALL_ACCESS, 0, &hKeyTarget, 0)) 
 				return false;
-
-		bool bRet = 
-			ERROR_SUCCESS == SHCopyKeyW_c(HKEY_CURRENT_USER, SrcKey, hKeyTarget, 0);
+		bool bRet = ERROR_SUCCESS == SHCopyKeyW_c(HKEY_CURRENT_USER, SrcKey, hKeyTarget, 0);
 
 		::RegCloseKey(hKeyTarget);
 		return bRet;
-	}
-
-}
+	}}
 
 using namespace nf;
 
-inline bool registry_remover::IsKeysOverloaded(tstring const &SrcKey, tstring const &TargetKey)
-{	//проверить, чтобы целевой ключ не был вложен в исходный ключ
-	//!TODO
-	return false;
+inline bool registry_remover::IsKeysOverloaded(tstring const &srcKey, tstring const &targetKey)
+{	//ensure that targetKey is not embedded to srcKey
+	return false; //!TODO
 }
 
-bool registry_remover::remove(tstring const &SrcKey
-							  , tstring const*const pTargetKey
-							  , bool bDeleteSrc)
-{
-	if (pTargetKey)
-	{
+bool registry_remover::remove(tstring const &SrcKey, tstring const*const pTargetKey, bool bDeleteSrc) {
+	if (pTargetKey) {
 		tstring target_key = *pTargetKey;
-	//ключи не пересекаются
 		if (IsKeysOverloaded(SrcKey, target_key)) return false;	
 		if (! ::copy_key(SrcKey.c_str(), target_key.c_str())) return false;
 	}
-
-//удалить исходный ключ
-	if (bDeleteSrc)
-	{
+	if (bDeleteSrc) { //delete source key
 		tstring ParentKey;
 		tstring KeyName;
 
 		tstring::size_type npos =  SrcKey.find_last_of(L"\\");
-		if (npos == tstring::npos)
-		{
+		if (npos == tstring::npos) {
 			KeyName = SrcKey;
 		} else {
 			ParentKey.assign(SrcKey.begin(), SrcKey.begin() + npos);
 			KeyName.assign(SrcKey.begin() + npos + 1, SrcKey.end());
 		}
-
 		WinSTL::reg_key_t Key(HKEY_CURRENT_USER, ParentKey.c_str());	
 		if (! ::recursive_delete_key(Key, KeyName.c_str())) return false;
 	}
-
 	return true;
 }
 

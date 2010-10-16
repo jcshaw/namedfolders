@@ -11,10 +11,8 @@
 #include <list>
 #include "PanelInfoWrap.h"
 
-namespace nf
-{
-	namespace Selectors 
-	{
+namespace nf {
+	namespace Selectors {
 	//получить полный список директорий для заданной переменной среды/ключа реестра
 		void GetAllPathForRegKey(HANDLE hPlugins
 			, tstring const &RegKeyName //ключ реестра, содержащий переменные, содержащие требуемые пути

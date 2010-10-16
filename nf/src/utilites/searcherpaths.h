@@ -70,5 +70,4 @@ namespace nf {
 				, std::list<tstring> &dest);
 		}
 	}
-
-};//nf
+}

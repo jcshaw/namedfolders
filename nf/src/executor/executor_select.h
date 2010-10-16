@@ -18,9 +18,7 @@ namespace nf {
 	//варианты могу появиться, если указан 
 	//путь относительный именованной директории (LocalPath) 
 	//либо Value содержит метасимволы
-	namespace Selectors 
-	{
-
+	namespace Selectors {
 		//найти все пути, подходящие для Value и LocalPath
 		//и вернуть их полный список в DestListPaths
 		void GetPath(HANDLE hPlugin

@@ -8,10 +8,11 @@
 #include "stdafx.h"
 #include "panel_functions.h"
 
+#include <boost/scope_exit.hpp>
+
 #include "Kernel.h"
 #include "PanelUpdater.h"
 #include "Panel.h"
-#include "ScopeGuard.h"
 
 #include "DialogEditCatalog.h"
 #include "DialogEditShortcut.h"
@@ -33,9 +34,11 @@ namespace nf {
 			assert(! IsSelectedItemIsCatalog(pPanel, pi));
 
 			PluginPanelItem *ppi = allocate_PluginPanelItem(pPanel, FCTL_GETSELECTEDPANELITEM, 0);
-			ScopeGuard sc_ppf_release = MakeGuard(&deallocate_PluginPanelItem, ppi);
+			BOOST_SCOPE_EXIT( (&ppi) ) {
+				deallocate_PluginPanelItem(ppi);
+			} BOOST_SCOPE_EXIT_END
 
-			sh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FindData.lpwszFileName
+				sh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FindData.lpwszFileName
 				, ppi->FindData.dwFileAttributes && FILE_ATTRIBUTE_TEMPORARY);
 		}
 	}
@@ -198,13 +201,17 @@ void nf::Panel::SaveSetup(CPanel* pPanel) {
 
 bool nf::Panel::IsSelectedItemIsCatalog(CPanel* pPanel, PanelInfo const &pi, int nSelectedItem) {
 	PluginPanelItem *ppi = allocate_PluginPanelItem(pPanel, FCTL_GETSELECTEDPANELITEM, nSelectedItem);
-	ScopeGuard sc_ppf_release = MakeGuard(&deallocate_PluginPanelItem, ppi);
+	BOOST_SCOPE_EXIT( (&ppi) ) {
+		deallocate_PluginPanelItem(ppi);
+	} BOOST_SCOPE_EXIT_END
 	return (ppi->FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
 tstring nf::Panel::GetSelectedCatalog(CPanel* pPanel, PanelInfo const&pi, int nSelectedItem) {
 	PluginPanelItem *ppi = allocate_PluginPanelItem(pPanel, FCTL_GETSELECTEDPANELITEM, nSelectedItem);
-	ScopeGuard sc_ppf_release = MakeGuard(&deallocate_PluginPanelItem, ppi);
+	BOOST_SCOPE_EXIT( (&ppi) ) {
+		deallocate_PluginPanelItem(ppi);
+	} BOOST_SCOPE_EXIT_END
 
 	return Utils::CombinePath(pPanel->GetCurrentCatalog()
 		, tstring(ppi->FindData.lpwszFileName)
@@ -213,7 +220,9 @@ tstring nf::Panel::GetSelectedCatalog(CPanel* pPanel, PanelInfo const&pi, int nS
 
 nf::tshortcut_info& nf::Panel::GetSelectedShortcut(CPanel* pPanel, PanelInfo const &pi, nf::tshortcut_info& sh, int nSelectedItem) {
 	PluginPanelItem *ppi = allocate_PluginPanelItem(pPanel, FCTL_GETSELECTEDPANELITEM, nSelectedItem);
-	ScopeGuard sc_ppf_release = MakeGuard(&deallocate_PluginPanelItem, ppi);
+	BOOST_SCOPE_EXIT( (&ppi) ) {
+		deallocate_PluginPanelItem(ppi);
+	} BOOST_SCOPE_EXIT_END
 
 	sh.catalog = pPanel->GetCurrentCatalog();
 	sh.shortcut = ppi->FindData.lpwszFileName;

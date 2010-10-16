@@ -51,11 +51,8 @@ namespace Utils
 
 // path functions
 	tstring ExtractParentDirectory(tstring const& SrcDir);
-	void DividePathFilename(tstring const &src, tstring &path
-		, tstring &filename
-		, wchar_t SlashChar
-		, bool bRemoveTrailingChar);
-	std::pair<tstring, tstring> DivideString(tstring const& SrcStr, wchar_t ch);
+	void DividePathFilename(tstring const &src, tstring &path, tstring &filename, wchar_t SlashChar, bool bRemoveTrailingChar);
+	tpair_strings DivideString(tstring const& SrcStr, wchar_t ch);
 
 // string helper functions
 	tstring ReplaceStringAll(tstring SrcStr, tstring const& FromStr, tstring const& ToStr);
