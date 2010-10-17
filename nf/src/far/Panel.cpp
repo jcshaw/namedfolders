@@ -259,10 +259,7 @@ int CPanel::PutFiles(struct PluginPanelItem *PanelItem
 	for (int i = 0; i < ItemsNumber; ++i) {
 		tstring cur_dir = get_hPlugin().GetPanelCurDir(false);	
 		if (PanelItem[i].FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-			nf::tshortcut_info sht;
-			sht.bIsTemporary = false;
-			sht.catalog = m_CurrentCatalog;
-			sht.shortcut = PanelItem[i].FindData.lpwszFileName; 
+			nf::tshortcut_info sht = nf::MakeShortcut(m_CurrentCatalog, PanelItem[i].FindData.lpwszFileName, false);
 			if (sht.shortcut == LEVEL_UP_TWO_POINTS) continue;
 			tstring value = Utils::CombinePath(cur_dir, sht.shortcut, SLASH_DIRS);
 			InsertShortcut(this, get_hPlugin().GetPanelInfo(false), sht, value);

@@ -207,8 +207,7 @@ namespace nf {
 		return far_di_item(ItemIndex, DI_CHECKBOX, X1, Y1, X2, Y2, Focus, Selected, Flags, DefaultButton, nf::GetMsg(msgID));
 	};
 
-	struct far_di_edit : public far_di_item
-	{
+	struct far_di_edit : public far_di_item {
 		far_di_edit(unsigned int ItemIndex, int X1, int Y1, int X2
 			, const wchar_t* sEditText
 			, DWORD Flags = 0

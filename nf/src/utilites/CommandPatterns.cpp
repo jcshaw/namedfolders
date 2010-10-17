@@ -335,7 +335,7 @@ tstring CommandsManager::GetListCommandPrefixes() const
 {	//get total list of prefixes registered for template commands 
 	tstring list_prefixes;
 	list_prefixes.reserve(256);
-	WinSTL::reg_key_t key(static_cast<HKEY>(m_Key), L"");
+	WinSTL::reg_key_t key (static_cast<HKEY>(m_Key), L"");
 	WinSTL::reg_value_sequence_t seq(key);
 	BOOST_FOREACH(WinSTL::reg_value_sequence_t::value_type const& value, seq) {
 		list_prefixes += value.name();

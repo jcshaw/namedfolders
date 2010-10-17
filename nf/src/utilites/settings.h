@@ -60,8 +60,7 @@ namespace nf
 		~CSettings(void);
 
 	public:
-		static CSettings& GetInstance() 
-		{
+		static CSettings& GetInstance() {
 			static CSettings st;
 			return st;
 		}
@@ -87,7 +86,9 @@ namespace nf
 		tstring m_FullListPrefixes;
 	};
 
-	inline const wchar_t *GetMsg(int MsgId) {return g_PluginInfo.GetMsg(g_PluginInfo.ModuleNumber, MsgId);}
+	inline const wchar_t *GetMsg(int MsgId) {
+		return g_PluginInfo.GetMsg(g_PluginInfo.ModuleNumber, MsgId);
+	}
 	inline tstring GetRegistryKeyForCommandPatterns() {
 		return CSettings::GetInstance().get_NamedFolders_reg_key() + tstring(L"\\CommandPatterns");
 	}};
