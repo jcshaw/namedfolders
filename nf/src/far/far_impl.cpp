@@ -80,15 +80,15 @@ namespace {
 									, bool bClosePlugin
 									, bool bActivePanel
 									, tstring srcDir
-									, tstring const& FileNameANSI)
+									, tstring const& fileName)
 	{
 		srcDir = Utils::ReplaceStringAll(srcDir, SLASH_CATS, SLASH_DIRS); // "/" are replaced by "\" - protection from UNIX-users
 
 		Plugin.SetPanelDir(bActivePanel, srcDir);
 		Plugin.RedrawPanel(bActivePanel);
 
-		if (! FileNameANSI.empty()) {
-			int current_item = nf::Panel::CPanelItemFinder(FileNameANSI.c_str())(); 
+		if (! fileName.empty()) {
+			int current_item = nf::Panel::CPanelItemFinder(fileName.c_str())(); 
 			int top_item = (static_cast<LONG>(current_item) > 
 				Plugin.GetPanelInfo(true).PanelRect.bottom)
 				? current_item 
@@ -99,17 +99,24 @@ namespace {
 		if (bClosePlugin) Plugin.ClosePlugin(srcDir);
 	}
 
-	bool find_path_and_filename(HANDLE hPlugin, tstring &srcPath, nf::twhat_to_search_t whatToSearch
-		, tstring const& Path, tstring &fnDest) 
+	bool find_path_and_filename(HANDLE hPlugin
+		, tstring const& srcPath
+		, nf::twhat_to_search_t whatToSearch
+		, tstring const& localPath
+		, tstring &destPath
+		, tstring &fnDest) 
 	{
-		if (! nf::Selectors::GetPath(hPlugin, srcPath, Path, srcPath, whatToSearch))  {
-			return false;
-		} else if (! ::PathIsDirectory(srcPath.c_str())) {
+		tstring dest_path;
+		if (! nf::Selectors::GetPath(hPlugin, srcPath, localPath, dest_path, whatToSearch)) return false;
+		if (! ::PathIsDirectory(dest_path.c_str())) {
 			//open directory where file is located; currently, we lost filename.
 			//!TODO: it world be perfect to position on this file
-			Utils::DividePathFilename(srcPath, srcPath, fnDest, SLASH_DIRS_CHAR, false);
+			Utils::DividePathFilename(dest_path, destPath, fnDest, SLASH_DIRS_CHAR, false);
 			Utils::RemoveLeadingCharsOnPlace(fnDest, SLASH_DIRS_CHAR);
+		} else {
+			fnDest = L"";
 		}
+		dest_path.swap(destPath);
 		return true;
 	}
 } //namespace 
@@ -140,8 +147,7 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 			//происходит зацикливание (начиная с FAR 2060)
 	} else {	//другие типы директорий
 		tstring dir;
-		switch (panel.ValueType)
-		{
+		switch (panel.ValueType) {
 		case nf::VAL_ENVIRONMENT_VARIABLE:
 			if (! nf::Selectors::GetPathByEnvvarPattern(hPlugin, panel.value, path, dir)) return false;
 			break;
@@ -152,14 +158,13 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 			dir = panel.value;
 			break;
 		case nf::VAL_TYPE_NET_DIRECTORY:
-			if (CSettings::GetInstance().GetValue(nf::ST_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE))
-			{
+			if (CSettings::GetInstance().GetValue(nf::ST_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE)) {
 				panel.value = L"net:\ncd " + panel.value;	//\n заменим на ENTER
 				::CloseAndStartAnotherPlugin(hPlugin, panel.value, bActivePanel, bOpenBoth);			
 				break;
 			}
 		default:
-			if (! ::find_path_and_filename(hPlugin, panel.value, WhatToSearch, path, filename)) return false;
+			if (! ::find_path_and_filename(hPlugin, panel.value, WhatToSearch, path, panel.value, filename)) return false;
 			if (! nf::Selectors::FindBestDirectory(hPlugin, panel, dir)) return false;
 		}; //switch
 		::open_path_and_close_plugin(plugin, bClosePlugin, bActivePanel, dir, filename);
@@ -181,7 +186,7 @@ bool SelectAndOpenPathOnPanel(HANDLE hPlugin, std::list<tpair_strings> const& li
 	if (! nf::Menu::SelectPath(paths, dest_path)) return false;
 
 	tstring dest_filename;
-	if (! find_path_and_filename(hPlugin, dest_path, whatToSearch, L"", dest_filename)) return false;
+	if (! find_path_and_filename(hPlugin, dest_path, whatToSearch, L"", dest_path, dest_filename)) return false;
 	::open_path_and_close_plugin(CPanelInfoWrap(hPlugin), false, bActivePanel, dest_path, dest_filename);
 	return true;
 }

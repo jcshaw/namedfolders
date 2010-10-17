@@ -240,6 +240,7 @@ bool nf::Commands::OpenShortcut(HANDLE hPlugin
 		}
 	}
 	//предлагаем пользователю выбрать требуемый путь
+	//!TODO: special handling for other plugin directories (i.e. FTP).
 	return ::SelectAndOpenPathOnPanel(hPlugin, list_alias_path, WhatToSearch, bOpenOnActivePanel);
 }
 

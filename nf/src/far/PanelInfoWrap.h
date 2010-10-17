@@ -1,9 +1,7 @@
 #pragma once
 
-
 //обертка вокруг Far.PanelInfo
-class CPanelInfoWrap
-{
+class CPanelInfoWrap {
 	HANDLE m_hPlugin;
 	PanelInfo m_Pi;
 public:
