@@ -80,18 +80,19 @@ tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, size
 {	//!TODO: попробовать реализовать через stream - код будет короче, как насчет размера плагина
 	tstring result;
 	result.reserve(Width1 + Value2.size() + 1);
-	result = get_compact_path(Value1, Width1);
-	size_t len1 = Width1 + 1 - (Value1.size() < Width1 ? Value1.size() : result.size());
-	for (size_t i = 0; i < len1; ++i) result += L" ";
-	result += Value2;
+	tstring compact_path = get_compact_path(Value1, Width1);
+	result += compact_path;
+	size_t len1 = Width1 + 1 - (Value1.size() < Width1 ? Value1.size() : Width1);
+ 	for (int i = 0; i < len1; ++i) result += L" ";
+ 	result += Value2;
 	return result;
 }
 
 tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, tstring Value3, size_t Width1, size_t Width2) {
 	tstring result;
 	result.reserve(Width1 + Width2 + Value3.size() + 2);
-
-	result = get_compact_path(Value1, Width1);
+	tstring compact_path = get_compact_path(Value1, Width1);
+	result += compact_path;
 	size_t len1 = Width1 + 1 - (Value1.size() < Width1 ? Value1.size() : result.size());
 	for (size_t i = 0; i < len1; ++i) result += L" ";
 	tstring prom = get_compact_path(Value2, Width2);

@@ -4,7 +4,7 @@
 * www: http://code.google.com/p/namedfolders/
 * e-mail: dvpublic0@gmail.com
 */
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "codec_for_values.h"
 #include "strings_utils.h"
 

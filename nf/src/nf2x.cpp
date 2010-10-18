@@ -52,7 +52,7 @@ void WINAPI _export GetPluginInfoW(struct PluginInfo *pInfo) {
 	DiskMenuStrings[0] = nf::GetMsg(lg::DISKMENUSTRING);
 	PluginMenuStrings[0]= nf::GetMsg(lg::PLUGINMENUSTRING);
 	PluginConfigStrings[0]= nf::GetMsg(lg::PLUGINSCONFIGSTRING);
-
+ 
 	static int hotkey = 0;
 	hotkey = CSettings::GetInstance().GetValue(nf::ST_EDIT_MENU_DISK_FAST_KEY);
 	if (hotkey >= 0 && hotkey <= 10) {
@@ -69,7 +69,7 @@ void WINAPI _export GetPluginInfoW(struct PluginInfo *pInfo) {
 	pInfo->Flags = PF_FULLCMDLINE;
 	
 	static std::wstring list_prefixes = CSettings::GetInstance().GetListPrefixes().c_str();
-	pInfo->CommandPrefix = list_prefixes.c_str();
+	pInfo->CommandPrefix = CSettings::GetInstance().GetListPrefixes().c_str();//		list_prefixes.c_str();
 	return;
 }
 

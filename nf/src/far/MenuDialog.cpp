@@ -74,7 +74,7 @@ namespace {
 
 //class to generate menu item strings
 	class menu_string_maker_visitor : public boost::static_visitor<tstring> { 
-		std::pair<size_t, size_t> const& m_Widths;
+		std::pair<size_t, size_t> const m_Widths;
 		int m_ViewMode;
 	public:
 		menu_string_maker_visitor(int ViewMode, std::pair<size_t, size_t> const& W) : m_ViewMode(ViewMode), m_Widths(W){};
@@ -263,13 +263,6 @@ std::pair<size_t, size_t> nf::Menu::CMenuDialog::get_column_widths() {
 	return widths;
 }
 
-namespace {
-	bool is_satisfy_to_filter(std::list<tstring> const& Filter, tstring SrcStr) {	//константая ссылка в SrcStr не проходит, в релизи висим.. //!TODO
-		// check if SrcStr fits to all items of filter 
-		return std::find_if(Filter.begin(), Filter.end()
-			, boost::bind(std::logical_not<bool>(), boost::bind<bool>(Utils::iFindFirst, SrcStr, _1))) == Filter.end();
-	}
-}
 void nf::Menu::CMenuDialog::set_items_visibility(tstring const& Filter, int Level) {
 	//decide which items will be visible 
 	//menu items strings are unlimited in width to have possibility to filter menu using whole strings contents
@@ -280,10 +273,19 @@ void nf::Menu::CMenuDialog::set_items_visibility(tstring const& Filter, int Leve
 
 	BOOST_FOREACH(tmenu_item& mi, m_List) {
 		if ((! m_bFilterFullUpdateMode) && (mi.first < 0) && (mi.first > -(Level-1))) continue;
-		if (filters.empty() || is_satisfy_to_filter(filters, boost::apply_visitor(string_maker, mi.second))	) {
-			mi.first = nitems++;
+		if (filters.empty()) {
+			mi.first = nitems++;		
 		} else {
-			mi.first = -Level;
+			tstring sfilter = boost::apply_visitor(string_maker, mi.second);
+		//check if sfilter fits to all filter items
+			bool b = filters.end() == std::find_if(filters.begin(), filters.end() 
+				, boost::bind(std::logical_not<bool>()
+					, boost::bind<bool>(&Utils::iFindFirst, boost::cref(sfilter), _1)));
+			if (b) { 
+				mi.first = nitems++;
+			} else {
+				mi.first = -Level;
+			}		
 		}
 	}
 }
@@ -291,9 +293,11 @@ void nf::Menu::CMenuDialog::set_items_visibility(tstring const& Filter, int Leve
 void nf::Menu::CMenuDialog::load_items(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers) {
 	//load to menu visible items only
 	assert(destMenuItems.empty());
+	assert(destMenuBuffers.empty());
 	destMenuItems.reserve(m_List.size());
+	destMenuBuffers.reserve(m_List.size());
 
-	set_items_visibility(m_Filter, static_cast<int>(m_Filter.size()) );	//find items that are visible
+	set_items_visibility(m_Filter, static_cast<int>(m_Filter.size()));	//find items that are visible
 	std::pair<size_t, size_t> widths = get_column_widths();	//find max required width of menu
 	menu_string_maker_visitor string_maker(m_Menu.GetCurrentMenuMode(), widths);
 	BOOST_FOREACH(tmenu_item const& mi, m_List) {
