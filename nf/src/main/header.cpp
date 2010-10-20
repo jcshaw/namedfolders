@@ -29,3 +29,4 @@ const wchar_t CHAR_LEADING_VALUE_REGKEY = L'$';	//!TODO: remove it
 
 wchar_t const* HISTORY_APPLY_COMMANDS = L"nf_history_apply_commands";
 wchar_t const* HISTORY_COMMAND_PATTERNS = L"nf_history_command_patterns";
+

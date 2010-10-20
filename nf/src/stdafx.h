@@ -25,3 +25,5 @@
 #include <wtypes.h>
 #include <WinDef.h>
 #include "header.h"
+
+#include <crtdbg.h>

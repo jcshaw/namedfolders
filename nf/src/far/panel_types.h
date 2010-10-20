@@ -32,8 +32,7 @@ namespace Panel {
 			PanelInfo pi;
 			g_PluginInfo.Control(PANEL_ACTIVE, FCTL_GETPANELINFO, 0, reinterpret_cast<LONG_PTR>(&pi));
 			for (int i = 0; i < pi.ItemsNumber; ++i) {
-				std::vector<unsigned char> buffer; //!TODO: use another buffer
-				buffer.resize(g_PluginInfo.Control(PANEL_ACTIVE, FCTL_GETPANELITEM, i, NULL));
+				nf::tautobuffer_byte buffer(g_PluginInfo.Control(PANEL_ACTIVE, FCTL_GETPANELITEM, i, NULL));
 				PluginPanelItem *ppi = reinterpret_cast<PluginPanelItem*>(&buffer[0]);
 				g_PluginInfo.Control(PANEL_ACTIVE, FCTL_GETPANELITEM, i, reinterpret_cast<LONG_PTR>(&buffer[0]));
 

@@ -1,6 +1,39 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
+<version product_name="Named Folders" version="3.0.0.240" date="snapshot"> 
+<group title="Key changes">
+<item type="!">Plagin uses Far API 2.0 and unicode.</item>	
+<item type="!">64-bit version of the plugin is released. Now plugin is available both for x86 and x64.</item>	
+<item type="!">Plugin has own open source project on google code: 
+http://code.google.com/p/namedfolders/. You can write bugreports and suggestion to
+issue tracker here. You can also download most recent snapshot of the plugin
+(all releases will be send to PlugRing as previously).</item>	
+</group>
+<group title="Changes">
+<item type="-">Launch of x64-apps from FAR x86 is fixed, see #6 
+(http://code.google.com/p/namedfolders/issues/detail?id=6)</item>	
+</group>
+</version>
+
+<version product_name="Named Folders" version="2.5.2 пострелиз" date="Unpublished">
+<item type="*">If flag "subdirectories as aliases" is turned on, then 
+plugin searches subfolders using mask "a*" (not "*a*" as previously).</item>
+<item type="*">If you copy directory on the plugin panel, dialog of alias
+creation appears. So, you are able to edit name of alias. In previous versions
+of the plugin, there was no possibility to make the edition.</item>
+<item type="-">Mode "Show all variants" didn't work.</item>
+<item type="!">Now ".." is used in local paths to specify "jump on one level above" 
+(instead of "."). It allows to use char "." in masks, i.e. "cd:f\*.exe"</item>
+<item type="-">Search with local path can lead to path duplicates in list of 
+path variants.</item>
+<item type="-">Shortcuts with characters "#", "@", "(", ")" in name didn't work.</item>
+<item type="*">Rename of "/@@" to "##" using Shift+F6 leaded to incorrect 
+creation of catalog "##".</item>
+<item type="-">Plugin used fixed width of panel columns instead of taking
+width from settings.</item>
+</version>
+
 <version product_name="Named Folders" version="2.5.1 postrelease" date="13.01.2006">
 <item type="-">Named folders with backslashes didn't work.</item>
 <item type="-">Fixed an error of the compilation - previous version of the

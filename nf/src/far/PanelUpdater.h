@@ -13,7 +13,7 @@
 #include "Panel.h"
 
 namespace nf {
-	namespace Panel {
+namespace Panel {
 
 class CPanelUpdater {
 public:
@@ -52,5 +52,5 @@ private:
 	CPanelInfoWrap m_hPlugin;
 }; 
 
-	}
+}
 }

@@ -17,7 +17,7 @@
 #include "panel_types.h"
 
 namespace nf {
-	namespace Panel {
+namespace Panel {
 
 class CPanel {
 	typedef std::pair<tstring, tstring> tname_value; //name and value of shortcut
@@ -63,5 +63,5 @@ private:
 	int go_to_up_folder(int OpMode);
 	void read_list_panelitems(DWORD flags);
 };
-	} //Panel
-};	//nf
+} //Panel
+}	//nf

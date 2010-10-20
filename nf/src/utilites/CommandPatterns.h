@@ -6,11 +6,8 @@
 #include "Registry.h"
 #include "strings_utils.h"
 
-namespace nf 
-{
-
-namespace Patterns
-{
+namespace nf {
+namespace Patterns {
 
 typedef std::pair<tstring, tstring> tcommand_pattern;
 typedef std::list<tcommand_pattern> tlist_command_patterns;
@@ -71,5 +68,4 @@ public:
 	}
 
 } //Patterns
-
 } //nf

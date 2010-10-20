@@ -3,16 +3,12 @@
 #include "dialogsT.h"
 #include "lang.h"
 
-namespace nf
-{
-
+namespace nf {
 extern const wchar_t* GetMsg(int MsgId);
 
-namespace Patterns
-{
+namespace Patterns {
 
-class DialogEditPattern	: public dialogT
-{
+class DialogEditPattern	: public dialogT {
 	bool m_bCreateNewPattern;
 	tstring m_Prefix;
 	tstring m_Pattern;
@@ -62,7 +58,5 @@ public:
 	};
 };
 
-
 } //Patterns
-
 } //nf

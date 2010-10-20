@@ -53,10 +53,11 @@ namespace {
 	}
 } 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-tstring nf::EncodeValues(tstring const& FirstPanelValue, tstring const& SecondPanelValue)
-{
-	if (SecondPanelValue.empty()) return get_screened(FirstPanelValue);
-	return get_screened(FirstPanelValue) + DEVCHAR + get_screened(SecondPanelValue);
+tstring nf::EncodeValues(tstring const& FirstPanelValue, tstring const& SecondPanelValue) {
+	if (SecondPanelValue.empty()) {
+		return get_screened(FirstPanelValue);
+	} 
+	return get_screened(FirstPanelValue) + tstring(DEVCHAR) + get_screened(SecondPanelValue);
 }
 
 tshortcut_value_parsed_pair nf::DecodeValues(tstring const& Value) {
@@ -81,4 +82,11 @@ tshortcut_value_parsed_pair nf::DecodeValues(tstring const& Value) {
 	return result;
 }
 
+nf::tshortcut_info nf::MakeShortcut(tstring const& srcCatalog, tstring const& srcShortcut, bool bTemporary) {
+	nf::tshortcut_info sh;
+	sh.bIsTemporary = bTemporary;
+	sh.shortcut = srcShortcut;
+	sh.catalog = srcCatalog;
+	return sh;
+}
 

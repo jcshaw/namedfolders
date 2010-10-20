@@ -11,14 +11,10 @@
 #include "lang.h"
 #include "strings_utils.h"
 
-namespace nf 
-{
-
+namespace nf {
 extern const wchar_t* GetMsg(int MsgId);
 
-
-class CDialogEditCatalog : public dialogT
-{
+class CDialogEditCatalog : public dialogT {
 	tstring m_ParentCatalog;
 	tstring m_CatalogName;
 	bool m_bCreateNew;
@@ -67,7 +63,6 @@ public:
 			, Utils::SubstituteSubstringLikePrintf(GetDialogItemsRef()[ID_TEXT_CATALOG].PtrData, m_CatalogName.c_str()).c_str() 
 		);
 	};
-
 };
 
-};
+}

@@ -6,11 +6,9 @@
 */
 #pragma once
 
-namespace nf
-{
+namespace nf {
 
-class registry_remover
-{
+class registry_remover {
 public:
 	registry_remover(void){};
 
@@ -35,6 +33,5 @@ public:
 private:
 	bool remove(tstring const &SrcKey, tstring const *const pTargetKey, bool bDeleteSrc);
 };
-
 
 } //nf

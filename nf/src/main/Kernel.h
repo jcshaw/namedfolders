@@ -24,7 +24,7 @@ namespace nf {
 	//	size_t SelectCatalogsAndShortcuts(wchar_t const *shortcut_pattern, wchar_t const* catalog_pattern, tshortcuts_list& list);
 
 	//shortcuts operations
-		bool InsertShortcut(tshortcut_info const&shortcut, tstring value, bool bOverride);		
+		bool InsertShortcut(tshortcut_info const&shortcut, tstring const& srcValue, bool bOverride);		
 		bool ModifyShortcut(tshortcut_info const& from
 			, tshortcut_info const &to, tstring * pnew_value = 0);		
 		bool DeleteShortcut(tshortcut_info const&shortcut);		

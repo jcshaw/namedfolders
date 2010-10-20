@@ -94,11 +94,38 @@ nf::Confirmations::Private::ask_for_delete_general(tstring const& srcTitle, int 
 		, bSeveral ? 7 : 5
 		, number_buttons);
 
-	switch (code) {
-		case 0: return R_DELETE;
-		case 1: return R_DELETEALL;
-		case 2: return R_SKIP;	
-		default: return R_CANCEL;
-	};
+	if (bSeveral) {
+		switch (code) {
+			case 0: return R_DELETE;
+			case 1: return R_DELETEALL;
+			case 2: return R_SKIP;	
+			default: return R_CANCEL;
+		};
+	} else {
+		switch (code) {
+			case 0: return R_DELETE;
+			default: return R_CANCEL;
+		};
+
+	}
+}
+
+UINT nf::Confirmations::AskForCreateCatalog(HANDLE hPlugin, nf::tcatalog_info const&cat) {
+// 	if (CSettings::GetInstance().GetValue(nf::ST_CONFIRM_IMPLICIT_CREATION) == 0) return 1;	//confirmation is not required
+// 
+// 	const wchar_t * Msg[4];
+// 	Msg[0] = GetMsg(lg::MSG_CREATE_SHORTCUT);
+// 	Msg[1] = GetMsg(lg::CONFIRM_INSERT_SHORTCUT);   
+// 	Msg[2] = cmd.shortcut.c_str();
+// 	Msg[3] = srcValue.c_str();
+// 
+// 	if (g_PluginInfo.Message(g_PluginInfo.ModuleNumber
+// 		, FMSG_MB_OKCANCEL
+// 		, 0
+// 		, Msg
+// 		, sizeof(Msg)/sizeof(Msg[0])
+// 		, 3) == 0) return 2;
+// 	else return 0;
+	return 2;
 }
 

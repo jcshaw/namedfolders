@@ -34,12 +34,10 @@ namespace Utils
 	tstring CombineStrings(tstring const& Value1, tstring const& Value2, tstring Value3, size_t Width1, size_t Width2);
 	tstring CombinePath(tstring const& Path1, tstring const& Path2, wchar_t const* Delimiter);
 
-
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 // splits string on tokens according reqexp
 	template <class Container>
-		void SplitStringByRegex(tstring const& SrcStr, Container &Dest, wchar_t const* RegExDelimiter)
-	{
+		void SplitStringByRegex(tstring const& SrcStr, Container &Dest, wchar_t const* RegExDelimiter) {
 		nf::tregex reg(RegExDelimiter);
 		nf::tregex_token_iterator p(SrcStr.begin(), SrcStr.end(), reg, -1);
 		nf::tregex_token_iterator end;

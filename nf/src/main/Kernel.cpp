@@ -30,7 +30,7 @@ size_t nf::Shell::SelectShortcuts(tstring shPattern
 	return 0;
 }
 
-bool nf::Shell::InsertShortcut(nf::tshortcut_info const&sh, tstring value, bool bOverride) {
+bool nf::Shell::InsertShortcut(nf::tshortcut_info const&sh, tstring const& srcValue, bool bOverride) {
 	tstring catalog_name = sh.catalog;
 	Utils::RemoveLeadingCharsOnPlace(catalog_name, SLASH_CATS_CHAR);
 	Utils::RemoveTrailingCharsOnPlace(catalog_name, SLASH_CATS_CHAR);
@@ -40,8 +40,8 @@ bool nf::Shell::InsertShortcut(nf::tshortcut_info const&sh, tstring value, bool 
 		tstring buf;
 		if (c.GetShortcutInfo(sh.shortcut, sh.bIsTemporary, buf)) return false; //the shortcut already exists
 	}
-	tstring oem_value = value;
-	c.SetShortcut(sh.shortcut, oem_value, sh.bIsTemporary);
+
+	c.SetShortcut(sh.shortcut, srcValue, sh.bIsTemporary);
 	return true;
 }
 

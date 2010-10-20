@@ -10,9 +10,7 @@
 #include "lang.h"
 #include "strings_utils.h"
 
-namespace nf 
-{
-
+namespace nf {
 extern const wchar_t* GetMsg(int MsgId);
 
 class CDialogMove : public dialogT {
@@ -84,4 +82,4 @@ private:
 	tstring m_DestinationCatalog;
 };
 
-};
+}

@@ -131,14 +131,6 @@ namespace nf {
 		bool bIsTemporary;	//временный
 	} _tshortcut_info;
 
-	inline tshortcut_info MakeShortcut(tstring const& srcCatalog, tstring const& srcShortcut, bool bTemporary) {
-		tshortcut_info sh;
-		sh.bIsTemporary = bTemporary;
-		sh.shortcut = srcShortcut;
-		sh.catalog = srcCatalog;
-		return sh;
-	}
-
 	typedef tstring tcatalog_info;	//информация о каталоге (путь относительно корневого каталога)
 
 	typedef std::vector<tstring> tcatalogs_list;
@@ -147,13 +139,9 @@ namespace nf {
 	typedef std::vector<tstring> tvalues_list;
 	typedef std::vector<tstring> tenvvars_list;
 
-	typedef stlsoft::auto_buffer<wchar_t> tautobuffer_char; //!TODO: optimization
 	typedef stlsoft::auto_buffer<wchar_t> tautobuffer_char;
-	typedef stlsoft::auto_buffer<BYTE> tautobuffer_byte; //!TODO: optimization
 	typedef stlsoft::auto_buffer<BYTE> tautobuffer_byte;
 // 	typedef std::vector<BYTE> tautobuffer_byte;
-// 	typedef std::vector<BYTE> tautobuffer_byte;
-// 	typedef std::vector<wchar_t> tautobuffer_char;
 // 	typedef std::vector<wchar_t> tautobuffer_char;
 
 

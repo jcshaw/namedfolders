@@ -7,9 +7,7 @@
 #pragma	once
 
 namespace lg {
-
-enum 
-{
+enum {
 	NAMEDFOLDERS
 	,DISKMENUSTRING
 	,PLUGINMENUSTRING

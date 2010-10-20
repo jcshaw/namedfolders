@@ -7,8 +7,7 @@ class CPanelInfoWrap {
 public:
 	CPanelInfoWrap(HANDLE hPlugin) : m_hPlugin(hPlugin) {}
 
-	PanelInfo const& GetPanelInfo(bool bActivePanel) 
-	{
+	PanelInfo const& GetPanelInfo(bool bActivePanel) {
 		g_PluginInfo.Control( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
 			, FCTL_GETPANELINFO
 			, 0
@@ -17,16 +16,15 @@ public:
 	}
 
 	tstring GetPanelCurDir(bool bActivePanel) {
-		unsigned int const NF_MAX_PATH = 1024; //!TODO: to constants.
-		tstring ret;
-		ret.resize(NF_MAX_PATH);
+		int buffer_size = g_PluginInfo.Control( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE), FCTL_GETPANELDIR, 0, 0); 
+		nf::tautobuffer_char buffer(buffer_size);
 		if (! g_PluginInfo.Control( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
 			, FCTL_GETPANELDIR
-			, NF_MAX_PATH
-			, reinterpret_cast<LONG_PTR>(&ret[0])
+			, buffer_size
+			, reinterpret_cast<LONG_PTR>(&buffer[0])
 		)) return L"";
 
-		return ret;
+		return &buffer[0];
 	}
 
 	void SetPanelDir(bool bActivePanel, tstring const& srcDir) {

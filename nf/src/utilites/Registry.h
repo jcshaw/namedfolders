@@ -11,11 +11,9 @@
 #include <vector>
 #include <boost/utility.hpp>
 
-namespace nf
-{
+namespace nf {
 
-class CRegistry : boost::noncopyable
-{	
+class CRegistry : boost::noncopyable {	
 	HKEY m_hKey;		
 public:
 	CRegistry(HKEY hkey
@@ -66,22 +64,29 @@ public: //get
 	}
 
 public: //set 
-	bool SetValue(tstring const& Key, tstring const& Value) {
-		return RegSetValueEx(m_hKey
-			, Key.c_str()
-			, 0
+	bool SetValue(wchar_t const* Key, wchar_t const* Value) {
+		long error_code = RegSetValueExW(m_hKey
+			, Key
+			, 0 //reserved
 			, REG_SZ
-			, (LPBYTE)Value.c_str()
-			, static_cast<DWORD>(Value.size() + 1) * sizeof(wchar_t)
-		) == ERROR_SUCCESS;
+			, reinterpret_cast<BYTE const*>(Value)
+			, (lstrlenW(Value) + 1) * sizeof(wchar_t)
+		);
+		return error_code == ERROR_SUCCESS;
+// 		if (b) {
+// 			MessageBox(0, L"OK", 0, MB_OK);
+// 		} else {
+// 			MessageBox(0, L"FALSE", 0, MB_OK);
+// 		}
+// 		return b;
 	}
 
-	bool SetValue(tstring const& Key, DWORD Value) {
+	bool SetValue(wchar_t const* Key, DWORD Value) {
 		return RegSetValueEx(m_hKey
-			, Key.c_str()
-			, 0
+			, Key
+			, 0 //reserved
 			, REG_DWORD
-			, (LPBYTE)&Value
+			, reinterpret_cast<BYTE const*>(&Value)
 			, sizeof(Value)
 			) == ERROR_SUCCESS;
 	}

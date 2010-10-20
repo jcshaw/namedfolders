@@ -16,4 +16,6 @@ namespace nf {
 //decode value of shortcut, determine type of directory for each panel
 	tshortcut_value_parsed_pair DecodeValues(tstring const& Value);
 
+	nf::tshortcut_info MakeShortcut(tstring const& srcCatalog
+		, tstring const& srcShortcut, bool bTemporary); //!TODO: remove to utils-file
 }

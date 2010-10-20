@@ -9,11 +9,50 @@
 
 
 ----------------------------------------------------------------------------
+Version 3.0.0.240 [snapshot]
+----------------------------------------------------------------------------
+Key changes
+~~~~~~~~~~~
+[!] Plagin uses Far API 2.0 and unicode.
+[!] 64-bit version of the plugin is released. Now plugin is available both for x86 and x64.
+[!] Plugin has own open source project on google code: 
+http://code.google.com/p/namedfolders/. You can write bugreports and suggestion to
+issue tracker here. You can also download most recent snapshot of the plugin
+(all releases will be send to PlugRing as previously).
+
+Changes
+~~~~~~~
+[-] Launch of x64-apps from FAR x86 is fixed, see #6 
+(http://code.google.com/p/namedfolders/issues/detail?id=6)
+
+
+----------------------------------------------------------------------------
+Version 2.5.2 пострелиз [Unpublished]
+----------------------------------------------------------------------------
+[*] If flag "subdirectories as aliases" is turned on, then 
+plugin searches subfolders using mask "a*" (not "*a*" as previously).
+[*] If you copy directory on the plugin panel, dialog of alias
+creation appears. So, you are able to edit name of alias. In previous versions
+of the plugin, there was no possibility to make the edition.
+[-] Mode "Show all variants" didn't work.
+[!] Now ".." is used in local paths to specify "jump on one level above" 
+(instead of "."). It allows to use char "." in masks, i.e. "cd:f\*.exe"
+[-] Search with local path can lead to path duplicates in list of 
+path variants.
+[-] Shortcuts with characters "#", "@", "(", ")" in name didn't work.
+[*] Rename of "/@@" to "##" using Shift+F6 leaded to incorrect 
+creation of catalog "##".
+[-] Plugin used fixed width of panel columns instead of taking
+width from settings.
+
+----------------------------------------------------------------------------
 Version 2.5.1 postrelease [13.01.2006]
 ----------------------------------------------------------------------------
 [-] Named folders with backslashes didn't work.
 [-] Fixed an error of the compilation - previous version of the
 plugin demands msvcp71.dll
+[-] The plugin uses fixed width (8,0) of columns on the panel instead of
+taking default values for widths
 
 ----------------------------------------------------------------------------
 Version 2.5 release [9.01.2006]

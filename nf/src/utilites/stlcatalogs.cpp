@@ -67,8 +67,8 @@ tstring CCatalog::GetCatalogRegkey() const
 }
 
 bool CCatalog::SetShortcut(tstring const& Name, tstring const& Value, bool bTemporary) {	
-	nf::CRegistry r(m_key.get_key_handle(), GetKeyName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS));
-	r.SetValue(Name, Value);
+	nf::CRegistry r(m_key.get_key_handle(), GetKeyName((bTemporary) ? REG_TEMP_KEYS : REG_STATIC_KEYS));
+	r.SetValue(Name.c_str(), Value.c_str());
 	return true;
 }
 bool CCatalog::InsertSubcatalog(tstring const& name) {
@@ -124,3 +124,8 @@ tstring CCatalog::get_combined_path(wchar_t const* catalog, CCatalog const *pare
 	name += catalog;
 	return name;
 }
+
+wchar_t const* CCatalog::GetKeyName(tregs_enum Index) {
+	static wchar_t const* regs[] = {L"keys", L"tempkeys", L"Catalogs", L"\\Catalogs\\"};
+	return regs[static_cast<int>(Index)];
+};

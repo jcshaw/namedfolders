@@ -10,10 +10,8 @@
 #include "plugin.hpp"
 
 //глобальные переменные и настройки
-namespace nf
-{
-	typedef enum tsetting_strings
-	{
+namespace nf {
+	typedef enum tsetting_strings {
 		STS_PREFIXES
 		, ST_SOFT_MASKS_TO_IGNORE_COMMA_SEPARETED	//список масок игнорируемых "cd: soft"
 		, STS_PANELWIDTH //настройки ширины панели в виде N,Z,CO;10,0,10
@@ -53,8 +51,7 @@ namespace nf
 		, NUMBER_FLAG_SETTINGS 
 	} _tflag;
 
-	class CSettings
-	{
+	class CSettings {
 	private:
 		CSettings(void);
 		~CSettings(void);

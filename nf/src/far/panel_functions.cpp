@@ -29,7 +29,7 @@ namespace nf {
 			if (s.find_first_of(L":") != tstring::npos) return L"";
 			else return s;
 		}
-		void get_selected_shortcut_info(CPanel *pPanel, nf::tshortcut_info &sh) {
+		void get_selected_shortcut_info(CPanel *pPanel, nf::tshortcut_info &destSh) {
 			PanelInfo const &pi = pPanel->get_hPlugin().GetPanelInfo(true);
 			assert(! IsSelectedItemIsCatalog(pPanel, pi));
 
@@ -37,8 +37,7 @@ namespace nf {
 			BOOST_SCOPE_EXIT( (&ppi) ) {
 				deallocate_PluginPanelItem(ppi);
 			} BOOST_SCOPE_EXIT_END;
-
-				sh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FindData.lpwszFileName
+				destSh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FindData.lpwszFileName
 				, ppi->FindData.dwFileAttributes && FILE_ATTRIBUTE_TEMPORARY);
 		}
 	}
@@ -218,14 +217,14 @@ tstring nf::Panel::GetSelectedCatalog(CPanel* pPanel, PanelInfo const&pi, int nS
 		, SLASH_CATS);
 }
 
-nf::tshortcut_info& nf::Panel::GetSelectedShortcut(CPanel* pPanel, PanelInfo const &pi, nf::tshortcut_info& sh, int nSelectedItem) {
+nf::tshortcut_info& nf::Panel::GetSelectedShortcut(CPanel* pPanel, PanelInfo const &pi, nf::tshortcut_info& destSh, int nSelectedItem) {
 	PluginPanelItem *ppi = allocate_PluginPanelItem(pPanel, FCTL_GETSELECTEDPANELITEM, nSelectedItem);
 	BOOST_SCOPE_EXIT( (&ppi) ) {
 		deallocate_PluginPanelItem(ppi);
 	} BOOST_SCOPE_EXIT_END;
 
-	sh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FindData.lpwszFileName, 0 != ppi->CRC32);
-	return sh;
+	destSh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FindData.lpwszFileName, 0 != ppi->CRC32);
+	return destSh;
 }
 
 void nf::Panel::DeleteSelectedCatalogsAndShortcuts(CPanel *pPanel, PanelInfo const &pi) {

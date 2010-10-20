@@ -4,8 +4,8 @@
 #include "CommandPatterns.h"
 
 namespace nf {
-	namespace Patterns {
-	// Edit list of registered patterns.
-		void EditPatterns(nf::Patterns::CommandsManager &cm);
-	} 
+namespace Patterns {
+// Edit list of registered patterns.
+	void EditPatterns(nf::Patterns::CommandsManager &cm);
+} 
 } //nf

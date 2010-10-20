@@ -13,9 +13,7 @@
 
 namespace nf {
 
-class CDialogEditShortcut : public dialogT
-
-{
+class CDialogEditShortcut : public dialogT {
 	nf::tshortcut_info m_sh;
 	tstring m_ValueActivePanel;
 	tstring m_ValueInActivePanel;
@@ -75,7 +73,6 @@ public:
 			<< &far_di_button(ID_CANCEL, lg::MSG_CANCEL, 26, 12, 0)
 			;
 	};
-
 };
 
-};
+}

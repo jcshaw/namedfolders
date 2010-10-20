@@ -10,13 +10,11 @@
 #include "dialogsT.h"
 #include "lang.h"
 
-namespace nf 
-{
+namespace nf {
 
-	extern const wchar_t* GetMsg(int MsgId);
+extern const wchar_t* GetMsg(int MsgId);
 
-class CDialogApplyCommand : public dialogT
-{
+class CDialogApplyCommand : public dialogT {
 	tstring m_Command;
 public:
 	CDialogApplyCommand(void);
@@ -62,4 +60,4 @@ public:
 	}; //SetDialogItems
 }; //CDialogApplyCommand
 
-};//nf
+} //nf

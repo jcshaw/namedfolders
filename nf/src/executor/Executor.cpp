@@ -48,7 +48,13 @@ namespace {
 		if (cmd.shortcut.empty()) {	//create catalog
 			return nf::Shell::InsertCatalog(cmd.catalog);
 		} else { //select best fitted catalog
-			if (! nf::Selectors::GetCatalog(plugin, cmd, cat)) return false;
+//!TODO: select exist catalog OR create new one
+			if (! nf::Selectors::GetCatalog(plugin, cmd, cat)) {
+// 				if (Confirmations::AskForCreateCatalog(plugin, cmd.catalog)) {
+// 					nf::Commands::AddCatalog(plugin, cmd.catalog);
+// 				} else return false;
+				return false;
+			}
 			//add new shortcut to selected catalog
 			if ((nf::QK_INSERT_BOTH == cmd.kind) || (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind)) {
 				return nf::Commands::AddShortcutForBothPanels(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
@@ -298,19 +304,20 @@ bool nf::Commands::AddShortcut(HANDLE hPlugin, nf::tshortcut_info const &sh, tst
 	return Shell::InsertShortcut(sh, srcValue, true) != 0;
 }
 
-bool nf::Commands::AddShortcut(HANDLE hPlugin, nf::tcatalog_info const &cat, tstring const& sh, bool bTemp, bool bImplicit) {
-	if (sh.empty()) return false;	//name of shortcut is absent
-	return nf::Commands::AddShortcut(hPlugin, nf::MakeShortcut(cat, sh, bTemp)
-		, CPanelInfoWrap(hPlugin).GetPanelCurDir(true).c_str()
+bool nf::Commands::AddShortcut(HANDLE hPlugin, nf::tcatalog_info const &cat, tstring const& shName, bool bTemp, bool bImplicit) {
+	if (shName.empty()) return false;	//name of shortcut is absent
+
+	return nf::Commands::AddShortcut(hPlugin, nf::MakeShortcut(cat, shName, bTemp)
+		, CPanelInfoWrap(hPlugin).GetPanelCurDir(true)
 		, bImplicit);
 }
 
-bool nf::Commands::AddShortcutForBothPanels(HANDLE hPlugin, nf::tcatalog_info const &cat, tstring const& sh, bool bTemp, bool bImplicit) {
-	if (sh.empty()) return false;	
+bool nf::Commands::AddShortcutForBothPanels(HANDLE hPlugin, nf::tcatalog_info const &cat, tstring const& shName, bool bTemp, bool bImplicit) {
+	if (shName.empty()) return false;	
 	CPanelInfoWrap plugin(hPlugin);
-	return nf::Commands::AddShortcut(hPlugin
-		, nf::MakeShortcut(cat, sh, bTemp)
-		, nf::EncodeValues(plugin.GetPanelCurDir(true), plugin.GetPanelCurDir(false)).c_str()
+	nf::tshortcut_info sh;
+	return nf::Commands::AddShortcut(hPlugin, nf::MakeShortcut(cat, shName, bTemp)
+		, nf::EncodeValues(plugin.GetPanelCurDir(true), plugin.GetPanelCurDir(false))
 		, bImplicit);
 }
 

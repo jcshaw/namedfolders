@@ -82,6 +82,12 @@ $^#How use plugin through command line#
 and its subcatalogs only.
   #cd:name\path# - after opening #name# open related path #path#.
   #cd:~~text# - find all shortcuts which named folders paths contain #text#.
+	#cd:%var%# - open directory corresponded to environment variable #var#; 
+if there are several directories in this directory (";"), the plugin allows
+to selecte required directory through variant selection menu. It's possible
+to specify variable name incompletely, i.e. #cd:%p# instead on #cd:%path%#.
+NF3: *path* is found in the name of variable AND in the directory corresponded
+to this environment variable.
   #cd:path# - open specified path. Path must be absolute local path and may contains metacharacters.
 You can use ".RelativePath" to search "RelativePath" relatively current directory.
 
