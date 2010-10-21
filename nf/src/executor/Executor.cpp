@@ -200,8 +200,7 @@ namespace {
 		, nf::tshortcut_value_parsed SrcParsed
 		, tstring const &LocalPath0
 		, nf::twhat_to_search_t WhatToSearch
-		, std::list<tpair_strings> &DestList)
-	{
+		, std::list<tpair_strings> &DestList) {
 		tstring local_path = LocalPath0;		
 		if (! local_path.empty()) { //remove only one and only one leading slash
 			if (*local_path.begin() == L'\\') local_path.erase(local_path.begin());

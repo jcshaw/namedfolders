@@ -107,8 +107,8 @@ namespace {
 
 	void GetListPairsForRegKey(tstring const &RegKeyName
 		, tstring const& subkeyPatternName
-		, std::list<tpair_strings> &DestListPaths)
-	{	//получить список <ключ реестра, путь>, удовлетворяющих шаблону KeyPattern
+		, std::list<tpair_strings> &DestListPaths) {	
+	//получить список <ключ реестра, путь>, удовлетворяющих шаблону KeyPattern
 		tstring subkey;
 		HKEY hkey;
 		if (! decode_reg_key(RegKeyName, hkey, subkey)) return;		//что-то пользователь не то передал...
@@ -122,7 +122,10 @@ namespace {
 			tstring subkey_pattern_name = subkeyPatternName;
 			if (! subkeyPatternName.empty()) subkey_pattern_name += L"*";
 			if (subkeyPatternName.empty() || nf::Parser::IsTokenMatchedToPattern(value.name(), subkey_pattern_name, true)) {
-				DestListPaths.push_back(std::make_pair(value.name(), value.value_expand_sz())); //CHAR_LEADING_VALUE_ENVVAR
+				tstring path = value.value_expand_sz();
+				if (::PathFileExists(path.c_str())) { //#18: only exist paths
+					DestListPaths.push_back(std::make_pair(value.name(), path)); //CHAR_LEADING_VALUE_ENVVAR
+				}
 			}
 		}
 	}
@@ -186,19 +189,18 @@ bool nf::Selectors::GetPathByEnvvarPattern(HANDLE hPlugin
 };
 
 bool nf::Selectors::GetPathByRegKey(HANDLE hPlugins
-									, tstring const &RegkeyName //ключ реестра, содержащий переменные, содержащие требуемые пути
-									, tstring LocalPath
-									, tstring &result_path	//выбранная пользователем директория из всех возможных директорий
-									)
-{
+									, tstring const &regKey //ключ реестра, содержащий переменные, содержащие требуемые пути
+									, tstring localPath
+									, tstring &destPath	//выбранная пользователем директория из всех возможных директорий
+									) {
 	std::list<tpair_strings> list_var_paths;
-	::GetListPairsForRegKey(RegkeyName
-		, LocalPath	//!TODO: здесь только первое имя из localpath
+	::GetListPairsForRegKey(regKey
+		, localPath	//!TODO: здесь только первое имя из localpath
 		, list_var_paths);
 
 	tpair_strings result;
 	if (! Menu::SelectPathByRegKey(list_var_paths, result)) return false;
-	result_path = result.second;
+	destPath = result.second;
 	return true;
 }
 

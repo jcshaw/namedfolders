@@ -7,7 +7,7 @@ REGEDIT4
 ; stdu - для директорий текущего пользователя
 ; stda - для стандартных директорий всех пользователей.
 
-[HKEY_CURRENT_USER\Software\Far\Plugins\NamedFolders\Keys]
+[HKEY_CURRENT_USER\Software\Far2\Plugins\NamedFolders\Keys]
 "stda"="$HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\\"
 "stdu"="$HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\\"
 
