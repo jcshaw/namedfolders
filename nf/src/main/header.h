@@ -86,31 +86,32 @@ namespace nf {
 
 	typedef enum tcommand_flags {
 		FGC_ENABLED_SHORTCUT = 0x1			//название €рлычка указано
-		,FGC_ENABLED_LOCAL_DIRECTORY = 0x2	//дальнейший путь указан (только при OPEN)
-		,FGC_ENABLED_PARAM = 0x4			//указаны один или несколько параметров
-		,FGC_ENABLED_CATALOG = 0x10			//указан каталог
-		,FGC_ENABLED_PREFIX = 0x20			//указан префикс
+		, FGC_ENABLED_LOCAL_DIRECTORY = 0x2	//дальнейший путь указан (только при OPEN)
+		, FGC_ENABLED_PARAM = 0x4			//указаны один или несколько параметров
+		, FGC_ENABLED_CATALOG = 0x10			//указан каталог
+		, FGC_ENABLED_PREFIX = 0x20			//указан префикс
 	} _tcommand_flags;
 
 	typedef enum tcommands_kinds {	
 		QK_OPEN_SHORTCUT				//cd:
-		,QK_INSERT_SHORTCUT				//cd::путь
-		,QK_INSERT_SHORTCUT_TEMPORARY	//cd:+
-		,QK_INSERT_BOTH					//cd:::
-		,QK_INSERT_BOTH_TEMPORARY		//cd:+:
-		,QK_DELETE_SHORTCUT				//cD:-им€ псевдонима
-		,QK_DELETE_CATALOG				//cD:-им€ каталога/
-		,QK_OPEN_NETWORK				/*cd:\\*/
-		,QK_OPEN_PANEL					//cd:
-		,QK_OPEN_BY_PATH				//cd:~ 
-		,QK_INSERT_SHORTCUT_IMPLICIT	//cd:: 
-		,QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT	//cd:+ 
-		,QK_DELETE_SHORTCUT_IMPLICIT	//cd:-
-		,QK_OPEN_ENVIRONMENT_VARIABLE	//cd:%
-		,QK_START_SOFT_SHORTCUT			//cd: soft
-		,QK_SEARCH_FILE					//cd:--f path
-		,QK_SEARCH_DIRECTORIES_AND_FILES //cd:--df path
-		// при добавлении изменить функцию GetCommandAsString и парсер
+		, QK_INSERT_SHORTCUT				//cd::shortcut_name
+		, QK_INSERT_SHORTCUT_TEMPORARY	//cd:+
+		, QK_INSERT_BOTH					//cd:::
+		, QK_INSERT_BOTH_TEMPORARY		//cd:+:
+		, QK_DELETE_SHORTCUT				//cD:-shortcut_name
+		, QK_DELETE_CATALOG				//cD:-catalog_name/
+		, QK_OPEN_NETWORK				/*cd:\\*/
+		, QK_OPEN_PANEL					//cd:
+		, QK_OPEN_BY_PATH				//cd:~ 
+		, QK_INSERT_SHORTCUT_IMPLICIT	//cd:: 
+		, QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT	//cd:+ 
+		, QK_DELETE_SHORTCUT_IMPLICIT	//cd:-
+		, QK_OPEN_ENVIRONMENT_VARIABLE	//cd:%
+		, QK_START_SOFT_SHORTCUT			//cd: soft
+		, QK_SEARCH_FILE					//cd:--f path
+		, QK_SEARCH_DIRECTORIES_AND_FILES //cd:--df path
+		, QK_INSERT_CATALOG	            //cd::catalog_name/
+		// при добавлении изменить функцию get_command_as_string и парсер
 	} _tcommands_kinds;
 
 	typedef struct tparsed_command {

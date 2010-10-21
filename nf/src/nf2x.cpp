@@ -13,41 +13,25 @@
 #include "kernel.h"
 #include "ConfigureDialog.h"
 #include "open_plugin.h"
-// extern "C"
-// {
-// 	void WINAPI _export SetStartupInfoW(struct PluginStartupInfo const* Info);
-// 	HANDLE WINAPI _export OpenPluginW(int OpenFrom,int Item);
-// 	void WINAPI _export GetPluginInfoW(struct PluginInfo* Info);
-// 	void WINAPI _export GetOpenPluginInfoW(HANDLE hPlugin, struct OpenPluginInfo *Info);
-// 	int WINAPI _export GetFindDataW(HANDLE hPlugin, struct PluginPanelItem **pPanelItem, int *pItemsNumber, int OpMode);
-// 	int WINAPI _export SetDirectoryW(HANDLE hPlugin,const wchar_t *Dir,int OpMode);
-// 	void WINAPI _export ClosePluginW(HANDLE hPlugin);
-// 	int WINAPI _export ProcessKeyW(HANDLE hPlugin,int Key,unsigned int ControlState);
-// 	int WINAPI _export GetMinFarVersionW(void);
-// 	int WINAPI _export ConfigureW(int ItemNumber);
-// 	int WINAPI _export MakeDirectoryW(HANDLE hPlugin, wchar_t *Name, int OpMode);
-// 	void WINAPI _export FreeFindDataW(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber);
-// 	int WINAPI _export PutFilesW(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber, int Move, int OpMode);
-// 	int WINAPI _export ProcessEventW(HANDLE hPlugin, int Event, void *Param);
-// };
 
-extern "C" {
-	// Exported Functions
-	void   WINAPI _export ClosePluginW(HANDLE hPlugin);
-	int    WINAPI _export ConfigureW(int ItemNumber);
-	void   WINAPI _export FreeFindDataW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber);
-	int    WINAPI _export GetFindDataW(HANDLE hPlugin,struct PluginPanelItem **pPanelItem,int *pItemsNumber,int OpMode);
-	int    WINAPI _export GetMinFarVersionW(void);
-	void   WINAPI _export GetOpenPluginInfoW(HANDLE hPlugin,struct OpenPluginInfo *Info);
-	void   WINAPI _export GetPluginInfoW(struct PluginInfo *Info);
-	int    WINAPI _export MakeDirectoryW(HANDLE hPlugin,const wchar_t **Name,int OpMode);
-	HANDLE WINAPI _export OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int DataSize,int OpMode);
-	HANDLE WINAPI _export OpenPluginW(int OpenFrom,INT_PTR Item);
-	int    WINAPI _export ProcessKeyW(HANDLE hPlugin,int Key,unsigned int ControlState);
-	int    WINAPI _export PutFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber,int Move,const wchar_t *SrcPath,int OpMode);
-	int    WINAPI _export SetDirectoryW(HANDLE hPlugin,const wchar_t *Dir,int OpMode);
-	void   WINAPI _export SetStartupInfoW(const struct PluginStartupInfo *Info);
-};
+// 
+// extern "C" {
+// 	// Exported Functions
+// 	void   WINAPI _export ClosePluginW(HANDLE hPlugin);
+// 	int    WINAPI _export ConfigureW(int ItemNumber);
+// 	void   WINAPI _export FreeFindDataW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber);
+// 	int    WINAPI _export GetFindDataW(HANDLE hPlugin,struct PluginPanelItem **pPanelItem,int *pItemsNumber,int OpMode);
+// 	int    WINAPI _export GetMinFarVersionW(void);
+// 	void   WINAPI _export GetOpenPluginInfoW(HANDLE hPlugin,struct OpenPluginInfo *Info);
+// 	void   WINAPI _export GetPluginInfoW(struct PluginInfo *Info);
+// 	int    WINAPI _export MakeDirectoryW(HANDLE hPlugin,const wchar_t **Name,int OpMode);
+// 	HANDLE WINAPI _export OpenFilePluginW(const wchar_t *Name,const unsigned char *Data,int DataSize,int OpMode);
+// 	HANDLE WINAPI _export OpenPluginW(int OpenFrom,INT_PTR Item);
+// 	int    WINAPI _export ProcessKeyW(HANDLE hPlugin,int Key,unsigned int ControlState);
+// 	int    WINAPI _export PutFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber,int Move,const wchar_t *SrcPath,int OpMode);
+// 	int    WINAPI _export SetDirectoryW(HANDLE hPlugin,const wchar_t *Dir,int OpMode);
+// 	void   WINAPI _export SetStartupInfoW(const struct PluginStartupInfo *Info);
+// };
 
 
 struct PluginStartupInfo g_PluginInfo; 
@@ -90,7 +74,7 @@ void WINAPI _export GetPluginInfoW(struct PluginInfo *pInfo) {
 	pInfo->Flags = PF_FULLCMDLINE;
 	
 	static std::wstring list_prefixes = CSettings::GetInstance().GetListPrefixes().c_str();
-	pInfo->CommandPrefix = CSettings::GetInstance().GetListPrefixes().c_str();//		list_prefixes.c_str();
+	pInfo->CommandPrefix = list_prefixes.c_str();
 	return;
 }
 

@@ -97,8 +97,7 @@ void nf::Patterns::EditPatterns(nf::Patterns::CommandsManager &cm)
 
 					cm.SetCommand(dlg.GetResultPrefix(), dlg.GetResultPattern());
 				}
-			} //if 
-			break;
+			} break;
 		}
 	}
 }

@@ -142,16 +142,16 @@ bool nf::Panel::EditShortcut(CPanel* pPanel, nf::tshortcut_info const &shortcut_
 
 bool nf::Panel::InsertShortcut(CPanel* pPanel, PanelInfo const &pi) {
 	nf::tshortcut_info default_sh;
-	nf::tshortcut_value_parsed apv;
+	tstring active_panel_value;
 
 	std::pair<tstring, tstring> pair_name_value = nf::Commands::get_implicit_name_and_value(pPanel->get_hPlugin(), false);
 	default_sh.shortcut.swap(pair_name_value.first);
-	apv.value.swap(pair_name_value.second);
+	active_panel_value.swap(pair_name_value.second);
 
 	default_sh.bIsTemporary = false;
 	default_sh.catalog = pPanel->GetCurrentCatalog();
 
-	return InsertShortcut(pPanel, pi, default_sh, apv.value);
+	return InsertShortcut(pPanel, pi, default_sh, active_panel_value);
 }
 
 bool nf::Panel::InsertShortcut(CPanel* pPanel, PanelInfo const &pi, tshortcut_info const &Sh, tstring const &Value) {

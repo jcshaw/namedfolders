@@ -7,7 +7,6 @@
 #pragma once
 #include "header.h"
 
-//encode/decode values of shortcuts
 namespace nf {
 //encode two shortcut values (for both paneles) to single string
 	tstring EncodeValues(tstring const& ValueFirstPanel
@@ -17,5 +16,5 @@ namespace nf {
 	tshortcut_value_parsed_pair DecodeValues(tstring const& Value);
 
 	nf::tshortcut_info MakeShortcut(tstring const& srcCatalog
-		, tstring const& srcShortcut, bool bTemporary); //!TODO: remove to utils-file
+		, tstring const& srcShortcut, bool bTemporary); 
 }

@@ -61,6 +61,7 @@ namespace {
 		case nf::QK_START_SOFT_SHORTCUT: return L" "; //cd: soft
 		case nf::QK_SEARCH_FILE: return L"--f";//cd:--f path
 		case nf::QK_SEARCH_DIRECTORIES_AND_FILES: return L"--df";//cd:--f path
+		case nf::QK_INSERT_CATALOG: return L"::";
 		default: {
 			assert(false);
 			return L"";

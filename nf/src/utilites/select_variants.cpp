@@ -15,7 +15,7 @@
 #include "stlcatalogs.h"
 #include <algorithm>
 #include "Parser.h"
-#include "codec_for_values.h"
+#include "shortcut_utils.h"
 #include "strings_utils.h"
 
 #include "searcherpaths.h"

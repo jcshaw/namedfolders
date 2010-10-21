@@ -10,8 +10,7 @@
 #include "strings_utils.h"
 #include "settings.h"
 
-namespace re	//регулярные выражения
-{
+namespace re {	//регулярные выражения
 //парсинг типа команды
 //массив LIST_COMMANDS задает последовательность команд
 //в массиве RE_LIST_COMMANDS в соответствующей последовательности
@@ -19,45 +18,47 @@ namespace re	//регулярные выражения
 //в регулярном выражении не указан префикс (он задается отдельным регулярным выражением RE_PREFIX)
 //каждое регулярное выражение раскладывает строку на две части - команду (один или несколько спецсимовлов)
 //и путь к ярлыку и директорию
-	const int NUM_COMMANDS = 17;
+	const int NUM_COMMANDS = 18;
 	nf::tcommands_kinds LIST_COMMANDS[NUM_COMMANDS] = {
 		nf::QK_OPEN_SHORTCUT		
-		,nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT	
-		,nf::QK_INSERT_SHORTCUT_IMPLICIT	
-		,nf::QK_SEARCH_FILE
-		,nf::QK_SEARCH_DIRECTORIES_AND_FILES
-		,nf::QK_DELETE_SHORTCUT_IMPLICIT	
-		,nf::QK_INSERT_SHORTCUT
-		,nf::QK_INSERT_SHORTCUT_TEMPORARY
-		,nf::QK_INSERT_BOTH_TEMPORARY
-		,nf::QK_INSERT_BOTH
-		,nf::QK_DELETE_SHORTCUT
-		,nf::QK_DELETE_CATALOG
-		,nf::QK_OPEN_NETWORK
-		,nf::QK_OPEN_PANEL
-		,nf::QK_OPEN_BY_PATH
-		,nf::QK_OPEN_ENVIRONMENT_VARIABLE
-		,nf::QK_START_SOFT_SHORTCUT
+		, nf::QK_INSERT_CATALOG
+		, nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT	
+		, nf::QK_INSERT_SHORTCUT_IMPLICIT	
+		, nf::QK_SEARCH_FILE
+		, nf::QK_SEARCH_DIRECTORIES_AND_FILES
+		, nf::QK_DELETE_SHORTCUT_IMPLICIT	
+		, nf::QK_INSERT_SHORTCUT
+		, nf::QK_INSERT_SHORTCUT_TEMPORARY
+		, nf::QK_INSERT_BOTH_TEMPORARY
+		, nf::QK_INSERT_BOTH
+		, nf::QK_DELETE_SHORTCUT
+		, nf::QK_DELETE_CATALOG
+		, nf::QK_OPEN_NETWORK
+		, nf::QK_OPEN_PANEL
+		, nf::QK_OPEN_BY_PATH
+		, nf::QK_OPEN_ENVIRONMENT_VARIABLE
+		, nf::QK_START_SOFT_SHORTCUT
 
 	};	//последовательность команд в списке RE_LIST_COMMANDS
 	wchar_t const* LIST_RE[NUM_COMMANDS] = {
 		L"()([\\*\\?\\w\\d_\\.@#\\(\\)].*)"
-		,L"(\\+)((?:.+\\/)?)$"
-		,L"(:)((?:.+\\/)?)$"
-		,L"(\\-\\-f\\s+)(.*)"
-		,L"(\\-\\-df\\s+)(.*)"
-		,L"(\\-)((?:.+\\/)?)$"
-		,L"(:)([^:\\+].*)"
-		,L"(\\+)([^:\\+].*)"
-		,L"(:\\+)(.*)"	//QK_INSERT_BOTH_TEMPORARY
-		,L"(::)(.*)"
-		,L"(\\-)(.*[^\\/]\\s*)"
-		,L"(\\-)(.*\\/\\s*)"
-		,L"(\\\\)(.*)"
-		,L"(\\s*)()$"
-		,L"(~)(.*)"
-		,L"(%)(.*)"
-		,L"( )(.*)"
+		, L"(:)([^:\\+].+?/)$" //QK_INSERT_CATALOG
+		, L"(\\+)((?:.+\\/)?)$"
+		, L"(:)((?:.+\\/)?)$"
+		, L"(\\-\\-f\\s+)(.*)"
+		, L"(\\-\\-df\\s+)(.*)"
+		, L"(\\-)((?:.+\\/)?)$"
+		, L"(:)([^:\\+].*)"
+		, L"(\\+)([^:\\+].*)"
+		, L"(:\\+)(.*)"	//QK_INSERT_BOTH_TEMPORARY
+		, L"(::)(.*)"
+		, L"(\\-)(.*[^\\/]\\s*)"
+		, L"(\\-)(.*\\/\\s*)"
+		, L"(\\\\)(.*)"
+		, L"(\\s*)()$"
+		, L"(~)(.*)"
+		, L"(%)(.*)"
+		, L"( )(.*)"
 	};
 //префикс команды
 	wchar_t const * RE_PREFIX = L"^((?:[\\w]+)|(?::)):";
@@ -74,14 +75,9 @@ namespace re	//регулярные выражения
 		L"(?:.+\\\\\\\\)|(?:\\*)|(?:\\?)|(?:\\[[^]]+\\])";
 	wchar_t const* RE_SEARCH_META_INTOKENS_ONLY =	//метасимволы в названиях (*, [], ?) но не пути (слеши)
 		L"(?:\\*)|(?:\\?)|(?:\\[[^]]+\\])";
-
 }
 
-using namespace nf;
-using namespace Parser;
-
-bool nf::Parser::ParseString(tstring const &srcStr, nf::tparsed_command &t)
-{
+bool nf::Parser::ParseString(tstring const &srcStr, nf::tparsed_command &t) {
 	tstring csdp;
 	t.flags = 0;
 
@@ -125,8 +121,8 @@ bool nf::Parser::GetCommandKind(tstring const& source, nf::tcommands_kinds &kind
 }
 
 namespace {
-	void remove_prefix_from_shortcut(tstring &s)
-	{	//если строка s содержит префикс (\w\w+:), то удаляем его из s; сделано, чтобы исключить случаи cd:cd:
+	inline void remove_prefix_from_shortcut(tstring &s) {
+	//если строка s содержит префикс (\w\w+:), то удаляем его из s; сделано, чтобы исключить случаи cd:cd:
 		size_t npos = s.find(L':');
 		if (npos != tstring::npos)
 		if (npos > 1) {
@@ -135,9 +131,8 @@ namespace {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &d, tstring &p)
-{	//разделить каталог/ярлычек\директорию на составляющие
+bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &d, tstring &p) {	
+//разделить каталог/ярлычек\директорию на составляющие
 	tregex expression(re::RE_CSD);
 	tsmatch what;
 	if (boost::regex_match(csdp, what, expression)) {
@@ -149,7 +144,6 @@ bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &
 		p = what[4];
 		return true;
 	}
-
 	return false;
 }
 

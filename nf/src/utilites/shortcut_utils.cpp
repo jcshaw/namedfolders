@@ -5,7 +5,7 @@
 * e-mail: dvpublic0@gmail.com
 */
 #include "stdafx.h"
-#include "codec_for_values.h"
+#include "shortcut_utils.h"
 #include "strings_utils.h"
 
 using namespace nf;

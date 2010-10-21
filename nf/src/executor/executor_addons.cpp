@@ -23,7 +23,7 @@
 #include "stlcatalogs.h"
 #include "menu2.h"
 #include "lang.h"
-#include "codec_for_values.h"
+#include "shortcut_utils.h"
 #include "confirmations.h"
 #include "Parser.h"
 #include "select_variants.h"
@@ -31,7 +31,6 @@
 using namespace nf;
 
 namespace {
-
 	void gen_list_envvars(tstring const& srcMask, std::list<tpair_strings> &listPairs, bool bIncompleteName) {
 		//получаем значения всех переменных среды, которые удовлетворяют шаблону varPattern
 		//генерируем список всех директорий на которые ссылаются выбранные переменные среды
@@ -67,8 +66,8 @@ namespace {
 			++penv;
 		}
 	}
-	void get_list_pairs_for_envvar(tstring const &varPattern, std::list<tpair_strings> &listPairs, tstring &destLocalPath) 
-	{	//получить список <имя переменная среды, путь>, удовлетворяющих шаблону varPattern
+	void get_list_pairs_for_envvar(tstring const &varPattern, std::list<tpair_strings> &listPairs, tstring &destLocalPath) {
+		//получить список <имя переменная среды, путь>, удовлетворяющих шаблону varPattern
 		//Если varPattern задана в виде %varPattern% или %varPattern то 
 		//расширяем varPattern в переменную среды средствами NF
 

@@ -22,7 +22,7 @@ namespace nf {
 //в итоге два варианта поиска для класса CSearcherPaths задаются в Search
 namespace Search {
 	struct CSearchPolice {
-		CSearchPolice(twhat_to_search_t WhatToSearch) :  m_WhatToSearch(WhatToSearch) {}
+		explicit CSearchPolice(twhat_to_search_t WhatToSearch) :  m_WhatToSearch(WhatToSearch) {}
 	//выполнить поиск поддиректории по заданному шаблону имени директории
 		virtual void  SearchSubdir(tstring const& RootDir, tstring const& Name, std::list<tstring> &list) const = 0;
 		twhat_to_search_t GetWhatToSearch() const {
@@ -31,11 +31,11 @@ namespace Search {
 		twhat_to_search_t m_WhatToSearch;
 	};
 
-	class CSearchSystemPolice : public CSearchPolice
-	{	//поиск системными средствами; метасимволы [] не поддерживаются
+	class CSearchSystemPolice : public CSearchPolice {
+		//поиск системными средствами; метасимволы [] не поддерживаются
 		//все найденные имена автоматически считаются совпавшими с шаблоном
 	public:
-		CSearchSystemPolice(twhat_to_search_t WhatToSearch) : CSearchPolice(WhatToSearch) {}
+		explicit CSearchSystemPolice(twhat_to_search_t WhatToSearch) : CSearchPolice(WhatToSearch) {}
 		virtual void SearchSubdir(tstring const& RootDir, tstring const& Name, std::list<tstring> &list) const;
 	};
 
@@ -43,7 +43,7 @@ namespace Search {
 	{	//находим все директорий, а затем проверяем совпадение имен с шаблоном
 		//средствами Far
 	public:
-		CSearchFarPolice(twhat_to_search_t WhatToSearch) : CSearchPolice(WhatToSearch) {}
+		explicit CSearchFarPolice(twhat_to_search_t WhatToSearch) : CSearchPolice(WhatToSearch) {}
 		virtual void SearchSubdir(tstring const& RootDir, tstring const& Name, std::list<tstring> &list) const;
 	};
 

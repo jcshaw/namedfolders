@@ -394,14 +394,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\utilites\codec_for_values.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\utilites\codec_for_values.h"
-				>
-			</File>
-			<File
 				RelativePath=".\utilites\CommandPatterns.cpp"
 				>
 			</File>
@@ -471,6 +463,14 @@
 			</File>
 			<File
 				RelativePath=".\utilites\settings.h"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\shortcut_utils.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\shortcut_utils.h"
 				>
 			</File>
 			<File

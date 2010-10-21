@@ -16,11 +16,10 @@ typedef std::list<tcommand_pattern> tlist_command_patterns;
 // Считывание списка команд, добавление, удаление, редактирование
 // Рекурсивная раскрутка команды
 /************************************************************************/
-class CommandsManager
-{
+class CommandsManager {
 	nf::CRegistry m_Key;
 public:
-	CommandsManager(tstring const& RegKey);
+	explicit CommandsManager(tstring const& RegKey);
 	~CommandsManager();
 
 	bool SetCommand(tstring const& Prefix, tstring const& Pattern);
@@ -43,7 +42,7 @@ class CommandPatterns {
 	typedef std::map<tstring, tstring, Utils::CmpStringLessCI> tmap;	//prefix - patterns
 	tmap m_PP;
 public:
-	CommandPatterns(tlist_command_patterns const&ListPatterns);
+	explicit CommandPatterns(tlist_command_patterns const&ListPatterns);
 	~CommandPatterns(void);
 
 	bool TransformCommand(nf::tparsed_command const &SrcCmd
@@ -59,7 +58,7 @@ public:
 			tlistparts const m_SrcParts;
 			tlistparts m_DestParts;
 		public:
-			DetailedCommand(nf::tparsed_command const &SrcCmd);
+			explicit DetailedCommand(nf::tparsed_command const &SrcCmd);
 			void ApplyPattern(tstring const& Pattern);
 			tstring GetResultString() const;
 		private:

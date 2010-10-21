@@ -18,7 +18,7 @@
 #include "executor_addons.h"
 #include "executor_select.h"
 #include "lang.h"
-#include "codec_for_values.h"
+#include "shortcut_utils.h"
 #include "confirmations.h"
 #include "Parser.h"
 #include "StartSoftShortcut.h"
@@ -43,35 +43,33 @@ namespace {
 	}
 
 	bool insert_shortcut(nf::tparsed_command &cmd, CPanelInfoWrap &plugin, bool bImplicit, bool bTemporary) {
-		nf::tcatalog_info cat;
 		if (bImplicit) cmd.shortcut = nf::Commands::get_implicit_name_and_value().first;
-		if (cmd.shortcut.empty()) {	//create catalog
-			return nf::Shell::InsertCatalog(cmd.catalog);
-		} else { //select best fitted catalog
+		if (cmd.shortcut.empty()) return false;
+		//select best matchec catalog
+
 //!TODO: select exist catalog OR create new one
-			if (! nf::Selectors::GetCatalog(plugin, cmd, cat)) {
+		nf::tcatalog_info cat;
+		if (! nf::Selectors::GetCatalog(plugin, cmd, cat)) {
 // 				if (Confirmations::AskForCreateCatalog(plugin, cmd.catalog)) {
 // 					nf::Commands::AddCatalog(plugin, cmd.catalog);
 // 				} else return false;
-				return false;
-			}
-			//add new shortcut to selected catalog
-			if ((nf::QK_INSERT_BOTH == cmd.kind) || (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind)) {
-				return nf::Commands::AddShortcutForBothPanels(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
-			} else {
-				return nf::Commands::AddShortcut(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
-			}
-		} //if
+			return false;
+		}
+		//add new shortcut to selected catalog
+		if ((nf::QK_INSERT_BOTH == cmd.kind) || (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind)) {
+			return nf::Commands::AddShortcutForBothPanels(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
+		} else {
+			return nf::Commands::AddShortcut(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
+		}
 		return false;
 	}
 
-	nf::twhat_to_search_t get_what_to_search(nf::tparsed_command &cmd) {
-		nf::twhat_to_search_t what_to_search = nf::WTS_DIRECTORIES;
-		switch (cmd.kind) {
-		case nf::QK_SEARCH_FILE: what_to_search = nf::WTS_FILES; break;
-		case nf::QK_SEARCH_DIRECTORIES_AND_FILES: what_to_search = nf::WTS_DIRECTORIES_AND_FILES; break;
+	nf::twhat_to_search_t get_what_to_search(tcommands_kinds srcKind) {
+		switch (srcKind) {
+		case nf::QK_SEARCH_FILE: return nf::WTS_FILES; 
+		case nf::QK_SEARCH_DIRECTORIES_AND_FILES: return nf::WTS_DIRECTORIES_AND_FILES; 
+		default: return nf::WTS_DIRECTORIES;
 		};
-		return what_to_search;
 	}
 
 	bool open_shortcut( nf::tparsed_command &cmd, CPanelInfoWrap& plugin, nf::twhat_to_search_t whatToSearch) {
@@ -109,17 +107,19 @@ namespace {
 		return DR_DELETE == nf::Commands::DeleteCatalog(cat);
 	}
 
+	inline bool insert_catalog(CPanelInfoWrap plugin, nf::tparsed_command & cmd) {
+		return Commands::AddCatalog(plugin, cmd.catalog);
+	}
 }
 
-bool nf::ExecuteCommand(nf::tparsed_command &cmd)
-{
+bool nf::ExecuteCommand(nf::tparsed_command &cmd) {
 	CPanelInfoWrap plugin(INVALID_HANDLE_VALUE);
 
 	switch(cmd.kind) {
 	case nf::QK_OPEN_SHORTCUT: //cd:
 	case nf::QK_SEARCH_DIRECTORIES_AND_FILES:
 	case nf::QK_SEARCH_FILE: 
-		return open_shortcut(cmd, plugin, get_what_to_search(cmd));
+		return open_shortcut(cmd, plugin, get_what_to_search(cmd.kind));
 	case nf::QK_OPEN_BY_PATH:	//cd:~ 
 		return open_by_path(plugin, cmd);
 	case nf::QK_OPEN_ENVIRONMENT_VARIABLE: //cd:%
@@ -141,10 +141,12 @@ bool nf::ExecuteCommand(nf::tparsed_command &cmd)
 		);
 	case nf::QK_DELETE_SHORTCUT_IMPLICIT: //cd:-
 		return delete_shortcut(cmd, plugin, true);
-	case nf::QK_DELETE_SHORTCUT:	//cD:-alias
+	case nf::QK_DELETE_SHORTCUT:	//cd:-alias
 		return delete_shortcut(cmd, plugin, false);
-	case nf::QK_DELETE_CATALOG:	//cD:-
+	case nf::QK_DELETE_CATALOG:	//cd:-
 		return delete_catalog(plugin, cmd);
+	case nf::QK_INSERT_CATALOG: //cd::catalog/
+		return insert_catalog(plugin, cmd);
 	case nf::QK_START_SOFT_SHORTCUT:
 		return Start::OpenSoftShortcut(plugin, cmd);
 	default:;
@@ -227,34 +229,52 @@ namespace {
 }
 
 bool nf::Commands::OpenShortcut(HANDLE hPlugin
-								, nf::tshortcuts_list const& SrcList
+								, nf::tshortcut_info const& sh
 								, tstring const &LocalPath
 								, bool bOpenOnActivePanel
 								, nf::twhat_to_search_t WhatToSearch)
-{	//открыть один из возможных псевдонимов
-	//учесть локальные пути, сразу показать список всех возможных директорий (а не псевдонимов, затем директорий)
+{	//open shortcut directory on panel, or both shortcut directories on both panels
 	CPanelInfoWrap plugin(hPlugin);
-	//получаем значения для каждого из алиасов
-	std::list<tpair_strings> list_alias_path;
+	tstring value = get_shortcut_value_ex(plugin, sh);
+
+	nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(value);
+	select_panel(plugin, vp, bOpenOnActivePanel);
+
+	bool bOpenBoth = vp.first.bValueEnabled && vp.second.bValueEnabled;
+	if (vp.second.bValueEnabled) ::OpenShortcutOnPanel(hPlugin, vp.second, LocalPath, false, bOpenBoth, false, WhatToSearch);
+	if (vp.first.bValueEnabled) ::OpenShortcutOnPanel(hPlugin, vp.first, LocalPath, true, bOpenBoth
+		, (hPlugin != INVALID_HANDLE_VALUE), WhatToSearch);
+
+	return true;
+}
+
+bool nf::Commands::OpenShortcut(HANDLE hPlugin
+								, nf::tshortcuts_list const& SrcList
+								, tstring const &LocalPath
+								, bool bOpenOnActivePanel
+								, nf::twhat_to_search_t WhatToSearch) {
+//open one of possible shortcuts
+//show list of possible paths with taking into account available local paths
+	CPanelInfoWrap plugin(hPlugin);
+	std::list<tpair_strings> list_sh_paths; //values for each shortcut
 	BOOST_FOREACH(nf::tshortcut_info const& kvp, SrcList) { 
 		tstring value = get_shortcut_value_ex(plugin, kvp);
 		if (! value.empty()) {
 			nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(value);	
 		//если две директории - помещаем в список обе
-			::append_paths(hPlugin, kvp, vp.first, LocalPath, WhatToSearch, list_alias_path);
-			::append_paths(hPlugin, kvp, vp.second, LocalPath, WhatToSearch, list_alias_path);
+			::append_paths(hPlugin, kvp, vp.first, LocalPath, WhatToSearch, list_sh_paths);
+			::append_paths(hPlugin, kvp, vp.second, LocalPath, WhatToSearch, list_sh_paths);
 		}
 	}
-	//предлагаем пользователю выбрать требуемый путь
-	//!TODO: special handling for other plugin directories (i.e. FTP).
-	return ::SelectAndOpenPathOnPanel(hPlugin, list_alias_path, WhatToSearch, bOpenOnActivePanel);
+//suggest user to select path
+//!TODO: special handling for other plugin directories (i.e. FTP).
+	return ::SelectAndOpenPathOnPanel(hPlugin, list_sh_paths, WhatToSearch, bOpenOnActivePanel);
 }
 
-bool nf::Commands::OpenPath(HANDLE hPlugin, tstring const& path)
-{	//открыть заданную директорию на активной панели
+bool nf::Commands::OpenPath(HANDLE hPlugin, tstring const& path) {	//open specified directory on the active panel
 	nf::tshortcut_value_parsed ap;		//active panel
 	ap.bValueEnabled = true;
-	ap.value  = path;
+	ap.value = path;
 	ap.ValueType = nf::VAL_DIRECT_PATH;
 
 	::OpenShortcutOnPanel(hPlugin, ap, L"", true, false, true, nf::WTS_DIRECTORIES);
@@ -281,14 +301,6 @@ void nf::Commands::OpenPathInExplorer(tstring const& srcPath) {
 	si.cb = sizeof(STARTUPINFO);
 	PROCESS_INFORMATION pi;
 	::CreateProcess(0, &sv[0], NULL, NULL, 0, 0, NULL, 0, &si, &pi);
-}
-
-bool nf::Commands::AddCatalog(HANDLE hPlugin, nf::tcatalog_info const &cat) {
-	tstring parent;
-	tstring c;
-	Utils::DividePathFilename(cat, parent, c, SLASH_CATS_CHAR, false);
-	Utils::RemoveLeadingCharsOnPlace(c, SLASH_CATS_CHAR);
-	return Shell::InsertCatalog(c.c_str(), parent.c_str());
 }
 
 bool nf::Commands::AddShortcut(HANDLE hPlugin, nf::tshortcut_info const &sh, tstring const& srcValue, bool bImplicit) {

@@ -20,8 +20,7 @@ namespace nf {
 		, NUMBER_STRING_SETTINGS 
 	} _tsetting_strings;
 
-	typedef enum tsetting_flags 
-	{	//флаги настроек
+	typedef enum tsetting_flags {	//флаги настроек
 		ST_SHOW_ERRORS					//показывать ошибки
 		, ST_SHOW_IN_PLUGINS_MENU		//отображать название плагина в меню плагинов
 		, ST_SHOW_IN_DISK_MENU			//показывать название плагина в меню дисков
@@ -55,7 +54,6 @@ namespace nf {
 	private:
 		CSettings(void);
 		~CSettings(void);
-
 	public:
 		static CSettings& GetInstance() {
 			static CSettings st;
@@ -70,11 +68,9 @@ namespace nf {
 		DWORD GetValue(tsetting_flags fg) const;	
 		tstring const& GetValue(tsetting_strings fg) const;
 		tstring const& get_NamedFolders_reg_key() const { return m_nf_reg_key;}
-
 	public: //задать значение требуемого флага настройки (в промежуточном массиве)
 		void SetValue(tsetting_flags fg, DWORD Value);	
 		void SetValue(tsetting_strings fg, tstring Value);
-
 	private:	//members
 		nf::tautobuffer_byte m_FV;	//flag values
 		std::vector<tstring> m_SV;	//string values

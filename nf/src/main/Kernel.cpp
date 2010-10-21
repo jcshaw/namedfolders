@@ -19,10 +19,8 @@
 
 using namespace nf;
 
-size_t nf::Shell::SelectShortcuts(tstring shPattern
-								, tstring srcCatalog
-								, tshortcuts_list& destList)
-{	//find all shortcuts that fit to specified pattern
+size_t nf::Shell::SelectShortcuts(tstring shPattern, tstring srcCatalog, tshortcuts_list& destList) {
+//find all shortcuts that match to specified pattern
 	if (!shPattern.size()) shPattern = L"*";
 	Utils::RemoveTrailingCharsOnPlace(srcCatalog, SLASH_CATS_CHAR);
 	Shell::SelectShortcuts(srcCatalog, shPattern, destList, true);
@@ -66,12 +64,13 @@ bool nf::Shell::ModifyShortcut(tshortcut_info const& from, tshortcut_info const&
 	return true;
 }
 
-
-bool nf::Shell::InsertCatalog(tstring catalog, wchar_t const* Parent) {
-	Utils::RemoveTrailingCharsOnPlace(catalog, SLASH_CATS_CHAR);
-
-	sc::CCatalog c(Parent);
-	return c.InsertSubcatalog(catalog);
+bool nf::Shell::InsertCatalog(tstring const& srcCatalog, tstring const& subCatalogName) {
+	sc::CCatalog c(srcCatalog); //CCatalog is able to restore catalog hierarchy 
+	if (! subCatalogName.empty()) {
+		return c.InsertSubcatalog(Utils::RemoveTrailingChars(subCatalogName, SLASH_CATS_CHAR));
+	} else {
+		return true; 
+	}
 }
 
 bool nf::Shell::Private::remove_catalog(tstring const& srcCatalog, tstring const* pTargetCatalog, bool bDeleteSource) {
@@ -95,14 +94,12 @@ bool nf::Shell::Private::remove_catalog(tstring const& srcCatalog, tstring const
 	}
 }
 
-bool nf::Shell::GetShortcutValue(tshortcut_info const& sh, tstring& value)
-{
+bool nf::Shell::GetShortcutValue(tshortcut_info const& sh, tstring& value) {
 	sc::CCatalog c(sh.catalog);
 	return c.GetShortcutInfo(sh.shortcut, sh.bIsTemporary, value);
 }
 
-bool nf::Shell::MoveShortcut(tshortcut_info const& sh, tstring const& new_shortcut_path, tshortcut_info &sh2)
-{	
+bool nf::Shell::MoveShortcut(tshortcut_info const& sh, tstring const& new_shortcut_path, tshortcut_info &sh2) {	
 	if (Utils::PrepareMovingShortcut(sh, new_shortcut_path, sh2)) {
 		return Shell::ModifyShortcut(sh, sh2, 0);
 	} else return false;
