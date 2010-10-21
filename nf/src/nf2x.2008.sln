@@ -1,8 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nf2x", "nf2x.vcproj", "{8676B3B0-390D-45E8-AF2F-53AE02970A90}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nf2x", "nf2x.2008.vcproj", "{8676B3B0-390D-45E8-AF2F-53AE02970A90}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nfut", "nfut.vcproj", "{3C021BFA-971D-42ED-912B-27CE727BBE80}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nfut", "nfut.2008.vcproj", "{3C021BFA-971D-42ED-912B-27CE727BBE80}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
