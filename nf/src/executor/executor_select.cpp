@@ -40,8 +40,7 @@ void nf::Selectors::GetPath(HANDLE hPlugin
 							, tstring const &Value
 							, tstring const &localPath0
 							, nf::twhat_to_search_t whatToSearch
-							, std::list<tstring> &destListPaths)
-{
+							, std::list<tstring> &destListPaths) {
 	//p может содержать метасимволы
 	//находим все директории, удовлетворяющие panel.value
 

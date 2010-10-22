@@ -192,8 +192,8 @@ bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, 
 	std::list<tstring> variants;
 	Private::search_multisubdir(RootDir, name, level, searchPolice, variants);
 
-	if (! *next_pattern)
-	{	// поиск завершен, variants содержит искомые директории
+	if (! *next_pattern) {
+		// поиск завершен, variants содержит искомые директории
 		// копируем их в массив результатов
 		std::copy(variants.begin(), variants.end(), 
 			std::insert_iterator<std::list<tstring> >(dest, dest.begin()));

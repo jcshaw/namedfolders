@@ -90,9 +90,10 @@
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">D:\libs\stlsoft-1.9.101\include;D:\libs\boost\include\boost-1_44;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\libs\stlsoft-1.9.93\include;D:\libs\boost\include\boost-1_44;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\libs\stlsoft-1.9.101\include;D:\libs\boost\include\boost-1_44;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\libs64\stlsoft-1.9.96\include;D:\libs64\boost\include\boost-1_44;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\libs64\stlsoft-1.9.96\include;D:\libs64\boost\include\boost-1_44;$(IncludePath)</IncludePath>
+    <RunCodeAnalysis Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -108,7 +109,6 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>C:\Program Files (x86)\Far2\Plugins\NamedFolders/NamedFolders.dll</OutputFile>
       <Version>
       </Version>
       <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
@@ -171,11 +171,10 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>true</EnablePREfast>
     </ClCompile>
     <Link>
       <AdditionalDependencies>LIBCPMT.lib;LIBCMT.lib;kernel32.lib;uuid.lib;user32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;shlwapi.lib;comsupp.lib;libboost_regex-vc90-mt-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>C:\Program Files (x86)\Far2\Plugins\NamedFolders/NamedFolders.dll</OutputFile>
-      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>

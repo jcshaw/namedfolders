@@ -20,6 +20,7 @@
 #include "PanelInfoWrap.h"
 #include "Menu2.h"
 #include "PanelUpdater.h"
+#include "Parser.h"
 
 extern struct PluginStartupInfo g_PluginInfo; 
 
@@ -154,9 +155,15 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 		case nf::VAL_REGISTRY_KEY:
 			if (! nf::Selectors::GetPathByRegKey(hPlugin, panel.value, path, dir)) return false;
 			break;
-		case nf::VAL_DIRECT_PATH:
-			dir = panel.value;
-			break;
+		case nf::VAL_DIRECT_PATH: {			
+				dir = panel.value;
+				tstring full_path = Utils::CombinePath(dir, path, SLASH_DIRS);
+				if (! PathFileExists(full_path.c_str())) {
+					if (! nf::Selectors::GetPath(hPlugin, dir, path, dir, nf::WTS_DIRECTORIES)) return false;
+				} else {
+					dir.swap(full_path);
+				}
+			} break;
 		case nf::VAL_TYPE_NET_DIRECTORY:
 			if (CSettings::GetInstance().GetValue(nf::ST_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE)) {
 				panel.value = L"net:\ncd " + panel.value;	//\n заменим на ENTER

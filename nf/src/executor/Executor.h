@@ -37,7 +37,7 @@ namespace Commands {
 	}
 
 //открыть в Explorer
-	bool OpenPath(HANDLE hPlugin, tstring const& path);
+	bool OpenPath(HANDLE hPlugin, tstring const& parentPath, tstring const& localPath);
 	void OpenPathInExplorer(tstring const& s);
 
 //создать новый псевдоним / каталог

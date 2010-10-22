@@ -160,7 +160,7 @@ void nf::Selectors::GetAllPathForRegKey(HANDLE hPlugins, tstring const &regKeyNa
 bool nf::Selectors::OpenEnvVar(HANDLE hPlugin, tstring const &VarName, tstring const &LocalPath) {
 	tstring result_path;
 	if (! nf::Selectors::GetPathByEnvvarPattern(hPlugin, VarName, LocalPath, result_path)) return false;
-	return nf::Commands::OpenPath(hPlugin, result_path);
+	return nf::Commands::OpenPath(hPlugin, result_path, L"");
 };
 
 bool nf::Selectors::GetPathByEnvvarPattern(HANDLE hPlugin

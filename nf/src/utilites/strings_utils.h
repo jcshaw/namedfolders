@@ -90,4 +90,9 @@ namespace Utils
 	inline tstring SubstituteSubstringLikePrintf(wchar_t const* srcStr, wchar_t const* srcSubStr) {
 		return Utils::ReplaceStringAll(srcStr, L"%s", srcSubStr);
 	}
+
+	inline bool IsLastCharEqualTo(tstring const& srcStr, wchar_t charToEqual) {
+		if (srcStr.empty()) return false;
+		return *(--srcStr.end()) == charToEqual;
+	}
 }//Utils

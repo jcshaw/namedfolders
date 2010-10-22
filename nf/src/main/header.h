@@ -93,7 +93,8 @@ namespace nf {
 	} _tcommand_flags;
 
 	typedef enum tcommands_kinds {	
-		QK_OPEN_SHORTCUT				//cd:
+		QK_OPEN_DIRECTORY_DIRECTLY		//cd:path
+		, QK_OPEN_SHORTCUT				//cd:
 		, QK_INSERT_SHORTCUT				//cd::shortcut_name
 		, QK_INSERT_SHORTCUT_TEMPORARY	//cd:+
 		, QK_INSERT_BOTH					//cd:::

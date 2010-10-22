@@ -44,6 +44,7 @@ namespace {
 	};
 	tstring get_command_as_string(nf::tcommands_kinds kind) {
 		switch (kind) {
+		case nf::QK_OPEN_DIRECTORY_DIRECTLY: return L"";
 		case nf::QK_OPEN_SHORTCUT: return L"";
 		case nf::QK_INSERT_SHORTCUT: return L":";
 		case nf::QK_INSERT_SHORTCUT_TEMPORARY: return L"+";
@@ -88,8 +89,8 @@ namespace {
 			}
 			m_DestParts[ID_PREFIX] = L"cd:";
 		} 
-		bool operator()(tstring const& AssignExp)
-		{	//типичная команда [Name]=[Prefix]
+		bool operator()(tstring const& AssignExp) {
+			//типичная команда [Name]=[Prefix]
 			//левая часть - имя переменной - задает новое значение для DestCmd
 			//правая часть - текст и переменные (идентифицирующие значение SrcCmd)
 			boost::match_results<wchar_t const*> what;

@@ -344,7 +344,7 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin
 					tstring program_directory;
 					if (GetShortcutProgramPath(path, program_directory, true)) {
 						CPanelInfoWrap wrap(INVALID_HANDLE_VALUE);
-						nf::Commands::OpenPath(wrap, program_directory);
+						nf::Commands::OpenPath(wrap, program_directory, L"");
 					}
 				} break;
 			case Menu::tsoft_menu::SWITCH_IGNORE_MODE_ONOFF: continue;

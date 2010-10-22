@@ -75,7 +75,7 @@ namespace {
 	bool open_shortcut( nf::tparsed_command &cmd, CPanelInfoWrap& plugin, nf::twhat_to_search_t whatToSearch) {
 		nf::tshortcut_info sh;
 		if (! cmd.local_directory.empty() && CSettings::GetInstance().GetValue(nf::ST_USE_SINGLE_MENU_MODE) != 0) {
-			//find all fitted shortcuts, find all paths form them 
+			//find all matched shortcuts, find all paths form them 
 			//give possibility to user select path (not shortcut) and open it
 			nf::tshortcuts_list list_all_shortcuts;
 			if (Selectors::GetAllShortcuts(plugin, cmd, list_all_shortcuts)) {
@@ -110,12 +110,24 @@ namespace {
 	inline bool insert_catalog(CPanelInfoWrap plugin, nf::tparsed_command & cmd) {
 		return Commands::AddCatalog(plugin, cmd.catalog);
 	}
+
+	bool open_directory_directly(CPanelInfoWrap &plugin, nf::tparsed_command &cmd) {	
+		if (Utils::IsLastCharEqualTo(cmd.local_directory, SLASH_DIRS_CHAR)) { 
+			cmd.local_directory += L"*"; //see #13: cd:c:\temp\ must be automatically converted to cd:c:\temp\*
+		}
+		tstring path;
+		tstring local;
+		Utils::DividePathFilename(cmd.local_directory, path, local, SLASH_DIRS_CHAR, true);
+		return nf::Commands::OpenPath(plugin, path, local);
+	}
 }
 
 bool nf::ExecuteCommand(nf::tparsed_command &cmd) {
 	CPanelInfoWrap plugin(INVALID_HANDLE_VALUE);
 
 	switch(cmd.kind) {
+	case nf::QK_OPEN_DIRECTORY_DIRECTLY:
+		return open_directory_directly(plugin, cmd);
 	case nf::QK_OPEN_SHORTCUT: //cd:
 	case nf::QK_SEARCH_DIRECTORIES_AND_FILES:
 	case nf::QK_SEARCH_FILE: 
@@ -270,13 +282,13 @@ bool nf::Commands::OpenShortcut(HANDLE hPlugin
 	return ::SelectAndOpenPathOnPanel(hPlugin, list_sh_paths, WhatToSearch, bOpenOnActivePanel);
 }
 
-bool nf::Commands::OpenPath(HANDLE hPlugin, tstring const& path) {	//open specified directory on the active panel
+bool nf::Commands::OpenPath(HANDLE hPlugin, tstring const& srcPath, tstring const& localPath) {	//open specified directory on the active panel
 	nf::tshortcut_value_parsed ap;		//active panel
 	ap.bValueEnabled = true;
-	ap.value = path;
+	ap.value = srcPath;
 	ap.ValueType = nf::VAL_DIRECT_PATH;
 
-	::OpenShortcutOnPanel(hPlugin, ap, L"", true, false, true, nf::WTS_DIRECTORIES);
+	::OpenShortcutOnPanel(hPlugin, ap, localPath, true, false, true, nf::WTS_DIRECTORIES);
 	return true;
 }
 

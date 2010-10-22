@@ -60,7 +60,7 @@ namespace {
 		return state;
 	}
 	
-	tstring get_panel_title(tstring const& currentCatalog) {
+	inline tstring get_panel_title(tstring const& currentCatalog) {
 		return tstring(GetMsg(lg::PANEL_TITLE)) + currentCatalog; 
 	}
 

@@ -18,9 +18,10 @@ namespace re {	//регулярные выражения
 //в регулярном выражении не указан префикс (он задается отдельным регулярным выражением RE_PREFIX)
 //каждое регулярное выражение раскладывает строку на две части - команду (один или несколько спецсимовлов)
 //и путь к ярлыку и директорию
-	const int NUM_COMMANDS = 18;
+	const int NUM_COMMANDS = 19;
 	nf::tcommands_kinds LIST_COMMANDS[NUM_COMMANDS] = {
-		nf::QK_OPEN_SHORTCUT		
+		nf::QK_OPEN_DIRECTORY_DIRECTLY
+		, nf::QK_OPEN_SHORTCUT		
 		, nf::QK_INSERT_CATALOG
 		, nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT	
 		, nf::QK_INSERT_SHORTCUT_IMPLICIT	
@@ -41,7 +42,8 @@ namespace re {	//регулярные выражения
 
 	};	//последовательность команд в списке RE_LIST_COMMANDS
 	wchar_t const* LIST_RE[NUM_COMMANDS] = {
-		L"()([\\*\\?\\w\\d_\\.@#\\(\\)].*)"
+		L"()(\\w:\\\\.*)"
+		, L"()([\\*\\?\\w\\d_\\.@#\\(\\)].*)"
 		, L"(:)([^:\\+].+?/)$" //QK_INSERT_CATALOG
 		, L"(\\+)((?:.+\\/)?)$"
 		, L"(:)((?:.+\\/)?)$"
@@ -93,6 +95,9 @@ bool nf::Parser::ParseString(tstring const &srcStr, nf::tparsed_command &t) {
 			t.shortcut = what[1] + tstring(L" ") + what[2];
 			t.param = L"";	//!TODO: сейчас параметры сохраняем в shortcut
 		}
+	} else if (t.kind == nf::QK_OPEN_DIRECTORY_DIRECTLY) {
+		t.local_directory = csdp;
+		t.flags = t.flags | nf::FGC_ENABLED_LOCAL_DIRECTORY;
 	} else if (ParseCSDP(csdp, t.catalog, t.shortcut, t.local_directory, t.param)) {
 		if (! t.catalog.empty()) t.flags = t.flags | nf::FGC_ENABLED_CATALOG;
 		if (! t.shortcut.empty()) t.flags = t.flags | nf::FGC_ENABLED_SHORTCUT;
