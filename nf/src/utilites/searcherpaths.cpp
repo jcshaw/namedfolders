@@ -72,7 +72,7 @@ void nf::Search::CSearchSystemPolice::SearchSubdir(tstring const& RootDir0, tstr
 	nf::twhat_to_search_t what_to_search = GetWhatToSearch();
 	WinSTL::findfile_sequence_t f(RootDir.c_str(), smask.c_str(), get_search_flags(what_to_search));
 	BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
-		tstring full_filename = Utils::CombinePath(RootDir0, t.get_filename(), SLASH_DIRS);
+		tstring full_filename = t.get_path(); //Utils::CombinePath(RootDir0, t.get_filename(), SLASH_DIRS);
 		list.push_back(full_filename);
 	}
 }

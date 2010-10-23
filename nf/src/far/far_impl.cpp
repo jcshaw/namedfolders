@@ -174,6 +174,10 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 			if (! ::find_path_and_filename(hPlugin, panel.value, WhatToSearch, path, panel.value, filename)) return false;
 			if (! nf::Selectors::FindBestDirectory(hPlugin, panel, dir)) return false;
 		}; //switch
+		
+		if (! PathFileExists(dir.c_str())) {
+			if (! nf::Selectors::FindBestDirectory(hPlugin, panel, dir)) return false;
+		}
 		::open_path_and_close_plugin(plugin, bClosePlugin, bActivePanel, dir, filename);
 	}; 
 

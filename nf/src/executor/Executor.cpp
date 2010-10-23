@@ -135,7 +135,7 @@ bool nf::ExecuteCommand(nf::tparsed_command &cmd) {
 	case nf::QK_OPEN_BY_PATH:	//cd:~ 
 		return open_by_path(plugin, cmd);
 	case nf::QK_OPEN_ENVIRONMENT_VARIABLE: //cd:%
-		return nf::Selectors::OpenEnvVar(plugin, cmd.shortcut, cmd.param);
+		return nf::Selectors::OpenEnvVar(plugin, cmd.shortcut, cmd.local_directory);
 	case nf::QK_OPEN_NETWORK:	/*cd:\\*/
 		return false; //!TODO: check
 	case nf::QK_INSERT_SHORTCUT:	//cd::
