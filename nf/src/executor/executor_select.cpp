@@ -48,6 +48,7 @@ void nf::Selectors::GetPath(HANDLE hPlugin
 	tstring local_path = localPath0;
 	local_path = Utils::ReplaceStringAll(local_path, L".*.", DEEP_REVERSE_SEARCH);
 	local_path = Utils::ReplaceStringAll(local_path, L"\\*\\", DEEP_DIRECT_SEARCH);
+	local_path = Utils::ReplaceStringAll(local_path, tstring(L"\\") + LEVEL_UP_TWO_POINTS, DEEP_UP_DIRECTORY);
 	local_path = Utils::ReplaceStringAll(local_path, LEVEL_UP_TWO_POINTS, DEEP_UP_DIRECTORY);
 
 	if (nf::Parser::ContainsMetachars(Value)) {	//при поиске начальной директории всегда ищем и директории 

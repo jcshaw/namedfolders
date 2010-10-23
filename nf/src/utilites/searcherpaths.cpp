@@ -98,8 +98,8 @@ void nf::Search::CSearchFarPolice::SearchSubdir(tstring const& RootDir, tstring 
 	} 
 }
 
-wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstring &destName, int &destLevel)
-{	//извлечь из srcPattern первое имя, определить на каком кол-ве уровней вложенности
+wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstring &destName, int &destLevel) {
+	//извлечь из srcPattern первое имя, определить на каком кол-ве уровней вложенности
 	//искать, вернуть остаток
 	//имена могут быть разделены слешами и точками (слеш - поиск вглубь, точка - вверх)
 	//специальный синтаксис для поиска без ограничения уровня вложенности
@@ -185,7 +185,12 @@ bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, 
 	int level = 0;	//на скольких уровнях вложенности искать
 
 	wchar_t const* next_pattern = Private::extract_name(Pattern.c_str(), name, level);
-	if (name.empty())  return false; //поиск завершен, директория не подходит...
+	if (name.empty()) {
+// 		if (level == -1) { // this is \..
+// 			name = L"..";
+// 		}
+		return false; //поиск завершен, директория не подходит...
+	}
 
 	name = Parser::ConvertToMask(name);
 
