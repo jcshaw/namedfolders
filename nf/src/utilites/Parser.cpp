@@ -77,13 +77,30 @@ namespace re {	//регулярные выражения
 		L"(?:.+\\\\\\\\)|(?:\\*)|(?:\\?)|(?:\\[[^]]+\\])";
 	wchar_t const* RE_SEARCH_META_INTOKENS_ONLY =	//метасимволы в названиях (*, [], ?) но не пути (слеши)
 		L"(?:\\*)|(?:\\?)|(?:\\[[^]]+\\])";
+
+//exclude double prefixes
+	wchar_t const* RE_DOUBLE_PREFIXES =
+		L"(\\w[\\w\\d_]+\\:)*(\\w[\\w\\d_]+\\:)(.+)";
+}
+
+namespace {
+	tstring remove_double_prefix(tstring const& srcStr) { //converts cd:ab:fe:command -> fe:commands (last prefix is always used)
+		nf::tregex expression(re::RE_DOUBLE_PREFIXES);
+		nf::tsmatch what;
+		if (boost::regex_match(srcStr, what, expression)) {
+			return what[2] + what[3];
+		} 
+		return srcStr;
+	}
 }
 
 bool nf::Parser::ParseString(tstring const &srcStr, nf::tparsed_command &t) {
 	tstring csdp;
 	t.flags = 0;
 
-	if (! GetCommandKind(srcStr, t.kind, t.prefix,  csdp)) return false;
+	tstring scommand = remove_double_prefix(srcStr);
+
+	if (! GetCommandKind(scommand, t.kind, t.prefix,  csdp)) return false;
 	if (! t.prefix.empty()) t.flags = t.flags | nf::FGC_ENABLED_PREFIX;
 
 	if (t.kind == nf::QK_START_SOFT_SHORTCUT) {
@@ -125,17 +142,6 @@ bool nf::Parser::GetCommandKind(tstring const& source, nf::tcommands_kinds &kind
 	return false;
 }
 
-namespace {
-	inline void remove_prefix_from_shortcut(tstring &s) {
-	//если строка s содержит префикс (\w\w+:), то удаляем его из s; сделано, чтобы исключить случаи cd:cd:
-		size_t npos = s.find(L':');
-		if (npos != tstring::npos)
-		if (npos > 1) {
-			s.erase(0, npos+1);
-		}
-	}
-}
-
 bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &d, tstring &p) {	
 //разделить каталог/ярлычек\директорию на составляющие
 	tregex expression(re::RE_CSD);
@@ -143,7 +149,7 @@ bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &
 	if (boost::regex_match(csdp, what, expression)) {
 		c = what[1];
 		s = what[2];
-		remove_prefix_from_shortcut(s);
+		//remove_prefix_from_shortcut(s);
 		d = what[3];
 		if (d.size() == 1) d += L'*'; //указан только разделитель; директория не указана
 		Utils::RemoveLeadingCharsOnPlace(d, SLASH_DIRS_CHAR);

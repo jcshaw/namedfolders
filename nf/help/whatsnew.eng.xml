@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
-<version product_name="Named Folders" version="3.0.0.240" date="snapshot"> 
+<version product_name="Named Folders" version="3.0.0.241" date="snapshot"> 
 <group title="Key changes">
 <item type="!">Plagin uses Far API 2.0 and unicode.</item>	
 <item type="!">64-bit version of the plugin is released. Now plugin is available both for x86 and x64.</item>	
@@ -13,6 +13,11 @@ issue tracker here. You can also download most recent snapshot of the plugin
 <group title="Changes">
 <item type="-">Launch of x64-apps from FAR x86 is fixed, see #6 
 (http://code.google.com/p/namedfolders/issues/detail?id=6)</item>	
+<item type="*">Procedure of removing douple prefixes is changed. In previous
+versions NF, command "cD:ab:command" was equal to "cd:command" and  
+command "cd:cd:cd:command" didn't work at all. Now, the plugin ignores
+all prefixes except last one. So, the command "ab:cd:ef:command" is
+equal to "ef:command".</item>
 </group>
 </version>
 
