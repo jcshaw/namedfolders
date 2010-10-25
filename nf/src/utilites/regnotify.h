@@ -1,7 +1,6 @@
 #pragma once
 
-class CRegNotify
-{
+class CRegNotify {
 	HANDLE m_hEvent;
 	HKEY m_hKey;
 public:

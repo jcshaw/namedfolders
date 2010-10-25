@@ -12,8 +12,7 @@
 
 namespace nf {
 namespace Menu {
-
-	class tmenu {
+	class CMenu {
 	public:
 		enum {
 			FG_SHOW_SINGLE_VARIANT = 0x1	//показывать меню даже если вариант единственный 
@@ -23,7 +22,7 @@ namespace Menu {
 		int const m_Flags;
 		nf::tsetting_flags m_MenuMode;
 
-		tmenu(wchar_t const* KeysInMenu = L"", wchar_t const* HelpTopic = L"", int Flags = 0
+		CMenu(wchar_t const* KeysInMenu = L"", wchar_t const* HelpTopic = L"", int Flags = 0
 			, nf::tsetting_flags MenuMode = static_cast<nf::tsetting_flags>(0))
 			: m_HelpTopic(HelpTopic)
 			, m_KeysInMenu(KeysInMenu)
@@ -39,19 +38,17 @@ namespace Menu {
 		virtual int MakeAction(int BreakCode) {return 0;}
 	};
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-//€рлыки
-	class tshortcuts_menu : public tmenu {
+	class CMenuShortcuts : public CMenu {
 	public:
-		tshortcuts_menu() : tmenu(L"Del, F2-F6", L"MenuSelect", 0, nf::ST_SELECT_SH_MENU_MODE) {}
+		CMenuShortcuts() : CMenu(L"Del, F2-F6", L"MenuSelect", 0, nf::ST_SELECT_SH_MENU_MODE) {}
 		enum {
-			MM_SH //только псевдоним
-			, MM_VAL //только значение
-			, MM_SH_VAL	//псевдоним и значение
-			, MM_CAT_SH //каталог и псевдоним
-			, MM_CAT_SH_VAL	//каталог, псевдоним и значение
+			MM_SHORTCUTS_ONLY 
+			, MM_VALUES_ONLY 
+			, MM_SHORTCUTS_AND_VALUES	
+			, MM_CATALOGS_AND_SHORTCUTS 
+			, MM_CATALOGS_SHORTCUTS_VALUES	
 
-			, NUMBER_MENU_MODES  //кол-во режимов отображени€ меню
+			, NUMBER_MENU_MODES  
 		};	 
 	public:
 		virtual int* GetBreakKeys() {
@@ -61,12 +58,10 @@ namespace Menu {
 		virtual int MakeAction(int BreakCode);
 	};
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-//программы
-	class tsoft_menu : public tmenu {
+	class CMenuApplications : public CMenu {
 	public:
-		tsoft_menu() : tmenu(L"F11, Ctrl+Enter, Shift+Enter, F2, F3", L""
-			, tmenu::FG_SHOW_SINGLE_VARIANT
+		CMenuApplications() : CMenu(L"F11, Ctrl+Enter, Shift+Enter, F2, F3", L""
+			, CMenu::FG_SHOW_SINGLE_VARIANT
 			, nf::ST_SELECT_SOFT_MENU_SHOWCATALOGS_MODE) {}
 		enum {
 			OPEN_PATH_IN_EXPLORER = VK_RETURN | PKF_CONTROL << 16
@@ -74,8 +69,8 @@ namespace Menu {
 			, SWITCH_IGNORE_MODE_ONOFF = VK_F11
 		};
 		enum {
-			MODE_IGNORE_ON = 0		//не искать среди €рлыков, удовлетвор€ющих игнорируемым в соответствии с маской в настройках 
-			, MODE_IGNORE_OFF = 1	//искать среди всех €рлыков, ничего не игнорировать
+			MODE_IGNORE_EXCEPTIONS_ON = 0		//не искать среди €рлыков, удовлетвор€ющих игнорируемым в соответствии с маской в настройках 
+			, MODE_IGNORE_EXCEPTIONS_OFF = 1	//искать среди всех €рлыков, ничего не игнорировать
 		};
 		enum { MM_PATH, MM_CAT_PATH };
 		virtual int MakeAction(int BreakCode);
@@ -85,20 +80,19 @@ namespace Menu {
 			return &soft_break_keys[0];
 		}
 		virtual tstring GetMenuTitle() {
-			return MODE_IGNORE_OFF == get_ignore_mode() ? L"" : L"*";
+			return MODE_IGNORE_EXCEPTIONS_OFF == get_ignore_mode() ? L"" : L"*";
 		}
 	private:
 		inline int get_ignore_mode() { return CSettings::GetInstance().GetValue(nf::ST_SELECT_SH_MENU_SHOWCATALOGS_MODE);}
 	};
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-//переменные среды
-	class tenv_menu : public tmenu {
+	class CMenuEnvironmentVariables : public CMenu {
 	public:
-		tenv_menu() : tmenu(L"F2, F3", L"", 0, nf::ST_SELECT_SH_MENU_MODE_EV) {}
+		CMenuEnvironmentVariables() : CMenu(L"F2, F3", L"", 0, nf::ST_SELECT_SH_MENU_MODE_EV) {}
 		enum {
-			MM_VAR_PATH	//с названиеи переменной
-			, MM_PATH //без названи€ переменной
+			MM_VARIABLE_AND_PATH	
+			, MM_PATH_ONLY 
+
 			, NUMBER_MENU_MODES
 		};	
 	public:
@@ -109,10 +103,7 @@ namespace Menu {
 		}
 	};
 
-//пути
-	typedef tmenu tpath_menu;
-//каталоги
-	typedef tmenu tcatalogs_menu;
-
+	typedef CMenu CMenuPaths;
+	typedef CMenu CMenuCatalogs;
 }
 }

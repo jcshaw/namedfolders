@@ -80,13 +80,13 @@ namespace {
 		menu_string_maker_visitor(int ViewMode, std::pair<size_t, size_t> const& W) : m_ViewMode(ViewMode), m_Widths(W){};
 		tstring operator() (tsh_info const& Value) const {
 			switch (m_ViewMode) {
-			case tshortcuts_menu::MM_VAL: 
+			case CMenuShortcuts::MM_VALUES_ONLY: 
 				return Value.second;
-			case tshortcuts_menu::MM_SH_VAL:
+			case CMenuShortcuts::MM_SHORTCUTS_AND_VALUES:
 				return Utils::CombineStrings(Value.first.shortcut, Value.second, m_Widths.first);
-			case tshortcuts_menu::MM_CAT_SH: 
+			case CMenuShortcuts::MM_CATALOGS_AND_SHORTCUTS: 
 				return Utils::CombineStrings(Value.first.catalog, Value.first.shortcut, m_Widths.first);
-			case tshortcuts_menu::MM_CAT_SH_VAL: 
+			case CMenuShortcuts::MM_CATALOGS_SHORTCUTS_VALUES: 
 				return Utils::CombineStrings(Value.first.catalog, Value.first.shortcut, Value.second, m_Widths.first, m_Widths.second);
 			default: //tshortcuts_menu::MM_SH: 
 				return Value.first.shortcut;
@@ -94,14 +94,14 @@ namespace {
 		}
 		tstring operator() (tenv_info const& Value) const {
 			switch(m_ViewMode) {
-			case tenv_menu::MM_PATH: return Value.second;
+			case CMenuEnvironmentVariables::MM_PATH_ONLY: return Value.second;
 			default: //tenv_menu::MM_VAR_PATH
 				return Utils::CombineStrings(Value.first, Value.second, m_Widths.first);
 			}
 		}
 		inline tstring operator() (tsoft_info const& Value) const {	
 			switch (m_ViewMode) { //!TODO: добавить режимы отображения
-			case tsoft_menu::MM_PATH: return Value.shortcut;
+			case CMenuApplications::MM_PATH: return Value.shortcut;
 			default: return Utils::CombineStrings(Value.catalog, Value.shortcut, m_Widths.first);
 			} 
 		}
@@ -118,23 +118,23 @@ namespace {
 			tshortcut_info const& sh = Value.first;
 			tstring const& value = Value.second;
 			switch (m_ViewMode) {
-			case tshortcuts_menu::MM_VAL: return std::make_pair(value.size(), 0);
-			case tshortcuts_menu::MM_SH_VAL: return std::make_pair(sh.shortcut.size(),value.size());
-			case tshortcuts_menu::MM_CAT_SH: 
-			case tshortcuts_menu::MM_CAT_SH_VAL: 
+			case CMenuShortcuts::MM_VALUES_ONLY: return std::make_pair(value.size(), 0);
+			case CMenuShortcuts::MM_SHORTCUTS_AND_VALUES: return std::make_pair(sh.shortcut.size(),value.size());
+			case CMenuShortcuts::MM_CATALOGS_AND_SHORTCUTS: 
+			case CMenuShortcuts::MM_CATALOGS_SHORTCUTS_VALUES: 
 				return std::make_pair(sh.catalog.size(), sh.shortcut.size());
 			default: return std::make_pair(sh.shortcut.size(), 0);
 			}; 
 		}
 		inline std::pair<size_t, size_t> operator() (tenv_info const& Value) const {
 			switch(m_ViewMode) {
-			case tenv_menu::MM_PATH: return std::make_pair(Value.second.size(), 0);
+			case CMenuEnvironmentVariables::MM_PATH_ONLY: return std::make_pair(Value.second.size(), 0);
 			default: return std::make_pair(Value.first.size(), Value.second.size());
 			}; 
 		}
 		inline std::pair<size_t, size_t> operator() (tsoft_info const& Value) const {	
 			switch(m_ViewMode) {
-			case tenv_menu::MM_PATH: return std::make_pair(Value.catalog.size(), 0);
+			case CMenuEnvironmentVariables::MM_PATH_ONLY: return std::make_pair(Value.catalog.size(), 0);
 			default: return std::make_pair(Value.catalog.size(), Value.shortcut.size());
 			}; //switch		
 		}
@@ -144,12 +144,10 @@ namespace {
 }
 
 
-nf::Menu::CMenuDialog::CMenuDialog(tmenu &srcMenu, tlist_menu_items &listItemsRef, tlist_far_menu_buffers &buffersRef) 
+nf::Menu::CMenuDialog::CMenuDialog(CMenu &srcMenu, tlist_menu_items &listItemsRef) 
 : m_Menu(srcMenu)
 , m_List(listItemsRef)
-, m_bFilterFullUpdateMode(true)
-, m_Buffers(buffersRef)
-{
+, m_bFilterFullUpdateMode(true) {
 
 }
 
@@ -209,7 +207,7 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &DestValue, int &DestRetCode) {
 	if (! m_List.size()) return 0;	//there is no suitable item 
 
-	if ( (! (m_Menu.m_Flags & tmenu::FG_SHOW_SINGLE_VARIANT)) && (1 == m_List.size())) {	//there is a single variant - menu is not required
+	if ( (! (m_Menu.m_Flags & CMenu::FG_SHOW_SINGLE_VARIANT)) && (1 == m_List.size())) {	//there is a single variant - menu is not required
 		DestValue = m_List.begin()->second;
 		DestRetCode = 1;		 
 		return true;

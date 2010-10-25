@@ -251,9 +251,8 @@ int CPanel::MakeDirectory (wchar_t *Name, int OpMode)
 int CPanel::PutFiles(struct PluginPanelItem *PanelItem
 					 , int ItemsNumber
 					 , int Move
-					 , int OpMode)
-{	//поместить файлы на панель - создать ярлыки для всех каталогов, перемещаемых на панель
-	//!разобрать xml-файл и создать на его основе именованные директории
+					 , int OpMode) {	
+	//create shortcuts for all directories that are being placed on the panel 
 	if (OpMode & OPM_SILENT) return FALSE;
 
 	for (int i = 0; i < ItemsNumber; ++i) {
@@ -326,10 +325,11 @@ int CPanel::ProcessEvent(int Event, void *Param) {
 			if (pi.Plugin) {
 				CPanelUpdater pu(this, pi.CurrentItem);
 				pu.UpdateActivePanel();
+				pu.UpdateInactivePanel();
 			}
 			m_RegNotify.Start();
 		};
-	} 
+	}
 
 	return FALSE;
 }

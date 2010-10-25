@@ -18,6 +18,9 @@ versions NF, command "cD:ab:command" was equal to "cd:command" and
 command "cd:cd:cd:command" didn't work at all. Now, the plugin ignores
 all prefixes except last one. So, the command "ab:cd:ef:command" is
 equal to "ef:command".</item>
+<item type="*">Search in local paths is changed. No, the command "cd:alias.." 
+can be written in more classic way "cd:alias\..". Both variants ".." and "\.."
+are supported to specify parent folder.</item>
 </group>
 </version>
 

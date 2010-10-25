@@ -332,14 +332,14 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin
 			execute_selected_program(path, params); 
 		} else {
 			switch (-nret) {
-			case Menu::tsoft_menu::OPEN_PATH_IN_EXPLORER:
+			case Menu::CMenuApplications::OPEN_PATH_IN_EXPLORER:
 				{	//открыть директорию, из которой запускается программа, в Far
 					tstring program_directory;
 					if (GetShortcutProgramPath(path, program_directory, true)) {
 						nf::Commands::OpenPathInExplorer(program_directory);
 					}
 				} break;
-			case Menu::tsoft_menu::OPEN_PATH_IN_FAR:
+			case Menu::CMenuApplications::OPEN_PATH_IN_FAR:
 				{	//открыть директорию, из которой запускатся программа, в Explorer
 					tstring program_directory;
 					if (GetShortcutProgramPath(path, program_directory, true)) {
@@ -347,7 +347,7 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin
 						nf::Commands::OpenPath(wrap, program_directory, L"");
 					}
 				} break;
-			case Menu::tsoft_menu::SWITCH_IGNORE_MODE_ONOFF: continue;
+			case Menu::CMenuApplications::SWITCH_IGNORE_MODE_ONOFF: continue;
 			default: return false;
 			}; //switch			
 		}		

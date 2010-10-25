@@ -59,7 +59,7 @@ namespace Menu {
 		typedef std::vector<FarMenuItem> tlist_far_menu_items; 
 		typedef std::vector<boost::shared_ptr<tstring> > tlist_far_menu_buffers;
 
-		CMenuDialog(tmenu &M, tlist_menu_items &listItemsRef, tlist_far_menu_buffers &buffersRef);
+		CMenuDialog(CMenu &M, tlist_menu_items &listItemsRef);
 		bool ShowMenu(tvariant_value &DestValue, int &DestRetCode);
 	private:			
 		std::pair<size_t, size_t> get_column_widths();
@@ -67,9 +67,8 @@ namespace Menu {
 		void load_items(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers); 
 		int show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem);
 	private:
-		tmenu &m_Menu;
+		CMenu &m_Menu;
 		tlist_menu_items &m_List;
-		tlist_far_menu_buffers &m_Buffers;
 		tstring m_Filter;	//введенный фильтр (только английские буквы)
 		bool m_bFilterFullUpdateMode; 
 		//при добавлении очередной буквы к фильтру нет необходимости проверять

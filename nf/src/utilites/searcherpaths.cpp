@@ -186,9 +186,13 @@ bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, 
 
 	wchar_t const* next_pattern = Private::extract_name(Pattern.c_str(), name, level);
 	if (name.empty()) {
-// 		if (level == -1) { // this is \..
-// 			name = L"..";
-// 		}
+		if (level < 0) { //branch of code to avoid #7 issue: ".." should work.
+			tstring s = RootDir;
+			while (!s.empty() && level++) {
+				s = Utils::ExtractParentDirectory(s);
+			}
+			if (! s.empty()) dest.push_back(s);
+		}
 		return false; //поиск завершен, директория не подходит...
 	}
 
