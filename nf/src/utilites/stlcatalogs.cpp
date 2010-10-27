@@ -112,7 +112,7 @@ bool CCatalog::GetShortcutInfo(tstring const& name_ansi, bool bTemporary, tstrin
 
 		if (ErrorCode != ERROR_SUCCESS) return false;
 		if (type != REG_SZ) return false;
-		if (size) value.assign(reinterpret_cast<wchar_t*>(&buf[0]), size-1);
+		if (size) value.assign(reinterpret_cast<wchar_t*>(&buf[0]), static_cast<int>(size / sizeof(wchar_t)) - 1);
 	}
 	return true;
 }

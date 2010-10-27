@@ -17,8 +17,7 @@
 #include <boost/regex.hpp>
 #pragma warning(default: 4244 4267)
 
-#include <stlsoft/memory/auto_buffer.hpp>
-
+#include <stlsoft/memory/auto_buffer.hpp> 
 typedef std::basic_string<wchar_t> tstring;
 typedef std::pair<tstring, tstring> tpair_strings;
 
@@ -142,8 +141,12 @@ namespace nf {
 	typedef std::vector<tstring> tenvvars_list;
 
 	typedef stlsoft::auto_buffer<wchar_t> tautobuffer_char;
-	typedef stlsoft::auto_buffer<BYTE> tautobuffer_byte;
-// 	typedef std::vector<BYTE> tautobuffer_byte;
+// 	typedef stlsoft::auto_buffer<BYTE> tautobuffer_byte;
+// 	typedef boost::auto_buffer<wchar_t> tautobuffer_char;
+// 	typedef boost::auto_buffer<BYTE> tautobuffer_byte;
+	typedef std::vector<BYTE> tautobuffer_byte; 
+		//!TODO: use BOOST library when auto_buffer will be included to boost.
+		//currently, stlsoft::auto_buffer doesn't support push_back, see far_impl
 // 	typedef std::vector<wchar_t> tautobuffer_char;
 
 

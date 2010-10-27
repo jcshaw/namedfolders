@@ -28,6 +28,12 @@ int FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath) {
 	return g_PluginInfo.CmpName(Pattern, String, SkipPath);
 }
 
+namespace {
+	inline void push_back(DWORD* pbuffer, unsigned int &counter, DWORD dw) {
+		pbuffer[counter++] = dw;
+	}
+}
+
 void CloseAndStartAnotherPlugin(HANDLE hPlugin
 								, tstring const& Command
 								, bool bActivePanel
@@ -39,36 +45,42 @@ void CloseAndStartAnotherPlugin(HANDLE hPlugin
 
 	ULONG add_size = 1 + 4 + static_cast<int>(prefix.size()); //CTRL+Y + TAB + ENTER + TAB + "cd:" + ENTER  
 
-	std::vector<DWORD> ks_buffer;
-	//always add Ctrl + Y at the beginning (!TODO: why)
-	ks_buffer.push_back(int('y') | KEY_CTRL);
+	tautobuffer_byte ks_buffer((Command.size() + add_size)*sizeof(DWORD)); //!TODO: there is a problem here: tautobuffer_byte (stlsoft) doesn't support push_back; 
+	unsigned int counter = 0; //use counter instead of push_back to work around the problem
+	DWORD* pbuffer = reinterpret_cast<DWORD*>(&ks_buffer[0]);
+
+	//always add Ctrl + Y at the beginning to clear command line
+	push_back(pbuffer, counter,  int('y') | KEY_CTRL);
 
 	if (! bActivePanel) {
-		ks_buffer.push_back(VK_TAB);
-		for (unsigned int i = 0; i < Command.size(); ++i) {
-			ks_buffer.push_back(static_cast<DWORD>(Command[i]));
-		}
-		ks_buffer.push_back(VK_RETURN);
-
-		if (! bOpenBoth) {
-			ks_buffer.push_back(VK_TAB);
-			for (unsigned int i = 0; i < prefix.size(); ++i) {
-				ks_buffer.push_back(static_cast<DWORD>(prefix[i]));
+		push_back(pbuffer, counter,  VK_TAB);
+			for (unsigned int i = 0; i < Command.size(); ++i) {
+				push_back(pbuffer, counter,  static_cast<DWORD>(Command[i]));
 			}
-			ks_buffer.push_back(VK_RETURN);
-		}
+			push_back(pbuffer, counter,  VK_RETURN);
+
+			if (! bOpenBoth) {
+				push_back(pbuffer, counter,  VK_TAB);
+					for (unsigned int i = 0; i < prefix.size(); ++i) {
+						push_back(pbuffer, counter,  static_cast<DWORD>(prefix[i]));
+					}
+					push_back(pbuffer, counter,  VK_RETURN);
+			}
 	} else {
 		for (unsigned int i = 0; i < Command.size(); ++i) {
-			if (static_cast<DWORD>(Command[i]) == L'\n') ks_buffer.push_back(VK_RETURN);
-			else ks_buffer.push_back(static_cast<DWORD>(Command[i]));
+			if (static_cast<DWORD>(Command[i]) == L'\n') {
+				push_back(pbuffer, counter,  VK_RETURN);
+			} else {
+				push_back(pbuffer, counter,  static_cast<DWORD>(Command[i]));
+			}
 		}
-		ks_buffer.push_back(VK_RETURN);
+		push_back(pbuffer, counter,  VK_RETURN);
 	}
 
 	static KeySequence ks;
 	ks.Flags = 0;//KSFLAGS_DISABLEOUTPUT;
 	ks.Count = static_cast<int>(ks_buffer.size());
-	ks.Sequence = &ks_buffer[0];
+	ks.Sequence = pbuffer;
 
 	BOOL bSuccess = static_cast<BOOL>(g_PluginInfo.AdvControl(g_PluginInfo.ModuleNumber
 		, ACTL_POSTKEYSEQUENCE
@@ -133,9 +145,6 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 	CPanelInfoWrap plugin(hPlugin);
 	tstring filename;	//имя файла на котором нужно позиционироваться
 
-	panel.value =  Utils::ReplaceStringAll(panel.value, SLASH_CATS, SLASH_DIRS);
-	path =  Utils::ReplaceStringAll(path, SLASH_CATS, SLASH_DIRS);
-
 	if (panel.ValueType == VAL_TYPE_PLUGIN_DIRECTORY) {	//открыть виртуальную директорию
 		::CloseAndStartAnotherPlugin(hPlugin, panel.value, bActivePanel, bOpenBoth);
 		g_PluginInfo.Control(hPlugin
@@ -145,6 +154,10 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 		);	//плагин необходимо закрывать, иначе при вызове из панели //!TODO: проверить на Far 2.0
 			//происходит зацикливание (начиная с FAR 2060)
 	} else {	//другие типы директорий
+		//issue #4: SLASH_CATS shouldn't be changed on SLASH_DIRS if shortcuts links to external plugin directory
+		panel.value =  Utils::ReplaceStringAll(panel.value, SLASH_CATS, SLASH_DIRS);
+		path =  Utils::ReplaceStringAll(path, SLASH_CATS, SLASH_DIRS);
+
 		tstring dir;
 		switch (panel.ValueType) {
 		case nf::VAL_ENVIRONMENT_VARIABLE:

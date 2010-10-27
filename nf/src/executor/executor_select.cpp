@@ -12,8 +12,8 @@
 #include "StdAfx.h"
 #include <cassert>
 #include <vector>
+#include <list>
 #include <shlwapi.h>
-#include <boost/bind.hpp>
 
 #include "executor.h"
 #include "Kernel.h"
@@ -46,9 +46,7 @@ namespace {
 
 //найти все пути, подход€щие дл€ Value и LocalPath
 //и вернуть их полный список в DestListPaths
-void nf::Selectors::GetPath(HANDLE hPlugin
-							, tstring const &srcValue
-							, tstring const &localPath0
+void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring const &localPath0
 							, nf::twhat_to_search_t whatToSearch
 							, std::list<tstring> &destListPaths) {
 	//p может содержать метасимволы
@@ -58,8 +56,8 @@ void nf::Selectors::GetPath(HANDLE hPlugin
 	tstring local_path = substitute_metachars(localPath0);
 	tstring svalue = substitute_metachars(srcValue);
 
-	//since b242 it's possible to use NF-metacharacters in shortucts values
-	//try to detect if any metacharacters (NF's or FAR's) are used 
+	//since b242 it's possible to use NF-metacharacters in shortuct's values
+	//try to detect if any NF/FAR-metacharacters are used 
 	bool bmetachars_are_most_probably_used = (Utils::RemoveTrailingChars(svalue, SLASH_DIRS_CHAR) != svalue) 
 		|| nf::Parser::ContainsMetachars(svalue)
 		|| ! PathFileExists(svalue.c_str());
@@ -81,8 +79,7 @@ void nf::Selectors::GetPath(HANDLE hPlugin
 }
 
 bool nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcPath, tstring const &localPath0, tstring &destPath
-							, nf::twhat_to_search_t whatToSearch)
-{
+							, nf::twhat_to_search_t whatToSearch) {
 	//найти все пути, подход€щие дл€ Value и LocalPath
 	//дать возможность пользователю выбрать требуемый путь 
 	//и вернуть его в ResultPath
@@ -93,8 +90,9 @@ bool nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcPath, tstring cons
 	value_paths.unique();
 
 	//меню выбора вариантов
-	if (! value_paths.empty()) return Menu::SelectPath(value_paths, destPath) != 0;
-	return false;
+	if (value_paths.empty()) return false;
+
+	return Menu::SelectPath(value_paths, destPath) != 0;
 };
 
 //выбрать наиболее подход€щий псевдоним из списка вариантов
@@ -113,7 +111,7 @@ bool nf::Selectors::GetShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd, 
 		//then there are two possible scenario depending on settings: return exact variant or show menu
 		bool bExpand = (nexact == 1) 
 			? CSettings::GetInstance().GetValue(nf::ST_ALWAYS_EXPAND_SHORTCUTS) != 0
-			: ! list.empty();	//variant should be selected from menu
+			: !list.empty();	//variant should be selected from menu
 
 		if (bExpand) {
 			int n = Menu::SelectShortcut(list, DestSh);
@@ -136,7 +134,7 @@ bool nf::Selectors::GetAllShortcuts(HANDLE hPlugin, nf::tparsed_command const &c
 	if (cmd.shortcut == L".") {	//псевдоалиас "."
 		destList.push_back(nf::MakeShortcut(L"",  L".", false));
 	}
-	return ! destList.empty();
+	return !destList.empty();
 }
 
 //выбрать наиболее подход€щий каталог из списка вариантов
@@ -167,9 +165,8 @@ bool nf::Selectors::GetCatalog(HANDLE hPlugin, nf::tparsed_command const &cmd, n
 	}
 }
 
-bool nf::Selectors::FindBestDirectory(HANDLE hPlugin, nf::tshortcut_value_parsed const &p, tstring &destDir)
-{	//найти наилучшую директории 
-	//если требуемой директории нет - найти ближайшую
+bool nf::Selectors::FindBestDirectory(HANDLE hPlugin, nf::tshortcut_value_parsed const &p, tstring &destDir) {
+	//найти наилучшую директории; если требуемой директории нет - найти ближайшую
 	assert(p.ValueType != nf::VAL_TYPE_PLUGIN_DIRECTORY);	//остальные типы должны открывать через эмул€цию нажати€ клавиш
 	tstring dir = p.value;
 
