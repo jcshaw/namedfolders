@@ -142,7 +142,7 @@ tstring Utils::GetCanonicalCatalogName(tstring const& srcCatalog) {
 // 	//!TODO: makepathcompact, lowercase	
 	tstring dest = MakePathCompact(srcCatalog, false);
 	if (! dest.empty()) Utils::AddLeadingCharIfNotExistsOnPlace(dest, SLASH_CATS);
-	boost::algorithm::to_lower(dest, std::locale(""));
+	boost::algorithm::to_lower(dest, std::locale("")); //!TODO: replace by smth else to reduce size ??
 	return dest;
 }
 

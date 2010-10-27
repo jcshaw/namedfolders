@@ -142,10 +142,10 @@ public:
 			, &dialogT::dlg_proc
 			, reinterpret_cast<LONG_PTR>(this) //param
 		);		
-		ENFORCE(m_DialogHandle != INVALID_HANDLE_VALUE);
-
-		nChoosenItem = g_PluginInfo.DialogRun(m_DialogHandle); //free in destructor
-		return nChoosenItem != -1;
+		if (m_DialogHandle != INVALID_HANDLE_VALUE) {
+			nChoosenItem = g_PluginInfo.DialogRun(m_DialogHandle); //free in destructor
+			return nChoosenItem != -1;
+		} return false;
 	}
 protected:
 	far_list_di_items& GetDialogItemsRef() {

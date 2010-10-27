@@ -147,42 +147,42 @@ namespace nf {
 // 	typedef std::vector<wchar_t> tautobuffer_char;
 
 
-	namespace Private {
-		struct Logger {
-			template <class T>
-			static void Output(const T& level, std::basic_string<wchar_t> const& Message) { 
-				//!TODO: write message to log file
-			}
-		};
-	}
-
-	class nf_exception : std::exception {
-	public:
-		nf_exception(std::basic_string<wchar_t> const& Message, const wchar_t* Locus)
-			: m_Message(Message)
-		{		
-			nf::Private::Logger::Output(0, Message + tstring(L"; ") + Locus);
-		}
-		inline tstring const& GetMessage() const { 
-			return m_Message;}
-	private:
-		tstring m_Message;
-	};
-
-	namespace Private 
-	{
-		struct Raiser {
-			template <class T>
-			static void Throw(const T&, const std::basic_string<wchar_t>& message, const wchar_t* locus) {			
-				throw nf_exception(message, locus);
-			};
-		}; //Raiser
-	} //Private
-
-	typedef nf::Private::Raiser traiser;
-
-#define ENFORCE(exp) \
-	*Ext::MakeEnforcer<Ext::Private::DefaultPredicate, nf::traiser>((exp), _T("Expression '") _TEXT(#exp) L"' failed in '" \
-	_TEXT(__FILE__) _TEXT("', line: ") _T( STRINGIZE(__LINE__)) )
+// 	namespace Private {
+// 		struct Logger {
+// 			template <class T>
+// 			static void Output(const T& level, std::basic_string<wchar_t> const& Message) { 
+// 				//!TODO: write message to log file
+// 			}
+// 		};
+// 	}
+// 
+// 	class nf_exception : std::exception {
+// 	public:
+// 		nf_exception(std::basic_string<wchar_t> const& Message, const wchar_t* Locus)
+// 			: m_Message(Message)
+// 		{		
+// 			nf::Private::Logger::Output(0, Message + tstring(L"; ") + Locus);
+// 		}
+// 		inline tstring const& GetMessage() const { 
+// 			return m_Message;}
+// 	private:
+// 		tstring m_Message;
+// 	};
+// 
+// 	namespace Private 
+// 	{
+// 		struct Raiser {
+// 			template <class T>
+// 			static void Throw(const T&, const std::basic_string<wchar_t>& message, const wchar_t* locus) {			
+// 				throw nf_exception(message, locus);
+// 			};
+// 		}; //Raiser
+// 	} //Private
+// 
+// 	typedef nf::Private::Raiser traiser;
+// 
+// #define ENFORCE(exp) \
+// 	*Ext::MakeEnforcer<Ext::Private::DefaultPredicate, nf::traiser>((exp), _T("Expression '") _TEXT(#exp) L"' failed in '" \
+// 	_TEXT(__FILE__) _TEXT("', line: ") _T( STRINGIZE(__LINE__)) )
 
 }

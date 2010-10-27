@@ -192,8 +192,10 @@ bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, 
 				s = Utils::ExtractParentDirectory(s);
 			}
 			if (! s.empty()) dest.push_back(s);
-		}
-		return false; //поиск завершен, директория не подходит...
+			return false;
+		} else if (level > 1) { //give possibility to specify NF-metachars in shortcuts values, i.e. support of "c:\program files\\\"
+			name = L"*";
+		} else return false; //поиск завершен, директория не подходит...
 	}
 
 	name = Parser::ConvertToMask(name);

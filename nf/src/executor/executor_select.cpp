@@ -34,10 +34,20 @@ extern struct FarStandardFunctions g_FSF;
 
 using namespace nf;
 
+namespace {
+	tstring substitute_metachars(tstring const& srcPath) {
+		tstring s = srcPath;
+		s = Utils::ReplaceStringAll(s, L".*.", DEEP_REVERSE_SEARCH);
+		s = Utils::ReplaceStringAll(s, L"\\*\\", DEEP_DIRECT_SEARCH);
+		s = Utils::ReplaceStringAll(s, tstring(L"\\") + LEVEL_UP_TWO_POINTS, DEEP_UP_DIRECTORY);
+		return Utils::ReplaceStringAll(s, LEVEL_UP_TWO_POINTS, DEEP_UP_DIRECTORY);
+	}
+}
+
 //найти все пути, подходящие для Value и LocalPath
 //и вернуть их полный список в DestListPaths
 void nf::Selectors::GetPath(HANDLE hPlugin
-							, tstring const &Value
+							, tstring const &srcValue
 							, tstring const &localPath0
 							, nf::twhat_to_search_t whatToSearch
 							, std::list<tstring> &destListPaths) {
@@ -45,17 +55,20 @@ void nf::Selectors::GetPath(HANDLE hPlugin
 	//находим все директории, удовлетворяющие panel.value
 
 	//комбинации символов указывающие на поиск неограниченной глубины заменяем спецсимволами
-	tstring local_path = localPath0;
-	local_path = Utils::ReplaceStringAll(local_path, L".*.", DEEP_REVERSE_SEARCH);
-	local_path = Utils::ReplaceStringAll(local_path, L"\\*\\", DEEP_DIRECT_SEARCH);
-	local_path = Utils::ReplaceStringAll(local_path, tstring(L"\\") + LEVEL_UP_TWO_POINTS, DEEP_UP_DIRECTORY);
-	local_path = Utils::ReplaceStringAll(local_path, LEVEL_UP_TWO_POINTS, DEEP_UP_DIRECTORY);
+	tstring local_path = substitute_metachars(localPath0);
+	tstring svalue = substitute_metachars(srcValue);
 
-	if (nf::Parser::ContainsMetachars(Value)) {	//при поиске начальной директории всегда ищем и директории 
+	//since b242 it's possible to use NF-metacharacters in shortucts values
+	//try to detect if any metacharacters (NF's or FAR's) are used 
+	bool bmetachars_are_most_probably_used = (Utils::RemoveTrailingChars(svalue, SLASH_DIRS_CHAR) != svalue) 
+		|| nf::Parser::ContainsMetachars(svalue)
+		|| ! PathFileExists(svalue.c_str());
+
+	if (bmetachars_are_most_probably_used) { 
 		nf::Search::CSearchFarPolice ssp(nf::WTS_DIRECTORIES); //nf::Search::CSearchSystemPolice ssp(false, false);
-		nf::Search::SearchMatched(Value, ssp, destListPaths);
-	} else {
-		destListPaths.push_back(Value);
+		nf::Search::SearchMatched(svalue, ssp, destListPaths);
+	} else { 
+		destListPaths.push_back(svalue);
 	}
 	if (! local_path.empty()) {	//учитываем локальный путь относительно каждой найденной директории	
 		std::list<tstring> list_paths;

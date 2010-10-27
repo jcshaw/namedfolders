@@ -81,8 +81,7 @@ namespace {
 									, bool bClosePlugin
 									, bool bActivePanel
 									, tstring srcDir
-									, tstring const& fileName)
-	{
+									, tstring const& fileName) {
 		srcDir = Utils::ReplaceStringAll(srcDir, SLASH_CATS, SLASH_DIRS); // "/" are replaced by "\" - protection from UNIX-users
 
 		Plugin.SetPanelDir(bActivePanel, srcDir);
@@ -128,8 +127,7 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 						 , bool bActivePanel
 						 , bool bOpenBoth	
 						 , bool bClosePlugin
-						 , nf::twhat_to_search_t WhatToSearch)
-{
+						 , nf::twhat_to_search_t WhatToSearch) {
 	using namespace nf;
 	assert(panel.bValueEnabled);
 	CPanelInfoWrap plugin(hPlugin);
@@ -187,7 +185,6 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 bool SelectAndOpenPathOnPanel(HANDLE hPlugin, std::list<tpair_strings> const& listAliasPaths, nf::twhat_to_search_t whatToSearch
 							  , bool bActivePanel)
 {	//suggest to select required variant from menu, then open selected path
-
 	//show list directories, without shortcut names
 	std::list<tstring> paths;	//all possible paths
 	BOOST_FOREACH(tpair_strings const& kvp, listAliasPaths) {
