@@ -1,0 +1,9 @@
+REGEDIT4
+; List of shortcut's masks which should be ignored by "cd: soft"
+; —писок масок €рлычков, которые нужно игнорировать пр вызове "cd: prog"
+
+[HKEY_CURRENT_USER\Software\Far\Plugins]
+
+[HKEY_CURRENT_USER\Software\Far\Plugins\NamedFolders]
+@=""
+"maskstoskip_list_semicolon"="*read me*;*readme*;*uninstall*"

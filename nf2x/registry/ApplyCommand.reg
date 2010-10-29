@@ -1,0 +1,13 @@
+REGEDIT4
+; Open execution dialog by Ctrl+D
+; Вызывать по Ctrl+D диалог выполнения команды
+
+[HKEY_CURRENT_USER\Software\Far\KeyMacros]
+
+[HKEY_CURRENT_USER\Software\Far\KeyMacros\Shell]
+
+[HKEY_CURRENT_USER\Software\Far\KeyMacros\Shell\CtrlD]
+@=""
+"Sequence"="F11 2 E"
+"Description"="Open execution dialog by Ctrl+D"
+"DisableOutput"=dword:00000001
