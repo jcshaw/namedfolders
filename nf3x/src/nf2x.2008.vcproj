@@ -29,6 +29,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -64,10 +65,10 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
+				CommandLine="del &quot;c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="C:\Program Files (x86)\Far2\Plugins\NamedFolders/NamedFolders.dll"
 				Version=""
 				LinkIncremental="2"
 				ModuleDefinitionFile="$(ProjectName).def"
@@ -99,6 +100,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy /b &quot;$(OutDir)\$(ProjectName).dll&quot; &quot;c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -147,10 +149,10 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
+				CommandLine="del &quot;c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="C:\Program Files\Far2\Plugins\NamedFolders/NamedFolders.dll"
 				LinkIncremental="2"
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
@@ -181,6 +183,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy /b &quot;$(OutDir)\$(ProjectName).dll&quot; &quot;c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -194,6 +197,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -237,11 +241,11 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
+				CommandLine="del &quot;c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 			/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="LIBCPMT.lib LIBCMT.lib kernel32.lib uuid.lib user32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib shlwapi.lib comsupp.lib libboost_regex-vc90-mt-s.lib"
-				OutputFile="C:\Program Files (x86)\Far2\Plugins\NamedFolders/NamedFolders.dll"
 				LinkIncremental="1"
 				IgnoreAllDefaultLibraries="true"
 				ModuleDefinitionFile="$(ProjectName).def"
@@ -277,6 +281,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy /b &quot;$(OutDir)\$(ProjectName).dll&quot; &quot;c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -336,10 +341,10 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
+				CommandLine="del &quot;c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="C:\Program Files\Far2\Plugins\NamedFolders/NamedFolders.dll"
 				LinkIncremental="1"
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
@@ -375,6 +380,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy /b &quot;$(OutDir)\$(ProjectName).dll&quot; &quot;c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 			/>
 		</Configuration>
 	</Configurations>
