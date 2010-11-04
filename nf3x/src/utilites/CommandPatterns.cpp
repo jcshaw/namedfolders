@@ -18,6 +18,8 @@ using namespace Patterns;
 #include <boost/bind.hpp>
 #pragma warning(default: 4244 4267)
 
+extern struct FarStandardFunctions g_FSF;
+
 namespace {
 	
 	enum {	//order is important, see GetResultString
@@ -70,10 +72,24 @@ namespace {
 		} //switch
 	}
 
+	bool is_pair_first_equal_to(tpair_strings const& srcPattern, tstring const& Prefix) {
+		return lstrcmpi(srcPattern.first.c_str(), Prefix.c_str()) == 0;
+	}
+
+	inline tstring itoa(int n) {
+		wchar_t buffer[33]; //see description of far itoa function: 32 characters + 1 for "0"
+		return g_FSF.itoa(n, &buffer[0], 10);
+	}
+
+	inline int atoi(tstring const& s) {
+		return g_FSF.atoi(s.c_str());
+	}
+
 	class applier {	
 		boost::basic_regex<wchar_t> m_RE;
 		boost::basic_regex<wchar_t> m_SubRE;
-		typedef std::map<tstring, int, Utils::CmpStringLessCI> tvarnames;
+		//typedef std::map<tstring, int, Utils::CmpStringLessCI> tvarnames; //map is removed for reducing size
+		typedef std::vector<tpair_strings> tvarnames;
 		tvarnames m_VarNames;
 		std::vector<tstring> const& m_SrcParts;
 		std::vector<tstring>& m_DestParts;
@@ -85,7 +101,8 @@ namespace {
 			, m_SubRE(applier::get_sub_regexp(), boost::regex_constants::icase)
 		{ 
 			for (int i = 0; i < NUM_PARTS; ++i) {
-				m_VarNames.insert(std::make_pair(VAR_NAMES[i], i));
+				m_VarNames.push_back(std::make_pair(VAR_NAMES[i], itoa(i)) );
+				//m_VarNames.insert(std::make_pair(VAR_NAMES[i], i));
 			}
 			m_DestParts[ID_PREFIX] = L"cd:";
 		} 
@@ -96,10 +113,12 @@ namespace {
 			boost::match_results<wchar_t const*> what;
 			if (boost::regex_match(AssignExp.c_str(), what, m_RE)) {
 				tstring DestVarName = what[1];
-				tvarnames::const_iterator pdest = m_VarNames.find(DestVarName);
-				if (pdest == m_VarNames.end()) return false;	//left side contains unknown variable
-				int nDestId = pdest->second;
-				m_DestParts[nDestId] = parse_right_part(what[2]);
+				int n = 0;
+				if (! find_variable(DestVarName, n)) return false;
+// 				tvarnames::const_iterator pdest = m_VarNames.find(DestVarName);
+// 				if (pdest == m_VarNames.end()) return false;	//left side contains unknown variable
+// 				int nDestId = pdest->second;
+				m_DestParts[n] = parse_right_part(what[2]);
 				return true;
 			}
 			return false;
@@ -118,14 +137,22 @@ namespace {
 			while (move < Expression.size(), boost::regex_search(Expression.c_str() + move, sub_what, m_SubRE)) {	
 				move += sub_what[0].length();
 				if (! tstring(sub_what[1]).empty()) {	//variable
-					tvarnames::const_iterator p = m_VarNames.find(tstring(sub_what[1]));
-					if (p != m_VarNames.end()) {
-						tstring var_value = m_SrcParts[p->second];
+					int n;
+					if (! find_variable(tstring(sub_what[1]), n)) {
+						result +=  tstring(L"[") + tstring(sub_what[2]) + tstring(L"]");	//unknown variable
+					} else {
+						tstring var_value = m_SrcParts[n];
 						result += var_value;
 						if (var_value.empty()) ++cEmptyVars;
-					} else {
-						result +=  tstring(L"[") + tstring(sub_what[2]) + tstring(L"]");	//unknown variable
-					}
+					}					
+// 					tvarnames::const_iterator p = m_VarNames.find(tstring(sub_what[1]));
+// 					if (p != m_VarNames.end()) {
+// 						tstring var_value = m_SrcParts[p->second];
+// 						result += var_value;
+// 						if (var_value.empty()) ++cEmptyVars;
+// 					} else {
+// 						result +=  tstring(L"[") + tstring(sub_what[2]) + tstring(L"]");	//unknown variable
+// 					}
 					++cVarsTotal;
 				} else { //text
 					result += sub_what[2];
@@ -141,6 +168,14 @@ namespace {
 		}
 		inline static tstring get_sub_regexp() { //регулярное выражение конструируем из имен переменных заданных в VAR_NAMES
 			return L"\\[([^]]+)\\]|([^][]+)";
+		}
+		inline bool find_variable(tstring const& varName, int& destVarId) {
+			tvarnames::const_iterator p = std::find_if(m_VarNames.begin(), m_VarNames.end()
+				, boost::bind(&::is_pair_first_equal_to, _1, boost::cref(varName) ) );
+			if (p == m_VarNames.end()) return false;
+
+			destVarId = atoi(p->second);
+			return true;
 		}
 	};
 };
@@ -224,8 +259,9 @@ nf::Patterns::Private::DetailedCommand::commandToListParts(nf::tparsed_command c
 //////////////////////////////////////////////////////////////////////////
 // CommandPatterns
 CommandPatterns::CommandPatterns(tlist_command_patterns const& listPatterns) {
+	m_PP.reserve(listPatterns.size());
 	BOOST_FOREACH(nf::Patterns::tcommand_pattern const& pattern, listPatterns) {
-		m_PP.insert(pattern);
+		m_PP.push_back(pattern);
 	}
 }
 
@@ -233,21 +269,17 @@ CommandPatterns::~CommandPatterns(void)
 {
 }
 
-bool CommandPatterns::TransformCommand(nf::tparsed_command const &SrcCmd
-									   , tstring &DestCmd) const
-{
-	//внимание: в map префиксы с двоеточием, а в SrcCmd - без
+bool CommandPatterns::TransformCommand(nf::tparsed_command const &SrcCmd, tstring &DestCmd) const {
+//Prefixes in m_PP are with ":", prefixes in SrcCmd are without
 	tstring prefix = SrcCmd.prefix + L":";
-	tmap::const_iterator p = m_PP.find(prefix);
-	if (p == m_PP.end()) return false;
+	tprefix_pattern_vector::const_iterator p = std::find_if(m_PP.begin(), m_PP.end(), boost::bind(&is_pair_first_equal_to, _1, boost::cref(prefix)));
+// 	tmap::const_iterator p = m_PP.find(prefix);
+ 	if (p == m_PP.end()) return false;
 
 	return TransformCommand(p->second, SrcCmd, DestCmd);
 }
 
-bool CommandPatterns::TransformCommand(tstring const& Pattern
-									   , nf::tparsed_command const &SrcCmd
-									   , tstring &DestCmd) const
-{
+bool CommandPatterns::TransformCommand(tstring const& Pattern, nf::tparsed_command const &SrcCmd, tstring &DestCmd) const {
 	Private::DetailedCommand dc(SrcCmd);
 	dc.ApplyPattern(Pattern);
 	DestCmd = dc.GetResultString();

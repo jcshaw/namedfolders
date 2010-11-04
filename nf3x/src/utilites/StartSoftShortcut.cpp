@@ -8,7 +8,6 @@
 #include "StdAfx.h"
 #include "startsoftshortcut.h"
 #include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 #include <boost/scope_exit.hpp>
 #include <ShlObj.h>  
@@ -26,8 +25,6 @@
 
 #include "executor_addons.h"
 #include "strings_utils.h"
-
-//#include <boost/lexical_cast.hpp>
 
 using namespace nf;
 using namespace Start;

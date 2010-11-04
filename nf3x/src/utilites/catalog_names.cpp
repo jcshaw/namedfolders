@@ -7,10 +7,12 @@
 #include "stdafx.h"
 #include "catalog_names.h"
 
-#include <locale> 
+//#include <locale> 
 #include <boost/foreach.hpp>
 #include "strings_utils.h"
 using namespace Utils;
+
+extern struct FarStandardFunctions g_FSF;
 
 tstring Utils::ExtractCatalogName(tstring const& srcPath) {
 	tstring path;
@@ -139,11 +141,17 @@ tstring Utils::MakePathCompact(tstring const &srcCatalog, bool bKeepExceededColo
 
 
 tstring Utils::GetCanonicalCatalogName(tstring const& srcCatalog) {
-// 	//!TODO: makepathcompact, lowercase	
+//make path compact
 	tstring dest = MakePathCompact(srcCatalog, false);
 	if (! dest.empty()) Utils::AddLeadingCharIfNotExistsOnPlace(dest, SLASH_CATS);
-	boost::algorithm::to_lower(dest, std::locale("")); //!TODO: replace by smth else to reduce size ??
-	return dest;
+//convert to lower case
+	tstring ret;
+	ret.reserve(dest.size());
+	BOOST_FOREACH(wchar_t ch, dest) {
+		ret.push_back(g_FSF.LLower(ch));
+	}
+	return ret;	
+	//boost::algorithm::to_lower(dest, std::locale("")); //!TODO: replace by smth else to reduce size ??
 }
 
 bool Utils::PrepareMovingShortcut(nf::tshortcut_info const &srcSh, tstring const &targetPath, nf::tshortcut_info &destSh) {

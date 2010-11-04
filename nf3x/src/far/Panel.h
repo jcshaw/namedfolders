@@ -4,7 +4,6 @@
 * e-mail: dvpublic0@gmail.com
 */
 #pragma once
-#include <map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
