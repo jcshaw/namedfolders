@@ -10,21 +10,21 @@ namespace nf {
 	public:
 		explicit autobuffer_wrapper() : m_Index(0) 
 		{}
-		inline T& operator[](unsigned int itemIndex) {
+		T& operator[](unsigned int itemIndex) {
 			return *reinterpret_cast<T*>(&m_Buffer[itemIndex * sizeof(T)]);
 		}
-		inline void resize(unsigned int countItems) {
+		void resize(unsigned int countItems) {
 			m_Buffer.resize(countItems * sizeof(T));
 		}
-		inline void push_back(T const& value) {
+		void push_back(T const& value) {
 			assert(m_Index < size());
 			this->operator[](m_Index++) = value;
 		}
-		inline size_t size() const {
+		size_t size() const {
 			return static_cast<size_t>(m_Buffer.size() / sizeof(T));
 		}
 	private:
 		nf::tautobuffer_byte m_Buffer;
-		unsigned int m_Index;
+		unsigned int m_Index; //counter for filling buffer using push_back
 	};
 }

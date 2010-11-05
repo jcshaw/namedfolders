@@ -157,11 +157,8 @@ int nf::Shell::SelectShortcutsByPath(tstring catalog
 }
 
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-namespace
-{
-	void search_catalogs(sc::CCatalog& c, nf::tlist_strings &ListCatalogParts, nf::tvector_strings& list)
-	{
+namespace {
+	void search_catalogs(sc::CCatalog& c, nf::tlist_strings &ListCatalogParts, nf::tvector_strings& list) {
 		tstring smask;
 		smask.swap(*ListCatalogParts.begin());
 		ListCatalogParts.erase(ListCatalogParts.begin());
@@ -197,8 +194,7 @@ int nf::Shell::SelectCatalogs(tstring const& pattern	//шаблон
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-namespace
-{
+namespace {
 	inline bool is_equal_to_pattern(tstring const& Pattern, nf::tshortcut_info const& s1) {
 		return ! lstrcmpi(s1.shortcut.c_str(), Pattern.c_str()) ? 0 : 1;
 	}
@@ -218,7 +214,7 @@ int nf::Shell::SortByRelevance(nf::tshortcuts_list& list
 	list.sort(boost::bind(less_hashed, SrcShPattern, _1, _2));
 	//std::sort(list.begin(), list.end(), boost::bind(less_hashed, SrcShPattern, _1, _2) ); 
 	//находим кол-во элементов точно равных шаблону (для них hash равен 0)
-	nf::tshortcuts_list::iterator p = find_if(list.begin(), list.end()
+	nf::tshortcuts_list::iterator p = std::find_if(list.begin(), list.end()
 		, boost::bind(std::equal_to<bool>(), false,  boost::bind(&is_equal_to_pattern, SrcShPattern, _1)));
 	if (p == list.end()) return 0;
 	return static_cast<int>(std::distance(p, list.begin()) + 1);

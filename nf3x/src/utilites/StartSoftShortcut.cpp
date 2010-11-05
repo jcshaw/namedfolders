@@ -172,6 +172,7 @@ namespace {
 		) return;
 
 		exceptions_checker checker;
+
 		ListShortcuts.erase(
 			std::remove_if(ListShortcuts.begin(), ListShortcuts.end()
 				, boost::bind(&exceptions_checker::IsShouldBeSkipped, &checker, _1))

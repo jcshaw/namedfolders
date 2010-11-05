@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <ShLwApi.h>
-#include <boost/scoped_ptr.hpp>
 #include <boost/foreach.hpp>
 
 #include "panel.h"

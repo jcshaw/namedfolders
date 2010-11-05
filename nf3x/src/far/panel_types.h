@@ -5,7 +5,6 @@
 */
 #pragma once
 #include <vector>
-#include <boost/scoped_ptr.hpp>
 
 #include "plugin.hpp"
 #include "PanelInfoWrap.h"

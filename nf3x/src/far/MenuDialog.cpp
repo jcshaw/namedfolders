@@ -59,7 +59,7 @@ namespace {
 			+ (L'Z' - L'A' + 1)*2 + (L'9' - L'0' + 1) 
 			+ number_additional_chars
 			+ 1; // 0
-		destBuf.resize(count_items);
+		destBuf.resize(static_cast<unsigned int>(count_items));
 
 		while (0 != pBreakCodes && 0 != *pBreakCodes) {
 			destBuf.push_back(*pBreakCodes);
