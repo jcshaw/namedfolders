@@ -24,14 +24,10 @@ namespace {
 		BOOST_FOREACH(nf::Patterns::tcommand_pattern const& pattern, List) {
 			FarMenuItem mi;
 			memset(&mi, 0, sizeof(FarMenuItem));
-			tstring_buffer t(new tstring(pattern.first));
-			mi.Text = (*t).c_str();
+			tstring_buffer t(Utils::Str2Buffer(pattern.first));
+			mi.Text = Utils::Buffer2Str(*t);
 			menuItems.push_back(mi);
-// #ifdef USE_RVALUES
-// 			itemBuffers.push_back(static_cast<tstring_buffer&&>(t));
-// #else
 			itemBuffers.push_back(t); 
-// #endif
 		}
 	}
 }

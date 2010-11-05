@@ -30,7 +30,7 @@ HANDLE nf::OpenFromPluginsMenu() {
 	std::vector<FarMenuItem> MenuItems(NUM_ITEMS);
 	tlist_buffers menu_buffers(NUM_ITEMS);
 	for (unsigned int i = 0; i < NUM_ITEMS; ++i) {
-		menu_buffers[i].reset(new tstring(GetMsg(PLUGINSMENU_ITEMS[i])));
+		menu_buffers[i].reset(Utils::Str2Buffer(GetMsg(PLUGINSMENU_ITEMS[i])));
 		MenuItems[i].Text = &(*menu_buffers[i])[0];	
 		MenuItems[i].Selected = 0;
 		MenuItems[i].Checked = 0;

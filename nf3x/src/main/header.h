@@ -25,6 +25,7 @@
 // #include <memory>
 // #else 
 #include <boost/shared_ptr.hpp>
+//#include <boost/ptr_container/ptr_vector.hpp>
 // #endif
 
 #pragma warning(default: 4244 4267)
@@ -32,17 +33,6 @@
 #include <stlsoft/memory/auto_buffer.hpp> 
 typedef std::basic_string<wchar_t> tstring;
 typedef std::pair<tstring, tstring> tpair_strings;
-
-// #ifdef USE_RVALUES
-// //it's not possible to use unique_ptr because of CPanel::GetFindData
-// typedef std::unique_ptr<tstring> tstring_buffer;
-// #else
-typedef boost::shared_ptr<tstring> tstring_buffer;
-// #endif
-
-typedef std::vector<tstring_buffer> tlist_buffers;
-
-//typedef std::basic_string<char> tstring;
 
 extern wchar_t const * SLASH_CATS;		//разделитель каталогов
 extern wchar_t const * SLASH_DIRS;		//разделитель директорий
@@ -55,13 +45,11 @@ extern wchar_t const*const DEEP_DIRECT_SEARCH;
 extern wchar_t const*const DEEP_REVERSE_SEARCH;
 extern wchar_t const*const DEEP_UP_DIRECTORY;
 
-
 extern const wchar_t CHAR_LEADING_VALUE_ENVVAR;	//символ для идентификации переменных среды в путях
 extern const wchar_t CHAR_LEADING_VALUE_REGKEY;	//символ для идентификации ключей реестра в путях 
 
 extern wchar_t const* HISTORY_APPLY_COMMANDS;
 extern wchar_t const* HISTORY_COMMAND_PATTERNS;
-
 
 extern struct PluginStartupInfo g_PluginInfo; 
 extern struct FarStandardFunctions g_FSF;
@@ -167,47 +155,9 @@ namespace nf {
 // 	typedef boost::auto_buffer<wchar_t> tautobuffer_char;
 // 	typedef boost::auto_buffer<BYTE> tautobuffer_byte;
 	typedef std::vector<BYTE> tautobuffer_byte; 
-		//!TODO: use BOOST library when auto_buffer will be included to boost.
-		//currently, stlsoft::auto_buffer doesn't support push_back, see far_impl
-// 	typedef std::vector<wchar_t> tautobuffer_char;
 
-
-// 	namespace Private {
-// 		struct Logger {
-// 			template <class T>
-// 			static void Output(const T& level, std::basic_string<wchar_t> const& Message) { 
-// 				//!TODO: write message to log file
-// 			}
-// 		};
-// 	}
-// 
-// 	class nf_exception : std::exception {
-// 	public:
-// 		nf_exception(std::basic_string<wchar_t> const& Message, const wchar_t* Locus)
-// 			: m_Message(Message)
-// 		{		
-// 			nf::Private::Logger::Output(0, Message + tstring(L"; ") + Locus);
-// 		}
-// 		inline tstring const& GetMessage() const { 
-// 			return m_Message;}
-// 	private:
-// 		tstring m_Message;
-// 	};
-// 
-// 	namespace Private 
-// 	{
-// 		struct Raiser {
-// 			template <class T>
-// 			static void Throw(const T&, const std::basic_string<wchar_t>& message, const wchar_t* locus) {			
-// 				throw nf_exception(message, locus);
-// 			};
-// 		}; //Raiser
-// 	} //Private
-// 
-// 	typedef nf::Private::Raiser traiser;
-// 
-// #define ENFORCE(exp) \
-// 	*Ext::MakeEnforcer<Ext::Private::DefaultPredicate, nf::traiser>((exp), _T("Expression '") _TEXT(#exp) L"' failed in '" \
-// 	_TEXT(__FILE__) _TEXT("', line: ") _T( STRINGIZE(__LINE__)) )
+	typedef boost::shared_ptr<tautobuffer_char> tstring_buffer;
+	//typedef boost::ptr_vector<tstring_buffer> tlist_buffers;
+	typedef std::vector<tstring_buffer> tlist_buffers;
 
 }

@@ -285,6 +285,7 @@ int CPanel::GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpM
 			*pPanelItem = 0;
 			*pItemsNumber = 0;
 			delete pm;
+			return FALSE;
 		}
 	} else {
 		*pPanelItem = m_PanelItems.first.size() == 0 
@@ -349,7 +350,7 @@ void set_panel_item(PluginPanelItem& item
 	memset(&item, 0, sizeof(item));
 	item.Description = folder.empty() ? 0 : folder.c_str();
 	item.Flags = 0;
-	itemBuffer.reset(new tstring(name));
+	itemBuffer.reset(Utils::Str2Buffer(name));
 	item.FindData.lpwszFileName = &(*itemBuffer)[0];
 	item.FindData.dwFileAttributes =  (bIsHidden) ? FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM : 0;
 	if (bIsDirectory) item.FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;

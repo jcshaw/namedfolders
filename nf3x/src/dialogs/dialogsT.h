@@ -29,7 +29,7 @@ public:
 		, wchar_t const* pData)
 		: m_ItemIndex(ItemIndex)
 	{
-		m_pBuffer.reset(new tstring());
+		m_pBuffer.reset(new nf::tautobuffer_char(1)); //stlsoft-autobuffer doesn't allow zero size
 		m_FarDialogItem.Type = ItemType;
 		m_FarDialogItem.X1 = X1;
 		m_FarDialogItem.Y1 = Y1;
@@ -42,22 +42,22 @@ public:
 		m_FarDialogItem.MaxLen = 0;
 		far_di_item::SetFarDialogItemBuffer(m_pBuffer, pData, m_FarDialogItem);		
 	};
-	tstring_buffer const& GetBufferPtr() const {
-		return m_pBuffer;
-	}
+// 	tstring_buffer const& GetBufferPtr() const {
+// 		return m_pBuffer;
+// 	}
 	FarDialogItem& GetFarDialogItemRef() {
 		return m_FarDialogItem;
 	}
 	unsigned int GetItemIndex() const {
 		return m_ItemIndex;
 	}
-	static void SetFarDialogItemBuffer(tstring_buffer& destBuffer, wchar_t const* srcData
-		, FarDialogItem& destFarDialogItem) {
-		destBuffer.reset(new tstring(srcData));
+	static void SetFarDialogItemBuffer(tstring_buffer& destBuffer, wchar_t const* srcData, FarDialogItem& destFarDialogItem) {
+		destBuffer.reset(new nf::tautobuffer_char(lstrlenW(srcData) + 1));
+		lstrcpyW(&(*destBuffer)[0], srcData);
 		destFarDialogItem.PtrData = &(*destBuffer)[0];
 	}
 private:
-	tstring_buffer m_pBuffer; //copyable
+	tstring_buffer m_pBuffer; 
 	FarDialogItem m_FarDialogItem;
 	unsigned int m_ItemIndex;
 };

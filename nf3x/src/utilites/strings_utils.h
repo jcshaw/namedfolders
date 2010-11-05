@@ -93,4 +93,13 @@ namespace Utils {
 		if (srcStr.empty()) return false;
 		return *(--srcStr.end()) == charToEqual;
 	}
+
+	inline nf::tautobuffer_char* Str2Buffer(tstring const& srcStr) {
+		nf::tautobuffer_char*p = new nf::tautobuffer_char(srcStr.size() + 1);
+		lstrcpy( &(*p)[0], srcStr.c_str());
+		return p;
+	}
+	inline wchar_t const* Buffer2Str(nf::tautobuffer_char const& srcBuffer) {
+		return &srcBuffer[0];
+	}
 }//Utils

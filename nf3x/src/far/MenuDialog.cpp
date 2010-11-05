@@ -339,9 +339,9 @@ void nf::Menu::CMenuDialog::load_items(tlist_far_menu_items &destMenuItems, tlis
 		if (mi.first >= 0) {
 			FarMenuItem m;			
 			memset(&m, 0, sizeof(FarMenuItem));
-			tstring_buffer buffer(new tstring(boost::apply_visitor(string_maker, mi.second)));
+			tstring_buffer buffer(Utils::Str2Buffer(boost::apply_visitor(string_maker, mi.second)));
 			if (buffer->size() > MAX_WIDTH) {
-				buffer->erase(MAX_WIDTH, buffer->size() - MAX_WIDTH);
+				(*buffer)[MAX_WIDTH] = 0; //same as buffer->erase(MAX_WIDTH, buffer->size() - MAX_WIDTH);
 			} 
 			m.Text = &(*buffer)[0];
 			destMenuItems.push_back(m);
