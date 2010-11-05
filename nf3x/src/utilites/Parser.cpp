@@ -164,9 +164,9 @@ bool nf::Parser::IsTokenMatchedToPattern(tstring const& srcToken, tstring const 
 	//	"a*" соответствует "abc" и "a",  "b?" соответствует "ba" и "bc"
 	if (bAddTrailingAsterix) {
 		tstring p = srcPattern + tstring(L"*");
-		return FarCmpName(p.c_str(), srcToken.c_str(), FALSE) != 0;
+		return nf::FarCmpName(p.c_str(), srcToken.c_str(), FALSE) != 0;
 	} else {
-		return FarCmpName(srcPattern.c_str(), srcToken.c_str(), FALSE) != 0;
+		return nf::FarCmpName(srcPattern.c_str(), srcToken.c_str(), FALSE) != 0;
 	}
 }
 

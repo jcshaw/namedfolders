@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include "enforce.h"
 
 #pragma warning(disable: 4244 4267)
@@ -15,11 +16,31 @@
 //http://www.boost.org
 #define BOOST_REGEX_STATIC_LINK
 #include <boost/regex.hpp>
+
+// #ifdef USE_VC2010
+// #define USE_RVALUES 
+// #endif
+
+// #ifdef USE_RVALUES
+// #include <memory>
+// #else 
+#include <boost/shared_ptr.hpp>
+// #endif
+
 #pragma warning(default: 4244 4267)
 
 #include <stlsoft/memory/auto_buffer.hpp> 
 typedef std::basic_string<wchar_t> tstring;
 typedef std::pair<tstring, tstring> tpair_strings;
+
+// #ifdef USE_RVALUES
+// //it's not possible to use unique_ptr because of CPanel::GetFindData
+// typedef std::unique_ptr<tstring> tstring_buffer;
+// #else
+typedef boost::shared_ptr<tstring> tstring_buffer;
+// #endif
+
+typedef std::vector<tstring_buffer> tlist_buffers;
 
 //typedef std::basic_string<char> tstring;
 
@@ -134,11 +155,12 @@ namespace nf {
 
 	typedef tstring tcatalog_info;	//информация о каталоге (путь относительно корневого каталога)
 
-	typedef std::vector<tstring> tcatalogs_list;
+	typedef std::list<tstring> tlist_strings;
+	typedef std::list<tpair_strings> tlist_pairs_strings;	
+	typedef std::vector<tstring> tvector_strings;
+	typedef std::vector<tpair_strings> tvector_pair_strings;
 	typedef std::list<nf::tshortcut_info> tshortcuts_list;
-	typedef std::vector<tstring> tdirs_list;
-	typedef std::vector<tstring> tvalues_list;
-	typedef std::vector<tstring> tenvvars_list;
+	typedef std::list<nf::tcatalog_info> tcatalogs_list;
 
 	typedef stlsoft::auto_buffer<wchar_t> tautobuffer_char;
 // 	typedef stlsoft::auto_buffer<BYTE> tautobuffer_byte;

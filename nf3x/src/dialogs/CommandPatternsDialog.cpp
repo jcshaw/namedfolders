@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <boost/foreach.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "lang.h"
 #include "settings.h"
@@ -17,7 +16,7 @@ namespace {
 	void load_list_patterns_to_menu(nf::Patterns::CommandsManager const &cm
 		, nf::Patterns::tlist_command_patterns const &List
 		, std::vector<FarMenuItem> &menuItems
-		, std::vector<boost::shared_ptr<tstring> > &itemBuffers)
+		, tlist_buffers &itemBuffers)
 	{
 		menuItems.reserve(List.size());
 		itemBuffers.reserve(List.size());
@@ -25,10 +24,14 @@ namespace {
 		BOOST_FOREACH(nf::Patterns::tcommand_pattern const& pattern, List) {
 			FarMenuItem mi;
 			memset(&mi, 0, sizeof(FarMenuItem));
-			boost::shared_ptr<tstring> t(new tstring(pattern.first));
+			tstring_buffer t(new tstring(pattern.first));
 			mi.Text = (*t).c_str();
 			menuItems.push_back(mi);
-			itemBuffers.push_back(t);
+// #ifdef USE_RVALUES
+// 			itemBuffers.push_back(static_cast<tstring_buffer&&>(t));
+// #else
+			itemBuffers.push_back(t); 
+// #endif
 		}
 	}
 }
@@ -40,7 +43,7 @@ void nf::Patterns::EditPatterns(nf::Patterns::CommandsManager &cm)
 
 	while (true) {
 		std::vector<FarMenuItem> menu_items;
-		std::vector<boost::shared_ptr<tstring> > mi_buffers;
+		tlist_buffers mi_buffers;
 
 		nf::Patterns::tlist_command_patterns list;
 		cm.GetListRegisteredCommands(list);

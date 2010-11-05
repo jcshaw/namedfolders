@@ -232,8 +232,8 @@ void nf::Panel::DeleteSelectedCatalogsAndShortcuts(CPanel *pPanel, PanelInfo con
 
 	CPanelUpdater pu(pPanel, pi.CurrentItem);		
 	//составляем полный список выделенных псевдонимов и каталогов
-	std::list<nf::tshortcut_info> list_sh;
-	std::list<nf::tcatalog_info> list_c;
+	nf::tshortcuts_list list_sh;
+	nf::tcatalogs_list list_c;
 	for (int i = 0; i < pi.SelectedItemsNumber; ++i) {
 		if (IsSelectedItemIsCatalog(pPanel, pi, i)) {
 			list_c.push_back(GetSelectedCatalog(pPanel, pi, i));

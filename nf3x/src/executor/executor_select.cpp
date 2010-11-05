@@ -48,7 +48,7 @@ namespace {
 //и вернуть их полный список в DestListPaths
 void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring const &localPath0
 							, nf::twhat_to_search_t whatToSearch
-							, std::list<tstring> &destListPaths) {
+							, nf::tlist_strings &destListPaths) {
 	//p может содержать метасимволы
 	//находим все директории, удовлетворяющие panel.value
 
@@ -69,7 +69,7 @@ void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring con
 		destListPaths.push_back(svalue);
 	}
 	if (! local_path.empty()) {	//учитываем локальный путь относительно каждой найденной директории	
-		std::list<tstring> list_paths;
+		nf::tlist_strings list_paths;
 		nf::Search::CSearchSystemPolice ssp(whatToSearch);
 		BOOST_FOREACH(tstring const& path, destListPaths) {
 			nf::Search::SearchByPattern(local_path.c_str(), path, ssp, list_paths);
@@ -83,7 +83,7 @@ bool nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcPath, tstring cons
 	//найти все пути, подходящие для Value и LocalPath
 	//дать возможность пользователю выбрать требуемый путь 
 	//и вернуть его в ResultPath
-	std::list<tstring> value_paths;
+	nf::tlist_strings value_paths;
 	GetPath(hPlugin, srcPath, localPath0, whatToSearch, value_paths);
 	value_paths.sort();
 	//при игре в \ и .. легко могут появиться множественные варианты одного и того же файла
@@ -139,7 +139,7 @@ bool nf::Selectors::GetAllShortcuts(HANDLE hPlugin, nf::tparsed_command const &c
 
 //выбрать наиболее подходящий каталог из списка вариантов
 bool nf::Selectors::GetCatalog(HANDLE hPlugin, nf::tparsed_command const &cmd, nf::tcatalog_info &destCatalog) {
-	nf::tcatalogs_list list;
+	nf::tvector_strings list;
 
 	if (cmd.catalog.empty()) {
 		destCatalog = L"";

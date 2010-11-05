@@ -24,7 +24,7 @@
 
 extern struct PluginStartupInfo g_PluginInfo; 
 
-int FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath) {
+int nf::FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath) {
 	return g_PluginInfo.CmpName(Pattern, String, SkipPath);
 }
 
@@ -34,10 +34,7 @@ namespace {
 	}
 }
 
-void CloseAndStartAnotherPlugin(HANDLE hPlugin
-								, tstring const& Command
-								, bool bActivePanel
-								, bool bOpenBoth)
+void nf::CloseAndStartAnotherPlugin(HANDLE hPlugin, tstring const& Command, bool bActivePanel, bool bOpenBoth)
 {	//"press" all keys - Command + Enter
 	using namespace nf;
 	//ignore all prefixes except first one 
@@ -54,18 +51,18 @@ void CloseAndStartAnotherPlugin(HANDLE hPlugin
 
 	if (! bActivePanel) {
 		push_back(pbuffer, counter,  VK_TAB);
-			for (unsigned int i = 0; i < Command.size(); ++i) {
-				push_back(pbuffer, counter,  static_cast<DWORD>(Command[i]));
-			}
-			push_back(pbuffer, counter,  VK_RETURN);
+		for (unsigned int i = 0; i < Command.size(); ++i) {
+			push_back(pbuffer, counter,  static_cast<DWORD>(Command[i]));
+		}
+		push_back(pbuffer, counter,  VK_RETURN);
 
-			if (! bOpenBoth) {
-				push_back(pbuffer, counter,  VK_TAB);
-					for (unsigned int i = 0; i < prefix.size(); ++i) {
-						push_back(pbuffer, counter,  static_cast<DWORD>(prefix[i]));
-					}
-					push_back(pbuffer, counter,  VK_RETURN);
-			}
+		if (! bOpenBoth) {
+			push_back(pbuffer, counter,  VK_TAB);
+				for (unsigned int i = 0; i < prefix.size(); ++i) {
+					push_back(pbuffer, counter,  static_cast<DWORD>(prefix[i]));
+				}
+				push_back(pbuffer, counter,  VK_RETURN);
+		}
 	} else {
 		for (unsigned int i = 0; i < Command.size(); ++i) {
 			if (static_cast<DWORD>(Command[i]) == L'\n') {
@@ -133,20 +130,17 @@ namespace {
 	}
 } //namespace 
 
-bool OpenShortcutOnPanel(HANDLE hPlugin
-						 , nf::tshortcut_value_parsed &panel
-						 , tstring path
-						 , bool bActivePanel
-						 , bool bOpenBoth	
-						 , bool bClosePlugin
-						 , nf::twhat_to_search_t WhatToSearch) {
+bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, tstring path
+							 , bool bActivePanel, bool bOpenBoth
+							 , bool bClosePlugin
+							 , nf::twhat_to_search_t WhatToSearch) {
 	using namespace nf;
 	assert(panel.bValueEnabled);
 	CPanelInfoWrap plugin(hPlugin);
 	tstring filename;	//им€ файла на котором нужно позиционироватьс€
 
 	if (panel.ValueType == VAL_TYPE_PLUGIN_DIRECTORY) {	//открыть виртуальную директорию
-		::CloseAndStartAnotherPlugin(hPlugin, panel.value, bActivePanel, bOpenBoth);
+		nf::CloseAndStartAnotherPlugin(hPlugin, panel.value, bActivePanel, bOpenBoth);
 		g_PluginInfo.Control(hPlugin
 			, FCTL_CLOSEPLUGIN
 			, 0
@@ -178,7 +172,7 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 		case nf::VAL_TYPE_NET_DIRECTORY:
 			if (CSettings::GetInstance().GetValue(nf::ST_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE)) {
 				panel.value = L"net:\ncd " + panel.value;	//\n заменим на ENTER
-				::CloseAndStartAnotherPlugin(hPlugin, panel.value, bActivePanel, bOpenBoth);			
+				nf::CloseAndStartAnotherPlugin(hPlugin, panel.value, bActivePanel, bOpenBoth);			
 				break;
 			}
 		default:
@@ -195,11 +189,11 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 	return true;
 }	
 
-bool SelectAndOpenPathOnPanel(HANDLE hPlugin, std::list<tpair_strings> const& listAliasPaths, nf::twhat_to_search_t whatToSearch
-							  , bool bActivePanel)
+bool nf::SelectAndOpenPathOnPanel(HANDLE hPlugin, tlist_pairs_strings const& listAliasPaths
+								  , nf::twhat_to_search_t whatToSearch, bool bActivePanel)
 {	//suggest to select required variant from menu, then open selected path
 	//show list directories, without shortcut names
-	std::list<tstring> paths;	//all possible paths
+	nf::tlist_strings paths;	//all possible paths
 	BOOST_FOREACH(tpair_strings const& kvp, listAliasPaths) {
 		paths.push_back(kvp.second);
 	}

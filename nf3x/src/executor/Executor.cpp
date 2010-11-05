@@ -212,13 +212,13 @@ namespace {
 		, nf::tshortcut_value_parsed SrcParsed
 		, tstring const &LocalPath0
 		, nf::twhat_to_search_t WhatToSearch
-		, std::list<tpair_strings> &DestList) {
+		, tlist_pairs_strings &DestList) {
 		tstring local_path = LocalPath0;		
 		if (! local_path.empty()) { //remove only one and only one leading slash
 			if (*local_path.begin() == L'\\') local_path.erase(local_path.begin());
 		}
 		if (SrcParsed.bValueEnabled) {
-			std::list<tstring> list;
+			nf::tlist_strings list;
 			switch (SrcParsed.ValueType) {
 			case nf::VAL_ENVIRONMENT_VARIABLE: nf::Selectors::GetAllPathForEnvvar(hPlugin, SrcParsed.value, list); break;
 			case nf::VAL_REGISTRY_KEY: 
@@ -267,7 +267,7 @@ bool nf::Commands::OpenShortcut(HANDLE hPlugin
 //open one of possible shortcuts
 //show list of possible paths with taking into account available local paths
 	CPanelInfoWrap plugin(hPlugin);
-	std::list<tpair_strings> list_sh_paths; //values for each shortcut
+	tlist_pairs_strings list_sh_paths; //values for each shortcut
 	BOOST_FOREACH(nf::tshortcut_info const& kvp, SrcList) { 
 		tstring value = get_shortcut_value_ex(plugin, kvp);
 		if (! value.empty()) {
@@ -386,19 +386,19 @@ tpair_strings nf::Commands::get_implicit_name_and_value(HANDLE hPlugin, bool bGe
 }
 
 int nf::Commands::DeleteShortcut(nf::tshortcut_info const& srcSh, bool bImplicit) {
-	std::list<nf::tshortcut_info> shortcuts;
+	nf::tshortcuts_list shortcuts;
 	shortcuts.push_back(srcSh);
-	return DeleteCatalogsAndShortcuts(shortcuts, std::list<nf::tcatalog_info>(), bImplicit);
+	return DeleteCatalogsAndShortcuts(shortcuts, nf::tcatalogs_list(), bImplicit);
 }
 
 int nf::Commands::DeleteCatalog(nf::tcatalog_info const& srcCatalog, bool bImplicit) {
-	std::list<nf::tcatalog_info> catalogs;
+	nf::tcatalogs_list catalogs;
 	catalogs.push_back(srcCatalog);
-	return DeleteCatalogsAndShortcuts(std::list<nf::tshortcut_info>(), catalogs, bImplicit);
+	return DeleteCatalogsAndShortcuts(nf::tshortcuts_list(), catalogs, bImplicit);
 }
 
-int nf::Commands::DeleteCatalogsAndShortcuts(std::list<nf::tshortcut_info> const& listSh
-											 , std::list<nf::tcatalog_info> const& listCatalogs
+int nf::Commands::DeleteCatalogsAndShortcuts(nf::tshortcuts_list const& listSh
+											 , nf::tcatalogs_list const& listCatalogs
 											 , bool bImplicit)
 {	//delete selected catalogs and shortcuts; ask confirmations from user (if they are turned on in settings)
 	//return total count of deleted shortcuts and catalogs

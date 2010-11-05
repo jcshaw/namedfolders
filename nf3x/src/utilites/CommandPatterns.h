@@ -11,7 +11,7 @@ namespace nf {
 namespace Patterns {
 
 typedef std::pair<tstring, tstring> tcommand_pattern;
-typedef std::list<tcommand_pattern> tlist_command_patterns;
+typedef tlist_pairs_strings tlist_command_patterns;
 /************************************************************************/
 // Предоставляет интерфейс для работы с шаблонами команд
 // Считывание списка команд, добавление, удаление, редактирование
@@ -40,7 +40,7 @@ public:
 // Например: $Name=$Prefix;$Catalog=abc;$Command=--f 
 /************************************************************************/
 class CommandPatterns {
-	typedef std::vector<tpair_strings> tprefix_pattern_vector; 
+	typedef tvector_pair_strings tprefix_pattern_vector; 
 	//typedef std::map<tstring, tstring, Utils::CmpStringLessCI> tmap;	//prefix - patterns
 	tprefix_pattern_vector m_PP;
 public:
@@ -56,7 +56,7 @@ public:
 
 	namespace Private {	 //Private namespace is visible for unit testing
 		class DetailedCommand {
-			typedef std::vector<tstring> tlistparts;
+			typedef nf::tvector_strings tlistparts;
 			tlistparts const m_SrcParts;
 			tlistparts m_DestParts;
 		public:

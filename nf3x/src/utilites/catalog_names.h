@@ -23,11 +23,11 @@ namespace Utils {
 	tstring MakePathCompact(tstring const &srcCatalog, bool bKeepExceededColons);
 	tstring GetCanonicalCatalogName(tstring const& srcCatalog);
 	namespace Private {
-		tstring mix_paths(std::list<tstring> const& s1, std::list<tstring> const& s2
+		tstring mix_paths(nf::tlist_strings const& s1, nf::tlist_strings const& s2
 			, wchar_t destDelimeter
 			, bool bForMovingShortcuts);
 
-		tstring sequence_to_string(std::list<tstring> const& srcSequence, wchar_t destDelimeter);
+		tstring sequence_to_string(nf::tlist_strings const& srcSequence, wchar_t destDelimeter);
 	}
 
 	bool PrepareMovingShortcut(nf::tshortcut_info const &srcSh

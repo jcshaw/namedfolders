@@ -73,7 +73,7 @@ namespace nf {
 		void SetValue(tsetting_strings fg, tstring Value);
 	private:	//members
 		nf::tautobuffer_byte m_FV;	//flag values
-		std::vector<tstring> m_SV;	//string values
+		nf::tvector_strings m_SV;	//string values
 		tstring m_nf_reg_key;		//ключ в котором хранятся настройки NF
 		tstring m_plugin_prefixes;	//префиксы плагина
 		tstring m_FullListPrefixes;

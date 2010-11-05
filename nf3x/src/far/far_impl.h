@@ -9,6 +9,7 @@
 #pragma once
 #include "header.h"
 
+namespace nf {
 int FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath);
 
 void CloseAndStartAnotherPlugin(HANDLE hPlugin, tstring const& Command, bool bActivePanel, bool bOpenBoth);
@@ -21,6 +22,7 @@ bool OpenShortcutOnPanel(HANDLE hPlugin
 						 , bool bClosePlugin
 						 , nf::twhat_to_search_t WhatToSearch);
 
-bool SelectAndOpenPathOnPanel(HANDLE hPlugin, std::list<tpair_strings> const& SrcListAliasPath
+bool SelectAndOpenPathOnPanel(HANDLE hPlugin, nf::tlist_pairs_strings const& SrcListAliasPath
 							  , nf::twhat_to_search_t WhatToSearch, bool bActivePanel);
 
+}

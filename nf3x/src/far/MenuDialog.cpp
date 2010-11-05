@@ -252,7 +252,7 @@ bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &DestValue, int &DestRetCode
 
 	while (true) {
 		tlist_far_menu_items menu_items;
-		tlist_far_menu_buffers menu_buffers;
+		tlist_buffers menu_buffers;
 		load_items(menu_items, menu_buffers);
 
 		int break_code = 0;
@@ -303,7 +303,7 @@ void nf::Menu::CMenuDialog::set_items_visibility(tstring const& Filter, int Leve
 	//menu items strings are unlimited in width to have possibility to filter menu using whole strings contents
 	menu_string_maker_visitor string_maker(m_Menu.GetCurrentMenuMode(), std::make_pair(1024, 1024));
 	int nitems = 0;
-	std::list<tstring> filters;
+	nf::tlist_strings filters;
 	Utils::SplitStringByRegex(Filter, filters, L" ");
 
 	BOOST_FOREACH(tmenu_item& mi, m_List) {
@@ -325,7 +325,7 @@ void nf::Menu::CMenuDialog::set_items_visibility(tstring const& Filter, int Leve
 	}
 }
 
-void nf::Menu::CMenuDialog::load_items(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers) {
+void nf::Menu::CMenuDialog::load_items(tlist_far_menu_items &destMenuItems, tlist_buffers &destMenuBuffers) {
 	//load to menu visible items only
 	assert(destMenuItems.empty());
 	assert(destMenuBuffers.empty());
@@ -339,7 +339,7 @@ void nf::Menu::CMenuDialog::load_items(tlist_far_menu_items &destMenuItems, tlis
 		if (mi.first >= 0) {
 			FarMenuItem m;			
 			memset(&m, 0, sizeof(FarMenuItem));
-			boost::shared_ptr<tstring> buffer(new tstring(boost::apply_visitor(string_maker, mi.second)));
+			tstring_buffer buffer(new tstring(boost::apply_visitor(string_maker, mi.second)));
 			if (buffer->size() > MAX_WIDTH) {
 				buffer->erase(MAX_WIDTH, buffer->size() - MAX_WIDTH);
 			} 

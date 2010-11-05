@@ -60,7 +60,7 @@ namespace Private {
 
 class CConfigureDialog : public dialogT {
 	nf::tautobuffer_byte m_dwParams;
-	std::vector<tstring> m_strParams;
+	nf::tvector_strings m_strParams;
 
 public:
 	CConfigureDialog(void);

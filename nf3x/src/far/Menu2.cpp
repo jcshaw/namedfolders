@@ -45,15 +45,15 @@ int nf::Menu::SelectSoft(nf::tshortcuts_list const &SrcList, nf::tshortcut_info&
 	return select_from_menu<CMenuApplications, tshortcuts_list, Polices::tdirect<nf::tshortcut_info> >(SrcList, DestSoft);
 }
 
-int nf::Menu::SelectCatalog(nf::tcatalogs_list const &SrcList, nf::tcatalog_info& DestCatalog) {
-	return select_from_menu<CMenuCatalogs, tcatalogs_list, Polices::tdirect<tstring> >(SrcList, DestCatalog);
+int nf::Menu::SelectCatalog(nf::tvector_strings const &SrcList, nf::tcatalog_info& DestCatalog) {
+	return select_from_menu<CMenuCatalogs, tvector_strings, Polices::tdirect<tstring> >(SrcList, DestCatalog);
 }
 
-int nf::Menu::SelectPath(std::list<tstring> const& SrcList, tstring &DestPath) {
-	return select_from_menu<CMenuPaths, std::list<tstring>, Polices::tdirect<tstring> >(SrcList, DestPath);
+int nf::Menu::SelectPath(nf::tlist_strings const& SrcList, tstring &DestPath) {
+	return select_from_menu<CMenuPaths, nf::tlist_strings, Polices::tdirect<tstring> >(SrcList, DestPath);
 }
 
-int nf::Menu::SelectEnvVar(std::list<std::pair<tstring, tstring> > const &SrcList, std::pair<tstring, tstring> &DestVar) {
-	return select_from_menu<CMenuEnvironmentVariables, std::list<tpair_strings>, Polices::tdirect<tpair_strings> >(SrcList, DestVar);
+int nf::Menu::SelectEnvVar(nf::tlist_pairs_strings const &SrcList, std::pair<tstring, tstring> &DestVar) {
+	return select_from_menu<CMenuEnvironmentVariables, tlist_pairs_strings, Polices::tdirect<tpair_strings> >(SrcList, DestVar);
 }
 

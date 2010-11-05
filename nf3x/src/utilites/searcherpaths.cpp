@@ -60,7 +60,7 @@ bool check_for_esc(void) {
 	return (bEsc);
 }
 
-void nf::Search::CSearchSystemPolice::SearchSubdir(tstring const& RootDir0, tstring const& Name, std::list<tstring> &list) const
+void nf::Search::CSearchSystemPolice::SearchSubdir(tstring const& RootDir0, tstring const& Name, nf::tlist_strings &list) const
 {	//найти удовлетворяющие паттерну поддиректории системными функциями
 	tstring smask = Parser::ConvertToMask(Name);
 
@@ -77,7 +77,7 @@ void nf::Search::CSearchSystemPolice::SearchSubdir(tstring const& RootDir0, tstr
 	}
 }
 
-void nf::Search::CSearchFarPolice::SearchSubdir(tstring const& RootDir, tstring const& Name, std::list<tstring> &list) const
+void nf::Search::CSearchFarPolice::SearchSubdir(tstring const& RootDir, tstring const& Name, nf::tlist_strings &list) const
 {	//найти удовлетворяющие паттерну поддиректории средствами FAR
 	nf::twhat_to_search_t what_to_search = GetWhatToSearch();
 	tstring root_dir = RootDir;
@@ -128,7 +128,7 @@ wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstr
 
 bool nf::Search::Private::search_multisubdir(tstring const& rootDir, tstring const& srcName, int level
 											 , CSearchPolice &searchPolice
-											 , std::list<tstring> &dest)
+											 , nf::tlist_strings &dest)
 {	//поиск среди директорий любого уровня вложенности
 	if (level == 0) ++level;	// \ и . сокращаются, тогда ищем просто в текущей директории
 	if (check_for_esc()) return false;	//exit by esc
@@ -142,7 +142,7 @@ bool nf::Search::Private::search_multisubdir(tstring const& rootDir, tstring con
 		if (! level) return true;	//дальше не ищем, достигли требуемого уровня вложенности
 
 		//рекурсивно ищем во всех вложенных директориях
-		std::list<tstring> list_subdirs;
+		nf::tlist_strings list_subdirs;
 		Search::CSearchSystemPolice sp(nf::WTS_DIRECTORIES); 
 		sp.SearchSubdir(rootDir, L"*", list_subdirs);
 
@@ -171,7 +171,7 @@ bool nf::Search::Private::search_multisubdir(tstring const& rootDir, tstring con
 }
 
 bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, CSearchPolice &searchPolice
-								 , std::list<tstring>& dest)
+								 , nf::tlist_strings& dest)
 {	// поиск директории, вложенной в текущую, по шаблону {[\dir]|[\\dir]|[\\\dir]|..}+
 	// вариант поиска имени в текущей директории определяется кол-вом слешей.
 	// "\dir"  - поиск имени dir только в текущей директории
@@ -200,14 +200,14 @@ bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, 
 
 	name = Parser::ConvertToMask(name);
 
-	std::list<tstring> variants;
+	nf::tlist_strings variants;
 	Private::search_multisubdir(RootDir, name, level, searchPolice, variants);
 
 	if (! *next_pattern) {
 		// поиск завершен, variants содержит искомые директории
 		// копируем их в массив результатов
 		std::copy(variants.begin(), variants.end(), 
-			std::insert_iterator<std::list<tstring> >(dest, dest.begin()));
+			std::insert_iterator<nf::tlist_strings >(dest, dest.begin()));
 	} else {
 		//в каждой из найденных директорий ищем следующие имена 
 		BOOST_FOREACH(tstring const& dir, variants) {
@@ -217,7 +217,7 @@ bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, 
 	return true;
 }
 
-bool nf::Search::SearchMatched(tstring const& srcPathPattern, CSearchPolice &searchPolice, std::list<tstring>& dest)
+bool nf::Search::SearchMatched(tstring const& srcPathPattern, CSearchPolice &searchPolice, nf::tlist_strings& dest)
 {	//найти все директории, удовлетворяющие паттерну
 	//PathPattern должен содержать полный локальный путь вида
 	//C:\path1\path2\...\pathN

@@ -56,7 +56,7 @@ namespace Commands {
 //класс для удаления одного/нескольких каталогов и/или псевдонимов
 	int DeleteShortcut(nf::tshortcut_info const& Shortcut, bool bImplicit = false);
 	int DeleteCatalog(nf::tcatalog_info const& Catalog, bool bImplicit = false);
-	int DeleteCatalogsAndShortcuts(std::list<nf::tshortcut_info> const& listSh
-		, std::list<nf::tcatalog_info> const& listCatalogs, bool bImplicit);
+	int DeleteCatalogsAndShortcuts(nf::tshortcuts_list const& listSh
+		, nf::tcatalogs_list const& listCatalogs, bool bImplicit);
 } 
 };

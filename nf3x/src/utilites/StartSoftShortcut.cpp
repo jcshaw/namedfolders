@@ -12,7 +12,6 @@
 #include <boost/scope_exit.hpp>
 #include <ShlObj.h>  
 #include <shellapi.h>
-#include <comdef.h>
 #include <vector>
 #include <Shlwapi.h>
 #include <iterator>
@@ -31,7 +30,7 @@ using namespace Start;
 
 namespace {
 	class exceptions_checker {
-		std::list<tstring> m_ListEx;
+		nf::tlist_strings m_ListEx;
 	public:
 		exceptions_checker() {
 			tstring comma_list = CSettings::GetInstance().GetValue(nf::ST_SOFT_MASKS_TO_IGNORE_COMMA_SEPARETED);
@@ -157,7 +156,7 @@ namespace {
 		return false;
 	}
 
-	void try_to_minimize(std::vector<tstring> &Paths, nf::tshortcuts_list& ListShortcuts) {
+	void try_to_minimize(nf::tvector_strings &Paths, nf::tshortcuts_list& ListShortcuts) {
 	//выделяем у всех директорий в списке общий элемент и переносим его в Paths
 	//снижаем, тем самым, размер отображаемых названий каталогов
 //		std::sort(ListShortcuts.begin(), ListShortcuts.end());
@@ -181,7 +180,7 @@ namespace {
 }
 
 namespace {
-	void get_soft_variants(HANDLE hPlugin, std::vector<tstring> &destPaths)
+	void get_soft_variants(HANDLE hPlugin, nf::tvector_strings &destPaths)
 	{	//составляем полный список программ из стартового меню
 		//получаем путь к каталогу StartMenu для всех пользователей и для текущего пользователя
 		wchar_t buffer[MAX_PATH];
@@ -244,21 +243,12 @@ namespace {
 		}
 	}
 	void execute_selected_program(tstring &path, tstring &params) {
-// 		OSVERSIONINFO version;
-// 		version.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-// 		GetVersionEx(&version);
-// 		if (VER_PLATFORM_WIN32_WINDOWS == version.dwPlatformId ) {//Win9X
-// 			//в Win9X ShellExecute требует oem кодировки...
-// 			tstring oem = path; //!TODO: what about Win95 and oem under Far 2.0?
-// 			HINSTANCE value = ShellExecute(0, NULL, oem.c_str(), params.c_str(), NULL, SW_SHOWNORMAL);
-// 		} else { 		
-			HINSTANCE value = ShellExecuteW(0, NULL , path.c_str(), params.c_str(), NULL, SW_SHOWNORMAL); 
-			if ((int)(intptr_t)value < 32) { 
-				if (IsWow64()) { //workaround for #6
-					execute_selected_program64_under_w32(path, params);
-				}
+		HINSTANCE value = ShellExecuteW(0, NULL , path.c_str(), params.c_str(), NULL, SW_SHOWNORMAL); 
+		if ((int)(intptr_t)value < 32) { 
+			if (IsWow64()) { //workaround for #6
+				execute_selected_program64_under_w32(path, params);
 			}
-//		}
+		}
 	}
 
 	void divide_shortcut_and_params(tstring &shortcut_pattern, tstring& params) {
@@ -272,12 +262,8 @@ namespace {
 
 }
 
-bool Start::OpenSoftShortcut(HANDLE hPlugin
-							 , nf::tparsed_command const &cmd)
-{
-	//CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE); //!TODO: see msdn  ShellExecute
-
-	std::vector<tstring> paths;
+bool Start::OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd) {
+	nf::tvector_strings paths;
 	get_soft_variants(hPlugin, paths); //get all possible paths
 
 	tstring shortcut_pattern;	// = (cmd.local_directory.size()) ? cmd.shortcut : cmd.local_directory;

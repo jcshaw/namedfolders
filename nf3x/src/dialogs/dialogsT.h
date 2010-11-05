@@ -9,15 +9,15 @@
 //far dialog item's templates
 #include <cassert>
 #include <vector>
+#include <boost/utility.hpp>
 #include <Windows.h>
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 
 namespace nf {
 
 extern const wchar_t* GetMsg(int MsgId);
 
-class far_di_item {
+class far_di_item : boost::noncopyable {
 public:
 	far_di_item(unsigned int ItemIndex
 		, int ItemType
@@ -42,7 +42,7 @@ public:
 		m_FarDialogItem.MaxLen = 0;
 		far_di_item::SetFarDialogItemBuffer(m_pBuffer, pData, m_FarDialogItem);		
 	};
-	boost::shared_ptr<tstring> const& GetBufferPtr() const {
+	tstring_buffer const& GetBufferPtr() const {
 		return m_pBuffer;
 	}
 	FarDialogItem& GetFarDialogItemRef() {
@@ -51,18 +51,18 @@ public:
 	unsigned int GetItemIndex() const {
 		return m_ItemIndex;
 	}
-	static void SetFarDialogItemBuffer(boost::shared_ptr<tstring>& destBuffer, wchar_t const* srcData
+	static void SetFarDialogItemBuffer(tstring_buffer& destBuffer, wchar_t const* srcData
 		, FarDialogItem& destFarDialogItem) {
 		destBuffer.reset(new tstring(srcData));
 		destFarDialogItem.PtrData = &(*destBuffer)[0];
 	}
 private:
-	boost::shared_ptr<tstring> m_pBuffer; //copyable
+	tstring_buffer m_pBuffer; //copyable
 	FarDialogItem m_FarDialogItem;
 	unsigned int m_ItemIndex;
 };
 
-class far_list_di_items {	//array of FAR dialog items
+class far_list_di_items : boost::noncopyable {	//array of FAR dialog items
 public:
 	far_list_di_items(int InitNumItems = 10) {
 		m_Items.reserve(InitNumItems);
@@ -95,14 +95,11 @@ public:
 			, m_Items[itemIndex]);		
 	}
 private:
-	typedef std::vector<FarDialogItem>  tvec; 
-	typedef std::vector<boost::shared_ptr<tstring> > tdata_buffers;
-
-	tvec m_Items;	
-	tdata_buffers m_Buffers;
+	std::vector<FarDialogItem> m_Items;	
+	tlist_buffers m_Buffers;
 };
 
-class dialogT {
+class dialogT : boost::noncopyable {
 public:
 	dialogT(int width
 		, int height

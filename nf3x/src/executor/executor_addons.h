@@ -17,10 +17,10 @@ namespace Selectors {
 	void GetAllPathForRegKey(HANDLE hPlugins
 		, tstring const &RegKeyName //ключ реестра, содержащий переменные, содержащие требуемые пути
 		, tstring const &VarName //название переменной в ключе реестра
-		, std::list<tstring> &DestListPaths);
+		, nf::tlist_strings &DestListPaths);
 	void GetAllPathForEnvvar(HANDLE hPlugins
 		, tstring const &VarName //название переменной: может быть указано полностью %temp% или частично %t
-		, std::list<tstring> &DestListPaths);
+		, nf::tlist_strings &DestListPaths);
 
 //cd:%
 	bool OpenEnvVar(HANDLE hPlugin, tstring const &VarName, tstring const &LocalPath);

@@ -3,7 +3,6 @@
 #include <boost/variant.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "strings_utils.h"
 #include "Panel.h"
@@ -57,14 +56,13 @@ namespace Menu {
 		typedef std::vector<tmenu_item> tlist_menu_items;
 
 		typedef std::vector<FarMenuItem> tlist_far_menu_items; 
-		typedef std::vector<boost::shared_ptr<tstring> > tlist_far_menu_buffers;
 
 		CMenuDialog(CMenu &M, tlist_menu_items &listItemsRef);
 		bool ShowMenu(tvariant_value &DestValue, int &DestRetCode);
 	private:			
 		std::pair<size_t, size_t> get_column_widths();
 		void set_items_visibility(tstring const& Filter, int Level);
-		void load_items(tlist_far_menu_items &destMenuItems, tlist_far_menu_buffers &destMenuBuffers); 
+		void load_items(tlist_far_menu_items &destMenuItems, tlist_buffers &destMenuBuffers); 
 		int show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem);
 	private:
 		CMenu &m_Menu;

@@ -113,7 +113,7 @@ namespace
 	bool recursive_delete_key(WinSTL::reg_key_t &Key, wchar_t const *SubKey)
 	{	//рекурсивно удалить содержимое ключа реестра
 		bool bRet = true;
-		std::list<tstring> sub_keys;
+		nf::tlist_strings sub_keys;
 		WinSTL::reg_key_t rk(Key.get_key_handle(), SubKey);
 		WinSTL::reg_key_sequence_t seq(rk);
 		BOOST_FOREACH(WinSTL::reg_key_sequence_t::value_type const& key, seq) {

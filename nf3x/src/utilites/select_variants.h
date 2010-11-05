@@ -10,7 +10,7 @@ namespace nf {
 namespace Shell {
 	//найти все варианты каталогов удовлетворяющих шаблону
 	int SelectCatalogs(tstring const& SrcPattern		//шаблон
-						, nf::tcatalogs_list& DestList//список всех найденных совпадений					
+						, nf::tvector_strings& DestList//список всех найденных совпадений					
 						);	
 
 	//найти в заданном каталоге все ярлыки, удовлетворяющие шаблону

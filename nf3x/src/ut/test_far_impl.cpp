@@ -4,8 +4,7 @@
 #include <cassert>
 #include <shlwapi.h>
 
-
-int FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath)
+int nf::FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath)
 {
 	assert(Pattern);
 

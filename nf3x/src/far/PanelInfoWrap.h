@@ -27,28 +27,28 @@ public:
 		return &buffer[0];
 	}
 
-	void SetPanelDir(bool bActivePanel, tstring const& srcDir) {
+	inline void SetPanelDir(bool bActivePanel, tstring const& srcDir) {
 		g_PluginInfo.Control( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
 			, FCTL_SETPANELDIR
 			, 0 
 			, reinterpret_cast<LONG_PTR>(srcDir.c_str()));
 	}
 
-	void RedrawPanel(bool bActivePanel, PanelRedrawInfo *pri = 0) {
+	inline void RedrawPanel(bool bActivePanel, PanelRedrawInfo *pri = 0) {
 		g_PluginInfo.Control( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
 			, FCTL_REDRAWPANEL
 			, 0
 			, reinterpret_cast<LONG_PTR>(pri));
 	}
 
-	void ClosePlugin(tstring const& srcDir) {
+	inline void ClosePlugin(tstring const& srcDir) {
 		g_PluginInfo.Control(m_hPlugin
 			, FCTL_CLOSEPLUGIN
 			, 0
 			, reinterpret_cast<LONG_PTR>(srcDir.c_str()));
 	}
 
-	void UpdatePanel(bool bActivePanel) {
+	inline void UpdatePanel(bool bActivePanel) {
 		g_PluginInfo.Control( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
 			, FCTL_UPDATEPANEL 
 			, 1 //don't remove selection; we can use any non-NULL pointer here

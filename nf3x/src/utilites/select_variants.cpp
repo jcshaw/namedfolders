@@ -160,7 +160,7 @@ int nf::Shell::SelectShortcutsByPath(tstring catalog
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 namespace
 {
-	void search_catalogs(sc::CCatalog& c, std::list<tstring> &ListCatalogParts, nf::tcatalogs_list& list)
+	void search_catalogs(sc::CCatalog& c, nf::tlist_strings &ListCatalogParts, nf::tvector_strings& list)
 	{
 		tstring smask;
 		smask.swap(*ListCatalogParts.begin());
@@ -184,11 +184,11 @@ namespace
 }
 
 int nf::Shell::SelectCatalogs(tstring const& pattern	//шаблон
-							 , nf::tcatalogs_list& list)
+							 , nf::tvector_strings& list)
 { //найти все варианты каталогов удовлетворяющих шаблону, вернуть список всех найденных совпадений	
   //вернуть кол-во точных совпадений (точные совпадения должны идти первыми)
 	sc::CCatalog c;	//!TODO: протестировать
-	std::list<tstring> catalog_parts;
+	nf::tlist_strings catalog_parts;
 	Utils::SplitStringByRegex(pattern, catalog_parts, SLASH_CATS);
 	::search_catalogs(c, catalog_parts, list);
 

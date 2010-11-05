@@ -5,9 +5,7 @@
 */
 #pragma once
 #include <vector>
-#include <map>
-#include <boost/shared_ptr.hpp>
-
+#include <boost/utility.hpp>
 #include "plugin.hpp"
 #include "kernel.h"
 #include "regnotify.h"
@@ -19,13 +17,11 @@
 namespace nf {
 namespace Panel {
 
-class CPanel {
+class CPanel : boost::noncopyable {
 	typedef std::pair<tstring, tstring> tname_value; //name and value of shortcut
 	typedef std::vector<PluginPanelItem> tpanelitems0;
-	typedef std::vector<boost::shared_ptr<tstring> > tpanelitems0_buffers;
 public:
-	typedef std::pair<tpanelitems0, tpanelitems0_buffers> tpanelitems;
-	//typedef std::map<PluginPanelItem*, tpanelitems*> tmap_panelitems;
+	typedef std::pair<tpanelitems0, tlist_buffers> tpanelitems;
 	typedef std::list<std::pair<PluginPanelItem*, tpanelitems*> > tmap_panelitems;
 
 	CPanel(tstring catalog = L"");
@@ -52,8 +48,8 @@ private:
 	tstring m_PanelTitle;				
 	tstring m_CurrentCatalog;			//current NF-catalog 
 
-	std::vector<tname_value> m_ListShortcuts; //list of all shortcuts - names and values
-	std::vector<tstring> m_ListCatalogs;	  //list of all NF-catalogs on panel - only names
+	nf::tvector_pair_strings m_ListShortcuts; //list of all shortcuts - names and values
+	nf::tvector_strings m_ListCatalogs;	  //list of all NF-catalogs on panel - only names
 
 	unsigned int m_NumberTemporaryShortcuts;		//кол-во временных псевдонимов (первые в списке m_ListShortcuts)
 

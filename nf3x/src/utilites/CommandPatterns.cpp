@@ -87,12 +87,12 @@ namespace {
 		boost::basic_regex<wchar_t> m_RE;
 		boost::basic_regex<wchar_t> m_SubRE;
 		//typedef std::map<tstring, int, Utils::CmpStringLessCI> tvarnames; //map is removed for reducing size
-		typedef std::vector<tpair_strings> tvarnames;
+		typedef tvector_pair_strings tvarnames;
 		tvarnames m_VarNames;
-		std::vector<tstring> const& m_SrcParts;
-		std::vector<tstring>& m_DestParts;
+		nf::tvector_strings const& m_SrcParts;
+		nf::tvector_strings& m_DestParts;
 	public:
-		applier(std::vector<tstring> const& SrcParts, std::vector<tstring> &DestParts)
+		applier(nf::tvector_strings const& SrcParts, nf::tvector_strings &DestParts)
 			: m_SrcParts(SrcParts)
 			, m_DestParts(DestParts)
 			, m_RE(applier::get_regexp(), boost::regex_constants::icase)
@@ -176,7 +176,7 @@ nf::Patterns::Private::DetailedCommand::DetailedCommand(nf::tparsed_command cons
 void nf::Patterns::Private::DetailedCommand::ApplyPattern(tstring const& Pattern) {
 	//шаблон состоит из одной или более операций присваивания,
 	//разделенных ';'. Последовательно выполняем их все
-	std::list<tstring> list_tokens;
+	nf::tlist_strings list_tokens;
 	Utils::SplitStringByRegex(Pattern, list_tokens, L";");
 	applier a(m_SrcParts, m_DestParts);
 	std::for_each(list_tokens.begin(), list_tokens.end(), a);
@@ -314,7 +314,7 @@ bool CommandsManager::RemoveCommand(tstring const& Prefix) {
 
 bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd, tstring &DestCmd) const {
 	tlist_command_patterns all_commands;
-	std::list<tstring> used_commands;
+	nf::tlist_strings used_commands;
 	DestCmd = SrcCmd;
 
 	GetListRegisteredCommands(all_commands);
@@ -342,7 +342,7 @@ bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd, tstring
 	return true;
 }
 
-void CommandsManager::GetListRegisteredCommands(std::list<tcommand_pattern> &ListPatterns) const {
+void CommandsManager::GetListRegisteredCommands(tlist_pairs_strings &ListPatterns) const {
 	assert(ListPatterns.empty());
 	WinSTL::reg_key_t key(static_cast<HKEY>(m_Key), L"");
 	WinSTL::reg_value_sequence_t seq(key);

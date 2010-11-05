@@ -31,7 +31,7 @@
 using namespace nf;
 
 namespace {
-	void gen_list_envvars(tstring const& srcMask, std::list<tpair_strings> &listPairs, bool bIncompleteName) {
+	void gen_list_envvars(tstring const& srcMask, tlist_pairs_strings &listPairs, bool bIncompleteName) {
 		//получаем значения всех переменных среды, которые удовлетворяют шаблону varPattern
 		//генерируем список всех директорий на которые ссылаются выбранные переменные среды
 		if (_wenviron == NULL) {
@@ -51,7 +51,7 @@ namespace {
 
 				bool bmask_in_name = nf::Parser::IsTokenMatchedToPattern(env_name, srcMask, false);
 				if (bmask_in_name || bIncompleteName) {
-					std::list<tstring> list_tokens;
+					nf::tlist_strings list_tokens;
 					Utils::SplitStringByRegex(pe, list_tokens, L";");
 					BOOST_FOREACH(tstring const& token, list_tokens) {
 						if (bmask_in_name || (bIncompleteName && nf::Parser::IsTokenMatchedToPattern(token, full_mask, false))) 
@@ -66,7 +66,7 @@ namespace {
 			++penv;
 		}
 	}
-	void get_list_pairs_for_envvar(tstring const &varPattern, std::list<tpair_strings> &listPairs, tstring &destLocalPath) {
+	void get_list_pairs_for_envvar(tstring const &varPattern, tlist_pairs_strings &listPairs, tstring &destLocalPath) {
 		//получить список <имя переменная среды, путь>, удовлетворяющих шаблону varPattern
 		//Если varPattern задана в виде %varPattern% или %varPattern то 
 		//расширяем varPattern в переменную среды средствами NF
@@ -107,7 +107,7 @@ namespace {
 
 	void GetListPairsForRegKey(tstring const &RegKeyName
 		, tstring const& subkeyPatternName
-		, std::list<tpair_strings> &DestListPaths) {	
+		, tlist_pairs_strings &DestListPaths) {	
 	//получить список <ключ реестра, путь>, удовлетворяющих шаблону KeyPattern
 		tstring subkey;
 		HKEY hkey;
@@ -131,9 +131,9 @@ namespace {
 	}
 }	//namespace
 
-void nf::Selectors::GetAllPathForEnvvar(HANDLE hPlugins, tstring const &varName, std::list<tstring> &destListPaths)
+void nf::Selectors::GetAllPathForEnvvar(HANDLE hPlugins, tstring const &varName, nf::tlist_strings &destListPaths)
 {	//получить полный список вариантов именованных директорий 
-	std::list<tpair_strings> list_var_paths;
+	tlist_pairs_strings list_var_paths;
 	tstring additional_local_path; //!TODO: что делать с этим значением?
 	::get_list_pairs_for_envvar(varName, list_var_paths, additional_local_path);
 
@@ -148,9 +148,9 @@ void nf::Selectors::GetAllPathForEnvvar(HANDLE hPlugins, tstring const &varName,
 }
 
 void nf::Selectors::GetAllPathForRegKey(HANDLE hPlugins, tstring const &regKeyName, tstring const &varName
-										, std::list<tstring> &destListPaths)
+										, nf::tlist_strings &destListPaths)
 {	//получить полный список вариантов именованных директорий 	
-	std::list<tpair_strings> list_var_paths;
+	tlist_pairs_strings list_var_paths;
 	::GetListPairsForRegKey(regKeyName, varName, list_var_paths);
 	BOOST_FOREACH(tpair_strings const& kvp, list_var_paths) {
 		destListPaths.push_back(kvp.second);
@@ -168,7 +168,7 @@ bool nf::Selectors::GetPathByEnvvarPattern(HANDLE hPlugin
 										   , tstring const &localPath
 										   , tstring &destPath)
 {
-	std::list<tpair_strings> list_var_paths;
+	tlist_pairs_strings list_var_paths;
 	tstring additional_local_path;
 	::get_list_pairs_for_envvar(varName, list_var_paths, additional_local_path);
 	if (! localPath.empty()) {
@@ -193,7 +193,7 @@ bool nf::Selectors::GetPathByRegKey(HANDLE hPlugins
 									, tstring localPath
 									, tstring &destPath	//выбранная пользователем директория из всех возможных директорий
 									) {
-	std::list<tpair_strings> list_var_paths;
+	tlist_pairs_strings list_var_paths;
 	::GetListPairsForRegKey(regKey
 		, localPath	//!TODO: здесь только первое имя из localpath
 		, list_var_paths);

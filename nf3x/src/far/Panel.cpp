@@ -275,8 +275,8 @@ int CPanel::GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpM
 	if (OpMode & OPM_FIND)
 	{	//выделяем память только при поиске (т.е. требуется одновременно 
 		//загружать в память содержимое всех каталогов)
-		tpanelitems *pm = new tpanelitems();	//очистка памяти в FreeFindData
-		*pm = m_PanelItems;
+		tpanelitems* pm = new tpanelitems();	//очистка памяти в FreeFindData
+		*pm = m_PanelItems; //copy(!) all items
 		if (! pm->first.empty()) {
 			m_FindCache.push_back(std::make_pair(&(pm->first)[0], pm));
 			*pPanelItem = &(pm->first)[0];
@@ -284,6 +284,7 @@ int CPanel::GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpM
 		} else {
 			*pPanelItem = 0;
 			*pItemsNumber = 0;
+			delete pm;
 		}
 	} else {
 		*pPanelItem = m_PanelItems.first.size() == 0 
@@ -338,7 +339,7 @@ int CPanel::ProcessEvent(int Event, void *Param) {
 }
 
 void set_panel_item(PluginPanelItem& item
-					, boost::shared_ptr<tstring>& itemBuffer
+					, tstring_buffer& itemBuffer
 					, tshortcut_state State
 					, tstring const& name
 					, tstring const& folder

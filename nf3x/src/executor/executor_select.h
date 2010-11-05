@@ -25,7 +25,7 @@ namespace nf {
 			, tstring const &Value
 			, tstring const &LocalPath
 			, nf::twhat_to_search_t WhatToSearch
-			, std::list<tstring> &DestListPaths);
+			, nf::tlist_strings &DestListPaths);
 
 		//найти все пути, подходящие для Value и LocalPath
 		//дать возможность пользователю выбрать требуемый путь 

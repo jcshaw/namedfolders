@@ -32,11 +32,11 @@ tstring Utils::ExtractCatalogName(tstring const& srcPath) {
 // a/b, a/b/c/../../../d/e/../../../f -> f
 // a/b .. -> b
 // a/b . -> a/b
-tstring Utils::Private::mix_paths(std::list<tstring> const& s1
-								  , std::list<tstring> const& s2
+tstring Utils::Private::mix_paths(nf::tlist_strings const& s1
+								  , nf::tlist_strings const& s2
 								  , wchar_t destDelimeter
 								  , bool bForMovingShortcuts) {
-	std::list<tstring> dest;
+	nf::tlist_strings dest;
 	std::copy(s1.begin(), s1.end(), std::back_inserter(dest));
 	if (s2.size() == 1 && *s2.begin() == L"..") {
 		if (! bForMovingShortcuts) {
@@ -66,7 +66,7 @@ tstring Utils::Private::mix_paths(std::list<tstring> const& s1
 	return Private::sequence_to_string(dest, destDelimeter);
 }
 
-tstring Utils::Private::sequence_to_string(std::list<tstring> const& srcSequence, wchar_t destDelimeter) {
+tstring Utils::Private::sequence_to_string(nf::tlist_strings const& srcSequence, wchar_t destDelimeter) {
 	tstring ret;
 	BOOST_FOREACH(tstring const& token, srcSequence) {
 		ret += destDelimeter + token;
@@ -100,10 +100,10 @@ bool Utils::ExpandCatalogPath(tstring const &srcCatalog
 //relative target catalog
 	bool bend_slash = (*(targetCatalog.end()-1) == SLASH_CATS_CHAR);
 
-	std::list<tstring> src_tokens;
+	nf::tlist_strings src_tokens;
 	Utils::SplitStringByRegex(Utils::TrimChar(srcCatalog, SLASH_CATS_CHAR).c_str(), src_tokens, SLASH_CATS);
 	
-	std::list<tstring> target_tokens;
+	nf::tlist_strings target_tokens;
 	Utils::SplitStringByRegex(Utils::TrimChar(targetCatalog, SLASH_CATS_CHAR).c_str(), target_tokens, SLASH_CATS);
 
 	destCatalog = Private::mix_paths(src_tokens, target_tokens, SLASH_CATS_CHAR, bForMovingShortcuts);
@@ -112,11 +112,11 @@ bool Utils::ExpandCatalogPath(tstring const &srcCatalog
 
 tstring Utils::MakePathCompact(tstring const &srcCatalog, bool bKeepExceededColons) {
 	// make path compact (all ".." will be collapsed)
-	std::list<tstring> src_tokens;
+	nf::tlist_strings src_tokens;
 	Utils::SplitStringByRegex(Utils::TrimChar(srcCatalog, SLASH_CATS_CHAR).c_str(), src_tokens, SLASH_CATS);
 
 	unsigned int count_reduced_names = 0;
-	std::list<tstring> dest_tokens;
+	nf::tlist_strings dest_tokens;
 	BOOST_REVERSE_FOREACH(tstring const& token, src_tokens) {
 		if (token == L"..") {
 			++count_reduced_names;
