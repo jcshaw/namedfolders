@@ -47,12 +47,49 @@ namespace {
 		return false;
 	}
 
-	void fill_menu_break_keys_buf(int* pBreakCodes, std::vector<int>& destBuf, size_t &destNumDefaultBreakKeys) {
+	//this class is wrapper for nf::tautobuffer_byte with interface of std::vector<int>
+	//it allowes to avoid using std::vector<int> in the program (reduce size on ~3 kb)
+	template<class T>
+	class buffer_wrapper { 
+	public:
+		explicit buffer_wrapper() : m_Index(0) 
+		{}
+		inline T& operator[](unsigned int itemIndex) {
+			return *reinterpret_cast<T*>(&m_Buffer[itemIndex * sizeof(T)]);
+		}
+		inline void resize(unsigned int countItems) {
+			m_Buffer.resize(countItems * sizeof(T));
+		}
+		inline void push_back(T const& value) {
+			assert(m_Index < size());
+			this->operator[](m_Index++) = value;
+		}
+		inline size_t size() const {
+			return static_cast<size_t>(m_Buffer.size() / sizeof(T));
+		}
+	private:
+		nf::tautobuffer_byte m_Buffer;
+		unsigned int m_Index;
+	};
+
+	void fill_menu_break_keys_buf(int* pBreakCodes, buffer_wrapper<int>& destBuf, size_t &destNumDefaultBreakKeys) {
+		int *p = pBreakCodes;
+		destNumDefaultBreakKeys = 0;
+		while (0 != p && 0 != *p) {
+			++destNumDefaultBreakKeys;
+			++p;
+		}
+		size_t count_items = destNumDefaultBreakKeys
+			+ 4  //VK_BACK, VK_SPACE + these keys with shift
+			+ (L'Z' - L'A' + 1)*2 + (L'9' - L'0' + 1) 
+			+ number_additional_chars
+			+ 1; // 0
+		destBuf.resize(count_items);
+
 		while (0 != pBreakCodes && 0 != *pBreakCodes) {
 			destBuf.push_back(*pBreakCodes);
 			++pBreakCodes;
 		}
-		destNumDefaultBreakKeys = destBuf.size();
 
 		destBuf.push_back(VK_BACK); //стирание, 1 символ
 		destBuf.push_back(VK_SPACE); //пробел, 1 символ
@@ -152,7 +189,7 @@ nf::Menu::CMenuDialog::CMenuDialog(CMenu &srcMenu, tlist_menu_items &listItemsRe
 }
 
 int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem) {
-	std::vector<int> buf;
+	buffer_wrapper<int> buf;
 	size_t num_custom_break_codes = 0;
 	fill_menu_break_keys_buf(m_Menu.GetBreakKeys(), buf, num_custom_break_codes);
 

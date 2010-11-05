@@ -11,6 +11,7 @@
 #include <cassert>
 #include <shlwapi.h>
 #include <boost/foreach.hpp>
+#include <boost/function.hpp>
 
 #include "stlcatalogs.h"
 #include <algorithm>

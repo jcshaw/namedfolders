@@ -34,11 +34,10 @@ public:
 		, ID_CANCEL
 	};
 
-	virtual void SetDialogItems()
-	{
+	virtual void SetDialogItems() {
 		const int left = 3;
 		GetDialogItemsRef()
-			<< &far_di_doublebox(ID_DOUBLEBOX,
+			<< &far_di_box(DI_SINGLEBOX, ID_DOUBLEBOX,
 				m_bCreateNewPattern
 					? lg::DLG_CREATE_COMMAND_PATTERN
 					: lg::DLG_EDIT_COMMAND_PATTERN
@@ -51,7 +50,7 @@ public:
 				, 1
 				, HISTORY_COMMAND_PATTERNS
 			)
-			<< &far_di_singlebox(ID_LINE2, 0, 2, 6, DIALOG_WIDTH-left, 6) 
+			<< &far_di_box(DI_SINGLEBOX, ID_LINE2, 0, 2, 6, DIALOG_WIDTH-left, 6) 
 			<< &far_di_button(ID_OK, lg::MSG_OK, 28, 7, 0, FALSE, FALSE, TRUE)	//default button
 			<< &far_di_button(ID_CANCEL, lg::MSG_CANCEL, 37, 7, 0)
 			;

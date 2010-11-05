@@ -4,9 +4,6 @@
 using namespace nf;
 using namespace Patterns;
 
-#include <boost/regex.hpp>
-#include <boost/foreach.hpp>
-
 #include "stlsoft_def.h"
 #include "parser.h"
 
@@ -16,6 +13,7 @@ using namespace Patterns;
 #define BOOST_REGEX_STATIC_LINK
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
+#include <boost/foreach.hpp>
 #pragma warning(default: 4244 4267)
 
 extern struct FarStandardFunctions g_FSF;
@@ -102,7 +100,6 @@ namespace {
 		{ 
 			for (int i = 0; i < NUM_PARTS; ++i) {
 				m_VarNames.push_back(std::make_pair(VAR_NAMES[i], itoa(i)) );
-				//m_VarNames.insert(std::make_pair(VAR_NAMES[i], i));
 			}
 			m_DestParts[ID_PREFIX] = L"cd:";
 		} 
@@ -115,9 +112,6 @@ namespace {
 				tstring DestVarName = what[1];
 				int n = 0;
 				if (! find_variable(DestVarName, n)) return false;
-// 				tvarnames::const_iterator pdest = m_VarNames.find(DestVarName);
-// 				if (pdest == m_VarNames.end()) return false;	//left side contains unknown variable
-// 				int nDestId = pdest->second;
 				m_DestParts[n] = parse_right_part(what[2]);
 				return true;
 			}
@@ -145,14 +139,6 @@ namespace {
 						result += var_value;
 						if (var_value.empty()) ++cEmptyVars;
 					}					
-// 					tvarnames::const_iterator p = m_VarNames.find(tstring(sub_what[1]));
-// 					if (p != m_VarNames.end()) {
-// 						tstring var_value = m_SrcParts[p->second];
-// 						result += var_value;
-// 						if (var_value.empty()) ++cEmptyVars;
-// 					} else {
-// 						result +=  tstring(L"[") + tstring(sub_what[2]) + tstring(L"]");	//unknown variable
-// 					}
 					++cVarsTotal;
 				} else { //text
 					result += sub_what[2];

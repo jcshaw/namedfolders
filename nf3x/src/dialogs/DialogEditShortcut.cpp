@@ -29,11 +29,8 @@ CDialogEditShortcut::~CDialogEditShortcut(void)
 {
 }
 
-UINT CDialogEditShortcut::ShowModal()
-{
-	//вызываем диалог редактированик имени псевдонима
-	int nChoosedItem;
-
+UINT CDialogEditShortcut::ShowModal() {
+	//вызываем диалог редактирования имени псевдонима
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_CATALOG, m_sh.catalog.c_str());
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_SHORTCUT, m_sh.shortcut.c_str());
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_VALUE_ACTIVE, m_ValueActivePanel.c_str());
@@ -42,6 +39,7 @@ UINT CDialogEditShortcut::ShowModal()
 
 	GetDialogItemsRef()[ID_EDIT_SHORTCUT].Focus = 1;
 
+	int nChoosedItem;
 	if (Execute(nChoosedItem))
 		if (nChoosedItem != ID_CANCEL)
 		{	//редактируем имя псевдонима

@@ -85,14 +85,14 @@ public:
 			<< &far_di_edit(ID_EDIT_MASKS_SOFT_EXCEPTIONS, left_half, 16, right-1, L"")
 			<< &far_di_text(ID_TEXT_MASKS_SOFT_EXCEPTIONS, lg::CFG_MASKS_SOFT_EXCEPTIONS, left, 16, left_half)		
 
-			<< &far_di_singlebox(ID_LINE4, 0, left, 15, right, 15) 
+			<< &far_di_box(DI_SINGLEBOX, ID_LINE4, 0, left, 15, right, 15) 
 
 			<< &far_di_edit(ID_EDIT_PANELWIDTH, left_half+16, 14, right-1, L"")
 			<< &far_di_text(ID_TEXT_PANELWIDTH, lg::CFG_TEXT_PANELWIDTH, left_half, 14, left_half+16)
 
 			<< &far_di_edit(ID_EDIT_PREFIX, left+20, 14, left_half-2, L"")
 			<< &far_di_text(ID_TEXT_PREFIX, lg::CFG_PREFIX, left, 14, left+20)
-			<< &far_di_singlebox(ID_LINE3, 0, left, 13, right, 13) 
+			<< &far_di_box(DI_SINGLEBOX, ID_LINE3, 0, left, 13, right, 13) 
 
 			<< &far_di_checkbox(ID_TEMPORARY_AS_HIDDEN, lg::CFG_TEMPORARY_AS_HIDDEN, left, 12)
 
@@ -106,21 +106,21 @@ public:
 
 			<< &far_di_checkbox(ID_ALWAYS_EXPAND_SHORTCUTS, lg::CFG_EXPAND_1SH, left, 9)
 
-			<< &far_di_singlebox(ID_LINE2, 0, left, 8, right, 8)
+			<< &far_di_box(DI_SINGLEBOX, ID_LINE2, 0, left, 8, right, 8)
 			<< &far_di_checkbox(ID_CONFIRM_IMPLICIT_DELETION, lg::CFG_CONFIRM_IMPLICIT_DELETION, left_half, 7)
 			<< &far_di_checkbox(ID_CONFIRM_IMPLICIT_CREATING, lg::CFG_CONFIRM_IMPLICIT_CREATING, left_half, 6)
 			<< &far_di_checkbox(ID_CONFIRM_DELETE_CATALOGS, lg::CFG_CONFIRM_DELETE_NON_EMPTY_CATALOGS, left_half, 5)
 			<< &far_di_checkbox(ID_CONFIRM_DELETE, lg::CFG_CONFIRM_DELETE, left, 7)
 			<< &far_di_checkbox(ID_CONFIRM_GO_TO_NEAREST, lg::CFG_CONFIRM_GO_TO_NEAREST, left, 6)
 			<< &far_di_checkbox(ID_CONFIRM_OVERRIDE, lg::CFG_CONFIRM_OVERRIDE, left, 5)
-			<< &far_di_singlebox(ID_LINE1, lg::CFG_CONFIRMATIONS, left, 4, right, 4) 
+			<< &far_di_box(DI_SINGLEBOX, ID_LINE1, lg::CFG_CONFIRMATIONS, left, 4, right, 4) 
 			
 			<< &far_di_text(ID_TEXT_MENU_DISK_FAST_KEY, lg::CFG_MENU_DISK_FAST_KEY, left+4, 3, left_half+25)
 			<< &far_di_edit(ID_EDIT_MENU_DISK_FAST_KEY, left, 3, left+1, L"")
 
 			<< &far_di_checkbox(ID_SHOW_INPLUGINS_MENU, lg::CFG_SHOWINPLUGINSMENU, left_half, 2)
 			<< &far_di_checkbox(ID_SHOW_INDISK_MENU, lg::CFG_SHOWINDISKMENU, left, 2) 
-			<< &far_di_doublebox(ID_DOUBLEBOX, lg::CFG_TITLE, left-1, 1, right+1, DIALOG_HEIGHT-2) 
+			<< &far_di_box(DI_DOUBLEBOX, ID_DOUBLEBOX, lg::CFG_TITLE, left-1, 1, right+1, DIALOG_HEIGHT-2) 
 		;
 	};
 private:

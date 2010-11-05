@@ -43,7 +43,7 @@ public:
 		//перечисл€ем все требуемые элементы диалога
 		const int left = 3;
 		this->GetDialogItemsRef()
-			<< &far_di_doublebox(ID_DOUBLEBOX,
+			<< &far_di_box(DI_SINGLEBOX, ID_DOUBLEBOX,
 				m_bCreateNew
 					? lg::DLG_MAKE_CATALOG
 					: lg::DLG_MOVE_CATALOG_TITLE
@@ -54,7 +54,7 @@ public:
 					: lg::DLG_MOVE_CATALOG_MOVE_MESSAGE_S
 				, left, 2, DIALOG_WIDTH-3)
 			<< &far_di_edit(ID_EDIT_CATALOG, left, 3, DIALOG_WIDTH-4, L"")
-			<< &far_di_singlebox(ID_LINE1, 0, 2, 4, DIALOG_WIDTH-3, 4) 
+			<< &far_di_box(DI_SINGLEBOX, ID_LINE1, 0, 2, 4, DIALOG_WIDTH-3, 4) 
 			<< &far_di_button(ID_OK, lg::MSG_OK, 28, 5, 0, FALSE, FALSE, TRUE)	//default button
 			<< &far_di_button(ID_CANCEL, lg::MSG_CANCEL, 37, 5, 0)
 			;

@@ -225,17 +225,16 @@ struct far_di_edit : public far_di_item {
 	}
 };
 
-template<int DI_ID>
-struct far_di_boxT : public far_di_item {
-	far_di_boxT(unsigned int ItemIndex, int msgID, int X1, int Y1, int X2, int Y2 
+struct far_di_box : public far_di_item {
+	far_di_box(DialogItemTypes dialogItemType, unsigned int ItemIndex, int msgID, int X1, int Y1, int X2, int Y2 
 		, DWORD Flags = 0
 		, int Focus = 0
 		, int Selected = 0
 		, int DefaultButton = 0)
-		:  far_di_item(ItemIndex, DI_ID, X1, Y1, X2, Y2, Focus, Selected, Flags, DefaultButton
-			, msgID 
-				? nf::GetMsg(msgID) 
-				: L""
+		:  far_di_item(ItemIndex, dialogItemType, X1, Y1, X2, Y2, Focus, Selected, Flags, DefaultButton
+		, msgID 
+		? nf::GetMsg(msgID) 
+		: L""
 		){}
 };
 
@@ -251,6 +250,6 @@ inline far_di_item far_di_button(unsigned int ItemIndex, int msgID, int X1, int 
 };
 
 
-typedef far_di_boxT<DI_DOUBLEBOX> far_di_doublebox;
-typedef far_di_boxT<DI_SINGLEBOX> far_di_singlebox;
+// typedef far_di_boxT<DI_DOUBLEBOX> far_di_doublebox;
+// typedef far_di_boxT<DI_SINGLEBOX> far_di_singlebox;
 };

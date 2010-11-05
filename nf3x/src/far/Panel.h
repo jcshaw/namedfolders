@@ -5,6 +5,7 @@
 */
 #pragma once
 #include <vector>
+#include <map>
 #include <boost/shared_ptr.hpp>
 
 #include "plugin.hpp"
@@ -22,9 +23,11 @@ class CPanel {
 	typedef std::pair<tstring, tstring> tname_value; //name and value of shortcut
 	typedef std::vector<PluginPanelItem> tpanelitems0;
 	typedef std::vector<boost::shared_ptr<tstring> > tpanelitems0_buffers;
-	typedef std::pair<tpanelitems0, tpanelitems0_buffers> tpanelitems;
-	typedef std::map<PluginPanelItem*, tpanelitems*> tmap_panelitems;
 public:
+	typedef std::pair<tpanelitems0, tpanelitems0_buffers> tpanelitems;
+	//typedef std::map<PluginPanelItem*, tpanelitems*> tmap_panelitems;
+	typedef std::list<std::pair<PluginPanelItem*, tpanelitems*> > tmap_panelitems;
+
 	CPanel(tstring catalog = L"");
 	~CPanel(void);
 

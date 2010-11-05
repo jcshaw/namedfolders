@@ -121,8 +121,7 @@ void CPanel::GetOpenPluginInfo(struct OpenPluginInfo *pi)
 	panel_mode.Reserved[0] = 0;
 	panel_mode.Reserved[1] = 0;
 
-	static wchar_t *ColumnTitles[3] = 
-	{
+	static wchar_t *ColumnTitles[3] = {
 		(wchar_t*)nf::GetMsg(lg::NF_PANEL_NAME),
 		(wchar_t*)nf::GetMsg(lg::NF_PANEL_DESCRIPTION),
 		(wchar_t*)nf::GetMsg(lg::NF_PANEL_STATE)
@@ -271,8 +270,7 @@ int CPanel::PutFiles(struct PluginPanelItem *PanelItem
 	return TRUE;
 }
 
-int CPanel::GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpMode)
-{	
+int CPanel::GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpMode) {	
 	static struct PanelInfo PInfo;
 	if (OpMode & OPM_FIND)
 	{	//выделяем память только при поиске (т.е. требуется одновременно 
@@ -280,7 +278,7 @@ int CPanel::GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpM
 		tpanelitems *pm = new tpanelitems();	//очистка памяти в FreeFindData
 		*pm = m_PanelItems;
 		if (! pm->first.empty()) {
-			m_FindCache.insert(std::make_pair(&(pm->first)[0], pm));
+			m_FindCache.push_back(std::make_pair(&(pm->first)[0], pm));
 			*pPanelItem = &(pm->first)[0];
 			*pItemsNumber = static_cast<int>(pm->first.size());
 		} else {
@@ -296,9 +294,14 @@ int CPanel::GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpM
 	return TRUE;
 }
 
-void CPanel::FreeFindData(struct PluginPanelItem *PanelItem, int ItemsNumber)
-{	
-	tmap_panelitems::iterator p = m_FindCache.find(PanelItem);
+namespace {
+	inline bool equal_panel_item(std::pair<PluginPanelItem*, CPanel::tpanelitems*> const& item, struct PluginPanelItem *panelItem) {
+		return item.first == panelItem;
+	}
+}
+void CPanel::FreeFindData(struct PluginPanelItem *PanelItem, int ItemsNumber) {	
+	tmap_panelitems::iterator p = std::find_if(m_FindCache.begin(), m_FindCache.end()
+		, boost::bind(&equal_panel_item, _1,  PanelItem) );
 	if (p != m_FindCache.end()) {
 		tpanelitems *pm = p->second;
 		m_FindCache.erase(p);
@@ -334,15 +337,14 @@ int CPanel::ProcessEvent(int Event, void *Param) {
 	return FALSE;
 }
 
-inline void set_panel_item(PluginPanelItem& item
-						   , boost::shared_ptr<tstring>& itemBuffer
-						   , tshortcut_state State
-						   , tstring const& name
-						   , tstring const& folder
-						   , bool bIsTemporary
-						   , bool bIsHidden
-						   , bool bIsDirectory) 
-{
+void set_panel_item(PluginPanelItem& item
+					, boost::shared_ptr<tstring>& itemBuffer
+					, tshortcut_state State
+					, tstring const& name
+					, tstring const& folder
+					, bool bIsTemporary
+					, bool bIsHidden
+					, bool bIsDirectory) {
 	memset(&item, 0, sizeof(item));
 	item.Description = folder.empty() ? 0 : folder.c_str();
 	item.Flags = 0;

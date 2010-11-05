@@ -49,12 +49,10 @@ public:
 		, ID_CANCEL
 	};
 
-	virtual void SetDialogItems()
-	{
-		//перечисл€ем все требуемые элементы диалога
+	virtual void SetDialogItems() {
 		const int left = 3;
 		GetDialogItemsRef()
-			<< &far_di_doublebox(ID_DOUBLEBOX, 
+			<< &far_di_box(DI_SINGLEBOX, ID_DOUBLEBOX, 
 				m_bInsertMode 
 					? lg::DGL_INSERT_SHORTCUT_TITLE
 					: lg::DGL_EDIT_SHORTCUT_TITLE
@@ -68,7 +66,7 @@ public:
 			<< &far_di_text(ID_TEXT_VALUE_INACTIVE, lg::DLG_INACTIVE_VALUE, left, 8, DIALOG_WIDTH-4)
 			<< &far_di_edit(ID_EDIT_VALUE_INACTIVE, left, 9, DIALOG_WIDTH-4, L"")
 			<< &far_di_checkbox(ID_SHOW_ISTEMPORARY, lg::MSG_ISTEMPORARY, left, 10)
-			<< &far_di_singlebox(ID_LINE1, 0, 2, 11, DIALOG_WIDTH-3, 11) 
+			<< &far_di_box(DI_SINGLEBOX, ID_LINE1, 0, 2, 11, DIALOG_WIDTH-3, 11) 
 			<< &far_di_button(ID_OK, lg::MSG_OK, 12, 12, 0, FALSE, FALSE, TRUE)	//default button
 			<< &far_di_button(ID_CANCEL, lg::MSG_CANCEL, 26, 12, 0)
 			;

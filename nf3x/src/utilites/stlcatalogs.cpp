@@ -53,8 +53,7 @@ tstring CCatalog::GetCatalogRegkey() const
 	//алгоритм: если каталог равер "/" или пустой то в качестве ключа принимаем ключ реестра плагина
 	//иначе: (добавляем (если его нет) первым символом "/"), заменяем все "/" на "catalogs\", затем добавляем к ключу реестра плагина
 	tstring key = m_CatalogPath;
-	if ((key != SLASH_CATS) && (! key.empty()))
-	{
+	if ((key != SLASH_CATS) && (! key.empty())) {
 		if (key[0] != SLASH_CATS_CHAR) key = SLASH_CATS_CHAR + key;
 
 		//заменяем "/" на "catalogs\"

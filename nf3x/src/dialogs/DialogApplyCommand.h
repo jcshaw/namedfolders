@@ -40,7 +40,7 @@ public:
 		//перечисл€ем все требуемые элементы диалога
 		const int left = 3;
 		GetDialogItemsRef()
-			<< &far_di_doublebox(ID_DOUBLEBOX
+			<< &far_di_box(DI_SINGLEBOX, ID_DOUBLEBOX
 				, lg::DLG_APPLY_COMMAND_TITLE
 				, 1, 1, DIALOG_WIDTH-2, DIALOG_HEIGHT-2) 
 			<< &far_di_text(ID_TEXT
@@ -53,7 +53,7 @@ public:
 					? HISTORY_APPLY_COMMANDS
 					: 0
 			)
-			<< &far_di_singlebox(ID_LINE1, 0, 2, 4, DIALOG_WIDTH-3, 4) 
+			<< &far_di_box(DI_SINGLEBOX, ID_LINE1, 0, 2, 4, DIALOG_WIDTH-3, 4) 
 			<< &far_di_button(ID_OK, lg::MSG_OK, 28, 5, 0, FALSE, FALSE, TRUE)	//default button
 			<< &far_di_button(ID_CANCEL, lg::MSG_CANCEL, 37, 5, 0)
 			;

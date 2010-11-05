@@ -7,7 +7,6 @@
 #pragma once
 
 #include <list>
-#include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
 
 namespace Utils {

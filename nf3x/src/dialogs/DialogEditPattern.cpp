@@ -28,19 +28,16 @@ DialogEditPattern::DialogEditPattern(tstring const& Prefix, tstring const& Patte
 }
 
 
-DialogEditPattern::~DialogEditPattern(void)
-{
+DialogEditPattern::~DialogEditPattern(void) {
 }
 
-UINT DialogEditPattern::ShowModal()
-{
-	//вызываем диалог редактированик имени каталога
-	int nChoosedItem;
-
+UINT DialogEditPattern::ShowModal() {
+	//вызываем диалог редактирования имени каталога
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_PREFIX, m_Prefix.c_str());
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_PATTERN, m_Pattern.c_str());
 	GetDialogItemsRef()[ID_EDIT_PREFIX].Focus = 1;
 
+	int nChoosedItem;
 	if (Execute(nChoosedItem))
 		if (nChoosedItem != ID_CANCEL)
 		{	//редактируем имя каталога

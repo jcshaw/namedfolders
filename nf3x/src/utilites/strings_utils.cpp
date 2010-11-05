@@ -10,6 +10,7 @@
 #include <cassert>
 #include <boost/bind.hpp>
 #include <Shlwapi.h>
+#include <boost/algorithm/string.hpp>
 
 namespace {
 	inline tstring get_compact_path(tstring const& srcStr, size_t MaxSize) {
@@ -59,9 +60,9 @@ tpair_strings Utils::DivideString(tstring const& srcStr, wchar_t ch) {
 	return result;
 }
 
-tstring Utils::ExtractParentDirectory(tstring const& srcDir)
-{	//extracts parent directory from srcDir 
-	//returns empty string if there are no parent directory
+tstring Utils::ExtractParentDirectory(tstring const& srcDir) {	
+//extracts parent directory from srcDir 
+//returns empty string if there are no parent directory
 	tstring result = srcDir;
 	tstring::reverse_iterator p = result.rbegin();
 	if (*p == SLASH_DIRS_CHAR || *p == SLASH_CATS_CHAR) ++p;
@@ -76,8 +77,7 @@ tstring Utils::ExtractParentDirectory(tstring const& srcDir)
 	return L"";
 }
 
-tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, size_t Width1)
-{	//!TODO: попробовать реализовать через stream - код будет короче, как насчет размера плагина
+tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, size_t Width1) {	
 	tstring result;
 	result.reserve(Width1 + Value2.size() + 1);
 	tstring compact_path = get_compact_path(Value1, Width1);
@@ -105,8 +105,7 @@ tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, tstr
 	return result;
 }
 
-tstring Utils::ReplaceStringAll(tstring srcStr, tstring const& fromStr, tstring const& toStr) //!TODO :убрать
-{	
+tstring Utils::ReplaceStringAll(tstring srcStr, tstring const& fromStr, tstring const& toStr) {	
 	size_t off = 0;
 	size_t pos = 0;
 	while ((pos = srcStr.find(fromStr, off)) != tstring::npos) {
@@ -125,12 +124,14 @@ void Utils::RemoveTrailingCharsOnPlace(tstring &str, wchar_t charToRemove) {
 }
 
 void Utils::AddTrailingCharIfNotExists(tstring &Str, wchar_t const* ch) {
-	if (! boost::ends_with(Str, ch)) 
+	if (! boost::ends_with(Str, ch)) {
 		Str += ch;
+	}
 }
 void Utils::AddLeadingCharIfNotExistsOnPlace(tstring &Str, wchar_t const* ch) {
-	if (! boost::starts_with(Str, ch)) 
+	if (! boost::starts_with(Str, ch)) {
 		Str.insert(0, ch);
+	}
 }
 
 bool Utils::iFindFirst(tstring const& SrcStr, tstring const& SubStr) {
