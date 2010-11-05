@@ -40,7 +40,7 @@ public:
 // Например: $Name=$Prefix;$Catalog=abc;$Command=--f 
 /************************************************************************/
 class CommandPatterns {
-	typedef tvector_pair_strings tprefix_pattern_vector; 
+	typedef tlist_pairs_strings tprefix_pattern_vector; 
 	//typedef std::map<tstring, tstring, Utils::CmpStringLessCI> tmap;	//prefix - patterns
 	tprefix_pattern_vector m_PP;
 public:

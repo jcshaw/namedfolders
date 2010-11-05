@@ -21,17 +21,12 @@
 #include "Menu2.h"
 #include "PanelUpdater.h"
 #include "Parser.h"
+#include "autobuffer_wrapper.h"
 
 extern struct PluginStartupInfo g_PluginInfo; 
 
 int nf::FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath) {
 	return g_PluginInfo.CmpName(Pattern, String, SkipPath);
-}
-
-namespace {
-	inline void push_back(DWORD* pbuffer, unsigned int &counter, DWORD dw) {
-		pbuffer[counter++] = dw;
-	}
 }
 
 void nf::CloseAndStartAnotherPlugin(HANDLE hPlugin, tstring const& Command, bool bActivePanel, bool bOpenBoth)
@@ -41,43 +36,41 @@ void nf::CloseAndStartAnotherPlugin(HANDLE hPlugin, tstring const& Command, bool
 	tstring prefix = CSettings::GetInstance().GetPrimaryPluginPrefix();
 
 	ULONG add_size = 1 + 4 + static_cast<int>(prefix.size()); //CTRL+Y + TAB + ENTER + TAB + "cd:" + ENTER  
-
-	tautobuffer_byte ks_buffer((Command.size() + add_size)*sizeof(DWORD)); //!TODO: there is a problem here: tautobuffer_byte (stlsoft) doesn't support push_back; 
-	unsigned int counter = 0; //use counter instead of push_back to work around the problem
-	DWORD* pbuffer = reinterpret_cast<DWORD*>(&ks_buffer[0]);
+	nf::autobuffer_wrapper<DWORD> ks_buffer;
+	ks_buffer.resize(static_cast<unsigned int>(Command.size() + add_size));
 
 	//always add Ctrl + Y at the beginning to clear command line
-	push_back(pbuffer, counter,  int('y') | KEY_CTRL);
+	ks_buffer.push_back(int('y') | KEY_CTRL);
 
 	if (! bActivePanel) {
-		push_back(pbuffer, counter,  VK_TAB);
+		ks_buffer.push_back(VK_TAB);
 		for (unsigned int i = 0; i < Command.size(); ++i) {
-			push_back(pbuffer, counter,  static_cast<DWORD>(Command[i]));
+			ks_buffer.push_back( static_cast<DWORD>(Command[i]));
 		}
-		push_back(pbuffer, counter,  VK_RETURN);
+		ks_buffer.push_back(VK_RETURN);
 
 		if (! bOpenBoth) {
-			push_back(pbuffer, counter,  VK_TAB);
+			ks_buffer.push_back(VK_TAB);
 				for (unsigned int i = 0; i < prefix.size(); ++i) {
-					push_back(pbuffer, counter,  static_cast<DWORD>(prefix[i]));
+					ks_buffer.push_back( static_cast<DWORD>(prefix[i]));
 				}
-				push_back(pbuffer, counter,  VK_RETURN);
+				ks_buffer.push_back(VK_RETURN);
 		}
 	} else {
 		for (unsigned int i = 0; i < Command.size(); ++i) {
 			if (static_cast<DWORD>(Command[i]) == L'\n') {
-				push_back(pbuffer, counter,  VK_RETURN);
+				ks_buffer.push_back(VK_RETURN);
 			} else {
-				push_back(pbuffer, counter,  static_cast<DWORD>(Command[i]));
+				ks_buffer.push_back( static_cast<DWORD>(Command[i]));
 			}
 		}
-		push_back(pbuffer, counter,  VK_RETURN);
+		ks_buffer.push_back(VK_RETURN);
 	}
 
 	static KeySequence ks;
 	ks.Flags = 0;//KSFLAGS_DISABLEOUTPUT;
 	ks.Count = static_cast<int>(ks_buffer.size());
-	ks.Sequence = pbuffer;
+	ks.Sequence = &ks_buffer[0];
 
 	BOOL bSuccess = static_cast<BOOL>(g_PluginInfo.AdvControl(g_PluginInfo.ModuleNumber
 		, ACTL_POSTKEYSEQUENCE

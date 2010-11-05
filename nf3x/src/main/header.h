@@ -146,7 +146,6 @@ namespace nf {
 	typedef std::list<tstring> tlist_strings;
 	typedef std::list<tpair_strings> tlist_pairs_strings;	
 	typedef std::vector<tstring> tvector_strings;
-	typedef std::vector<tpair_strings> tvector_pair_strings;
 	typedef std::list<nf::tshortcut_info> tshortcuts_list;
 	typedef std::list<nf::tcatalog_info> tcatalogs_list;
 

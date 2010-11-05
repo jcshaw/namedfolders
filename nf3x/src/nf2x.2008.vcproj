@@ -710,6 +710,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\utilites\autobuffer_wrapper.h"
+			>
+		</File>
+		<File
 			RelativePath=".\main\header.cpp"
 			>
 		</File>

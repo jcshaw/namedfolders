@@ -2,7 +2,7 @@
 #include "MenuDialog.h"
 
 #include <boost/foreach.hpp>
-
+#include "autobuffer_wrapper.h"
 using namespace nf;
 using namespace Menu;
 using namespace Polices;
@@ -47,32 +47,7 @@ namespace {
 		return false;
 	}
 
-	//this class is wrapper for nf::tautobuffer_byte with interface of std::vector<int>
-	//it allowes to avoid using std::vector<int> in the program (reduce size on ~3 kb)
-	template<class T>
-	class buffer_wrapper { 
-	public:
-		explicit buffer_wrapper() : m_Index(0) 
-		{}
-		inline T& operator[](unsigned int itemIndex) {
-			return *reinterpret_cast<T*>(&m_Buffer[itemIndex * sizeof(T)]);
-		}
-		inline void resize(unsigned int countItems) {
-			m_Buffer.resize(countItems * sizeof(T));
-		}
-		inline void push_back(T const& value) {
-			assert(m_Index < size());
-			this->operator[](m_Index++) = value;
-		}
-		inline size_t size() const {
-			return static_cast<size_t>(m_Buffer.size() / sizeof(T));
-		}
-	private:
-		nf::tautobuffer_byte m_Buffer;
-		unsigned int m_Index;
-	};
-
-	void fill_menu_break_keys_buf(int* pBreakCodes, buffer_wrapper<int>& destBuf, size_t &destNumDefaultBreakKeys) {
+	void fill_menu_break_keys_buf(int* pBreakCodes, autobuffer_wrapper<int>& destBuf, size_t &destNumDefaultBreakKeys) {
 		int *p = pBreakCodes;
 		destNumDefaultBreakKeys = 0;
 		while (0 != p && 0 != *p) {
@@ -189,7 +164,7 @@ nf::Menu::CMenuDialog::CMenuDialog(CMenu &srcMenu, tlist_menu_items &listItemsRe
 }
 
 int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem) {
-	buffer_wrapper<int> buf;
+	autobuffer_wrapper<int> buf;
 	size_t num_custom_break_codes = 0;
 	fill_menu_break_keys_buf(m_Menu.GetBreakKeys(), buf, num_custom_break_codes);
 

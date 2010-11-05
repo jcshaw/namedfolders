@@ -18,7 +18,7 @@ namespace nf {
 namespace Panel {
 
 class CPanel : boost::noncopyable {
-	typedef std::pair<tstring, tstring> tname_value; //name and value of shortcut
+	typedef tpair_strings tname_value; //name and value of shortcut
 	typedef std::vector<PluginPanelItem> tpanelitems0;
 public:
 	typedef std::pair<tpanelitems0, tlist_buffers> tpanelitems;
@@ -48,7 +48,7 @@ private:
 	tstring m_PanelTitle;				
 	tstring m_CurrentCatalog;			//current NF-catalog 
 
-	nf::tvector_pair_strings m_ListShortcuts; //list of all shortcuts - names and values
+	nf::tlist_pairs_strings m_ListShortcuts; //list of all shortcuts - names and values
 	nf::tvector_strings m_ListCatalogs;	  //list of all NF-catalogs on panel - only names
 
 	unsigned int m_NumberTemporaryShortcuts;		//кол-во временных псевдонимов (первые в списке m_ListShortcuts)

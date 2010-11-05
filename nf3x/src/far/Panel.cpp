@@ -381,7 +381,7 @@ void CPanel::read_list_panelitems(DWORD flags) {
 		m_ListShortcuts.clear();
 		sc::shortcuts_sequence seq_shtemp(c.GetSequenceShortcuts(true));
 		sc::shortcuts_sequence seq_sh(c.GetSequenceShortcuts(false));
-		m_ListShortcuts.reserve(seq_shtemp.size() + seq_sh.size());
+		//m_ListShortcuts.reserve(seq_shtemp.size() + seq_sh.size());
 		BOOST_FOREACH(sc::shortcuts_sequence_item si, seq_shtemp) { //temporal shortcuts
 			m_ListShortcuts.push_back(std::make_pair(si.GetName(), si.GetValue()));
 		}
@@ -413,18 +413,20 @@ void CPanel::UpdateListItems(DWORD flags) {
 		);
 	}
 
-	for (unsigned int i = 0; i < m_ListShortcuts.size(); ++i) {
+	unsigned int i = 0;
+	BOOST_FOREACH(tpair_strings const& pair, m_ListShortcuts) {
 		set_panel_item(m_PanelItems.first[m_ListCatalogs.size() + i]
 			, m_PanelItems.second[m_ListCatalogs.size() + i]
 			, bshow_state 
-				? get_state(m_ListShortcuts[i].second)
+				? get_state(pair.second)
 				: STATE_NO_STATE
-			, m_ListShortcuts[i].first
-			, m_ListShortcuts[i].second
+			, pair.first
+			, pair.second
 			, i < m_NumberTemporaryShortcuts
 			, (i < m_NumberTemporaryShortcuts) && btemporary_is_hidden
 			, false
 		);
+		++i;
 	}
 }
 

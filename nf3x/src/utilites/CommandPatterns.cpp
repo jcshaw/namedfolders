@@ -87,7 +87,7 @@ namespace {
 		boost::basic_regex<wchar_t> m_RE;
 		boost::basic_regex<wchar_t> m_SubRE;
 		//typedef std::map<tstring, int, Utils::CmpStringLessCI> tvarnames; //map is removed for reducing size
-		typedef tvector_pair_strings tvarnames;
+		typedef tlist_pairs_strings tvarnames;
 		tvarnames m_VarNames;
 		nf::tvector_strings const& m_SrcParts;
 		nf::tvector_strings& m_DestParts;
@@ -245,7 +245,6 @@ nf::Patterns::Private::DetailedCommand::commandToListParts(nf::tparsed_command c
 //////////////////////////////////////////////////////////////////////////
 // CommandPatterns
 CommandPatterns::CommandPatterns(tlist_command_patterns const& listPatterns) {
-	m_PP.reserve(listPatterns.size());
 	BOOST_FOREACH(nf::Patterns::tcommand_pattern const& pattern, listPatterns) {
 		m_PP.push_back(pattern);
 	}
