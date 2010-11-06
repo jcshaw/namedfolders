@@ -74,9 +74,9 @@ namespace re {	//регул€рные выражени€
 
 //поиск метасимволов
 	wchar_t const* RE_SEARCH_META = 
-		L"(?:.+\\\\\\\\)|(?:\\*)|(?:\\?)|(?:\\[[^]]+\\])";
+		L"(?:.+\\\\\\\\)|(?:\\*)|(?:\\?)|(?:\\[[^\\]]+\\])";
 	wchar_t const* RE_SEARCH_META_INTOKENS_ONLY =	//метасимволы в названи€х (*, [], ?) но не пути (слеши)
-		L"(?:\\*)|(?:\\?)|(?:\\[[^]]+\\])";
+		L"(?:\\*)|(?:\\?)|(?:\\[[^\\]]+\\])";
 
 //exclude double prefixes
 	wchar_t const* RE_DOUBLE_PREFIXES =
@@ -85,9 +85,9 @@ namespace re {	//регул€рные выражени€
 
 namespace {
 	tstring remove_double_prefix(tstring const& srcStr) { //converts cd:ab:fe:command -> fe:commands (last prefix is always used)
-		nf::tregex expression(re::RE_DOUBLE_PREFIXES);
+		nf::tregex expression(NF_BOOST_REGEX_COMPILE(re::RE_DOUBLE_PREFIXES));
 		nf::tsmatch what;
-		if (boost::regex_match(srcStr, what, expression)) {
+		if (NF_BOOST_REGEX_LIB::regex_match(srcStr, what, expression)) {
 			return what[2] + what[3];
 		} 
 		return srcStr;
@@ -104,9 +104,9 @@ bool nf::Parser::ParseString(tstring const &srcStr, nf::tparsed_command &t) {
 	if (! t.prefix.empty()) t.flags = t.flags | nf::FGC_ENABLED_PREFIX;
 
 	if (t.kind == nf::QK_START_SOFT_SHORTCUT) {
-		nf::tregex expression(re::RE_SOFT);
+		nf::tregex expression(NF_BOOST_REGEX_COMPILE(re::RE_SOFT));
 		nf::tsmatch what;
-		if (boost::regex_match(csdp, what, expression)) {
+		if (NF_BOOST_REGEX_LIB::regex_match(csdp, what, expression)) {
 			t.catalog = L"";
 			t.local_directory = L"";
 			t.shortcut = what[1] + tstring(L" ") + what[2];
@@ -129,10 +129,10 @@ bool nf::Parser::GetCommandKind(tstring const& source, nf::tcommands_kinds &kind
 		tstring rexp(re::RE_PREFIX);
 		rexp += re::LIST_RE[i];	
 
-		nf::tregex expression(rexp.c_str());
+		nf::tregex expression(NF_BOOST_REGEX_COMPILE(rexp.c_str()));
 		
 		nf::tsmatch what;
-		if (boost::regex_match(source, what, expression)) {
+		if (NF_BOOST_REGEX_LIB::regex_match(source, what, expression)) {
 			prefix = what[1];
 			csdp = what[3];
 			kind = re::LIST_COMMANDS[i];
@@ -144,9 +144,9 @@ bool nf::Parser::GetCommandKind(tstring const& source, nf::tcommands_kinds &kind
 
 bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &d, tstring &p) {	
 //разделить каталог/€рлычек\директорию на составл€ющие
-	tregex expression(re::RE_CSD);
+	tregex expression(NF_BOOST_REGEX_COMPILE(re::RE_CSD));
 	tsmatch what;
-	if (boost::regex_match(csdp, what, expression)) {
+	if (NF_BOOST_REGEX_LIB::regex_match(csdp, what, expression)) {
 		c = what[1];
 		s = what[2];
 		//remove_prefix_from_shortcut(s);
@@ -171,11 +171,11 @@ bool nf::Parser::IsTokenMatchedToPattern(tstring const& srcToken, tstring const 
 }
 
 bool nf::Parser::ContainsMetachars(tstring const& sToken) {
-	return (boost::regex_search(sToken, tsmatch(), tregex(re::RE_SEARCH_META)));
+	return (NF_BOOST_REGEX_LIB::regex_search(sToken, tsmatch(), tregex(NF_BOOST_REGEX_COMPILE(re::RE_SEARCH_META))));
 }
 
 bool nf::Parser::IsContainsMetachars_InTokensOnly(tstring const& sToken) {
-	return (boost::regex_search(sToken, tsmatch(), tregex(re::RE_SEARCH_META_INTOKENS_ONLY)));
+	return (NF_BOOST_REGEX_LIB::regex_search(sToken, tsmatch(), tregex(NF_BOOST_REGEX_COMPILE(re::RE_SEARCH_META_INTOKENS_ONLY))));
 }
 
 
@@ -186,7 +186,7 @@ bool nf::Parser::IsContainsMetachars_InTokensOnly(tstring const& sToken) {
 bool nf::Parser::ParseEnvVarPath(tstring const& srcStr, tstring& varName, tstring& localPath) {
 	localPath.clear();
 	tsmatch what;
-	if (! boost::regex_search(srcStr, what, tregex(re::RE_EV))) {
+	if (! NF_BOOST_REGEX_LIB::regex_search(srcStr, what, tregex(NF_BOOST_REGEX_COMPILE(re::RE_EV)))) {
 		varName = srcStr;
 		return false;
 	}

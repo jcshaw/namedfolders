@@ -14,19 +14,19 @@
 #pragma warning(disable: 4244 4267)
 //используется библиотека BOOST
 //http://www.boost.org
+
+#ifdef USE_BOOST_XPRESSIVE
+#include <boost/xpressive/xpressive.hpp> //#include <boost/regex.hpp>
+#define NF_BOOST_REGEX_LIB boost::xpressive
+#define NF_BOOST_REGEX_COMPILE nf::NF_BOOST_REGEX_COMPILE
+#else 
+#define NF_BOOST_REGEX_LIB boost
 #define BOOST_REGEX_STATIC_LINK
+#define NF_BOOST_REGEX_COMPILE
 #include <boost/regex.hpp>
+#endif
 
-// #ifdef USE_VC2010
-// #define USE_RVALUES 
-// #endif
-
-// #ifdef USE_RVALUES
-// #include <memory>
-// #else 
-#include <boost/shared_ptr.hpp>
-//#include <boost/ptr_container/ptr_vector.hpp>
-// #endif
+#include <boost/shared_ptr.hpp> //#include <boost/ptr_container/ptr_vector.hpp>
 
 #pragma warning(default: 4244 4267)
 
@@ -63,11 +63,20 @@ enum {
 };
 
 namespace nf {
+
+#ifdef USE_BOOST_XPRESSIVE
+	typedef boost::xpressive::wsregex tregex;
+	//typedef NF_BOOST_REGEX_LIB::wcmatch tcmatch;
+	typedef boost::xpressive::wsmatch tsmatch;
+	typedef boost::xpressive::wsregex_iterator tregex_iterator;
+	typedef boost::xpressive::wsregex_token_iterator tregex_token_iterator;	
+#else 
 	typedef boost::wregex tregex;
-	typedef boost::wcmatch tcmatch;
+	//typedef boost::wcmatch tcmatch;
 	typedef boost::wsmatch tsmatch;
 	typedef boost::wsregex_iterator tregex_iterator;
 	typedef boost::wsregex_token_iterator tregex_token_iterator;
+#endif
 
 	typedef enum tshortcutvalue_type
 	{	//типы именованных директорий

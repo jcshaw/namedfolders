@@ -8,10 +8,6 @@ using namespace Patterns;
 #include "parser.h"
 
 #pragma warning(disable: 4244 4267)
-//используется библиотека BOOST
-//http://www.boost.org
-#define BOOST_REGEX_STATIC_LINK
-#include <boost/regex.hpp>
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 #pragma warning(default: 4244 4267)
@@ -84,8 +80,8 @@ namespace {
 	}
 
 	class applier {	
-		boost::basic_regex<wchar_t> m_RE;
-		boost::basic_regex<wchar_t> m_SubRE;
+		nf::tregex m_RE;
+		nf::tregex m_SubRE;
 		//typedef std::map<tstring, int, Utils::CmpStringLessCI> tvarnames; //map is removed for reducing size
 		typedef tlist_pairs_strings tvarnames;
 		tvarnames m_VarNames;
@@ -95,8 +91,13 @@ namespace {
 		applier(nf::tvector_strings const& SrcParts, nf::tvector_strings &DestParts)
 			: m_SrcParts(SrcParts)
 			, m_DestParts(DestParts)
-			, m_RE(applier::get_regexp(), boost::regex_constants::icase)
-			, m_SubRE(applier::get_sub_regexp(), boost::regex_constants::icase)
+#ifdef USE_BOOST_XPRESSIVE
+			, m_RE(NF_BOOST_REGEX_COMPILE(applier::get_regexp(), NF_BOOST_REGEX_LIB::regex_constants::icase))
+			, m_SubRE(NF_BOOST_REGEX_COMPILE(applier::get_sub_regexp(), NF_BOOST_REGEX_LIB::regex_constants::icase))
+#else
+			, m_RE(applier::get_regexp(), NF_BOOST_REGEX_LIB::regex_constants::icase)
+			, m_SubRE(applier::get_sub_regexp(), NF_BOOST_REGEX_LIB::regex_constants::icase)
+#endif
 		{ 
 			for (int i = 0; i < NUM_PARTS; ++i) {
 				m_VarNames.push_back(std::make_pair(VAR_NAMES[i], itoa(i)) );
@@ -107,8 +108,8 @@ namespace {
 			//типичная команда [Name]=[Prefix]
 			//левая часть - имя переменной - задает новое значение для DestCmd
 			//правая часть - текст и переменные (идентифицирующие значение SrcCmd)
-			boost::match_results<wchar_t const*> what;
-			if (boost::regex_match(AssignExp.c_str(), what, m_RE)) {
+			nf::tsmatch what;
+			if (NF_BOOST_REGEX_LIB::regex_match(AssignExp, what, m_RE)) {
 				tstring DestVarName = what[1];
 				int n = 0;
 				if (! find_variable(DestVarName, n)) return false;
@@ -124,11 +125,12 @@ namespace {
 				//поэтому заменяем его строкой с заранее выделенной памятью
 			tstring result;
 			result.reserve(256);
-			boost::match_results<wchar_t const*> sub_what;
+			nf::tsmatch sub_what;
 			std::size_t move = 0;
 			int cVarsTotal = 0;
 			int cEmptyVars = 0;
-			while (move < Expression.size(), boost::regex_search(Expression.c_str() + move, sub_what, m_SubRE)) {	
+			tstring::const_iterator p = Expression.begin();
+			while (move < Expression.size(), NF_BOOST_REGEX_LIB::regex_search(p, Expression.end(), sub_what, m_SubRE)) {	
 				move += sub_what[0].length();
 				if (! tstring(sub_what[1]).empty()) {	//variable
 					int n;
@@ -143,6 +145,7 @@ namespace {
 				} else { //text
 					result += sub_what[2];
 				}
+				std::advance(p, move);
 			}
 //			r = result.str();
 		//!TODO: если все переменные пусты - то суммарная строка тоже пуста

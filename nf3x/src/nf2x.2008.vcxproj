@@ -94,6 +94,7 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\libs64\stlsoft-1.9.96\include;D:\libs64\boost\include\boost-1_44;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\libs64\stlsoft-1.9.96\include;D:\libs64\boost\include\boost-1_44;$(IncludePath)</IncludePath>
     <RunCodeAnalysis Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</RunCodeAnalysis>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\libs\msvcrt.bak;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -187,6 +188,7 @@
       </DataExecutionPrevention>
       <ImportLibrary>$(OutDir)nf2x.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

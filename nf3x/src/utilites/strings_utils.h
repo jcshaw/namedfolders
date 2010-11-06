@@ -35,8 +35,8 @@ namespace Utils {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 // splits string on tokens according reqexp
 	template <class Container>
-		void SplitStringByRegex(tstring const& SrcStr, Container &Dest, wchar_t const* RegExDelimiter) {
-		nf::tregex reg(RegExDelimiter);
+	void SplitStringByRegex(tstring const& SrcStr, Container &Dest, wchar_t const* RegExDelimiter) {
+		nf::tregex reg(NF_BOOST_REGEX_COMPILE(RegExDelimiter));
 		nf::tregex_token_iterator p(SrcStr.begin(), SrcStr.end(), reg, -1);
 		nf::tregex_token_iterator end;
 		while (p != end) { 

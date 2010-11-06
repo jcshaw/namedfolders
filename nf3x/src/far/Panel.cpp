@@ -412,20 +412,20 @@ void CPanel::UpdateListItems(DWORD flags) {
 		);
 	}
 
-	unsigned int i = 0;
+	unsigned int index = 0;
 	BOOST_FOREACH(tpair_strings const& pair, m_ListShortcuts) {
-		set_panel_item(m_PanelItems.first[m_ListCatalogs.size() + i]
-			, m_PanelItems.second[m_ListCatalogs.size() + i]
+		set_panel_item(m_PanelItems.first[m_ListCatalogs.size() + index]
+			, m_PanelItems.second[m_ListCatalogs.size() + index]
 			, bshow_state 
 				? get_state(pair.second)
 				: STATE_NO_STATE
 			, pair.first
 			, pair.second
-			, i < m_NumberTemporaryShortcuts
-			, (i < m_NumberTemporaryShortcuts) && btemporary_is_hidden
+			, index < m_NumberTemporaryShortcuts
+			, (index < m_NumberTemporaryShortcuts) && btemporary_is_hidden
 			, false
 		);
-		++i;
+		++index;
 	}
 }
 
