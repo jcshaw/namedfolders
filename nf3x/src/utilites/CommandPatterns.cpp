@@ -129,8 +129,7 @@ namespace {
 			std::size_t move = 0;
 			int cVarsTotal = 0;
 			int cEmptyVars = 0;
-			tstring::const_iterator p = Expression.begin();
-			while (move < Expression.size(), NF_BOOST_REGEX_LIB::regex_search(p, Expression.end(), sub_what, m_SubRE)) {	
+			while (move < Expression.size(), NF_BOOST_REGEX_LIB::regex_search(Expression.begin() + move, Expression.end(), sub_what, m_SubRE)) {	
 				move += sub_what[0].length();
 				if (! tstring(sub_what[1]).empty()) {	//variable
 					int n;
@@ -145,7 +144,6 @@ namespace {
 				} else { //text
 					result += sub_what[2];
 				}
-				std::advance(p, move);
 			}
 //			r = result.str();
 		//!TODO: если все переменные пусты - то суммарная строка тоже пуста
