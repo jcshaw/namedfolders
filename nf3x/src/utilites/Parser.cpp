@@ -199,7 +199,8 @@ tstring nf::Parser::ExtractPrefix(tstring const &srcCommand) {
 //regexp is not necessary here
 	if (srcCommand.empty()) return L"";
 
-	tstring::const_iterator p = std::find(++srcCommand.begin(), srcCommand.end(), L':');
+	tstring::const_iterator p1 = srcCommand.begin() + 1;
+	tstring::const_iterator p = std::find(p1, srcCommand.end(), L':');
 	if (p == srcCommand.end()) return L"";
 
 	return tstring(srcCommand.begin(), p + 1);

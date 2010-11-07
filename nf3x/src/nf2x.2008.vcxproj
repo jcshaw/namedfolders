@@ -90,11 +90,11 @@
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">D:\libs\stlsoft-1.9.101\include;D:\libs\boost\include\boost-1_44;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\libs\stlsoft-1.9.101\include;D:\libs\boost\include\boost-1_44;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\libs\stlport\STLport-5.2.1\stlport.bak;D:\libs\stlsoft-1.9.101\include;D:\libs\boost\include\boost-1_44;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\libs64\stlsoft-1.9.96\include;D:\libs64\boost\include\boost-1_44;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\libs64\stlsoft-1.9.96\include;D:\libs64\boost\include\boost-1_44;$(IncludePath)</IncludePath>
     <RunCodeAnalysis Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</RunCodeAnalysis>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\libs\msvcrt.bak;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\libs\stlport\STLport-5.2.1\lib.bak;D:\libs\msvcrt.bak;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

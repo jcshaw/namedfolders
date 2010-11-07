@@ -245,9 +245,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="LIBCPMT.lib LIBCMT.lib kernel32.lib uuid.lib user32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib shlwapi.lib comsupp.lib libboost_regex-vc90-mt-s.lib"
 				LinkIncremental="1"
-				IgnoreAllDefaultLibraries="true"
+				IgnoreAllDefaultLibraries="false"
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"

@@ -89,11 +89,7 @@ namespace Utils {
 		return Utils::ReplaceStringAll(srcStr, L"%s", srcSubStr);
 	}
 
-	inline bool IsLastCharEqualTo(tstring const& srcStr, wchar_t charToEqual) {
-		if (srcStr.empty()) return false;
-		return *(--srcStr.end()) == charToEqual;
-	}
-
+	bool IsLastCharEqualTo(tstring const& srcStr, wchar_t charToEqual);
 	inline nf::tautobuffer_char* Str2Buffer(tstring const& srcStr) {
 		nf::tautobuffer_char*p = new nf::tautobuffer_char(srcStr.size() + 1);
 		lstrcpy( &(*p)[0], srcStr.c_str());

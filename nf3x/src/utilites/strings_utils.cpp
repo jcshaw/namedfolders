@@ -134,6 +134,11 @@ void Utils::AddLeadingCharIfNotExistsOnPlace(tstring &Str, wchar_t const* ch) {
 	}
 }
 
+bool Utils::IsLastCharEqualTo(tstring const& srcStr, wchar_t charToEqual) {
+	wchar_t end[2] = {charToEqual, 0};
+	return boost::ends_with(srcStr, &end[0]);
+}
+
 bool Utils::iFindFirst(tstring const& SrcStr, tstring const& SubStr) {
 	return StrStrI(SrcStr.c_str(), SubStr.c_str()) != NULL;
 	//return  boost::ifind_first(srcStr, SubStr); //additional 20 κα

@@ -17,6 +17,15 @@
 #define _CRT_SECURE_NO_DEPRECATE //Currently, STLSoft does not work with the "Safe String Library". 
 #define _SCL_SECURE_NO_WARNINGS
 
+//#define USE_BOOST_XPRESSIVE
+//#define USE_STLPORT
+
+//stlport
+#ifdef USE_STLPORT
+#define _STLP_HAS_NO_NEW_C_HEADERS 
+#define _STLP_VENDOR_TERMINATE_STD
+#endif
+
 #pragma warning (disable: 4290) //C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 
 #include "plugin.hpp" // этот файл хочет 1-byte alignment

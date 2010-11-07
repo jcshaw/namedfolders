@@ -18,7 +18,7 @@
 #ifdef USE_BOOST_XPRESSIVE
 #include <boost/xpressive/xpressive.hpp> //#include <boost/regex.hpp>
 #define NF_BOOST_REGEX_LIB boost::xpressive
-#define NF_BOOST_REGEX_COMPILE nf::NF_BOOST_REGEX_COMPILE
+#define NF_BOOST_REGEX_COMPILE nf::tregex::compile
 #else 
 #define NF_BOOST_REGEX_LIB boost
 #define BOOST_REGEX_STATIC_LINK
@@ -66,13 +66,11 @@ namespace nf {
 
 #ifdef USE_BOOST_XPRESSIVE
 	typedef boost::xpressive::wsregex tregex;
-	//typedef NF_BOOST_REGEX_LIB::wcmatch tcmatch;
 	typedef boost::xpressive::wsmatch tsmatch;
 	typedef boost::xpressive::wsregex_iterator tregex_iterator;
 	typedef boost::xpressive::wsregex_token_iterator tregex_token_iterator;	
 #else 
 	typedef boost::wregex tregex;
-	//typedef boost::wcmatch tcmatch;
 	typedef boost::wsmatch tsmatch;
 	typedef boost::wsregex_iterator tregex_iterator;
 	typedef boost::wsregex_token_iterator tregex_token_iterator;
