@@ -38,7 +38,6 @@ struct PluginStartupInfo g_PluginInfo;
 struct FarStandardFunctions g_FSF;
 
 using namespace nf;
-///////////////////////////////////////////////////////////////////////////////////////
 void WINAPI _export SetStartupInfoW(const struct PluginStartupInfo *pInfo) {
 	g_PluginInfo = *pInfo;
 	g_FSF = *pInfo->FSF;
