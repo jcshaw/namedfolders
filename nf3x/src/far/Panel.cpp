@@ -62,7 +62,6 @@ namespace {
 	inline tstring get_panel_title(tstring const& currentCatalog) {
 		return tstring(GetMsg(lg::PANEL_TITLE)) + currentCatalog; 
 	}
-
 }
 
 CPanel::CPanel(tstring catalog)
@@ -166,12 +165,13 @@ int CPanel::SetDirectory(const wchar_t *Dir, int OpMode)
 {	//открыть указанную директорию - перейти в директорию, на которую указывает ярлычок
 	//на активной панели
 	CPanelUpdater pu(this, 0, OpMode);
+	tstring sdir = Utils::ReplaceStringAll(Dir, SLASH_DIRS, SLASH_CATS);
 
-	if (tstring(LEVEL_UP_TWO_POINTS) == Dir) {
+	if (tstring(LEVEL_UP_TWO_POINTS) == sdir) {
 		return go_to_up_folder(OpMode);
 	} else {
 		pu.SetCursorOnItem(m_CurrentCatalog, FG_CATALOGS);
-		m_CurrentCatalog = m_CurrentCatalog + tstring(SLASH_CATS) + tstring(Dir);
+		m_CurrentCatalog = m_CurrentCatalog + tstring(SLASH_CATS) + tstring(sdir);
 	}
 
 	pu.UpdateActivePanel();

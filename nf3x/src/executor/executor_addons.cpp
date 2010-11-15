@@ -27,6 +27,7 @@
 #include "confirmations.h"
 #include "Parser.h"
 #include "select_variants.h"
+#include "menus_impl.h"
 
 using namespace nf;
 
@@ -226,10 +227,13 @@ bool nf::Selectors::GetShortcutByPathPattern(HANDLE hPlugin
 			return false;
 		} 
 		int nCodeRet = Menu::SelectShortcut(list, sh);
-		if (nCodeRet == -1) { //delete selected shortcut
+		if (nCodeRet == -nf::Menu::CMenuShortcuts::MS_COMMAND_DELETE) { //delete selected shortcut
 			nf::Commands::DeleteShortcut(sh, false);
-			continue;
-		} else return nCodeRet != 0;
+		} else if (nCodeRet == -nf::Menu::CMenuShortcuts::MS_COMMAND_EDIT) {
+			nf::Commands::EditShortcut(hPlugin, sh);
+		} else {
+			return nCodeRet != 0;
+		}
 	}; 
 }
 

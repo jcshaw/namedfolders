@@ -47,6 +47,7 @@ namespace Commands {
 	inline bool AddCatalog(HANDLE hPlugin, nf::tcatalog_info const &cat) {
 		return Shell::InsertCatalog(cat);
 	}
+	bool EditShortcut(HANDLE hPlugin, nf::tshortcut_info const &sh);
 
 	tpair_strings get_implicit_name_and_value(HANDLE hPlugin = INVALID_HANDLE_VALUE
 		, bool bGetDataFromActivePanel = true	//с активной или неактивной панели брать данные

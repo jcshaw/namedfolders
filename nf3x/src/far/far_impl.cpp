@@ -169,8 +169,9 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 				break;
 			}
 		default:
-			if (! ::find_path_and_filename(hPlugin, panel.value, WhatToSearch, path, panel.value, filename)) return false;
-			if (! nf::Selectors::FindBestDirectory(hPlugin, panel, dir)) return false;
+			if (! ::find_path_and_filename(hPlugin, panel.value, WhatToSearch, path, panel.value, filename)) {
+				if (! nf::Selectors::FindBestDirectory(hPlugin, panel, dir)) return false;
+			}
 		}; //switch
 		
 		if (! PathFileExists(dir.c_str())) {

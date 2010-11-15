@@ -14,20 +14,27 @@
 using namespace nf;
 using namespace Menu;
 
-// actions
-int CMenuShortcuts::MakeAction(int BreakCode) {
-	if (BreakCode == 0) { //Del - remove selected shortcut
-		return -1;
-	} else  {	//change menu view mode; save new mode
+namespace {
+	void switch_view_mode(int BreakCode) {
 		CSettings::GetInstance().SetValue(nf::ST_SELECT_SH_MENU_MODE, BreakCode-1);	
 		CSettings::GetInstance().SaveSettings();
 	}
+}
+
+// actions
+int CMenuShortcuts::MakeAction(int BreakCode) {
+	switch (BreakCode) {
+	case 0: return -MS_COMMAND_DELETE; //Del - remove selected shortcut
+	case 3: return -MS_COMMAND_EDIT; //F4 - edit selected shortcut
+	case 6: switch_view_mode(3); //F7 is used instead of F4 since build 243.
+	default: switch_view_mode(BreakCode);
+	}	
 	return 0;
 }
 
 int CMenuApplications::MakeAction(int BreakCode) {
 	switch(BreakCode) {
-	case 0:  return -OPEN_PATH_IN_FAR; 
+	case 0: return -OPEN_PATH_IN_FAR; 
 	case 1: return -OPEN_PATH_IN_EXPLORER;
 	case 2: //switch catalogs view mode 
 		CSettings::GetInstance().SetValue(nf::ST_SELECT_SH_MENU_SHOWCATALOGS_MODE

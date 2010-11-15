@@ -40,7 +40,7 @@ namespace Menu {
 
 	class CMenuShortcuts : public CMenu {
 	public:
-		CMenuShortcuts() : CMenu(L"Del, F2-F6", L"MenuSelect", 0, nf::ST_SELECT_SH_MENU_MODE) {}
+		CMenuShortcuts() : CMenu(L"Del,F4; F2-F3,F5-F7", L"MenuSelect", 0, nf::ST_SELECT_SH_MENU_MODE) {}
 		enum {
 			MM_SHORTCUTS_ONLY 
 			, MM_VALUES_ONLY 
@@ -50,9 +50,13 @@ namespace Menu {
 
 			, NUMBER_MENU_MODES  
 		};	 
+		enum {
+			MS_COMMAND_DELETE = 1
+			, MS_COMMAND_EDIT = 2
+		};
 	public:
 		virtual int* GetBreakKeys() {
-			static int shortcuts_break_keys [] = {VK_DELETE, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, 0};
+			static int shortcuts_break_keys [] = {VK_DELETE, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, 0};
 			return &shortcuts_break_keys[0];
 		}
 		virtual int MakeAction(int BreakCode);

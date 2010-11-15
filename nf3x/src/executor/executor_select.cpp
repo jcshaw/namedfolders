@@ -19,6 +19,7 @@
 #include "Kernel.h"
 #include "stlcatalogs.h"
 #include "menu2.h"
+#include "menus_impl.h"
 #include "executor_addons.h"
 #include "lang.h"
 #include "shortcut_utils.h"
@@ -115,8 +116,10 @@ bool nf::Selectors::GetShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd, 
 
 		if (bExpand) {
 			int n = Menu::SelectShortcut(list, DestSh);
-			if (n == -1) {	//удалить выбраный псевдоним..
+			if (n == -Menu::CMenuShortcuts::MS_COMMAND_DELETE) {	//удалить выбраный псевдоним..
 				nf::Commands::DeleteShortcut(DestSh, false);
+			} else if (n == -Menu::CMenuShortcuts::MS_COMMAND_EDIT) {
+				nf::Commands::EditShortcut(hPlugin, DestSh);
 			} else return n > 0;
 		} else {
 			if (!list.empty()) {

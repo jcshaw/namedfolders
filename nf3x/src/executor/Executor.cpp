@@ -23,6 +23,7 @@
 #include "Parser.h"
 #include "StartSoftShortcut.h"
 #include "far_impl.h"
+#include "DialogEditShortcut.h"
 
 extern struct PluginStartupInfo g_PluginInfo; 
 using namespace nf;
@@ -443,4 +444,18 @@ int nf::Commands::DeleteCatalogsAndShortcuts(nf::tshortcuts_list const& listSh
 		++count_deleted;
 	}	
 	return count_deleted;
+}
+
+bool nf::Commands::EditShortcut(HANDLE hPlugin, nf::tshortcut_info const &sh) {
+	tstring value;
+	Shell::GetShortcutValue(sh, value);
+	nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(value);
+
+	nf::CDialogEditShortcut dlg(sh, vp.first.value, vp.second.value, false);
+	if (dlg.ShowModal()) {
+		nf::tshortcut_info const& sh2 = dlg.GetShortcutInfo();
+		tstring value2 = nf::EncodeValues(dlg.GetValueForActivePanel(), dlg.GetValueForInActivePanel());
+		return Shell::ModifyShortcut(sh, sh2, &value2);
+	}
+	return false;
 }
