@@ -170,8 +170,7 @@ tstring Utils::SubstituteSearchMetachars(tstring const& srcPath) {
 	s = Utils::ReplaceStringAll(s, MC_SEARCH_BACKWORD_LONG, MC_SEARCH_BACKWORD_SHORT);
 
 	return s;	
-		//cd:nf.. -> .. is igno
-	red; 
+		//cd:nf.. -> .. is ignored; 
 		//cd:nf\.. -> .. works 
 		//Utils::ReplaceStringAll(s, LEVEL_UP_TWO_POINTS, MC_SEARCH_BACKWORD_SHORT);
 }
