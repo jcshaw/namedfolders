@@ -152,7 +152,7 @@ bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &
 		//remove_prefix_from_shortcut(s);
 		d = what[3];
 		if (d.size() == 1) d += L'*'; //указан только разделитель; директория не указана
-		Utils::RemoveLeadingCharsOnPlace(d, SLASH_DIRS_CHAR);
+		//Utils::RemoveSingleLeadingCharOnPlace(d, SLASH_DIRS_CHAR);
 		p = what[4];
 		return true;
 	}

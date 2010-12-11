@@ -21,17 +21,12 @@
 using namespace nf;
 
 namespace {
-	//в header объявлены соответствующие wchar_t* 
-	//версии wchar_t нужны, чтобы работал case
-	wchar_t const DEEP_DIRECT_SEARCH_CH = L'\n';
-	wchar_t const DEEP_REVERSE_SEARCH_CH = L'\t';
-	wchar_t const DEEP_UP_DIRECTORY_CH = L'\b'; //символ, обозначающий переход на уровень выше = '..'
-
 	inline bool is_slash(wchar_t ch) { 
 		return SLASH_DIRS_CHAR == ch 
-			|| DEEP_UP_DIRECTORY_CH == ch 
-			|| DEEP_DIRECT_SEARCH_CH == ch 
-			|| DEEP_REVERSE_SEARCH_CH == ch;
+			|| MC_SEARCH_BACKWORD_SHORT[0] == ch 
+			|| MC_DEEP_DIRECT_SEARCH_SHORT[0] == ch 
+			|| MC_DEEP_REVERSE_SEARCH_SHORT[0] == ch
+			|| MC_SEARCH_FORWARD_SHORT[0] == ch;
 	}
 	const int UNLIMITED_SEARCH_LEVEL = 9999;
 
@@ -103,18 +98,23 @@ wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstr
 	//искать, вернуть остаток
 	//имена могут быть разделены слешами и точками (слеш - поиск вглубь, точка - вверх)
 	//специальный синтаксис для поиска без ограничения уровня вложенности
-	//.*. и slesh*slesh
 	wchar_t const* ps = srcPattern;
 	assert(lstrlen(srcPattern) > 0);
 	
 	destLevel = 0;
 	while (is_slash(*ps)) {
-		switch (*ps) {
-		case L'\\': ++destLevel; break;
-		case DEEP_UP_DIRECTORY_CH: --destLevel; break;
-		case DEEP_DIRECT_SEARCH_CH: destLevel = UNLIMITED_SEARCH_LEVEL; break;
-		case DEEP_REVERSE_SEARCH_CH: destLevel = -UNLIMITED_SEARCH_LEVEL; break;
-		default: assert(false);
+		if (*ps == L'\\' || *ps == MC_SEARCH_FORWARD_SHORT[0]) {
+			++destLevel; // "\*\*\*" is equal to "\\\" 
+		} else if (*ps == MC_SEARCH_BACKWORD_SHORT[0]) {
+			--destLevel;
+		} else if (MC_DEEP_DIRECT_SEARCH_SHORT[0] == *ps) {
+			destLevel = UNLIMITED_SEARCH_LEVEL;
+			++ps;
+			break;
+		} else if (MC_DEEP_REVERSE_SEARCH_SHORT[0] == *ps) {
+			destLevel = -UNLIMITED_SEARCH_LEVEL;
+			++ps;
+			break;
 		}
 		++ps;
 	}
@@ -170,7 +170,7 @@ bool nf::Search::Private::search_multisubdir(tstring const& rootDir, tstring con
 	return true;
 }
 
-bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, CSearchPolice &searchPolice
+bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir, CSearchPolice &searchPolice
 								 , nf::tlist_strings& dest)
 {	// поиск директории, вложенной в текущую, по шаблону {[\dir]|[\\dir]|[\\\dir]|..}+
 	// вариант поиска имени в текущей директории определяется кол-вом слешей.
@@ -179,13 +179,11 @@ bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, 
 	// "\\\dir" и т.д.
 	// Неограниченная глубина через \t и \n
 
-	//для простоты (посимвольная обработка) на первом шаге заменяем .*. и slesh*slesh на спецсимволы
-
 	tstring name; 
 	int level = 0;	//на скольких уровнях вложенности искать
 
 	wchar_t const* next_pattern = Private::extract_name(Pattern.c_str(), name, level);
-	if (name.empty()) {
+	if (name.empty() && level != -UNLIMITED_SEARCH_LEVEL) {
 		if (level < 0) { //branch of code to avoid #7 issue: ".." should work.
 			tstring s = RootDir;
 			while (!s.empty() && level++) {
@@ -198,7 +196,11 @@ bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, 
 		} else return false; //поиск завершен, директория не подходит...
 	}
 
-	name = Parser::ConvertToMask(name);
+	if (name.empty()) {
+		name = L"*"; //implicit mask for deep search character
+	} else {
+		name = Parser::ConvertToMask(name);
+	}
 
 	nf::tlist_strings variants;
 	Private::search_multisubdir(RootDir, name, level, searchPolice, variants);
@@ -213,6 +215,7 @@ bool nf::Search::SearchByPattern(tstring const&Pattern, tstring const &RootDir, 
 		BOOST_FOREACH(tstring const& dir, variants) {
 			SearchByPattern(next_pattern, dir, searchPolice, dest);
 		}
+		//if name of current directory is matched to pattern, include this directory to results
 	}
 	return true;
 }

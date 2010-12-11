@@ -52,6 +52,7 @@ namespace Utils {
 
 // string helper functions
 	tstring ReplaceStringAll(tstring SrcStr, tstring const& FromStr, tstring const& ToStr);
+	void RemoveSingleLeadingCharOnPlace(tstring &str, wchar_t charToRemove);
 	void RemoveLeadingCharsOnPlace(tstring &str, wchar_t charToRemove);
 	void RemoveTrailingCharsOnPlace(tstring &str, wchar_t charToRemove);
 	inline tstring RemoveLeadingChars(tstring const &str, wchar_t charToRemove) {
@@ -98,4 +99,6 @@ namespace Utils {
 	inline wchar_t const* Buffer2Str(nf::tautobuffer_char const& srcBuffer) {
 		return &srcBuffer[0];
 	}
+
+	tstring SubstituteSearchMetachars(tstring const& srcPath);
 }//Utils

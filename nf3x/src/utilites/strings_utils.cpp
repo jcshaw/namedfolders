@@ -83,7 +83,7 @@ tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, size
 	tstring compact_path = get_compact_path(Value1, Width1);
 	result += compact_path;
 	size_t len1 = Width1 + 1 - (Value1.size() < Width1 ? Value1.size() : Width1);
- 	for (int i = 0; i < len1; ++i) result += L" ";
+ 	for (unsigned int i = 0; i < len1; ++i) result += L" ";
  	result += Value2;
 	return result;
 }
@@ -114,6 +114,14 @@ tstring Utils::ReplaceStringAll(tstring srcStr, tstring const& fromStr, tstring 
 	}
 	//	boost::replace_all(srcStr, FromStr, ToStr);	//5 kb
 	return srcStr;
+}
+
+void Utils::RemoveSingleLeadingCharOnPlace(tstring &str, wchar_t charToRemove) {
+	if (! str.empty()) {
+		if (str[0] == charToRemove) {
+			str.assign(str, 1, str.size() - 1);
+		}
+	}
 }
 
 void Utils::RemoveLeadingCharsOnPlace(tstring &str, wchar_t charToRemove) {
@@ -149,4 +157,21 @@ tstring Utils::CombinePath(tstring const& Path1, tstring const& Path2, wchar_t c
 		return Path1 + Delimiter + Path2;
 	}
 	return Path1 + Path2;	//delimeter already exists
+}
+
+tstring Utils::SubstituteSearchMetachars(tstring const& srcPath) {
+	tstring s = (boost::starts_with(srcPath, tstring(L"**")) || boost::starts_with(srcPath, tstring(L"..*")) ) 
+		? L"\\" + srcPath
+		: srcPath;
+
+	s = Utils::ReplaceStringAll(s, MC_DEEP_REVERSE_SEARCH_LONG, MC_DEEP_REVERSE_SEARCH_SHORT);
+	s = Utils::ReplaceStringAll(s, MC_DEEP_DIRECT_SEARCH_LONG, MC_DEEP_DIRECT_SEARCH_SHORT);
+	s = Utils::ReplaceStringAll(s, MC_SEARCH_FORWARD_LONG, MC_SEARCH_FORWARD_SHORT);
+	s = Utils::ReplaceStringAll(s, MC_SEARCH_BACKWORD_LONG, MC_SEARCH_BACKWORD_SHORT);
+
+	return s;	
+		//cd:nf.. -> .. is igno
+	red; 
+		//cd:nf\.. -> .. works 
+		//Utils::ReplaceStringAll(s, LEVEL_UP_TWO_POINTS, MC_SEARCH_BACKWORD_SHORT);
 }

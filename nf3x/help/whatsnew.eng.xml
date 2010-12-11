@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
-<version product_name="Named Folders" version="3.0.0.241" date="snapshot"> 
+<version product_name="Named Folders" version="3.0.0.243" date="snapshot"> 
 <group title="Key changes">
-<item type="!">Plagin uses Far API 2.0 and unicode.</item>	
+<item type="!">Plugin uses Far API 2.0 and unicode.</item>	
 <item type="!">64-bit version of the plugin is released. Now plugin is available both for x86 and x64.</item>	
 <item type="!">Plugin has own open source project on google code: 
 http://code.google.com/p/namedfolders/. You can write bugreports and suggestion to
 issue tracker here. You can also download most recent snapshot of the plugin
 (all releases will be send to PlugRing as previously).</item>	
+<item type="!">NF3 doesn't work correctly with russian shortcuts, that
+were created on NF2. As result, it's necessary to recreate all shortcuts,
+that contain Russian letters in names and in paths.</item>
 </group>
 <group title="Changes">
 <item type="-">Launch of x64-apps from FAR x86 is fixed, see #6 
@@ -21,6 +24,9 @@ equal to "ef:command".</item>
 <item type="*">Search in local paths is changed. No, the command "cd:alias.." 
 can be written in more classic way "cd:alias\..". Both variants ".." and "\.."
 are supported to specify parent folder.</item>
+<item type="+">New possibility to edit shortuct from variants menu.
+F4 is used to edit menu. To change view mode "shorctuts and values" on
+plese use F7 instead of F4.</item>
 </group>
 </version>
 

@@ -16,10 +16,16 @@ wchar_t const * SLASH_CATS = L"/";		//разделитель каталогов
 wchar_t const * SLASH_DIRS = L"\\";	//разделитель директорий
 wchar_t const SLASH_CATS_CHAR = L'/';	//разделитель каталогов
 wchar_t const SLASH_DIRS_CHAR = L'\\';	//разделитель директорий
-wchar_t const*const DEEP_DIRECT_SEARCH = L"\n";
-wchar_t const*const DEEP_REVERSE_SEARCH = L"\t";
-wchar_t const*const DEEP_UP_DIRECTORY = L"\b"; //символ, обозначающий переход на уровень выше = '..'
+wchar_t const*const MC_DEEP_DIRECT_SEARCH_SHORT = L"\n";
+wchar_t const*const MC_DEEP_REVERSE_SEARCH_SHORT = L"\t";
 
+wchar_t const*const MC_SEARCH_BACKWORD_SHORT = L"\b"; //символ, обозначающий переход на уровень выше = '..'
+wchar_t const*const MC_SEARCH_FORWARD_SHORT = L"\r"; // \*\* is equal to \\
+
+wchar_t const*const MC_DEEP_DIRECT_SEARCH_LONG = L"\\**"; //see also Utils::SubstituteSearchMetachars - "**" and "..*" are specified there
+wchar_t const*const MC_DEEP_REVERSE_SEARCH_LONG = L"\\..*";
+wchar_t const*const MC_SEARCH_BACKWORD_LONG =  L"\\..";
+wchar_t const*const MC_SEARCH_FORWARD_LONG = L"\\*";
 
 wchar_t const* LEVEL_UP_TWO_POINTS = L"..";
 

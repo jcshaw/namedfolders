@@ -41,9 +41,16 @@ extern wchar_t const SLASH_DIRS_CHAR;		//разделитель директорий
 extern wchar_t const* LEVEL_UP_TWO_POINTS;
 
 //спецсимволы для поиска с неограниченным уровнем вложенности - вверх и вниз
-extern wchar_t const*const DEEP_DIRECT_SEARCH;
-extern wchar_t const*const DEEP_REVERSE_SEARCH;
-extern wchar_t const*const DEEP_UP_DIRECTORY;
+extern wchar_t const*const MC_DEEP_DIRECT_SEARCH_LONG; // \**
+extern wchar_t const*const MC_DEEP_REVERSE_SEARCH_LONG; // \..*
+extern wchar_t const*const MC_SEARCH_BACKWORD_LONG; // L"..";
+extern wchar_t const*const MC_SEARCH_FORWARD_LONG; // L"\*";
+
+//спецсимволы для поиска с неограниченным уровнем вложенности - вверх и вниз
+extern wchar_t const*const MC_DEEP_DIRECT_SEARCH_SHORT; //one char equivalent for DEEP_DIRECT_SEARCH_STRING
+extern wchar_t const*const MC_DEEP_REVERSE_SEARCH_SHORT; //one char equivalent for DEEP_REVERSE_SEARCH_STRING
+extern wchar_t const*const MC_SEARCH_BACKWORD_SHORT; // ".."
+extern wchar_t const*const MC_SEARCH_FORWARD_SHORT; // "\*"
 
 extern const wchar_t CHAR_LEADING_VALUE_ENVVAR;	//символ для идентификации переменных среды в путях
 extern const wchar_t CHAR_LEADING_VALUE_REGKEY;	//символ для идентификации ключей реестра в путях 

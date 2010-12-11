@@ -35,16 +35,6 @@ extern struct FarStandardFunctions g_FSF;
 
 using namespace nf;
 
-namespace {
-	tstring substitute_metachars(tstring const& srcPath) {
-		tstring s = srcPath;
-		s = Utils::ReplaceStringAll(s, L".*.", DEEP_REVERSE_SEARCH);
-		s = Utils::ReplaceStringAll(s, L"\\*\\", DEEP_DIRECT_SEARCH);
-		s = Utils::ReplaceStringAll(s, tstring(L"\\") + LEVEL_UP_TWO_POINTS, DEEP_UP_DIRECTORY);
-		return Utils::ReplaceStringAll(s, LEVEL_UP_TWO_POINTS, DEEP_UP_DIRECTORY);
-	}
-}
-
 //найти все пути, подход€щие дл€ Value и LocalPath
 //и вернуть их полный список в DestListPaths
 void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring const &localPath0
@@ -54,14 +44,15 @@ void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring con
 	//находим все директории, удовлетвор€ющие panel.value
 
 	//комбинации символов указывающие на поиск неограниченной глубины замен€ем спецсимволами
-	tstring local_path = substitute_metachars(localPath0);
-	tstring svalue = substitute_metachars(srcValue);
+	tstring local_path = Utils::SubstituteSearchMetachars(localPath0); 
+	tstring svalue = Utils::SubstituteSearchMetachars(srcValue);
 
-	//since b242 it's possible to use NF-metacharacters in shortuct's values
+	//since b242 it's possible to use NF-metacharacters in shortcut's values
 	//try to detect if any NF/FAR-metacharacters are used 
 	bool bmetachars_are_most_probably_used = (Utils::RemoveTrailingChars(svalue, SLASH_DIRS_CHAR) != svalue) 
 		|| nf::Parser::ContainsMetachars(svalue)
-		|| ! PathFileExists(svalue.c_str());
+		//|| ! PathFileExists(svalue.c_str()) //!too dangerous
+	;
 
 	if (bmetachars_are_most_probably_used) { 
 		nf::Search::CSearchFarPolice ssp(nf::WTS_DIRECTORIES); //nf::Search::CSearchSystemPolice ssp(false, false);
