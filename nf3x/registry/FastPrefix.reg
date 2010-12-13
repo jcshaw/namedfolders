@@ -4,18 +4,14 @@ REGEDIT4
 ; Pressing ':' is equal to typing 'cd:'
 ; По нажатию : в командной строке набирается cd: 
 ; работает так же в русской раскладке 
-; За идею спасибо Антону Синицину 
+; причем после нажатия ':' автоматически включается английская раскладка.
+; За идею и помощь в реализации спасибо Антону Синицыну 
+
+; we don't need this key under Far 2.0
+[-HKEY_CURRENT_USER\Software\Far2\KeyMacros\Shell\є]
 
 [HKEY_CURRENT_USER\Software\Far2\KeyMacros\Shell\:]
-@=""
-"Sequence"="c d :"
-"Description"="Pressing ':' is equal to typing 'cd:'"
-"DisableOutput"=dword:00000001              
-"EmptyCommandLine"=dword:00000001
-
-
-[HKEY_CURRENT_USER\Software\Far2\KeyMacros\Shell\є]
-"Sequence"="\"cd:\" kbdLayout(1)" 
+"Sequence"="print(\"cd:\") kbdLayout(0x0409)"
 "DisableOutput"=dword:00000001
-"Description"="NamedFolders - Fast Prefix (в русской раскладке)"
-"EmptyCommandLine"=dword:00000001
+"Description"=":NamedFolders - Fast Prefix (с переключением раскладки)"
+"EmptyCommandLine"=dword:00000001 
