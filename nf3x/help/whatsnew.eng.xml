@@ -27,6 +27,10 @@ are supported to specify parent folder.</item>
 <item type="+">New possibility to edit shortuct from variants menu.
 F4 is used to edit menu. To change view mode "shorctuts and values" on
 plese use F7 instead of F4.</item>
+<item type="+">Macros FastPrefix is fixed for Far 2.0. Now, key ':'
+types "cd:" in command line and changes Russian to English if Russian
+layout was selected. So, you can press ':' and types your NF command
+in English langugage.</item>
 </group>
 </version>
 

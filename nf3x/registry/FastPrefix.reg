@@ -13,5 +13,5 @@ REGEDIT4
 [HKEY_CURRENT_USER\Software\Far2\KeyMacros\Shell\:]
 "Sequence"="print(\"cd:\") kbdLayout(0x0409)"
 "DisableOutput"=dword:00000001
-"Description"=":NamedFolders - Fast Prefix (с переключением раскладки)"
+"Description"="NamedFolders - Fast Prefix"
 "EmptyCommandLine"=dword:00000001 

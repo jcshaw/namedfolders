@@ -53,7 +53,7 @@ public: //get
 		} while (ErrorCode == ERROR_MORE_DATA);
 
 		if (! ((ErrorCode == ERROR_SUCCESS) && (type == REG_SZ))) return 0;
-		str.assign(reinterpret_cast<wchar_t*>(&buf[0]), size);
+		str.assign(reinterpret_cast<wchar_t*>(&buf[0]), (size / sizeof(wchar_t)) - 1);
 		return type;
 	}
 	bool GetValue(tstring const& Key, DWORD &Value) {

@@ -146,7 +146,7 @@ of password protected directories).
   0 - a -> *a*
   1 - a -> a*
   2 - a -> a
-  For example, "cd:x\a\*b\c":
+  For example, "cd:x\a\b*\c":
 	0 - *a*\b*\*c*
   1 - a*\b*\c*
   2 - a\b*\c

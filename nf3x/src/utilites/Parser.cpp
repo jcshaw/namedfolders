@@ -219,9 +219,9 @@ tstring nf::Parser::ConvertToMask(tstring const& srcStr) {
 	//0: a -> *a*
 
 	tstring result = srcStr;
-	if (mode == L"2") return srcStr;
+	if (mode == tstring(L"2")) return srcStr;
 	result.push_back(L'*');	
-	if (mode == L"1") return result;
+	if (mode == tstring(L"1")) return result;
 
 	result.insert(0, L"*");	
 	return result;
