@@ -18,8 +18,7 @@ namespace
 	struct {
 		int control_id;
 		tsetting_flags settings_id;
-	} main_dw_settings[] = 
-	{
+	} main_dw_settings[] = {
 		{ID_SHOW_INDISK_MENU, nf::ST_SHOW_IN_DISK_MENU}
 		,{ID_SHOW_INPLUGINS_MENU, nf::ST_SHOW_IN_PLUGINS_MENU}
 		,{ID_CONFIRM_OVERRIDE, nf::ST_CONFIRM_OVERRIDE}
@@ -32,9 +31,11 @@ namespace
 		,{ID_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE, nf::ST_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE}
 		,{ID_HISTORY_IN_APPLY_COMMAND_DIALOG, nf::ST_HISTORY_IN_DIALOG_APPLY_COMMAND}
 		,{ID_TEMPORARY_AS_HIDDEN, nf::ST_SHOW_TEMPORARY_AS_HIDDEN}
-		,{ID_EDIT_MENU_DISK_FAST_KEY, nf::ST_EDIT_MENU_DISK_FAST_KEY}
+		//depricated: ,{ID_EDIT_MENU_DISK_FAST_KEY, nf::ST_EDIT_MENU_DISK_FAST_KEY}
 		,{ID_USE_SINGLE_MENU_MODE, nf::ST_USE_SINGLE_MENU_MODE}
 		,{ID_SUBDIRECTORIES_AS_ALIASES, nf::ST_SUBDIRECTORIES_AS_ALIASES}
+		,{ID_TEXT_SHOW_CATALOGS_IN_DISK_MENU, nf::ST_SHOW_CATALOGS_IN_DISK_MENU}
+		,{ID_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH, nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH}
 	};
 	struct {
 		int control_id;
@@ -113,26 +114,28 @@ void CConfigureDialog::dde_main_dialog(bool bSaveToControls)
 	if (bSaveToControls) {
 		//считываем настройки из векторов в элементы диалога
 		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
-			if (nf::ST_EDIT_MENU_DISK_FAST_KEY != main_dw_settings[i].settings_id) {
+			//if (nf::ST_EDIT_MENU_DISK_FAST_KEY != main_dw_settings[i].settings_id) {
 				GetDialogItemsRef()[main_dw_settings[i].control_id].Selected = m_dwParams[main_dw_settings[i].settings_id];
-			}
+			//}
 		}
 		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
 			GetDialogItemsRef().SetFarDialogItemData(main_str_settings[i].control_id, m_strParams[main_str_settings[i].settings_id].c_str());
 		}
 
-	//ST_EDIT_MENU_DISK_FAST_KEY храним как DWORD, показываем как строку
-		const_cast<wchar_t&>(GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[0]) = _T('0') + static_cast<int>(m_dwParams[nf::ST_EDIT_MENU_DISK_FAST_KEY]);
-		const_cast<wchar_t&>(GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[1]) = 0;
+// depricated:
+// 	//ST_EDIT_MENU_DISK_FAST_KEY храним как DWORD, показываем как строку
+// 		const_cast<wchar_t&>(GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[0]) = _T('0') + static_cast<int>(m_dwParams[nf::ST_EDIT_MENU_DISK_FAST_KEY]);
+// 		const_cast<wchar_t&>(GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[1]) = 0;
+
 	} else 	{	//сохраняем настройки из контролов в вектора
 		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
-			if (nf::ST_EDIT_MENU_DISK_FAST_KEY != main_dw_settings[i].settings_id) {
+			//if (nf::ST_EDIT_MENU_DISK_FAST_KEY != main_dw_settings[i].settings_id) {
 				m_dwParams[main_dw_settings[i].settings_id] = this->IsDialogItemSelected(main_dw_settings[i].control_id);
-			}
+			//}
 		}
 		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
 			m_strParams[main_str_settings[i].settings_id] = this->GetDialogItemValue(main_str_settings[i].control_id);
 		}
-		m_dwParams[nf::ST_EDIT_MENU_DISK_FAST_KEY] = GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[0] - _T('0');
+		//m_dwParams[nf::ST_EDIT_MENU_DISK_FAST_KEY] = GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[0] - _T('0');
 	}
 }

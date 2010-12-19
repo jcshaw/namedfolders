@@ -28,6 +28,7 @@ enum {
 	,CFG_SHOWINPLUGINSMENU
 	,CFG_SHOWINDISKMENU
 	,CFG_TEMPORARY_AS_HIDDEN
+	,CFG_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH
 	,CFG_EXPAND_1SH		//Always expand single-letter shortcuts
 	,CFG_NF_HOTKEY		//Hot key to call NF
 	,CFG_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE //net: и \\ через команду строку 
@@ -45,7 +46,8 @@ enum {
 	,CFG_USE_SINGLE_MENU_MODE
 	,CFG_SHOW_KEYS_IN_MENU //show keys in menu
 	,CFG_MASKS_SOFT_EXCEPTIONS 
-	,CFG_MENU_DISK_FAST_KEY	//клавиша быстрого запуска 
+	//depricated:,CFG_MENU_DISK_FAST_KEY	//клавиша быстрого запуска 
+	,CFG_SHOW_CATALOGS_IN_DISK_MENU
 	,CFG_TEXT_PANELWIDTH //настройки ширины панели
 	,CFG_ASTERIXMODE
 

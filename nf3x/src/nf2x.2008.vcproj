@@ -407,6 +407,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DiskMenuHelper.h"
+				>
+			</File>
+			<File
 				RelativePath=".\executor\Executor.cpp"
 				>
 			</File>

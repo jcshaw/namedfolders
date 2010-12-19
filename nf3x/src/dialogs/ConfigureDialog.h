@@ -21,8 +21,9 @@ namespace Private {
 		, ID_SHOW_INDISK_MENU
 		, ID_SHOW_INPLUGINS_MENU
 
-		, ID_TEXT_MENU_DISK_FAST_KEY
-		, ID_EDIT_MENU_DISK_FAST_KEY
+		//depricated:, ID_TEXT_MENU_DISK_FAST_KEY
+		//depricated:, ID_EDIT_MENU_DISK_FAST_KEY
+		, ID_TEXT_SHOW_CATALOGS_IN_DISK_MENU
 
 		, ID_LINE1
 		, ID_CONFIRM_OVERRIDE
@@ -42,6 +43,7 @@ namespace Private {
 		, ID_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE
 		, ID_SUBDIRECTORIES_AS_ALIASES
 		, ID_TEMPORARY_AS_HIDDEN
+		, ID_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH
 
 		, ID_TEXT_PREFIX
 		, ID_EDIT_PREFIX	
@@ -94,6 +96,7 @@ public:
 			<< &far_di_text(ID_TEXT_PREFIX, lg::CFG_PREFIX, left, 14, left+20)
 			<< &far_di_box(DI_SINGLEBOX, ID_LINE3, 0, left, 13, right, 13) 
 
+			<< &far_di_checkbox(ID_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH, lg::CFG_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH, left_half, 12)
 			<< &far_di_checkbox(ID_TEMPORARY_AS_HIDDEN, lg::CFG_TEMPORARY_AS_HIDDEN, left, 12)
 
 			<< &far_di_checkbox(ID_SUBDIRECTORIES_AS_ALIASES, lg::CFG_SUBDIRECTORIES_AS_ALIASES, left_half, 11)
@@ -115,8 +118,7 @@ public:
 			<< &far_di_checkbox(ID_CONFIRM_OVERRIDE, lg::CFG_CONFIRM_OVERRIDE, left, 5)
 			<< &far_di_box(DI_SINGLEBOX, ID_LINE1, lg::CFG_CONFIRMATIONS, left, 4, right, 4) 
 			
-			<< &far_di_text(ID_TEXT_MENU_DISK_FAST_KEY, lg::CFG_MENU_DISK_FAST_KEY, left+4, 3, left_half+25)
-			<< &far_di_edit(ID_EDIT_MENU_DISK_FAST_KEY, left, 3, left+1, L"")
+			<< &far_di_checkbox(ID_TEXT_SHOW_CATALOGS_IN_DISK_MENU, lg::CFG_SHOW_CATALOGS_IN_DISK_MENU, left, 3)
 
 			<< &far_di_checkbox(ID_SHOW_INPLUGINS_MENU, lg::CFG_SHOWINPLUGINSMENU, left_half, 2)
 			<< &far_di_checkbox(ID_SHOW_INDISK_MENU, lg::CFG_SHOWINDISKMENU, left, 2) 

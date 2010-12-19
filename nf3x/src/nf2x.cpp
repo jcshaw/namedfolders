@@ -13,6 +13,7 @@
 #include "kernel.h"
 #include "ConfigureDialog.h"
 #include "open_plugin.h"
+#include "DiskMenuHelper.h"
 
 // 
 // extern "C" {
@@ -45,28 +46,21 @@ void WINAPI _export SetStartupInfoW(const struct PluginStartupInfo *pInfo) {
 	g_PluginInfo.FSF=&g_FSF; //see SetStartupInfoW in encyclopedia
 }
 
-void WINAPI _export GetPluginInfoW(struct PluginInfo *pInfo) {
-	pInfo->DiskMenuStringsNumber = CSettings::GetInstance().GetValue(nf::ST_SHOW_IN_DISK_MENU) ? 1 : 0;
+void WINAPI _export GetPluginInfoW(struct PluginInfo *pInfo) {	
+	static nf::DiskMenuHelper menu_helper;
+
+	pInfo->DiskMenuStringsNumber = static_cast<int>(menu_helper.GetCountStrings());
 	pInfo->PluginMenuStringsNumber = CSettings::GetInstance().GetValue(nf::ST_SHOW_IN_PLUGINS_MENU) ? 1 : 0;
 	pInfo->PluginConfigStringsNumber = 1;
 
-	static const wchar_t *DiskMenuStrings[1];
 	static const wchar_t *PluginMenuStrings[1];
 	static const wchar_t *PluginConfigStrings[1];
-	DiskMenuStrings[0] = nf::GetMsg(lg::DISKMENUSTRING);
 	PluginMenuStrings[0]= nf::GetMsg(lg::PLUGINMENUSTRING);
 	PluginConfigStrings[0]= nf::GetMsg(lg::PLUGINSCONFIGSTRING);
  
-	static int hotkey = 0;
-	hotkey = CSettings::GetInstance().GetValue(nf::ST_EDIT_MENU_DISK_FAST_KEY);
-	if (hotkey >= 0 && hotkey <= 10) {
-		pInfo->DiskMenuNumbers = &hotkey;
-	} else {
-		pInfo->DiskMenuNumbers = 0;
-	}
-
-	pInfo->DiskMenuStrings= DiskMenuStrings;
-	pInfo->PluginMenuStrings= PluginMenuStrings;
+	pInfo->DiskMenuNumbers = 0;
+	pInfo->DiskMenuStrings = menu_helper.GetStringsArray();
+	pInfo->PluginMenuStrings = PluginMenuStrings;
 	pInfo->PluginConfigStrings = PluginConfigStrings;
 
 	pInfo->StructSize = sizeof(*pInfo); 
@@ -92,7 +86,14 @@ HANDLE WINAPI _export OpenPluginW(int OpenFrom,INT_PTR Item) {
 			return nf::OpenFromPluginsMenu();
 			break;
 		case OPEN_DISKMENU:
-			return new nf::Panel::CPanel();
+			if (Item == 0) {
+				return new nf::Panel::CPanel();
+			} else {
+				//we get "nf:catalogname"
+				//so, open "cd:catalogname/*"
+				nf::DiskMenuHelper menu_helper;
+				return nf::OpenFromCommandLine(menu_helper.GetCommand(static_cast<unsigned int>(Item)).c_str()).first;
+			}
 		break;
 		}
 	} catch (...) {

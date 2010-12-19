@@ -10,8 +10,8 @@ http://code.google.com/p/namedfolders/. You can write bugreports and suggestion 
 issue tracker here. You can also download most recent snapshot of the plugin
 (all releases will be send to PlugRing as previously).</item>	
 <item type="!">NF3 doesn't work correctly with russian shortcuts, that
-were created on NF2. As result, it's necessary to recreate all shortcuts,
-that contain Russian letters in names and in paths.</item>
+were created under NF2. As result, it's necessary to recreate all shortcuts,
+that contain Russian letters in names and/or in paths.</item>
 </group>
 <group title="Changes">
 <item type="-">Launch of x64-apps from FAR x86 is fixed, see #6 
@@ -31,6 +31,21 @@ plese use F7 instead of F4.</item>
 types "cd:" in command line and changes Russian to English if Russian
 layout was selected. So, you can press ':' and types your NF command
 in English langugage.</item>
+</group>
+
+<group title="Settings">
+<item type="*">Убрана возможность задавать клавиша быстрого запуска для 
+плагина в меню дисков. После выхода FAR 2.0 build 1692 она стала 
+попросту неактуальной. Issue #15</item>
+<item type="+">Добавлен флаг "Показывать каталоги в меню дисков". Если
+этот флаг включен, то в меню дисков, помимо строки "Named Folders", появятся
+все NF-каталоги. Issue #8</item>
+<item type="+">Добавлен флаг "Краткие команды в глубоком поиске". Если
+этот флаг включен, то плагин позволит использовать в относительных 
+путях сокращенный синтаксис команд. Например, "\\\" вместо "\*\*\*",
+"...." вместо "\.\." и "cd:a.." вместо "cd:a\..". Подробности в вики 
+WIkiRelatedPathsRu. 
+</item>
 </group>
 </version>
 

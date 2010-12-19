@@ -33,18 +33,22 @@ namespace nf {
 		, ST_CONFIRM_IMPLICIT_DELETION	//подтверждать удаление псевдонима по команде cd:-
 		, ST_CONFIRM_GO_TO_NEAREST		//подтверждать переход в ближайшую директорию
 		, ST_SHOW_KEYS_IN_MENU		//показывать в меню сочетания клавиш
-		, ST_SELECT_SH_MENU_MODE	//режим отображнеия меню со списком вариантов псевдонимов
-		, ST_PANEL_MODE				//режим отображнеия панели
-		, ST_SELECT_CATS_MENU_MODE	//режим отображнеия меню со списком вариантов каталогов
+		, ST_SELECT_SH_MENU_MODE	//режим отображения меню со списком вариантов псевдонимов
+		, ST_PANEL_MODE				//режим отображения панели
+		, ST_SELECT_CATS_MENU_MODE	//режим отображения меню со списком вариантов каталогов
 		, ST_ALWAYS_EXPAND_SHORTCUTS	//всегда расширять однобуквенные псевдонимы
 		, ST_HISTORY_IN_DIALOG_APPLY_COMMAND	//использовать историю в диалоге выполнения команды
 		, ST_SELECT_SH_MENU_MODE_EV		//режим отображения меню со списком переменных среды
 		, ST_SELECT_SH_MENU_SHOWCATALOGS_MODE // режим отображнеия каталогов в меню вариантов
-		, ST_EDIT_MENU_DISK_FAST_KEY // клавиша быстрого доступа в меню дисков
+		//, ST_EDIT_MENU_DISK_FAST_KEY // клавиша быстрого доступа в меню дисков
 		, ST_FLAG_NETWORK_COMMANDS_THROUGH_COMMAND_LINE //переходить в сетевые директории с помощью плагина Network
 		, ST_SELECT_SOFT_MENU_SHOWCATALOGS_MODE // режим отображения каталогов в меню запуска программ
 		, ST_USE_SINGLE_MENU_MODE
 		, ST_SUBDIRECTORIES_AS_ALIASES
+
+		//NF 3.0
+		, ST_SHOW_CATALOGS_IN_DISK_MENU //allow to show list of catalogs in disk menu
+		, ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH //disable possibility to use "\\\" instead of "\*\*\*", "...." instead of "\..\.." and use "cd:a.." instead of "cd:a\.."
 		// при добавлении - добавить значение по умолчанию в default_flags_values
 
 		, NUMBER_FLAG_SETTINGS 
