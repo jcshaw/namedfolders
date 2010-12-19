@@ -70,8 +70,8 @@ void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring con
 	}
 }
 
-bool nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcPath, tstring const &localPath0, tstring &destPath
-							, nf::twhat_to_search_t whatToSearch) {
+tpath_selection_result nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcPath, tstring const &localPath0
+											  , tstring &destPath, nf::twhat_to_search_t whatToSearch) {
 	//найти все пути, подходящие для Value и LocalPath
 	//дать возможность пользователю выбрать требуемый путь 
 	//и вернуть его в ResultPath
@@ -82,9 +82,13 @@ bool nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcPath, tstring cons
 	value_paths.unique();
 
 	//меню выбора вариантов
-	if (value_paths.empty()) return false;
+	if (value_paths.empty()) return nf::ID_PATH_NOT_FOUND;
 
-	return Menu::SelectPath(value_paths, destPath) != 0;
+	if (Menu::SelectPath(value_paths, destPath) == 0) {
+		return nf::ID_MENU_CANCELED;
+	} else {
+		return nf::ID_PATH_SELECTED;
+	}
 };
 
 //выбрать наиболее подходящий псевдоним из списка вариантов

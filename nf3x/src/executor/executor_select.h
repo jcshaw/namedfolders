@@ -29,7 +29,7 @@ namespace Selectors {
 	//найти все пути, подходящие для Value и LocalPath
 	//дать возможность пользователю выбрать требуемый путь 
 	//и вернуть его в ResultPath
-	bool GetPath(HANDLE hPlugin
+	tpath_selection_result GetPath(HANDLE hPlugin
 		, tstring const &SrcPath
 		, tstring const &LocalPath
 		, tstring &ResultPath

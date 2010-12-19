@@ -163,6 +163,11 @@ nf::Menu::CMenuDialog::CMenuDialog(CMenu &srcMenu, tlist_menu_items &listItemsRe
 
 }
 
+inline tstring itoa(int n) {
+	wchar_t buffer[33]; //see description of far itoa function: 32 characters + 1 for "0"
+	return g_FSF.itoa(n, &buffer[0], 10);
+}
+
 int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem) {
 	autobuffer_wrapper<int> buf;
 	size_t num_custom_break_codes = 0;
@@ -174,6 +179,11 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 		title += m_Filter;
 	}
 
+	//display count of items at the bottom of menu
+	tstring bottom = m_Menu.m_KeysInMenu;
+	if (! bottom.empty()) bottom += L" ";
+	bottom += L"(" + itoa(static_cast<int>(MenuItems.size())) + L")";
+ 
 	nSelectedItem = g_PluginInfo.Menu (
 		g_PluginInfo.ModuleNumber
 		, -1
@@ -181,7 +191,7 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 		, 0	//макс кол-во видимых элементов
 		, FMENU_WRAPMODE | FMENU_SHOWAMPERSAND
 		, title.c_str()
-		, m_Menu.m_KeysInMenu.c_str()
+		, bottom.c_str()// m_Menu.m_KeysInMenu.c_str()
 		, m_Menu.m_HelpTopic.c_str()
 		, (buf.size() == 0 ? 0 : &buf[0])
 		, &BreakCode
@@ -194,8 +204,7 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 	}
 	m_bFilterFullUpdateMode = true;
 	if (BreakCode < static_cast<int>(num_custom_break_codes)) return true; //нажата заданная в m_Menu.GetBreakKeys клавиша
-	if (VK_BACK == LOWORD(buf[BreakCode]))
-	{	//удаляем последний символ фильтра
+	if (VK_BACK == LOWORD(buf[BreakCode])) {	//удаляем последний символ фильтра
 		if (m_Filter.size()) m_Filter.erase(m_Filter.size()-1, 1);
 	} else {
 		wchar_t ch; //!DO: русские буквы так просто уже не заменить английскими в фильтре, TODO

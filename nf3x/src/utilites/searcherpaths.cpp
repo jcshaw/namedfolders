@@ -15,6 +15,7 @@
 #include "stlsoft_def.h"
 
 #include "strings_utils.h"
+#include "settings.h"
 
 #include "Parser.h"
 
@@ -26,7 +27,8 @@ namespace {
 			|| MC_SEARCH_BACKWORD_SHORT[0] == ch 
 			|| MC_DEEP_DIRECT_SEARCH_SHORT[0] == ch 
 			|| MC_DEEP_REVERSE_SEARCH_SHORT[0] == ch
-			|| MC_SEARCH_FORWARD_SHORT[0] == ch;
+			|| MC_SEARCH_FORWARD_SHORT[0] == ch
+			|| MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH[0] == ch;
 	}
 	const int UNLIMITED_SEARCH_LEVEL = 9999;
 
@@ -37,6 +39,11 @@ namespace {
 				? WinSTL::findfile_sequence_t::files
 				: WinSTL::findfile_sequence_t::files | WinSTL::findfile_sequence_t::directories); //=WTS_DIRECTORIES_AND_FILES
 	}
+
+	const wchar_t CH_SEARCH_BACKWORD = L'2';
+	const wchar_t CH_SEARCH_FORWARD = L'1';
+	const wchar_t CH_SEARCH_FORWARD_UNLIMITED = L'3';
+	const wchar_t CH_SEARCH_BACKWORD_UNLIMITED = L'4';
 }
 
 bool check_for_esc(void) {
@@ -93,26 +100,36 @@ void nf::Search::CSearchFarPolice::SearchSubdir(tstring const& RootDir, tstring 
 	} 
 }
 
-wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstring &destName, int &destLevel) {
+wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstring &destName, tstring &destLevel) {
 	//извлечь из srcPattern первое имя, определить на каком кол-ве уровней вложенности
-	//искать, вернуть остаток
-	//имена могут быть разделены слешами и точками (слеш - поиск вглубь, точка - вверх)
-	//специальный синтаксис для поиска без ограничения уровня вложенности
+	//искать, вернуть остаток 
+	//имена могут быть разделены \* и \.. (поиск вглубь, переход вверх)
+	//специальный синтаксис для поиска без ограничения уровня вложенности: \** и \..*
+	//destLevel contains sequence of required actions (CH_SEARCH_FORWARD | CH_SEARCH_BACKWORD | CH_SEARCH_FORWARD_UNLIMITED | CH_SEARCH_BACKWORD_UNLIMITED)
 	wchar_t const* ps = srcPattern;
 	assert(lstrlen(srcPattern) > 0);
+	bool bshort_commands_allowed = (nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0);
 	
-	destLevel = 0;
+	destLevel = L"";
 	while (is_slash(*ps)) {
-		if (*ps == L'\\' || *ps == MC_SEARCH_FORWARD_SHORT[0]) {
-			++destLevel; // "\*\*\*" is equal to "\\\" 
+		if (*ps == L'\\') { 
+			if (bshort_commands_allowed || destLevel.empty()) {
+				destLevel += CH_SEARCH_FORWARD; // "\*\*\*" is equal to "\\\" 
+			}
+		} else if (*ps == MC_SEARCH_FORWARD_SHORT[0]) {
+			destLevel += CH_SEARCH_FORWARD; // "\*\*\*" is equal to "\\\" 
 		} else if (*ps == MC_SEARCH_BACKWORD_SHORT[0]) {
-			--destLevel;
+			destLevel += CH_SEARCH_BACKWORD;
+		} else if (*ps == MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH[0]) {
+			if (bshort_commands_allowed || destLevel.empty()) {
+				destLevel += CH_SEARCH_BACKWORD;
+			}
 		} else if (MC_DEEP_DIRECT_SEARCH_SHORT[0] == *ps) {
-			destLevel = UNLIMITED_SEARCH_LEVEL;
+			destLevel += CH_SEARCH_FORWARD_UNLIMITED;
 			++ps;
 			break;
 		} else if (MC_DEEP_REVERSE_SEARCH_SHORT[0] == *ps) {
-			destLevel = -UNLIMITED_SEARCH_LEVEL;
+			destLevel += CH_SEARCH_BACKWORD_UNLIMITED;
 			++ps;
 			break;
 		}
@@ -126,20 +143,22 @@ wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstr
 	return psend;
 }
 
-bool nf::Search::Private::search_multisubdir(tstring const& rootDir, tstring const& srcName, int level
+bool nf::Search::Private::search_multisubdir(tstring const& rootDir, tstring const& srcName
+											 , unsigned int levelIndex
+											 , tstring const& level
 											 , CSearchPolice &searchPolice
 											 , nf::tlist_strings &dest)
 {	//поиск среди директорий любого уровня вложенности
-	if (level == 0) ++level;	// \ и . сокращаются, тогда ищем просто в текущей директории
 	if (check_for_esc()) return false;	//exit by esc
+	if (levelIndex >= level.size()) return true; //current directory is required one
 
-	if (level >= 0) {
+	if (level[levelIndex] == CH_SEARCH_FORWARD || level[levelIndex] == CH_SEARCH_FORWARD_UNLIMITED) {
 		//находим все непосредственно вложенные директории, 
 		//удовлетворяющие маске и заносим их в результирующий список
 		searchPolice.SearchSubdir(rootDir, srcName, dest);
 
-		level--;
-		if (! level) return true;	//дальше не ищем, достигли требуемого уровня вложенности
+		if (level[levelIndex] != CH_SEARCH_FORWARD_UNLIMITED && level[levelIndex] != CH_SEARCH_BACKWORD_UNLIMITED) levelIndex++;
+		if (levelIndex >= level.size()) return true; //дальше не ищем, достигли требуемого уровня вложенности
 
 		//рекурсивно ищем во всех вложенных директориях
 		nf::tlist_strings list_subdirs;
@@ -147,25 +166,33 @@ bool nf::Search::Private::search_multisubdir(tstring const& rootDir, tstring con
 		sp.SearchSubdir(rootDir, L"*", list_subdirs);
 
 		BOOST_FOREACH(tstring const& subdir, list_subdirs) {
-			if (!search_multisubdir(subdir, srcName, level, searchPolice, dest)) {
+			if (!search_multisubdir(subdir, srcName, levelIndex, level, searchPolice, dest)) {
 				return false;	//exit by esc
 			}
 		}
-	} else  {
+	} else {
 		//поиск в обратном направлении
 		//переходим в директорию выше и проверяем, есть ли в ней директории
 		//которые удовлетворяют маске
 		
 		//в rootDir удаляем последнюю директорию
-		tstring parent = rootDir;
-		while (level) {
-			parent = Utils::ExtractParentDirectory(parent);
-			if (parent.empty()) return true; //если родительской директории нет, поиск завершен
-			Utils::RemoveTrailingCharsOnPlace(parent, SLASH_DIRS_CHAR);	//!TODO: 
+		tstring parent = Utils::ExtractParentDirectory(rootDir);
+		if (parent.empty()) return true; //если родительской директории нет, поиск завершен
+		Utils::RemoveTrailingCharsOnPlace(parent, SLASH_DIRS_CHAR);	
 
+		if (srcName.empty()) {
+			if (levelIndex == level.size() - 1) {
+				Utils::AddTrailingCharIfNotExists(parent, SLASH_DIRS);
+				dest.push_back(parent); // cd:nf\.. ; add slash for to replace "c:" by "c:\"
+			}
+		} else {
 			searchPolice.SearchSubdir(parent, srcName, dest);	
-			level++;
 		}
+
+		if (level[levelIndex] != CH_SEARCH_FORWARD_UNLIMITED && level[levelIndex] != CH_SEARCH_BACKWORD_UNLIMITED) levelIndex++;
+		if (levelIndex >= level.size()) return true; //дальше не ищем, достигли требуемого уровня вложенности
+
+		return search_multisubdir(parent, srcName, levelIndex, level, searchPolice, dest);
 	}
 	return true;
 }
@@ -180,36 +207,17 @@ bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir,
 	// Неограниченная глубина через \t и \n
 
 	tstring name; 
-	int level = 0;	//на скольких уровнях вложенности искать
-
+	tstring level;	//на скольких уровнях вложенности искать
 	wchar_t const* next_pattern = Private::extract_name(Pattern.c_str(), name, level);
-	if (name.empty() && level != -UNLIMITED_SEARCH_LEVEL) {
-		if (level < 0) { //branch of code to avoid #7 issue: ".." should work.
-			tstring s = RootDir;
-			while (!s.empty() && level++) {
-				s = Utils::ExtractParentDirectory(s);
-			}
-			if (! s.empty()) dest.push_back(s);
-			return false;
-		} else if (level > 1) { //give possibility to specify NF-metachars in shortcuts values, i.e. support of "c:\program files\\\"
-			name = L"*";
-		} else return false; //поиск завершен, директория не подходит...
-	}
-
-	if (name.empty()) {
-		name = L"*"; //implicit mask for deep search character
-	} else {
-		name = Parser::ConvertToMask(name);
-	}
+	if (! name.empty()) name = Parser::ConvertToMask(name);
 
 	nf::tlist_strings variants;
-	Private::search_multisubdir(RootDir, name, level, searchPolice, variants);
+	Private::search_multisubdir(RootDir, name, 0, level, searchPolice, variants);
 
 	if (! *next_pattern) {
 		// поиск завершен, variants содержит искомые директории
 		// копируем их в массив результатов
-		std::copy(variants.begin(), variants.end(), 
-			std::insert_iterator<nf::tlist_strings >(dest, dest.begin()));
+		std::copy(variants.begin(), variants.end(), std::insert_iterator<nf::tlist_strings >(dest, dest.begin()));
 	} else {
 		//в каждой из найденных директорий ищем следующие имена 
 		BOOST_FOREACH(tstring const& dir, variants) {

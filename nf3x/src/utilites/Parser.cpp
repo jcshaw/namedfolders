@@ -114,8 +114,10 @@ bool nf::Parser::ParseString(tstring const &srcStr, nf::tparsed_command &t) {
 		}
 	} else if (t.kind == nf::QK_OPEN_DIRECTORY_DIRECTLY) {
 		t.local_directory = csdp;
+		Utils::RemoveSingleTrailingCharOnPlace(t.local_directory, SLASH_DIRS_CHAR);
 		t.flags = t.flags | nf::FGC_ENABLED_LOCAL_DIRECTORY;
 	} else if (ParseCSDP(csdp, t.catalog, t.shortcut, t.local_directory, t.param)) {
+		Utils::RemoveSingleTrailingCharOnPlace(t.local_directory, SLASH_DIRS_CHAR);
 		if (! t.catalog.empty()) t.flags = t.flags | nf::FGC_ENABLED_CATALOG;
 		if (! t.shortcut.empty()) t.flags = t.flags | nf::FGC_ENABLED_SHORTCUT;
 		if (! t.local_directory.empty()) t.flags = t.flags | nf::FGC_ENABLED_LOCAL_DIRECTORY;
@@ -151,7 +153,7 @@ bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &
 		s = what[2];
 		//remove_prefix_from_shortcut(s);
 		d = what[3];
-		if (d.size() == 1) d += L'*'; //указан только разделитель; директория не указана
+		//if (d.size() == 1) d += L'*'; //указан только разделитель; директория не указана
 		//Utils::RemoveSingleLeadingCharOnPlace(d, SLASH_DIRS_CHAR);
 		p = what[4];
 		return true;

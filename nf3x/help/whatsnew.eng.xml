@@ -31,6 +31,7 @@ plese use F7 instead of F4.</item>
 types "cd:" in command line and changes Russian to English if Russian
 layout was selected. So, you can press ':' and types your NF command
 in English langugage.</item>
+<item type="+">Variants menu shows total list of items.</item>
 </group>
 
 <group title="Settings">

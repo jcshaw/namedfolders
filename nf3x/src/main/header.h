@@ -49,8 +49,10 @@ extern wchar_t const*const MC_SEARCH_FORWARD_LONG; // L"\*";
 //спецсимволы дл€ поиска с неограниченным уровнем вложенности - вверх и вниз
 extern wchar_t const*const MC_DEEP_DIRECT_SEARCH_SHORT; //one char equivalent for DEEP_DIRECT_SEARCH_STRING
 extern wchar_t const*const MC_DEEP_REVERSE_SEARCH_SHORT; //one char equivalent for DEEP_REVERSE_SEARCH_STRING
-extern wchar_t const*const MC_SEARCH_BACKWORD_SHORT; // ".."
+extern wchar_t const*const MC_SEARCH_BACKWORD_SHORT; // "\.."
 extern wchar_t const*const MC_SEARCH_FORWARD_SHORT; // "\*"
+extern wchar_t const*const MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH; // ".."
+
 
 extern const wchar_t CHAR_LEADING_VALUE_ENVVAR;	//символ дл€ идентификации переменных среды в пут€х
 extern const wchar_t CHAR_LEADING_VALUE_REGKEY;	//символ дл€ идентификации ключей реестра в пут€х 
@@ -154,6 +156,12 @@ namespace nf {
 		tstring shortcut;	//название €рлыка
 		bool bIsTemporary;	//временный
 	} _tshortcut_info;
+
+	enum tpath_selection_result {
+		ID_PATH_SELECTED
+		, ID_PATH_NOT_FOUND
+		, ID_MENU_CANCELED
+	};
 
 	typedef tstring tcatalog_info;	//информаци€ о каталоге (путь относительно корневого каталога)
 

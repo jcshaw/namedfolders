@@ -101,7 +101,7 @@ namespace {
 		if (bClosePlugin) Plugin.ClosePlugin(srcDir);
 	}
 
-	bool find_path_and_filename(HANDLE hPlugin
+	nf::tpath_selection_result find_path_and_filename(HANDLE hPlugin
 		, tstring const& srcPath
 		, nf::twhat_to_search_t whatToSearch
 		, tstring const& localPath
@@ -109,7 +109,9 @@ namespace {
 		, tstring &fnDest) 
 	{
 		tstring dest_path;
-		if (! nf::Selectors::GetPath(hPlugin, srcPath, localPath, dest_path, whatToSearch)) return false;
+		nf::tpath_selection_result ret = nf::Selectors::GetPath(hPlugin, srcPath, localPath, dest_path, whatToSearch);
+		if (ret != nf::ID_PATH_SELECTED) return ret;
+
 		if (! ::PathIsDirectory(dest_path.c_str())) {
 			//open directory where file is located; currently, we lost filename.
 			//!TODO: it world be perfect to position on this file
@@ -119,7 +121,7 @@ namespace {
 			fnDest = L"";
 		}
 		dest_path.swap(destPath);
-		return true;
+		return nf::ID_PATH_SELECTED;
 	}
 } //namespace 
 
@@ -157,7 +159,7 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 				dir = panel.value;
 				tstring full_path = Utils::CombinePath(dir, path, SLASH_DIRS);
 				if (! PathFileExists(full_path.c_str())) {
-					if (! nf::Selectors::GetPath(hPlugin, dir, path, dir, nf::WTS_DIRECTORIES)) return false;
+					if (ID_PATH_SELECTED != nf::Selectors::GetPath(hPlugin, dir, path, dir, nf::WTS_DIRECTORIES)) return false;
 				} else {
 					dir.swap(full_path);
 				}
@@ -169,9 +171,11 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 				break;
 			}
 		default:
-			if (! ::find_path_and_filename(hPlugin, panel.value, WhatToSearch, path, panel.value, filename)) {
-				if (! nf::Selectors::FindBestDirectory(hPlugin, panel, dir)) return false;
-			}
+			switch( ::find_path_and_filename(hPlugin, panel.value, WhatToSearch, path, panel.value, filename)) {
+			case ID_PATH_NOT_FOUND: if (! nf::Selectors::FindBestDirectory(hPlugin, panel, dir)) return false;
+				break;
+			case ID_MENU_CANCELED: return false;				
+			};
 		}; //switch
 		
 		if (! PathFileExists(dir.c_str())) {

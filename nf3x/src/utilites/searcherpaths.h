@@ -48,12 +48,7 @@ namespace Search {
 	};
 
 	// поиск директории, вложенной в текущую, по шаблону {[\dir]|[\\dir]|[\\\dir]|..}+
-	// вариант поиска имени в текущей директории определяется кол-вом слешей.
-	// "\dir"  - поиск dir только в текущей директории
-	// "\\dir" - поиск dir во всех вложенных директориях и в директориях непосредственно в них вложенных 
-	// "\\\dir" и т.д.
-	//? "\*\dir" - поиск имени dir во всех вложенных директориях
-	//? ".dir" - переход dir начиная с директории на один уровень выше, "..dir" на два уровня выше и т.д.
+	// "\*", "\**", "\..", "\..*"
 	bool SearchByPattern(tstring const& srcPattern, tstring const &rootDir, Search::CSearchPolice &searchPolice, nf::tlist_strings& dest);
 
 	//найти все директории, удовлетворяющие паттерну
@@ -64,8 +59,10 @@ namespace Search {
 	bool SearchMatched(tstring const& PathPattern, Search::CSearchPolice &searchPolice, nf::tlist_strings& dest);
 
 	namespace Private {
-		wchar_t const* extract_name(wchar_t const* srcPattern, tstring &destName, int &destLevel);
-		bool search_multisubdir(tstring const& RootDir, tstring const& Name, int level
+		wchar_t const* extract_name(wchar_t const* srcPattern, tstring &destName, tstring &destLevel);
+		bool search_multisubdir(tstring const& RootDir, tstring const& Name
+			, unsigned levelIndex
+			, tstring const& level
 			, Search::CSearchPolice &searchPolice
 			, nf::tlist_strings &dest);
 	}

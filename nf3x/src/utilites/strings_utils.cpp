@@ -12,6 +12,8 @@
 #include <Shlwapi.h>
 #include <boost/algorithm/string.hpp>
 
+#include "settings.h"
+
 namespace {
 	inline tstring get_compact_path(tstring const& srcStr, size_t MaxSize) {
 		if (srcStr.size() <= MaxSize) return srcStr;
@@ -124,6 +126,14 @@ void Utils::RemoveSingleLeadingCharOnPlace(tstring &str, wchar_t charToRemove) {
 	}
 }
 
+void Utils::RemoveSingleTrailingCharOnPlace(tstring &str, wchar_t charToRemove) {
+	if (! str.empty()) {
+		if (str[str.size() - 1] == charToRemove) {
+			str.assign(str, 0, str.size() - 1);
+		}
+	}
+}
+
 void Utils::RemoveLeadingCharsOnPlace(tstring &str, wchar_t charToRemove) {
 	boost::trim_left_if(str, boost::bind(std::equal_to<wchar_t>(), _1, charToRemove));
 }
@@ -169,8 +179,11 @@ tstring Utils::SubstituteSearchMetachars(tstring const& srcPath) {
 	s = Utils::ReplaceStringAll(s, MC_SEARCH_FORWARD_LONG, MC_SEARCH_FORWARD_SHORT);
 	s = Utils::ReplaceStringAll(s, MC_SEARCH_BACKWORD_LONG, MC_SEARCH_BACKWORD_SHORT);
 
-	return s;	
+	if (nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0) {
+		return Utils::ReplaceStringAll(s, LEVEL_UP_TWO_POINTS, MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH);
+	} else {
 		//cd:nf.. -> .. is ignored; 
 		//cd:nf\.. -> .. works 
-		//Utils::ReplaceStringAll(s, LEVEL_UP_TWO_POINTS, MC_SEARCH_BACKWORD_SHORT);
+	}
+	return s;	
 }
