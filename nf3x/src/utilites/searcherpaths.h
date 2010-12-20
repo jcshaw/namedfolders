@@ -15,12 +15,11 @@
 #include "strings_utils.h"
 
 namespace nf {
-//поиск директорий ведетс€ системными функци€м
-//системные функции позвол€ют задать маску поиска с использованием метасимволов * и ?
-//если требуетс€ поддержка дополнительного метасимвола [], объ€вленного в FAR
-//необходимо вначале найти все директории, затем проверить их совпадение с шаблоном средствами FAR
-//в итоге два варианта поиска дл€ класса CSearcherPaths задаютс€ в Search
 namespace Search {
+	//search engine to search files and directories matched to specified mask
+	//it's possible to use metachars "*", "?" and "[a-z]" in mask
+	//engine is able to convert mask to appropriate regexp and check name matching using this regexp
+	//if regexp failed then system search functions are used.
 	struct CSearchEngine {
 		explicit CSearchEngine(twhat_to_search_t WhatToSearch) :  m_WhatToSearch(WhatToSearch) {}
 	//выполнить поиск поддиректории по заданному шаблону имени директории

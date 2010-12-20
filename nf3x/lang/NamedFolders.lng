@@ -2,14 +2,14 @@
 
 "Named Folders"
 "Named Folders"
-"Named Folders &2.5"
+"Named Folders &3.0"
 "Open &panel"
 "&Execute command"
 "&Command patterns"
 "Named Folders:"
 
 
-"Named Folders &2.5"
+"Named Folders &3.0"
 "Delete alias"
 "Delete"
 "MkDir"
@@ -21,6 +21,7 @@
 "Show in pl&ugins menu"
 "Show in d&isk menu"
 "Hidden &temporary aliases"
+"Short syntax in paths"
 "Always show all &variants"
 "Hot &key to call NF Panel"
 "Open \\\\ as net:\\\\"
@@ -38,7 +39,7 @@
 "Use single m&enu mode"
 "&Show keys in menu"
 "Masks ignored by 'cd: soft'"
-"Disk menu hotke&y ('1'-'9'). Set 0 to autoassign"
+"Show catalogs in disk menu"
 "Panel mode"
 "&Aliases mask expand mode"
 

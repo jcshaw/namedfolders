@@ -5,8 +5,8 @@
 >
 <xsl:output method="xml" omit-xml-declaration="no" indent="yes"  encoding="windows-1251"/>
 <!--
-	Copyright 2004-2005 by Victor Derevyanko, wingspan@yandex.ru
-	http:/www.rammus.ru
+	Copyright 2004-2010 by Victor Derevyanko, dvpublic0@gmail.com
+	http://code.google.com/p/namedfolders/
 	$Id: whatsnew.rus.wwww.xslt 102 2005-05-29 10:19:36Z dv $
 -->
 

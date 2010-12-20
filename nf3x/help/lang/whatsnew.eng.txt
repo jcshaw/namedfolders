@@ -9,16 +9,19 @@
 
 
 ----------------------------------------------------------------------------
-Version 3.0.0.241 [snapshot]
+Version 3.0.0.244 [beta]
 ----------------------------------------------------------------------------
 Key changes
 ~~~~~~~~~~~
-[!] Plagin uses Far API 2.0 and unicode.
+[!] Plugin uses Far API 2.0 and unicode.
 [!] 64-bit version of the plugin is released. Now plugin is available both for x86 and x64.
 [!] Plugin has own open source project on google code: 
 http://code.google.com/p/namedfolders/. You can write bugreports and suggestion to
 issue tracker here. You can also download most recent snapshot of the plugin
 (all releases will be send to PlugRing as previously).
+[!] NF3 doesn't work correctly with russian shortcuts, that
+were created under NF2. As result, it's necessary to recreate all shortcuts,
+that contain Russian letters in names and/or in paths.
 
 Changes
 ~~~~~~~
@@ -32,6 +35,38 @@ equal to "ef:command".
 [*] Search in local paths is changed. No, the command "cd:alias.." 
 can be written in more classic way "cd:alias\..". Both variants ".." and "\.."
 are supported to specify parent folder.
+[+] New possibility to edit shortuct from variants menu.
+F4 is used to edit menu. To change view mode "shorctuts and values" on
+plese use F7 instead of F4.
+[+] Macros FastPrefix is fixed for Far 2.0. Now, key ':'
+types "cd:" in command line and changes Russian to English if Russian
+layout was selected. So, you can press ':' and types your NF command
+in English langugage.
+[+] Variants menu shows total list of items.
+[!] Technology of search by related paths is completely changed.
+New metacharacters "\**" and "\..*" are used to search without deep
+limitations insted of depricatead metacharacters "\*\" and "\.\".
+Sequence of N-metacharacters "\*", "\.." is used to search on 
+N levels instead of sequence of slashes and dishes. Old syntax
+with slashes and dishes are supported also (it can be turned on/off
+in plugin settings, see param "Short syntax in paths".
+See wiki page 
+http://code.google.com/p/namedfolders/wiki/WIkiRelatedPathsRu 
+for details.
+
+
+Settings
+~~~~~~~~
+[*] Possibility to specify fast key for the plugin in disk
+menu is removed. It's not actual anymore after releasing Far 2.0 build
+1692. Issue #15
+[+] New flag "Show catalogs in disk menu". If it's turned on,
+then NF shows catalog in disk menu besid standard menu item "Named Folders".
+This is experimental implementation of Issue #8.
+[+] New flag "Short syntax in paths". This flag enables
+possibility to use "\\\" instead of "\*\*\*" and "...." instead of "\..\.."
+in related path. Also, it allows to use "cd:a.." instead of "cd:a\.."
+
 
 
 ----------------------------------------------------------------------------

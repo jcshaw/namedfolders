@@ -155,7 +155,8 @@ int WINAPI _export ProcessKeyW(HANDLE hPlugin,int Key,unsigned int ControlState)
 
 int WINAPI _export GetMinFarVersionW(void) {
 	return MAKEFARVERSION(2, 0
-		, 1692
+		//, 1692
+		, 1500
 	);
 }
 

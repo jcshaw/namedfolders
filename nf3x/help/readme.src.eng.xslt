@@ -25,15 +25,11 @@
 <xsl:value-of select="//CONTACT_EMAIL"/>
 <xsl:text>&#xD;</xsl:text>
 
-<xsl:text>icq: </xsl:text>
-<xsl:value-of select="//ICQ"/>
-<xsl:text>&#xD;</xsl:text>
-
 <xsl:text>www: </xsl:text>
 <xsl:value-of select="//RAMMUS_WWW"/>
 <xsl:text>&#xD;</xsl:text>
 
-<xsl:text>Russia, Krasnoyarsk, RAMMuS Group</xsl:text>
+<xsl:text>Russia, Krasnoyarsk</xsl:text>
 <xsl:text>&#xD;</xsl:text>
 
 

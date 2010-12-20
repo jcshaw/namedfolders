@@ -3,7 +3,7 @@ REGEDIT4
 ; Шаблон для преобразования команды "cs:soft" в "cd: :soft"
 
 
-[HKEY_CURRENT_USER\Software\Far\Plugins\NamedFolders\CommandPatterns]
+[HKEY_CURRENT_USER\Software\Far2\Plugins\NamedFolders\CommandPatterns]
 "cs:"="[command]= ;[name]=:[name]"
 
 

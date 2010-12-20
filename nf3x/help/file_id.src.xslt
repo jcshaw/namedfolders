@@ -4,8 +4,8 @@
   version="1.0"
 >
 <!--
-	Copyright 2004-2005 by Victor Derevyanko, wingspan@yandex.ru
-	http:/www.rammus.ru
+	Copyright 2004-2010 by Victor Derevyanko, dvpublic0@gmail.com
+	http://code.google.com/p/namedfolders/
 
 	$Id: file_id.src.xslt 72 2004-08-06 13:06:26Z dv $
 -->
@@ -33,10 +33,6 @@
 <xsl:value-of select="//CONTACT_EMAIL"/>
 <xsl:text>&#xD;</xsl:text>
 
-<xsl:text>icq: </xsl:text>
-<xsl:value-of select="//ICQ"/>
-<xsl:text>&#xD;</xsl:text>
-
 <xsl:text>www: </xsl:text>
 <xsl:value-of select="//RAMMUS_WWW"/>
 <xsl:text>&#xD;</xsl:text>
@@ -59,10 +55,6 @@ to this directory executing "cd:abc".
 <xsl:text>&#xD;</xsl:text>
 <xsl:text>e-mail: </xsl:text>
 <xsl:value-of select="//CONTACT_EMAIL"/>
-<xsl:text>&#xD;</xsl:text>
-
-<xsl:text>icq: </xsl:text>
-<xsl:value-of select="//ICQ"/>
 <xsl:text>&#xD;</xsl:text>
 
 <xsl:text>www: </xsl:text>
