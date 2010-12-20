@@ -25,15 +25,9 @@ namespace nf {
 		const wchar_t* const* GetStringsArray() {
 			m_Catalogs.clear();
 			if (CSettings::GetInstance().GetValue(nf::ST_SHOW_CATALOGS_IN_DISK_MENU) != 0) {
-				if (m_Array) delete[] m_Array;
 				load_list_nf_catalogs();
-				m_Array = new wchar_t const*[1 + m_Catalogs.size()];
-				m_Array[0] = nf::GetMsg(lg::DISKMENUSTRING);	
-				for (unsigned int i = 0; i < m_Catalogs.size(); ++i) {
-					tautobuffer_char& b = *m_Catalogs[i].get();
-					m_Array[1 + i] = &b[0];
-				}
 			}
+			recreate_array();
 			if (m_Catalogs.size() != 0 && ! show_main_string()) {
 				return m_Array + 1;
 			} else {
@@ -47,6 +41,15 @@ namespace nf {
 			return Utils::ReplaceStringAll(cmd, L"nf:", L"cd:") + L"/*";
 		}
 	private:
+		void recreate_array() {
+			if (m_Array) delete[] m_Array;
+			m_Array = new wchar_t const*[1 + m_Catalogs.size()];
+			m_Array[0] = nf::GetMsg(lg::DISKMENUSTRING);	
+			for (unsigned int i = 0; i < m_Catalogs.size(); ++i) {
+				tautobuffer_char& b = *m_Catalogs[i].get();
+				m_Array[1 + i] = &b[0];
+			}
+		}
 		bool show_main_string() {
 			return CSettings::GetInstance().GetValue(nf::ST_SHOW_IN_DISK_MENU) != 0;
 		}

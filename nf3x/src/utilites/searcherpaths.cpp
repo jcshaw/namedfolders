@@ -62,8 +62,30 @@ bool check_for_esc(void) {
 	return (bEsc);
 }
 
-void nf::Search::CSearchSystemPolice::SearchSubdir(tstring const& RootDir0, tstring const& Name, nf::tlist_strings &list) const
-{	//найти удовлетвор€ющие паттерну поддиректории системными функци€ми
+void nf::Search::CSearchEngine::SearchItems(tstring const& rootDir0, tstring const& Name, nf::tlist_strings &destList, twhat_to_search_t whatToSearch) const {
+	try {
+		tstring name = Parser::ConvertMaskToReqex(Name);
+		tregex expression(NF_BOOST_REGEX_COMPILE(name));
+		tsmatch what;
+
+		tstring RootDir = rootDir0;
+		if (Utils::IsAliasIsDisk(RootDir)) RootDir += L"\\";
+
+		WinSTL::findfile_sequence_t f(RootDir.c_str(), L"*", get_search_flags(whatToSearch));
+		BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
+			tstring filename = t.get_filename();
+			if (NF_BOOST_REGEX_LIB::regex_match(filename, what, expression)) {
+				destList.push_back(t.get_path());
+			}
+		}
+	} catch (...) {
+		SearchBySystemFunctions(rootDir0, Name, destList, whatToSearch);
+	}
+}
+
+void nf::Search::CSearchEngine::SearchBySystemFunctions(tstring const& RootDir0, tstring const& Name, nf::tlist_strings &destList
+														, twhat_to_search_t whatToSearch) const {	
+	//search using system functions (they don't support [] metachar)
 	tstring smask = Parser::ConvertToMask(Name);
 
 	//если в качестве RootDir передаетс€ z: то поиск не срабатывает
@@ -71,33 +93,11 @@ void nf::Search::CSearchSystemPolice::SearchSubdir(tstring const& RootDir0, tstr
 	tstring RootDir = RootDir0;
 	if (Utils::IsAliasIsDisk(RootDir)) RootDir += L"\\";
 
-	nf::twhat_to_search_t what_to_search = GetWhatToSearch();
-	WinSTL::findfile_sequence_t f(RootDir.c_str(), smask.c_str(), get_search_flags(what_to_search));
+	WinSTL::findfile_sequence_t f(RootDir.c_str(), smask.c_str(), get_search_flags(whatToSearch));
 	BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
 		tstring full_filename = t.get_path(); //Utils::CombinePath(RootDir0, t.get_filename(), SLASH_DIRS);
-		list.push_back(full_filename);
+		destList.push_back(full_filename);
 	}
-}
-
-void nf::Search::CSearchFarPolice::SearchSubdir(tstring const& RootDir, tstring const& Name, nf::tlist_strings &list) const
-{	//найти удовлетвор€ющие паттерну поддиректории средствами FAR
-	nf::twhat_to_search_t what_to_search = GetWhatToSearch();
-	tstring root_dir = RootDir;
-	if (root_dir.size() == 2) root_dir += SLASH_DIRS;	
-	//!TODO: к имени диска Ќ≈ќЅ’ќƒ»ћќ добавить \\
-	//иначе в релизе findfile_sequence_t использует неправильную корневую директорию
-	//баг stlsoft?
-	WinSTL::findfile_sequence_t f(root_dir.c_str(), L"*", get_search_flags(what_to_search));
-	BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
-		tstring file_name = t.get_filename();
-		if (nf::Parser::IsTokenMatchedToPattern(file_name, Name, false)
-			|| (file_name == Name)	//пр€мое сравнение на случай, если в пути используютс€ квадратные скобки
-			)
-		{
-			tstring full_filename = tstring(RootDir) + tstring(SLASH_DIRS) + file_name;
-			list.push_back(full_filename);
-		};
-	} 
 }
 
 wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstring &destName, tstring &destLevel) {
@@ -146,7 +146,7 @@ wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstr
 bool nf::Search::Private::search_multisubdir(tstring const& rootDir, tstring const& srcName
 											 , unsigned int levelIndex
 											 , tstring const& level
-											 , CSearchPolice &searchPolice
+											 , CSearchEngine &searchEngine
 											 , nf::tlist_strings &dest)
 {	//поиск среди директорий любого уровн€ вложенности
 	if (check_for_esc()) return false;	//exit by esc
@@ -155,18 +155,17 @@ bool nf::Search::Private::search_multisubdir(tstring const& rootDir, tstring con
 	if (level[levelIndex] == CH_SEARCH_FORWARD || level[levelIndex] == CH_SEARCH_FORWARD_UNLIMITED) {
 		//находим все непосредственно вложенные директории, 
 		//удовлетвор€ющие маске и заносим их в результирующий список
-		searchPolice.SearchSubdir(rootDir, srcName, dest);
+		searchEngine.SearchItems(rootDir, srcName, dest);
 
 		if (level[levelIndex] != CH_SEARCH_FORWARD_UNLIMITED && level[levelIndex] != CH_SEARCH_BACKWORD_UNLIMITED) levelIndex++;
 		if (levelIndex >= level.size()) return true; //дальше не ищем, достигли требуемого уровн€ вложенности
 
 		//рекурсивно ищем во всех вложенных директори€х
 		nf::tlist_strings list_subdirs;
-		Search::CSearchSystemPolice sp(nf::WTS_DIRECTORIES); 
-		sp.SearchSubdir(rootDir, L"*", list_subdirs);
+		searchEngine.SearchItems(rootDir, L"*", list_subdirs, nf::WTS_DIRECTORIES);
 
 		BOOST_FOREACH(tstring const& subdir, list_subdirs) {
-			if (!search_multisubdir(subdir, srcName, levelIndex, level, searchPolice, dest)) {
+			if (!search_multisubdir(subdir, srcName, levelIndex, level, searchEngine, dest)) {
 				return false;	//exit by esc
 			}
 		}
@@ -186,18 +185,18 @@ bool nf::Search::Private::search_multisubdir(tstring const& rootDir, tstring con
 				dest.push_back(parent); // cd:nf\.. ; add slash for to replace "c:" by "c:\"
 			}
 		} else {
-			searchPolice.SearchSubdir(parent, srcName, dest);	
+			searchEngine.SearchItems(parent, srcName, dest);	
 		}
 
 		if (level[levelIndex] != CH_SEARCH_FORWARD_UNLIMITED && level[levelIndex] != CH_SEARCH_BACKWORD_UNLIMITED) levelIndex++;
 		if (levelIndex >= level.size()) return true; //дальше не ищем, достигли требуемого уровн€ вложенности
 
-		return search_multisubdir(parent, srcName, levelIndex, level, searchPolice, dest);
+		return search_multisubdir(parent, srcName, levelIndex, level, searchEngine, dest);
 	}
 	return true;
 }
 
-bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir, CSearchPolice &searchPolice
+bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir, CSearchEngine &searchPolice
 								 , nf::tlist_strings& dest)
 {	// поиск директории, вложенной в текущую, по шаблону {[\dir]|[\\dir]|[\\\dir]|..}+
 	// вариант поиска имени в текущей директории определ€етс€ кол-вом слешей.
@@ -228,7 +227,7 @@ bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir,
 	return true;
 }
 
-bool nf::Search::SearchMatched(tstring const& srcPathPattern, CSearchPolice &searchPolice, nf::tlist_strings& dest)
+bool nf::Search::SearchMatched(tstring const& srcPathPattern, CSearchEngine &searchPolice, nf::tlist_strings& dest)
 {	//найти все директории, удовлетвор€ющие паттерну
 	//PathPattern должен содержать полный локальный путь вида
 	//C:\path1\path2\...\pathN

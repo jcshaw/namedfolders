@@ -176,7 +176,7 @@ tstring Utils::SubstituteSearchMetachars(tstring const& srcPath) {
 
 	s = Utils::ReplaceStringAll(s, MC_DEEP_REVERSE_SEARCH_LONG, MC_DEEP_REVERSE_SEARCH_SHORT);
 	s = Utils::ReplaceStringAll(s, MC_DEEP_DIRECT_SEARCH_LONG, MC_DEEP_DIRECT_SEARCH_SHORT);
-	s = Utils::ReplaceStringAll(s, MC_SEARCH_FORWARD_LONG, MC_SEARCH_FORWARD_SHORT);
+	s = Utils::ReplaceStringAll(s, tstring(MC_SEARCH_FORWARD_LONG) + SLASH_DIRS_CHAR, tstring(MC_SEARCH_FORWARD_SHORT) + SLASH_DIRS_CHAR);
 	s = Utils::ReplaceStringAll(s, MC_SEARCH_BACKWORD_LONG, MC_SEARCH_BACKWORD_SHORT);
 
 	if (nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0) {

@@ -228,3 +228,13 @@ tstring nf::Parser::ConvertToMask(tstring const& srcStr) {
 	result.insert(0, L"*");	
 	return result;
 }
+
+tstring nf::Parser::ConvertMaskToReqex(tstring const& srcName) {
+	static const nf::tregex esc(L"[\\^\\.\\$\\|\\(\\)\\+\\/\\\\]"); //dont' escape \\[\\]\\*\\? 
+	static const tstring rep(L"\\\\\\1"); //see http://stackoverflow.com/questions/1252992/how-to-escape-a-string-for-use-in-boost-regex
+
+	tstring smask = boost::regex_replace(srcName, esc, rep, boost::match_default | boost::format_sed);
+
+	smask = Utils::ReplaceStringAll(smask, L"*", L".*");
+	return Utils::ReplaceStringAll(smask, L"?", L".?");
+}

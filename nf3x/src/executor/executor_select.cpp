@@ -55,14 +55,14 @@ void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring con
 	;
 
 	if (bmetachars_are_most_probably_used) { 
-		nf::Search::CSearchFarPolice ssp(nf::WTS_DIRECTORIES); //nf::Search::CSearchSystemPolice ssp(false, false);
+		nf::Search::CSearchEngine ssp(nf::WTS_DIRECTORIES); //nf::Search::CSearchSystemPolice ssp(false, false);
 		nf::Search::SearchMatched(svalue, ssp, destListPaths);
 	} else { 
 		destListPaths.push_back(svalue);
 	}
 	if (! local_path.empty()) {	//учитываем локальный путь относительно каждой найденной директории	
 		nf::tlist_strings list_paths;
-		nf::Search::CSearchSystemPolice ssp(whatToSearch);
+		nf::Search::CSearchEngine ssp(whatToSearch);
 		BOOST_FOREACH(tstring const& path, destListPaths) {
 			nf::Search::SearchByPattern(local_path.c_str(), path, ssp, list_paths);
 		}

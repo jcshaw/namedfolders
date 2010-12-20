@@ -25,6 +25,7 @@ namespace Parser {
 
 	//превратить строку в маску с учетом режима настроек asterixmode, и наличия в строке метасимволов
 	tstring ConvertToMask(tstring const& SrcStr);
+	tstring ConvertMaskToReqex(tstring const& srcName);
 
 	bool GetCommandKind(tstring const& source, nf::tcommands_kinds &kind, tstring &prefix, tstring &csdp);
 	//csdp - catalog, shortcut, directory, parameters 
