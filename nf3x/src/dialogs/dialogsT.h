@@ -26,9 +26,12 @@ public:
 		, int Selected
 		, DWORD Flags
 		, int DefaultButton
-		, wchar_t const* pData)
+		, wchar_t const* pData
+		, FarList* pFarList = 0
+		)
 		: m_ItemIndex(ItemIndex)
 	{
+		memset(&m_FarDialogItem, 0, sizeof(m_FarDialogItem));
 		m_pBuffer.reset(new nf::tautobuffer_char(1)); //stlsoft-autobuffer doesn't allow zero size
 		m_FarDialogItem.Type = ItemType;
 		m_FarDialogItem.X1 = X1;
@@ -40,8 +43,14 @@ public:
 		m_FarDialogItem.Flags = Flags;
 		m_FarDialogItem.DefaultButton = DefaultButton;
 		m_FarDialogItem.MaxLen = 0;
-		far_di_item::SetFarDialogItemBuffer(m_pBuffer, pData, m_FarDialogItem);		
+		m_FarDialogItem.ListItems = pFarList;
+		if (m_FarDialogItem.Type == DI_COMBOBOX) {
+			far_di_item::SetFarDialogItemBuffer(m_pBuffer, L"", m_FarDialogItem);		
+		} else {
+			far_di_item::SetFarDialogItemBuffer(m_pBuffer, pData, m_FarDialogItem);		
+		}
 	};
+
 // 	tstring_buffer const& GetBufferPtr() const {
 // 		return m_pBuffer;
 // 	}
@@ -165,6 +174,9 @@ public: //get modified data from dialog after dialog closing
 		return g_PluginInfo.SendDlgMessage(m_DialogHandle, DM_GETCHECK, dialogItemId, 0) == BSTATE_CHECKED;
 		//return GetDialogItemsRef()[dialogItemId].Selected != 0;
 	}
+	HANDLE GetDialogHandle() {
+		return m_DialogHandle;
+	}
 private:
 	static LONG_PTR WINAPI dlg_proc(HANDLE hDlg, int Msg, int Param1, LONG_PTR Param2) {
 		return g_PluginInfo.DefDlgProc(hDlg, Msg, Param1, Param2);
@@ -244,6 +256,18 @@ inline far_di_item far_di_button(unsigned int ItemIndex, int msgID, int X1, int 
 		, int Y2 = 0) 
 {
 	return far_di_item(ItemIndex, DI_BUTTON, X1, Y1, X2, Y2, Focus, Selected, Flags, DefaultButton, nf::GetMsg(msgID));
+};
+
+inline far_di_item far_di_combobox(unsigned int ItemIndex, int X1, int Y1, int X2
+								   , FarList* listItems
+								   , DWORD Flags = DIF_DROPDOWNLIST 
+								   , int Focus = FALSE
+								   , int Selected = FALSE
+								   , int DefaultButton = FALSE) 
+{
+	return far_di_item(ItemIndex, DI_COMBOBOX, X1, Y1, X2
+		, Y1 //Y2 is not used
+		, Focus, Selected, Flags, DefaultButton, 0, listItems);
 };
 
 

@@ -103,4 +103,14 @@ namespace Utils {
 	}
 
 	tstring SubstituteSearchMetachars(tstring const& srcPath);
+
+	inline tstring itoa(int n) {
+		wchar_t buffer[33]; //see description of far itoa function: 32 characters + 1 for "0"
+		return g_FSF.itoa(n, &buffer[0], 10);
+	}
+
+	inline int atoi(tstring srcStr) {
+		return g_FSF.atoi(srcStr.c_str());
+	}
+
 }//Utils

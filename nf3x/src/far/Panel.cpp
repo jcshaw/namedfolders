@@ -254,7 +254,7 @@ int CPanel::PutFiles(struct PluginPanelItem *PanelItem
 	if (OpMode & OPM_SILENT) return FALSE;
 
 	for (int i = 0; i < ItemsNumber; ++i) {
-		tstring cur_dir = get_hPlugin().GetPanelCurDir(false);	
+		tstring cur_dir = get_hPlugin().GetPanelCurDir(true);	
 		if (PanelItem[i].FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
 			nf::tshortcut_info sht = nf::MakeShortcut(m_CurrentCatalog, PanelItem[i].FindData.lpwszFileName, false);
 			if (sht.shortcut == LEVEL_UP_TWO_POINTS) continue;

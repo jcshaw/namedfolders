@@ -63,6 +63,7 @@ namespace Private {
 class CConfigureDialog : public dialogT {
 	nf::tautobuffer_byte m_dwParams;
 	nf::tvector_strings m_strParams;
+	FarList m_FarList;
 
 public:
 	CConfigureDialog(void);
@@ -70,8 +71,8 @@ public:
 
 	UINT ShowModal();
 
-	enum {DIALOG_WIDTH = 70, DIALOG_HEIGHT = 21};
-	
+	enum {DIALOG_WIDTH = 80, DIALOG_HEIGHT = 21};
+
 	virtual void SetDialogItems()
 	{
 		using namespace nf::Private;
@@ -89,7 +90,7 @@ public:
 
 			<< &far_di_box(DI_SINGLEBOX, ID_LINE4, 0, left, 15, right, 15) 
 
-			<< &far_di_edit(ID_EDIT_PANELWIDTH, left_half+16, 14, right-1, L"")
+			<< &far_di_edit(ID_EDIT_PANELWIDTH, left_half+18, 14, right-1, L"")
 			<< &far_di_text(ID_TEXT_PANELWIDTH, lg::CFG_TEXT_PANELWIDTH, left_half, 14, left_half+16)
 
 			<< &far_di_edit(ID_EDIT_PREFIX, left+20, 14, left_half-2, L"")
@@ -104,8 +105,11 @@ public:
 			<< &far_di_checkbox(ID_HISTORY_IN_APPLY_COMMAND_DIALOG, lg::CFG_USE_HISTORY_IN_DIALOG_APPLY_COMMAND, left, 10)
 			<< &far_di_checkbox(ID_USE_SINGLE_MENU_MODE, lg::CFG_USE_SINGLE_MENU_MODE, left_half, 10)
 
-			<< &far_di_edit(ID_EDIT_ASTERIXMODE, left_half+25, 9, right-1, L"")
+			<< &far_di_combobox(ID_EDIT_ASTERIXMODE, left_half+25, 9, right-1, &m_FarList)
 			<< &far_di_text(ID_TEXT_ASTERIXMODE, lg::CFG_ASTERIXMODE, left_half, 9, left_half+25)
+// 
+// 			<< &far_di_edit(ID_EDIT_ASTERIXMODE, left_half+25, 9, right-1, L"")
+// 			<< &far_di_text(ID_TEXT_ASTERIXMODE, lg::CFG_ASTERIXMODE, left_half, 9, left_half+25)
 
 			<< &far_di_checkbox(ID_ALWAYS_EXPAND_SHORTCUTS, lg::CFG_EXPAND_1SH, left, 9)
 
@@ -128,6 +132,7 @@ public:
 private:
 	void dde_registry(bool bSaveToRegistry);
 	void dde_main_dialog(bool bSaveToControls);
+
 };
 
 }; //nf

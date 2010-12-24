@@ -163,22 +163,32 @@ bool nf::Selectors::GetCatalog(HANDLE hPlugin, nf::tparsed_command const &cmd, n
 	}
 }
 
-bool nf::Selectors::FindBestDirectory(HANDLE hPlugin, nf::tshortcut_value_parsed const &p, tstring &destDir) {
+bool nf::Selectors::FindBestDirectory(HANDLE hPlugin, nf::tshortcut_value_parsed const &p, tstring const& localPath, tstring &destDir) {
 	//найти наилучшую директории; если требуемой директории нет - найти ближайшую
+	//функция используется и в том случае, если локальный путь не найден, а директория связанная с псевдонимом - существует
+	//тогда localPath не пустой
+	if (::PathFileExists(p.value.c_str()) && localPath.empty())  {
+		destDir = p.value;
+		return true;
+	}
+	bool blocal_path_not_found = ::PathFileExists(p.value.c_str()) && !localPath.empty();
+
 	assert(p.ValueType != nf::VAL_TYPE_PLUGIN_DIRECTORY);	//остальные типы должны открывать через эмуляцию нажатия клавиш
+	tstring title = p.value + (blocal_path_not_found  //показываем директорию псевдонима + локальный путь
+		? localPath							//но локальный путь сразу отнимаем (он не найден)
+		: L"");
 	tstring dir = p.value;
 
-	if (! ::PathFileExists(dir.c_str())) {	//find nearest directory
-		nf::tautobuffer_char buf(dir.size()+1);	
-		lstrcpy(&buf[0], dir.c_str());
+	nf::tautobuffer_char buf(dir.size()+1);	
+	lstrcpy(&buf[0], dir.c_str());
 
-		do {
-			if (! ::PathRemoveFileSpec(&buf[0])) return false; //ближайшей директории не оказалось..
-		} while (! ::PathFileExists(&buf[0]));
+	while (! ::PathFileExists(&buf[0])) {
+		if (! ::PathRemoveFileSpec(&buf[0])) return false; //ближайшей директории не оказалось..
+	};
 
-		if (! nf::Confirmations::AskToGoToNearest(hPlugin, dir, &buf[0])) return false;
-		dir = &buf[0];
-	}
+	if (! nf::Confirmations::AskToGoToNearest(hPlugin, title, &buf[0])) return false;
+	dir = &buf[0];
+
 	destDir.swap(dir);
 	return true;
 } 

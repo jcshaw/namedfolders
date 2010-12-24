@@ -1,7 +1,7 @@
 /*
 * Far Named Folders 3.x
 * Copyright (c) 2002-2010 by Victor Derevyanko
-* www: http://code.google.com/p/namedfolders/
+* www: http://code.google.com/p/namedfolders/ 
 * e-mail: dvpublic0@gmail.com
 */
 #include "StdAfx.h"
@@ -65,7 +65,7 @@ bool check_for_esc(void) {
 void nf::Search::CSearchEngine::SearchItems(tstring const& rootDir0, tstring const& Name, nf::tlist_strings &destList, twhat_to_search_t whatToSearch) const {
 	try {
 		tstring name = Parser::ConvertMaskToReqex(Name);
-		tregex expression(NF_BOOST_REGEX_COMPILE(name));
+		tregex expression(NF_BOOST_REGEX_COMPILE(name), boost::regex_constants::icase);
 		tsmatch what;
 
 		tstring RootDir = rootDir0;
@@ -111,9 +111,10 @@ wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstr
 	bool bshort_commands_allowed = (nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0);
 	
 	destLevel = L"";
+	wchar_t prev_char = 0;
 	while (is_slash(*ps)) {
 		if (*ps == L'\\') { 
-			if (bshort_commands_allowed || destLevel.empty()) {
+			if (bshort_commands_allowed || prev_char != L'\\') {
 				destLevel += CH_SEARCH_FORWARD; // "\*\*\*" is equal to "\\\" 
 			}
 		} else if (*ps == MC_SEARCH_FORWARD_SHORT[0]) {
@@ -121,7 +122,7 @@ wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstr
 		} else if (*ps == MC_SEARCH_BACKWORD_SHORT[0]) {
 			destLevel += CH_SEARCH_BACKWORD;
 		} else if (*ps == MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH[0]) {
-			if (bshort_commands_allowed || destLevel.empty()) {
+			if (bshort_commands_allowed || prev_char != MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH[0]) {
 				destLevel += CH_SEARCH_BACKWORD;
 			}
 		} else if (MC_DEEP_DIRECT_SEARCH_SHORT[0] == *ps) {
@@ -133,6 +134,7 @@ wchar_t const* nf::Search::Private::extract_name(wchar_t const* srcPattern, tstr
 			++ps;
 			break;
 		}
+		prev_char = *ps;
 		++ps;
 	}
 

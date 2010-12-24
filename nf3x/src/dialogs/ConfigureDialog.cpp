@@ -9,6 +9,7 @@
 #include "configuredialog.h"
 #include "Kernel.h"
 #include <cmath>
+#include "strings_utils.h"
 
 using namespace nf;
 using namespace nf::Private;
@@ -45,7 +46,7 @@ namespace
 		{ID_EDIT_PREFIX, nf::STS_PREFIXES}
 		,{ID_EDIT_PANELWIDTH, nf::STS_PANELWIDTH}
 		,{ID_EDIT_MASKS_SOFT_EXCEPTIONS, nf::ST_SOFT_MASKS_TO_IGNORE_COMMA_SEPARETED}
-		,{ID_EDIT_ASTERIXMODE, nf::ST_ASTERIX_MODE}
+		,{ID_EDIT_ASTERIXMODE, nf::ST_ASTERIX_MODE} //this is combobox now
 	};
 	const unsigned int NUM_MAIN_DW_SETTINGS = sizeof(main_dw_settings) / sizeof(main_dw_settings[0]);
 	const unsigned int NUM_MAIN_STR_SETTINGS = sizeof(main_str_settings) / sizeof(main_str_settings[0]);
@@ -56,17 +57,43 @@ CConfigureDialog::CConfigureDialog()
 	, m_dwParams(max(nf::NUMBER_FLAG_SETTINGS, NUM_MAIN_DW_SETTINGS))
 	, m_strParams(max(nf::NUMBER_STRING_SETTINGS, NUM_MAIN_STR_SETTINGS))
 {
+	static wchar_t const* ITEM_TEXTS[] = {
+		L"0: a->*a*"
+		, L"1: a->a*"
+		, L"2: a->a"
+	};
+
+	static FarListItem g_Items[sizeof(ITEM_TEXTS) / sizeof(wchar_t const*)];
+	unsigned int count_items = sizeof(ITEM_TEXTS) / sizeof(wchar_t const*);
+
+	m_FarList.ItemsNumber = count_items;
+	m_FarList.Items = &g_Items[0]; //по какой то неясной причине динамические массивы тут не проходят... выравнивание???
+
+	for (unsigned int i = 0; i < count_items; ++ i) {
+		memset(&m_FarList.Items[i].Reserved, 0, sizeof(m_FarList.Items[i].Reserved));
+		m_FarList.Items[i].Text = ITEM_TEXTS[i];
+		m_FarList.Items[i].Flags = 0;
+	}
+
+//загружаем текущие настройки - они нужны, чтобы определить текущий Asterix mode и инициализировать комбобокс
+	CSettings::GetInstance().ReloadSettings();
+	dde_registry(false);
+
+	unsigned int cur_asterix_mode = Utils::atoi(m_strParams[main_str_settings[i].settings_id]);
+	if (cur_asterix_mode < count_items) {
+		m_FarList.Items[cur_asterix_mode].Flags = LIF_SELECTED;
+	}
+
 	SetDialogItems();
 }
 
 CConfigureDialog::~CConfigureDialog()
 {
+	//delete[] m_FarList.Items;
 }
 
 UINT CConfigureDialog::ShowModal()
 {
-	CSettings::GetInstance().ReloadSettings();
-	dde_registry(false);
 	dde_main_dialog(true);
 
 //вызываем диалог настроек
@@ -114,28 +141,27 @@ void CConfigureDialog::dde_main_dialog(bool bSaveToControls)
 	if (bSaveToControls) {
 		//считываем настройки из векторов в элементы диалога
 		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
-			//if (nf::ST_EDIT_MENU_DISK_FAST_KEY != main_dw_settings[i].settings_id) {
-				GetDialogItemsRef()[main_dw_settings[i].control_id].Selected = m_dwParams[main_dw_settings[i].settings_id];
-			//}
+			GetDialogItemsRef()[main_dw_settings[i].control_id].Selected = m_dwParams[main_dw_settings[i].settings_id];
 		}
 		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
-			GetDialogItemsRef().SetFarDialogItemData(main_str_settings[i].control_id, m_strParams[main_str_settings[i].settings_id].c_str());
+			if (ID_EDIT_ASTERIXMODE != main_str_settings[i].control_id) {
+				GetDialogItemsRef().SetFarDialogItemData(main_str_settings[i].control_id, m_strParams[main_str_settings[i].settings_id].c_str());
+			} else {
+				//nothing to do
+			}
 		}
-
-// depricated:
-// 	//ST_EDIT_MENU_DISK_FAST_KEY храним как DWORD, показываем как строку
-// 		const_cast<wchar_t&>(GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[0]) = _T('0') + static_cast<int>(m_dwParams[nf::ST_EDIT_MENU_DISK_FAST_KEY]);
-// 		const_cast<wchar_t&>(GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[1]) = 0;
 
 	} else 	{	//сохраняем настройки из контролов в вектора
 		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
-			//if (nf::ST_EDIT_MENU_DISK_FAST_KEY != main_dw_settings[i].settings_id) {
-				m_dwParams[main_dw_settings[i].settings_id] = this->IsDialogItemSelected(main_dw_settings[i].control_id);
-			//}
+			m_dwParams[main_dw_settings[i].settings_id] = this->IsDialogItemSelected(main_dw_settings[i].control_id);
 		}
 		for (int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
-			m_strParams[main_str_settings[i].settings_id] = this->GetDialogItemValue(main_str_settings[i].control_id);
+			if (ID_EDIT_ASTERIXMODE != main_str_settings[i].control_id) {
+				m_strParams[main_str_settings[i].settings_id] = this->GetDialogItemValue(main_str_settings[i].control_id);
+			} else {
+				int cur_asterix_mode = static_cast<int>(g_PluginInfo.SendDlgMessage(GetDialogHandle(), DM_LISTGETCURPOS, ID_EDIT_ASTERIXMODE, 0));
+				m_strParams[main_str_settings[i].settings_id] = Utils::itoa(cur_asterix_mode);
+			}
 		}
-		//m_dwParams[nf::ST_EDIT_MENU_DISK_FAST_KEY] = GetDialogItemsRef()[ID_EDIT_MENU_DISK_FAST_KEY].PtrData[0] - _T('0');
 	}
 }

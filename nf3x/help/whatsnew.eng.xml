@@ -43,7 +43,11 @@ See wiki page
 http://code.google.com/p/namedfolders/wiki/WIkiRelatedPathsRu 
 for details.
 </item>
-
+<item type="*">If you execute command "cd:a\path" and plugin hasn't found
+directory matched to "path", it will show standard confirmation 
+"do you want to go to nearest directory?". Previous version didn't
+show confirmation, they open the directory assigned to shortcut "a".
+You can disable this confirmations in plugin settings.</item>
 </group>
 
 <group title="Settings">

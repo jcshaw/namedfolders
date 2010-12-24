@@ -144,7 +144,8 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 			//происходит зацикливание (начиная с FAR 2060)
 	} else {	//другие типы директорий
 		//issue #4: SLASH_CATS shouldn't be changed on SLASH_DIRS if shortcuts links to external plugin directory
-		panel.value =  Utils::ReplaceStringAll(panel.value, SLASH_CATS, SLASH_DIRS);
+		panel.value = Utils::ReplaceStringAll(panel.value, SLASH_CATS, SLASH_DIRS);
+		Utils::RemoveSingleTrailingCharOnPlace(panel.value, SLASH_DIRS_CHAR); //last slash is always ignored
 		path =  Utils::ReplaceStringAll(path, SLASH_CATS, SLASH_DIRS);
 
 		tstring dir;
@@ -172,14 +173,14 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 			}
 		default:
 			switch( ::find_path_and_filename(hPlugin, panel.value, WhatToSearch, path, panel.value, filename)) {
-			case ID_PATH_NOT_FOUND: if (! nf::Selectors::FindBestDirectory(hPlugin, panel, dir)) return false;
+			case ID_PATH_NOT_FOUND: if (! nf::Selectors::FindBestDirectory(hPlugin, panel, path, dir)) return false;
 				break;
 			case ID_MENU_CANCELED: return false;				
 			};
 		}; //switch
 		
 		if (! PathFileExists(dir.c_str())) {
-			if (! nf::Selectors::FindBestDirectory(hPlugin, panel, dir)) return false;
+			if (! nf::Selectors::FindBestDirectory(hPlugin, panel, L"", dir)) return false;
 		}
 		::open_path_and_close_plugin(plugin, bClosePlugin, bActivePanel, dir, filename);
 	}; 

@@ -53,6 +53,7 @@ namespace Selectors {
 	//если требуемой директории нет - найти ближайшую
 	bool FindBestDirectory(HANDLE hPlugin
 		, nf::tshortcut_value_parsed const &p
+		, tstring const& localPath
 		, tstring &dir);
 } //Selectors
 } //nf

@@ -163,11 +163,6 @@ nf::Menu::CMenuDialog::CMenuDialog(CMenu &srcMenu, tlist_menu_items &listItemsRe
 
 }
 
-inline tstring itoa(int n) {
-	wchar_t buffer[33]; //see description of far itoa function: 32 characters + 1 for "0"
-	return g_FSF.itoa(n, &buffer[0], 10);
-}
-
 int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem) {
 	autobuffer_wrapper<int> buf;
 	size_t num_custom_break_codes = 0;
@@ -182,7 +177,7 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 	//display count of items at the bottom of menu
 	tstring bottom = m_Menu.m_KeysInMenu;
 	if (! bottom.empty()) bottom += L" ";
-	bottom += L"(" + itoa(static_cast<int>(MenuItems.size())) + L")";
+	bottom += L"(" + Utils::itoa(static_cast<int>(MenuItems.size())) + L")";
  
 	nSelectedItem = g_PluginInfo.Menu (
 		g_PluginInfo.ModuleNumber
