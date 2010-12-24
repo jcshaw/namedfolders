@@ -75,15 +75,18 @@ CConfigureDialog::CConfigureDialog()
 		m_FarList.Items[i].Flags = 0;
 	}
 
-//загружаем текущие настройки - они нужны, чтобы определить текущий Asterix mode и инициализировать комбобокс
+	//загружаем текущие настройки - они нужны, чтобы определить текущий Asterix mode и инициализировать комбобокс
 	CSettings::GetInstance().ReloadSettings();
 	dde_registry(false);
 
-	unsigned int cur_asterix_mode = Utils::atoi(m_strParams[main_str_settings[i].settings_id]);
-	if (cur_asterix_mode < count_items) {
-		m_FarList.Items[cur_asterix_mode].Flags = LIF_SELECTED;
+	for (unsigned int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
+		if (ID_EDIT_ASTERIXMODE == main_str_settings[i].control_id) {
+			unsigned int cur_asterix_mode = Utils::atoi(m_strParams[main_str_settings[i].settings_id]);
+			if (cur_asterix_mode < count_items) {
+				m_FarList.Items[cur_asterix_mode].Flags = LIF_SELECTED;
+			}
+		}
 	}
-
 	SetDialogItems();
 }
 

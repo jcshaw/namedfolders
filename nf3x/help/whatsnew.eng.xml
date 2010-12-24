@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
-<version product_name="Named Folders" version="3.0.0.244" date="beta"> 
+<version product_name="Named Folders" version="3.0.0.245" date="beta"> 
 <group title="Key changes">
 <item type="!">Plugin uses Far API 2.0 and unicode.</item>	
 <item type="!">64-bit version of the plugin is released. Now plugin is available both for x86 and x64.</item>	
