@@ -113,8 +113,8 @@ namespace {
 	}
 
 	bool open_directory_directly(CPanelInfoWrap &plugin, nf::tparsed_command &cmd) {	
-		if (Utils::IsLastCharEqualTo(cmd.local_directory, SLASH_DIRS_CHAR)) { 
-			cmd.local_directory += L"*"; //see #13: cd:c:\temp\ must be automatically converted to cd:c:\temp\*
+		if (Utils::IsLastCharEqualTo(cmd.local_directory, L':')) { 
+			cmd.local_directory += L"\\*"; //cd:z: must be automatically converted to cd:z:\*
 		}
 		tstring path;
 		tstring local;

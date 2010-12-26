@@ -160,7 +160,9 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 				dir = panel.value;
 				tstring full_path = Utils::CombinePath(dir, path, SLASH_DIRS);
 				if (! PathFileExists(full_path.c_str())) {
-					if (ID_PATH_SELECTED != nf::Selectors::GetPath(hPlugin, dir, path, dir, nf::WTS_DIRECTORIES)) return false;
+					tstring disk;
+					Utils::DivideDiskPath(full_path, disk, path);
+					if (ID_PATH_SELECTED != nf::Selectors::GetPath(hPlugin, disk, path, dir, nf::WTS_DIRECTORIES)) return false;
 				} else {
 					dir.swap(full_path);
 				}

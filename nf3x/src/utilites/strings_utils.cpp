@@ -163,7 +163,7 @@ bool Utils::iFindFirst(tstring const& SrcStr, tstring const& SubStr) {
 }
 
 tstring Utils::CombinePath(tstring const& Path1, tstring const& Path2, wchar_t const* Delimiter) {
-	if ( (! boost::starts_with(Path2, Delimiter)) && (! boost::ends_with(Path1, Delimiter))) {
+	if ( (! boost::starts_with(Path2, Delimiter)) && (! boost::ends_with(Path1, Delimiter)) && (!Path1.empty()) && (!Path2.empty())) {
 		return Path1 + Delimiter + Path2;
 	}
 	return Path1 + Path2;	//delimeter already exists
@@ -186,4 +186,14 @@ tstring Utils::SubstituteSearchMetachars(tstring const& srcPath) {
 		//cd:nf\.. -> .. works 
 	}
 	return s;	
+}
+
+void Utils::DivideDiskPath(tstring const &src, tstring &destDisk, tstring &destPath) {
+	if (src.size() < 2) {
+		destDisk = src;
+		destPath = L"";
+	} else {
+		destDisk.assign(src, 0, 2);
+		destPath.assign(src, 2, src.size() - 2);
+	}
 }
