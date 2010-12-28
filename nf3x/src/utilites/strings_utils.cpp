@@ -11,6 +11,7 @@
 #include <boost/bind.hpp>
 #include <Shlwapi.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 
 #include "settings.h"
 
@@ -169,18 +170,59 @@ tstring Utils::CombinePath(tstring const& Path1, tstring const& Path2, wchar_t c
 	return Path1 + Path2;	//delimeter already exists
 }
 
+namespace {
+	tstring replace_sequence_chars(tstring const& srcStr, wchar_t srcCh, tstring const& byString, unsigned int minCount) {
+		unsigned int counter = 0;
+		tstring dest;
+		dest.reserve(srcStr.size());
+//!TODO: unit testing, test  cd:far\\\\\\\\\\\\* è cd:far........
+		for (unsigned int n = 0; n < srcStr.size(); ++n) {
+			if (srcStr[n] != srcCh || n == srcStr.size() - 1) {
+				if (counter != 0) {
+					if (counter < minCount) {
+						for (unsigned int i = 0; i < minCount; ++i) {
+							dest.push_back(srcCh);
+						}
+					} else {
+						for (unsigned int i = 0; i < byString.size(); ++i) {
+							dest.push_back(byString[i]);
+						}
+					}
+					counter = 0;
+					if (n != srcStr.size() - 1) {
+						dest.push_back(srcStr[n]);
+					}
+				} else {
+					dest.push_back(srcStr[n]);
+				}
+			} else {
+				++counter;
+			}
+		}
+		return dest;
+	}
+}
+
 tstring Utils::SubstituteSearchMetachars(tstring const& srcPath) {
 	tstring s = (boost::starts_with(srcPath, tstring(L"**")) || boost::starts_with(srcPath, tstring(L"..*")) ) 
 		? L"\\" + srcPath
 		: srcPath;
+
+	bool ballow_short_path_commands = (nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0);
+		//replace sequence of \\\ by single \
+		//replace sequence of ... by ..
+// 	if (! ballow_short_path_commands) {
+// 		s = replace_sequence_chars(s, L'.', L"..", 2);
+// 		s = replace_sequence_chars(s, L'\\', L"\\", 1);
+// 	}
 
 	s = Utils::ReplaceStringAll(s, MC_DEEP_REVERSE_SEARCH_LONG, MC_DEEP_REVERSE_SEARCH_SHORT);
 	s = Utils::ReplaceStringAll(s, MC_DEEP_DIRECT_SEARCH_LONG, MC_DEEP_DIRECT_SEARCH_SHORT);
 	s = Utils::ReplaceStringAll(s, tstring(MC_SEARCH_FORWARD_LONG) + SLASH_DIRS_CHAR, tstring(MC_SEARCH_FORWARD_SHORT) + SLASH_DIRS_CHAR);
 	s = Utils::ReplaceStringAll(s, MC_SEARCH_BACKWORD_LONG, MC_SEARCH_BACKWORD_SHORT);
 
-	if (nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0) {
-		return Utils::ReplaceStringAll(s, LEVEL_UP_TWO_POINTS, MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH);
+	if (! ballow_short_path_commands) {
+		s = Utils::ReplaceStringAll(s, LEVEL_UP_TWO_POINTS, MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH);
 	} else {
 		//cd:nf.. -> .. is ignored; 
 		//cd:nf\.. -> .. works 

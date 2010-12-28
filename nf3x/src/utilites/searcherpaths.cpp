@@ -206,13 +206,24 @@ bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir,
 	// "\\dir" - поиск имени dir во всех вложенных директориях и в директориях вложенных в них
 	// "\\\dir" и т.д.
 	// Неограниченная глубина через \t и \n
+	nf::tlist_strings variants;
 
 	tstring name; 
 	tstring level;	//на скольких уровнях вложенности искать
 	wchar_t const* next_pattern = Private::extract_name(Pattern.c_str(), name, level);
+	
+//Подгонка под #7, комментарий 48
+//Команда far... приведет к лишней точке и ненужной маске = ".*". Точку убираем
+	if (name == L".") name = L"";
+//Команда cd:far\\\\\\\\\\ приводит к пустому name и level="1". Учитываем текущую директорию
+	if (! level.empty()) {
+		if (level[0] == CH_SEARCH_FORWARD) {
+			variants.push_back(RootDir);
+		}
+	}
+
 	if (! name.empty()) name = Parser::ConvertToMask(name);
 
-	nf::tlist_strings variants;
 	Private::search_multisubdir(RootDir, name, 0, level, searchPolice, variants);
 
 	if (! *next_pattern) {
