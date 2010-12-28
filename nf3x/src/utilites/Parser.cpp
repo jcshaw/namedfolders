@@ -18,7 +18,7 @@ namespace re {	//регул€рные выражени€
 //в регул€рном выражении не указан префикс (он задаетс€ отдельным регул€рным выражением RE_PREFIX)
 //каждое регул€рное выражение раскладывает строку на две части - команду (один или несколько спецсимовлов)
 //и путь к €рлыку и директорию
-	const int NUM_COMMANDS = 19;
+	const int NUM_COMMANDS = 21;
 	nf::tcommands_kinds LIST_COMMANDS[NUM_COMMANDS] = {
 		nf::QK_OPEN_DIRECTORY_DIRECTLY
 		, nf::QK_OPEN_SHORTCUT		
@@ -31,7 +31,9 @@ namespace re {	//регул€рные выражени€
 		, nf::QK_DELETE_SHORTCUT_IMPLICIT	
 		, nf::QK_INSERT_SHORTCUT
 		, nf::QK_INSERT_SHORTCUT_TEMPORARY
+		, nf::QK_INSERT_BOTH_TEMPORARY_IMPLICIT
 		, nf::QK_INSERT_BOTH_TEMPORARY
+		, nf::QK_INSERT_BOTH_IMPLICIT
 		, nf::QK_INSERT_BOTH
 		, nf::QK_DELETE_SHORTCUT
 		, nf::QK_OPEN_NETWORK
@@ -44,23 +46,27 @@ namespace re {	//регул€рные выражени€
 	wchar_t const* LIST_RE[NUM_COMMANDS] = {
 		L"()(\\w:.*)" //L"()(\\w:\\\\.*)" - заменено, чтобы работало cd:z:
 		, L"()([\\*\\?\\w\\d_\\.@#\\(\\)].*)"
-		, L"(:)([^:\\+].+?/)$" //QK_INSERT_CATALOG
-		, L"(\\+)((?:.+\\/)?)$"
-		, L"(:)((?:.+\\/)?)$" 
-		, L"(\\-\\-f\\s+)(.*)"
-		, L"(\\-\\-df\\s+)(.*)"
+		, L"(:)([^:\\+].*?/)$" //QK_INSERT_CATALOG
+		, L"(\\+)((?:[^:\\+]+\\/)?)$" //QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT
+		, L"(:)((?:[^:\\+]+\\/)?)$" //QK_INSERT_SHORTCUT_IMPLICIT
+		, L"(\\-\\-f\\s+)(.*)" //QK_SEARCH_FILE
+		, L"(\\-\\-df\\s+)(.*)" //QK_SEARCH_DIRECTORIES_AND_FILES
 		, L"(\\-)(.*\\/\\s*)" //QK_DELETE_CATALOG
 		, L"(\\-)((?:.+\\/)?)$" //QK_DELETE_SHORTCUT_IMPLICIT
-		, L"(:)([^:\\+].*)"
-		, L"(\\+)([^:\\+].*)"
+		, L"(:)([^:\\+].*)" //QK_INSERT_SHORTCUT
+		, L"(\\+)([^:\\+].*)" //QK_INSERT_SHORTCUT_TEMPORARY
+
+		, L"(:\\+)((?:.+\\/)?)"	//QK_INSERT_BOTH_TEMPORARY_IMPLICIT
 		, L"(:\\+)(.*)"	//QK_INSERT_BOTH_TEMPORARY
-		, L"(::)(.*)"
+		, L"(::)((?:.+\\/)?)" //QK_INSERT_BOTH_IMPLICIT
+		, L"(::)(.*)" //QK_INSERT_BOTH
+
 		, L"(\\-)(.*[^\\/]\\s*)" //QK_DELETE_SHORTCUT
-		, L"(\\\\)(.*)"
-		, L"(\\s*)()$"
-		, L"(~)(.*)"
-		, L"(%)(.*)"
-		, L"( )(.*)"
+		, L"(\\\\)(.*)" //QK_OPEN_NETWORK
+		, L"(\\s*)()$" //QK_OPEN_PANEL
+		, L"(~)(.*)" //QK_OPEN_BY_PATH
+		, L"(%)(.*)" //QK_OPEN_ENVIRONMENT_VARIABLE
+		, L"( )(.*)" //QK_START_SOFT_SHORTCUT
 	};
 //префикс команды
 	wchar_t const * RE_PREFIX = L"^((?:[\\w]+)|(?::)):";

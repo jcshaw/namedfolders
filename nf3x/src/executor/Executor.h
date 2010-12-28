@@ -49,8 +49,9 @@ namespace Commands {
 	}
 	bool EditShortcut(HANDLE hPlugin, nf::tshortcut_info const &sh);
 
-	tpair_strings get_implicit_name_and_value(HANDLE hPlugin = INVALID_HANDLE_VALUE
-		, bool bGetDataFromActivePanel = true	//с активной или неактивной панели брать данные
+	tpair_strings get_implicit_name_and_value(bool bBothPanels
+		, HANDLE hPlugin = INVALID_HANDLE_VALUE
+		, bool bGetDataFromActivePanel = true	//с активной или неактивной панели брать данные		
 	);
 	bool IsCatalogIsEmpty(nf::tcatalog_info const& cat);
 

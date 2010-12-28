@@ -122,7 +122,9 @@ namespace nf {
 		, QK_INSERT_SHORTCUT				//cd::shortcut_name
 		, QK_INSERT_SHORTCUT_TEMPORARY	//cd:+
 		, QK_INSERT_BOTH					//cd:::
-		, QK_INSERT_BOTH_TEMPORARY		//cd:+:
+		, QK_INSERT_BOTH_TEMPORARY		//cd::+
+		, QK_INSERT_BOTH_IMPLICIT		//cd::: (shortcut is empty, catalog could be not empty)
+		, QK_INSERT_BOTH_TEMPORARY_IMPLICIT //cd::+ (shortcut is empty, catalog could be not empty)
 		, QK_DELETE_SHORTCUT				//cD:-shortcut_name
 		, QK_DELETE_CATALOG				//cD:-catalog_name/
 		, QK_OPEN_NETWORK				/*cd:\\*/

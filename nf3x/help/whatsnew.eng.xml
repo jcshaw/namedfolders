@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
-<version product_name="Named Folders" version="3.0.0.245" date="beta"> 
+<version product_name="Named Folders" version="3.0.0.247" date="RC1"> 
 <group title="Key changes">
 <item type="!">Plugin uses Far API 2.0 and unicode.</item>	
 <item type="!">64-bit version of the plugin is released. Now plugin is available both for x86 and x64.</item>	
@@ -51,6 +51,15 @@ You can disable this confirmations in plugin settings.</item>
 <item type="*">Direct path commands use technology of search by related
 paths (see above). I.e. they support metachars "\**", "..*", "\*", "\..". 
 Commands "cd:z:" and "cd:z:\" are executed as "cd:z:\*"</item>
+<item type="-">Command "cd:a/" created catalog. Now, it doesn't create
+catalog but only open exist catalog on NF-panel, see #38</item>
+<item type="+">Implicit commands of creation shortcuts for two
+directories (on both panels) are implemented: "cd:::", "cd::+", 
+"cd:::catalog/", "cd::+catalog/", see #38</item>
+<item type="-">Command "cd::a/" didn't create catalog "a" if name
+of catalog contained only single letter, see #38</item>
+<item type="-">Pressing Ctrl+'/' on NF-panel resulted to creation
+garbage catalogs on panel, see #39</item>
 </group>
 
 <group title="Settings">

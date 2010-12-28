@@ -144,7 +144,7 @@ bool nf::Panel::InsertShortcut(CPanel* pPanel, PanelInfo const &pi) {
 	nf::tshortcut_info default_sh;
 	tstring active_panel_value;
 
-	std::pair<tstring, tstring> pair_name_value = nf::Commands::get_implicit_name_and_value(pPanel->get_hPlugin(), false);
+	std::pair<tstring, tstring> pair_name_value = nf::Commands::get_implicit_name_and_value(false, pPanel->get_hPlugin(), false);
 	default_sh.shortcut.swap(pair_name_value.first);
 	active_panel_value.swap(pair_name_value.second);
 

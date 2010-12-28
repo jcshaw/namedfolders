@@ -43,8 +43,10 @@ namespace {
 		return DR_DELETE == nf::Commands::DeleteShortcut(sh, bImplicit);	
 	}
 
-	bool insert_shortcut(nf::tparsed_command &cmd, CPanelInfoWrap &plugin, bool bImplicit, bool bTemporary) {
-		if (bImplicit) cmd.shortcut = nf::Commands::get_implicit_name_and_value().first;
+	bool insert_shortcut(nf::tparsed_command &cmd, CPanelInfoWrap &plugin, bool bImplicit, bool bTemporary, bool bInsertBoth) {
+		if (bImplicit) {
+			cmd.shortcut = nf::Commands::get_implicit_name_and_value(bInsertBoth).first;
+		}
 		if (cmd.shortcut.empty()) return false;
 		//select best matchec catalog
 
@@ -57,8 +59,8 @@ namespace {
 			return false;
 		}
 		//add new shortcut to selected catalog
-		if ((nf::QK_INSERT_BOTH == cmd.kind) || (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind)) {
-			return nf::Commands::AddShortcutForBothPanels(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
+		if (bInsertBoth) {
+ 			return nf::Commands::AddShortcutForBothPanels(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
 		} else {
 			return nf::Commands::AddShortcut(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
 		}
@@ -140,17 +142,26 @@ bool nf::ExecuteCommand(nf::tparsed_command &cmd) {
 	case nf::QK_OPEN_NETWORK:	/*cd:\\*/
 		return false; //!TODO: check
 	case nf::QK_INSERT_SHORTCUT:	//cd::
-	case nf::QK_INSERT_BOTH:				//cd:::
 	case nf::QK_INSERT_SHORTCUT_IMPLICIT: //cd::
-	case nf::QK_INSERT_BOTH_TEMPORARY:	//cd:+:
 	case nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT: //cd:+
 	case nf::QK_INSERT_SHORTCUT_TEMPORARY: //cd:+
+	case nf::QK_INSERT_BOTH:				//cd:::
+	case nf::QK_INSERT_BOTH_TEMPORARY:	//cd:+:
+	case nf::QK_INSERT_BOTH_IMPLICIT:	//cd:::
+	case nf::QK_INSERT_BOTH_TEMPORARY_IMPLICIT:	//cd:+:
 		return insert_shortcut(cmd, plugin 
 			, ((nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT == cmd.kind)  //implicit
-				|| (nf::QK_INSERT_SHORTCUT_IMPLICIT == cmd.kind))
+				|| (nf::QK_INSERT_SHORTCUT_IMPLICIT == cmd.kind)
+				|| (nf::QK_INSERT_BOTH_IMPLICIT == cmd.kind) 
+				|| (nf::QK_INSERT_BOTH_TEMPORARY_IMPLICIT == cmd.kind)
+			)
 			, ((nf::QK_INSERT_SHORTCUT_TEMPORARY == cmd.kind)   //temporary
 				|| (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind)
 				|| (nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT == cmd.kind))
+			, ((nf::QK_INSERT_BOTH == cmd.kind) 
+				|| (nf::QK_INSERT_BOTH_IMPLICIT == cmd.kind) 
+				|| (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind)
+				|| (nf::QK_INSERT_BOTH_TEMPORARY_IMPLICIT == cmd.kind))
 		);
 	case nf::QK_DELETE_SHORTCUT_IMPLICIT: //cd:-
 		return delete_shortcut(cmd, plugin, true);
@@ -350,14 +361,21 @@ bool nf::Commands::IsCatalogIsEmpty(nf::tcatalog_info const& cat) {
 	return (0 == c.GetNumberSubcatalogs()) && (0 == c.GetNumberShortcuts());
 }
 
-tpair_strings nf::Commands::get_implicit_name_and_value(HANDLE hPlugin, bool bGetDataFromActivePanel) {
+tpair_strings nf::Commands::get_implicit_name_and_value(bool bBothPanels, HANDLE hPlugin, bool bGetDataFromActivePanel) {
 	tpair_strings result;
 	CPanelInfoWrap plugin(hPlugin);
-	result.second = plugin.GetPanelCurDir(bGetDataFromActivePanel);
+	if (! bBothPanels) {
+		result.second = plugin.GetPanelCurDir(bGetDataFromActivePanel);
+	} else {
+		result.second = nf::EncodeValues(result.second = plugin.GetPanelCurDir(bGetDataFromActivePanel)
+			, result.second = plugin.GetPanelCurDir(! bGetDataFromActivePanel));
+	}
 	result.first = ::PathFindFileName(result.second.c_str());
 	tstring &s = result.first;
 
-	tstring::iterator ps = s.begin();
+	tstring dest;
+	dest.reserve(s.size());
+	tstring::const_iterator ps = s.begin();
 	while (ps != s.end()) { //first char mustn't be command character - skip if it is one.
 		switch(*ps) {
 		case L'%':
@@ -366,10 +384,12 @@ tpair_strings nf::Commands::get_implicit_name_and_value(HANDLE hPlugin, bool bGe
 		case L'|':
 		case L'-':
 		case L'!':
-			s.erase(ps);
-			ps = s.begin();
-			continue;
+			//nothing to do
+			break;
+		default:
+			dest.push_back(*ps);
 		};
+		++ps;
 		break;
 	}
 
@@ -379,10 +399,19 @@ tpair_strings nf::Commands::get_implicit_name_and_value(HANDLE hPlugin, bool bGe
 		case L'%':
 //		case L'&':
 		case L'|':
-			*ps = L'_';
+			dest.push_back(L'_');
+			break;
+		case L'\\':
+		case L':':
+		case L'/':
+			//just skip
+			break;
+		default:
+			dest.push_back(*ps);
 		};
 		++ps;
 	}
+	result.first.swap(dest);
 	return result;
 }
 
