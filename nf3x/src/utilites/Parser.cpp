@@ -27,13 +27,13 @@ namespace re {	//регул€рные выражени€
 		, nf::QK_INSERT_SHORTCUT_IMPLICIT	
 		, nf::QK_SEARCH_FILE
 		, nf::QK_SEARCH_DIRECTORIES_AND_FILES
+		, nf::QK_DELETE_CATALOG
 		, nf::QK_DELETE_SHORTCUT_IMPLICIT	
 		, nf::QK_INSERT_SHORTCUT
 		, nf::QK_INSERT_SHORTCUT_TEMPORARY
 		, nf::QK_INSERT_BOTH_TEMPORARY
 		, nf::QK_INSERT_BOTH
 		, nf::QK_DELETE_SHORTCUT
-		, nf::QK_DELETE_CATALOG
 		, nf::QK_OPEN_NETWORK
 		, nf::QK_OPEN_PANEL
 		, nf::QK_OPEN_BY_PATH
@@ -46,16 +46,16 @@ namespace re {	//регул€рные выражени€
 		, L"()([\\*\\?\\w\\d_\\.@#\\(\\)].*)"
 		, L"(:)([^:\\+].+?/)$" //QK_INSERT_CATALOG
 		, L"(\\+)((?:.+\\/)?)$"
-		, L"(:)((?:.+\\/)?)$"
+		, L"(:)((?:.+\\/)?)$" 
 		, L"(\\-\\-f\\s+)(.*)"
 		, L"(\\-\\-df\\s+)(.*)"
-		, L"(\\-)((?:.+\\/)?)$"
+		, L"(\\-)(.*\\/\\s*)" //QK_DELETE_CATALOG
+		, L"(\\-)((?:.+\\/)?)$" //QK_DELETE_SHORTCUT_IMPLICIT
 		, L"(:)([^:\\+].*)"
 		, L"(\\+)([^:\\+].*)"
 		, L"(:\\+)(.*)"	//QK_INSERT_BOTH_TEMPORARY
 		, L"(::)(.*)"
-		, L"(\\-)(.*[^\\/]\\s*)"
-		, L"(\\-)(.*\\/\\s*)"
+		, L"(\\-)(.*[^\\/]\\s*)" //QK_DELETE_SHORTCUT
 		, L"(\\\\)(.*)"
 		, L"(\\s*)()$"
 		, L"(~)(.*)"

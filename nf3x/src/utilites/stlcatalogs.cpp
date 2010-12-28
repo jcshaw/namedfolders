@@ -31,7 +31,9 @@ CCatalog::CCatalog()
 CCatalog::CCatalog(tstring SubCatalog, CCatalog const *pParent, bool bCreateIfNotExists) {
 	m_CatalogPath = get_combined_path(SubCatalog.c_str(), pParent);
 	tstring regkey = GetCatalogRegkey();
-	if (bCreateIfNotExists) nf::CRegistry(HKEY_CURRENT_USER, regkey.c_str());
+	if (bCreateIfNotExists) {
+		nf::CRegistry(HKEY_CURRENT_USER, regkey.c_str());
+	}
 	m_key = basic_class(HKEY_CURRENT_USER, regkey, KEY_ALL_ACCESS);		
 }
 
@@ -48,21 +50,32 @@ CCatalog::CCatalog(sc::catalogs_sequence_item &c, CCatalog const *pParent) {
 	m_key = basic_class(HKEY_CURRENT_USER, GetCatalogRegkey(), KEY_ALL_ACCESS);		
 }
 
-tstring CCatalog::GetCatalogRegkey() const
-{	//получить ключ реестра соответствующий каталогу
+tstring CCatalog::get_catalog_regkey(tstring key) const {
+	//получить ключ реестра соответствующий каталогу
 	//алгоритм: если каталог равер "/" или пустой то в качестве ключа принимаем ключ реестра плагина
 	//иначе: (добавляем (если его нет) первым символом "/"), заменяем все "/" на "catalogs\", затем добавляем к ключу реестра плагина
-	tstring key = m_CatalogPath;
 	if ((key != SLASH_CATS) && (! key.empty())) {
 		if (key[0] != SLASH_CATS_CHAR) key = SLASH_CATS_CHAR + key;
 
 		//заменяем "/" на "catalogs\"
 		key = Utils::ReplaceStringAll(key, SLASH_CATS, GetKeyName(REG_B_SUB_CATALOGS_B));
-		
+
 		if (key.size() > 1 && *key.begin() == SLASH_DIRS_CHAR) key.erase(key.begin());	//удаляем первый /
 		return Utils::CombinePath(get_far_reg_key(), key, SLASH_DIRS);
 	}
 	return get_far_reg_key();
+}
+
+bool nf::sc::CCatalog::IsSubcatalogExist(tstring const& subCatalog) {
+	tstring catalog_path = get_combined_path(subCatalog.c_str(), this);
+	tstring regkey = get_catalog_regkey(catalog_path);
+
+	HKEY hkey;
+	return ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER
+		, regkey.c_str()
+		, 0
+		, KEY_READ
+		, &hkey);
 }
 
 bool CCatalog::SetShortcut(tstring const& Name, tstring const& Value, bool bTemporary) {	
@@ -128,3 +141,27 @@ wchar_t const* CCatalog::GetKeyName(tregs_enum Index) {
 	static wchar_t const* regs[] = {L"keys", L"tempkeys", L"Catalogs", L"\\Catalogs\\"};
 	return regs[static_cast<int>(Index)];
 };
+
+namespace {
+	bool check_if_catalog_exists(nf::sc::CCatalog &parent, std::list<tstring>& paths) {
+		if (paths.empty()) return false;
+		tstring root = paths.front();
+		paths.pop_front();
+		if (! parent.IsSubcatalogExist(root)) {
+			return false;
+		}
+		if (paths.empty()) return true;
+		return check_if_catalog_exists(nf::sc::CCatalog(root, &parent), paths);
+	}
+}
+
+
+bool nf::sc::CCatalog::IsCatalogExist(tstring const& pathCatalog) {
+	tstring s = Utils::RemoveTrailingChars(pathCatalog, SLASH_CATS_CHAR);
+	Utils::RemoveLeadingCharsOnPlace(s, SLASH_CATS_CHAR);
+
+	std::list<tstring> list;
+	Utils::SplitStringByRegex(s, list, SLASH_CATS);
+
+	return check_if_catalog_exists(nf::sc::CCatalog(), list);
+}

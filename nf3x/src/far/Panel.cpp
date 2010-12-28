@@ -171,7 +171,9 @@ int CPanel::SetDirectory(const wchar_t *Dir, int OpMode)
 		return go_to_up_folder(OpMode);
 	} else {
 		pu.SetCursorOnItem(m_CurrentCatalog, FG_CATALOGS);
-		m_CurrentCatalog = m_CurrentCatalog + tstring(SLASH_CATS) + tstring(sdir);
+		if (sdir != SLASH_CATS) { //bug #39
+			m_CurrentCatalog = m_CurrentCatalog + tstring(SLASH_CATS) + tstring(sdir);
+		}
 	}
 
 	pu.UpdateActivePanel();

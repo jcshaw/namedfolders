@@ -48,7 +48,9 @@ public:
 	inline tstring const& CatalogPath() const {//путь к каталогу относительно корневого каталога	
 		return m_CatalogPath;
 	}
-	tstring GetCatalogRegkey() const;
+	inline tstring GetCatalogRegkey() const {
+		return get_catalog_regkey(m_CatalogPath);
+	}
 	inline size_t GetNumberSubcatalogs() const {
 		if (! nf::Registry::IsSubkeyExist(m_key.get_key_handle(), GetKeyName(REG_SUB_CATALOGS))) return 0;
 
@@ -79,14 +81,18 @@ public:
 			return m_key.create_sub_key(subkey);
 		}
 	}
+	bool IsSubcatalogExist(tstring const& subCatalog);
 public: 
 	bool SetShortcut(tstring const& Name, tstring const& Value, bool bTemporary);
 	bool InsertSubcatalog(tstring const& Name); //добавить подкаталог
 	bool DeleteShortcut(tstring const& Name, bool bTemporary);
 	bool DeleteSubcatalog(tstring const& Name);
 	bool GetShortcutInfo(tstring const& AnsiName, bool bTemporary, tstring &Value);
+public:
+	static bool IsCatalogExist(tstring const& pathCatalog);
 private: 
 	tstring get_combined_path(wchar_t const* catalog, CCatalog const *parent = 0); //получить полный путь к каталогу относительно корневого пути
+	tstring get_catalog_regkey(tstring catalogName) const;
 	inline static tstring const& get_far_reg_key() { 
 		return nf::CSettings::GetInstance().get_NamedFolders_reg_key();
 	}
