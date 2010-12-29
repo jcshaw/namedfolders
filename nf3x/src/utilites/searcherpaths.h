@@ -21,13 +21,21 @@ namespace Search {
 	//engine is able to convert mask to appropriate regexp and check name matching using this regexp
 	//if regexp failed then system search functions are used.
 	struct CSearchEngine {
-		explicit CSearchEngine(twhat_to_search_t WhatToSearch) :  m_WhatToSearch(WhatToSearch) {}
+		explicit CSearchEngine(twhat_to_search_t WhatToSearch
+			, bool bAutoConvertNamesToMetachars = true // true: c->*c* according asterix mode;  false: c->c
+			, bool bAddAllFollowingPathsToResuts = true // c:\a\b\c  true: c:\a and c\a\b will be added to results; false: won't be added.
+		) :  m_WhatToSearch(WhatToSearch)
+		, AutoConvertNamesToMetachars(bAutoConvertNamesToMetachars)
+		, AddAllFollowingPathsToResuts(bAddAllFollowingPathsToResuts)
+		{}
 	//выполнить поиск поддиректории по заданному шаблону имени директории
 		void SearchItems(tstring const& RootDir, tstring const& Name, nf::tlist_strings &list, twhat_to_search_t whatToSearch) const;
 		inline void SearchItems(tstring const& rootDir, tstring const& srcName, nf::tlist_strings &destList) const {
 			SearchItems(rootDir, srcName, destList, m_WhatToSearch);
 		}
 		void SearchBySystemFunctions(tstring const& RootDir, tstring const& Name, nf::tlist_strings &list, twhat_to_search_t whatToSearch) const;
+		const bool AutoConvertNamesToMetachars;
+		const bool AddAllFollowingPathsToResuts;
 	private:
 		twhat_to_search_t m_WhatToSearch;
 	};

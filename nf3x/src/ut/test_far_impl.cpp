@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "test_far_impl.h"
 
 #include <boost/regex.hpp>
 #include <cassert>

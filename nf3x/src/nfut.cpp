@@ -5,24 +5,26 @@
 
 #include "CommandPatternsTest.h"
 #include "ParserTest.h"
-#include "SearcherPathsTest.h"
 #include "UtilsTest.h"
 
 #include <boost/test/unit_test.hpp>
 using boost::unit_test::test_suite;
 
 struct PluginStartupInfo g_PluginInfo; //emulation
+struct FarStandardFunctions g_FSF; //emulation
 //////////////////////////////////////////////////////////////////////////
 test_suite*
 init_unit_test_suite( int, char* [] ) {
 	test_suite* test= BOOST_TEST_SUITE( "NF" );
 
-	test->add( BOOST_TEST_CASE( &nf::ut::test_GetCanonicalCatalogName));
-	test->add( BOOST_TEST_CASE( &nf::ut::test_ExpandCatalogPath));
-	test->add( BOOST_TEST_CASE( &nf::ut::test_PrepareMovingShortcut));
+	test->add( BOOST_TEST_CASE( &nf::ut::test_replace_sequence_chars));
 	
-	test->add( BOOST_TEST_CASE( &nf::ut::test_DetailedCommand ));
-	test->add( BOOST_TEST_CASE( &nf::ut::test_TransformCommand ));
+	//test->add( BOOST_TEST_CASE( &nf::ut::test_GetCanonicalCatalogName));
+	//test->add( BOOST_TEST_CASE( &nf::ut::test_ExpandCatalogPath));
+	//test->add( BOOST_TEST_CASE( &nf::ut::test_PrepareMovingShortcut));
+	
+	//test->add( BOOST_TEST_CASE( &nf::ut::test_DetailedCommand ));
+	//test->add( BOOST_TEST_CASE( &nf::ut::test_TransformCommand ));
 
 	test->add( BOOST_TEST_CASE( &nf::ut::test_ImplicitCommands));
 	test->add( BOOST_TEST_CASE( &nf::ut::test_ExtractPrefix));

@@ -357,10 +357,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ut\SearcherPathsTest.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\utilites\settings.cpp"
 				>
 			</File>
@@ -432,10 +428,6 @@
 			</File>
 			<File
 				RelativePath=".\ut\ParserTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ut\SearcherPathsTest.h"
 				>
 			</File>
 			<File

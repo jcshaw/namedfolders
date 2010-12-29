@@ -5,5 +5,5 @@
 #include <shlwapi.h>
 
 namespace nf {
-int FarCmpName(const char *Pattern, const char *String, int SkipPath);
+int FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath);
 }

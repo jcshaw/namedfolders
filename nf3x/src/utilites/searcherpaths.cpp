@@ -216,13 +216,21 @@ bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir,
 //Команда far... приведет к лишней точке и ненужной маске = ".*". Точку убираем
 	if (name == L".") name = L"";
 //Команда cd:far\\\\\\\\\\ приводит к пустому name и level="1". Учитываем текущую директорию
-	if (! level.empty()) {
-		if (level[0] == CH_SEARCH_FORWARD) {
+	if (! level.empty() && searchPolice.AddAllFollowingPathsToResuts) {
+		if (level[0] == CH_SEARCH_FORWARD || level[0] == CH_SEARCH_FORWARD_UNLIMITED) {
 			variants.push_back(RootDir);
 		}
 	}
 
-	if (! name.empty()) name = Parser::ConvertToMask(name);
+	if (! name.empty()) {
+		if (searchPolice.AutoConvertNamesToMetachars) {
+			name = Parser::ConvertToMask(name);
+		}
+	} else {
+		if (level[0] == CH_SEARCH_FORWARD || level[0] == CH_SEARCH_FORWARD_UNLIMITED) {
+			name = L"*"; //противоречие: cd:nf\** и cd:nf\..*
+		}
+	}
 
 	Private::search_multisubdir(RootDir, name, 0, level, searchPolice, variants);
 
@@ -235,7 +243,6 @@ bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir,
 		BOOST_FOREACH(tstring const& dir, variants) {
 			SearchByPattern(next_pattern, dir, searchPolice, dest);
 		}
-		//if name of current directory is matched to pattern, include this directory to results
 	}
 	return true;
 }

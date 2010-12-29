@@ -226,9 +226,7 @@ namespace {
 		, nf::twhat_to_search_t WhatToSearch
 		, tlist_pairs_strings &DestList) {
 		tstring local_path = LocalPath0;		
-		if (! local_path.empty()) { //remove only one and only one leading slash
-			if (*local_path.begin() == L'\\') local_path.erase(local_path.begin());
-		}
+		//::Utils::RemoveSingleLeadingCharOnPlace(local_path, SLASH_DIRS_CHAR);
 		if (SrcParsed.bValueEnabled) {
 			nf::tlist_strings list;
 			switch (SrcParsed.ValueType) {

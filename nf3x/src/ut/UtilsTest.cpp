@@ -3,6 +3,7 @@
 
 #include "strings_utils.h"
 #include <boost/test/unit_test.hpp>
+#include <iostream>
 #include "catalog_names.h"
 
 using boost::unit_test::test_suite;
@@ -79,6 +80,38 @@ void nf::ut::test_GetCanonicalCatalogName() {
 	for (unsigned int i = 0; i < count_tests; ++i) {
 		tstring dest = Utils::GetCanonicalCatalogName(tests[i][0]);
 		BOOST_CHECK(dest == tests[i][1]); 
+	}
+}
+
+
+void nf::ut::test_replace_sequence_chars() {
+	wchar_t const* tests[][2] = {	
+		{L"..a..b..", L"..a..b.."}
+		,{L"\\a\\b\\", L"\\a\\b\\"}
+		,{L"\\*\\\\*", L"\\*\\*"}
+		,{L"...\\\\\\...", L"..\\.."}
+		,{L"\\", L"\\"}
+		,{L"\\\\", L"\\"}
+		,{L"\\\\\\", L"\\"}
+		,{L"\\\\\\\\", L"\\"}
+		,{L".", L"."}
+		,{L"..", L".."}
+		,{L"...", L".."}
+		,{L"....", L".."}
+		,{L"cd:far\\\\\\\\\\\\*", L"cd:far\\*"} 
+		,{L"cd:far........", L"cd:far.."}
+
+	};
+	unsigned int const count_tests = sizeof(tests) / sizeof(wchar_t const*[2]);
+
+	for (unsigned int i = 0; i < count_tests; ++i) {
+		tstring s = Utils::Private::replace_sequence_chars(tests[i][0], L'.', L"..", 2);
+		s = Utils::Private::replace_sequence_chars(s, L'\\', L"\\", 1);
+
+		BOOST_CHECK(s == tests[i][1]); 
+		if (s != tests[i][1]) {
+			std::wcout << i << L": '" << s << L"' != '" << tests[i][1] <<  L"'" <<  std::endl;
+		}
 	}
 
 }

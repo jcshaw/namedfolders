@@ -114,4 +114,9 @@ namespace Utils {
 		return g_FSF.atoi(srcStr.c_str());
 	}
 
+namespace Private {
+	//removes sequence of srcCh with min length minCount by byString;
+	tstring replace_sequence_chars(tstring const& srcStr, wchar_t srcCh, tstring const& byString, unsigned int minCount);
+}
+
 }//Utils
