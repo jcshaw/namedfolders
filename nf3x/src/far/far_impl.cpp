@@ -202,7 +202,9 @@ bool nf::SelectAndOpenPathOnPanel(HANDLE hPlugin, tlist_pairs_strings const& lis
 	if (! nf::Menu::SelectPath(paths, dest_path)) return false;
 
 	tstring dest_filename;
-	if (! find_path_and_filename(hPlugin, dest_path, whatToSearch, L"", dest_path, dest_filename)) return false;
+	if (find_path_and_filename(hPlugin, dest_path, whatToSearch, L"", dest_path, dest_filename) != nf::ID_PATH_SELECTED) {
+		return false;
+	}
 	::open_path_and_close_plugin(CPanelInfoWrap(hPlugin), false, bActivePanel, dest_path, dest_filename);
 	return true;
 }
