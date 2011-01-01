@@ -167,7 +167,7 @@ int CPanel::SetDirectory(const wchar_t *Dir, int OpMode)
 	CPanelUpdater pu(this, 0, OpMode);
 	tstring sdir = Utils::ReplaceStringAll(Dir, SLASH_DIRS, SLASH_CATS);
 
-	if (tstring(LEVEL_UP_TWO_POINTS) == sdir) {
+	if (tstring(LEVEL_UP_TWO_POINTS) == sdir || sdir == SLASH_CATS) {
 		return go_to_up_folder(OpMode);
 	} else {
 		pu.SetCursorOnItem(m_CurrentCatalog, FG_CATALOGS);
@@ -191,8 +191,9 @@ int CPanel::ProcessKey(int Key, unsigned int ControlState) {
 	case VK_LBUTTON: //open
 		return OpenSelectedItem(this, ControlState, pi);
 	case VK_PRIOR:	//go to up level - Ctrp + PgUp = BACKSPACE 
-		if (PKF_CONTROL == ControlState) 
+		if (PKF_CONTROL == ControlState) { 
 			return go_to_up_folder(0);
+		}
 		return FALSE;
 	case VK_DELETE:  //delete
 		if (PKF_SHIFT != ControlState) return FALSE; 
@@ -450,6 +451,7 @@ int CPanel::go_to_up_folder(int OpMode) {
 		}
 
 		CPanelUpdater pu(this, 0, OpMode);
+		pu.UpdateActivePanel();
 		pu.SetCursorOnItem(CurrentCatalogName, FG_CATALOGS);
 		pu.UpdateActivePanel();
 

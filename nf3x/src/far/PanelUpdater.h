@@ -31,9 +31,12 @@ public:
 	void UpdateActivePanel(ULONG fgUpdate = FG_ALL)
 	{	//update list of items and update active FAR panel
 		m_pPanel->UpdateListItems(fgUpdate);
-		if (m_OpMode & OPM_FIND)  m_hPlugin.UpdatePanel(true);
-		else {
-			if (m_pif.get()) m_nCurrentItem = (*m_pif)();	//ищем элемент по имени, указанному ранее
+		if (m_OpMode & OPM_FIND) {
+			m_hPlugin.UpdatePanel(true);
+		} else {
+			if (m_pif.get()) {
+				m_nCurrentItem = (*m_pif)();	//ищем элемент по имени, указанному ранее
+			}
 			int nTopPanelItem = (static_cast<LONG>(m_nCurrentItem) > 
 				m_hPlugin.GetPanelInfo(true).PanelRect.bottom)
 				? m_nCurrentItem 

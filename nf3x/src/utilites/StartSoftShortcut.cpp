@@ -310,8 +310,8 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd) {
 		if (! nret) return false;
 
 		assert(static_cast<unsigned int>(sh.bIsTemporary) < paths.size());
-		tstring path = L"\"" + tstring(paths[static_cast<int>(sh.bIsTemporary)]) 
-			+ Utils::CombinePath(sh.catalog, sh.shortcut, SLASH_DIRS) + L"\"";
+		tstring path = L"\"" + Utils::CombinePath(tstring(paths[static_cast<int>(sh.bIsTemporary)])
+			, Utils::CombinePath(sh.catalog, sh.shortcut, SLASH_DIRS), SLASH_DIRS)+ L"\"";
 		if (nret > 0) {	
 			execute_selected_program(path, params); 
 		} else {

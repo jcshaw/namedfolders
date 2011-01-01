@@ -47,22 +47,12 @@ void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring con
 	tstring local_path = Utils::SubstituteSearchMetachars(localPath0); 
 	tstring svalue = Utils::SubstituteSearchMetachars(srcValue);
 
-// 	//since b242 it's possible to use NF-metacharacters in shortcut's values
-// 	//try to detect if any NF/FAR-metacharacters are used 
-// 	bool bmetachars_are_most_probably_used = (Utils::RemoveTrailingChars(svalue, SLASH_DIRS_CHAR) != svalue) 
-// 		|| nf::Parser::ContainsMetachars(svalue)
-// 		//|| ! PathFileExists(svalue.c_str()) //!too dangerous
-// 	;
-// 
-// 	if (bmetachars_are_most_probably_used) { 
 	nf::Search::CSearchEngine ssp(nf::WTS_DIRECTORIES, false, false); //nf::Search::CSearchSystemPolice ssp(false, false);
 	nf::Search::SearchMatched(svalue, ssp, destListPaths);
-// 	} else { 
-// 		destListPaths.push_back(svalue);
-// 	}
+
 	if (! local_path.empty()) {	//учитываем локальный путь относительно каждой найденной директории	
 		nf::tlist_strings list_paths;
-		nf::Search::CSearchEngine ssp(whatToSearch);
+		nf::Search::CSearchEngine ssp(whatToSearch, true, true);
 		BOOST_FOREACH(tstring const& path, destListPaths) {
 			nf::Search::SearchByPattern(local_path.c_str(), path, ssp, list_paths);
 		}

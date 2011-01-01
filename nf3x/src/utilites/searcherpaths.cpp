@@ -216,7 +216,10 @@ bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir,
 //Команда far... приведет к лишней точке и ненужной маске = ".*". Точку убираем
 	if (name == L".") name = L"";
 //Команда cd:far\\\\\\\\\\ приводит к пустому name и level="1". Учитываем текущую директорию
-	if (! level.empty() && searchPolice.AddAllFollowingPathsToResuts) {
+	if (! level.empty() 
+		&& searchPolice.AddAllFollowingPathsToResuts 
+		&& next_pattern == 0 // cd:a\*\* , but not cd:\*\a*\b*, see #7.54
+		&& Parser::ContainsMetachars(name)) {
 		if (level[0] == CH_SEARCH_FORWARD || level[0] == CH_SEARCH_FORWARD_UNLIMITED) {
 			variants.push_back(RootDir);
 		}
