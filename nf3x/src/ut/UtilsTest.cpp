@@ -105,8 +105,8 @@ void nf::ut::test_replace_sequence_chars() {
 	unsigned int const count_tests = sizeof(tests) / sizeof(wchar_t const*[2]);
 
 	for (unsigned int i = 0; i < count_tests; ++i) {
-		tstring s = Utils::Private::replace_sequence_chars(tests[i][0], L'.', L"..", 2);
-		s = Utils::Private::replace_sequence_chars(s, L'\\', L"\\", 1);
+		tstring s = Utils::Private::replace_sequence_chars(tests[i][0], L'.', L"..", 2, 0);
+		s = Utils::Private::replace_sequence_chars(s, L'\\', L"\\", 1, 0);
 
 		BOOST_CHECK(s == tests[i][1]); 
 		if (s != tests[i][1]) {

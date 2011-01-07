@@ -115,7 +115,7 @@ namespace {
 		if (! ::PathIsDirectory(dest_path.c_str())) {
 			//open directory where file is located; currently, we lost filename.
 			//!TODO: it world be perfect to position on this file
-			Utils::DividePathFilename(dest_path, destPath, fnDest, SLASH_DIRS_CHAR, false);
+			Utils::DividePathFilename(dest_path, dest_path, fnDest, SLASH_DIRS_CHAR, false);
 			Utils::RemoveLeadingCharsOnPlace(fnDest, SLASH_DIRS_CHAR);
 		} else {
 			fnDest = L"";

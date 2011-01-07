@@ -6,6 +6,8 @@
 */
 #include "StdAfx.h"
 #include "strings_utils.h"
+
+#include "Parser.h"
 #include <vector>
 #include <cassert>
 #include <boost/bind.hpp>
@@ -173,12 +175,15 @@ tstring Utils::CombinePath(tstring const& Path1, tstring const& Path2, wchar_t c
 namespace Utils {
 namespace Private {
 	//Заменяет в строке srcStr последовательность символов srcCh длиной не менее minCount на byString
-	tstring replace_sequence_chars(tstring const& srcStr, wchar_t srcCh, tstring const& byString, unsigned int minCount) {
+	tstring replace_sequence_chars(tstring const& srcStr, wchar_t srcCh, tstring const& byString, unsigned int minCount, unsigned int startFrom) {
 		tstring buf;
 		tstring dest;
 		dest.reserve(srcStr.size());
 
-		BOOST_FOREACH(wchar_t const& ch, srcStr) {
+		for (unsigned int i = 0; i < startFrom; ++i) dest.push_back(srcStr[i]);
+
+		for (unsigned int i = startFrom; i < srcStr.size(); ++i) {
+			wchar_t const& ch = srcStr[i];
 			if (ch == srcCh) {
 				if (buf.size() < minCount) {
 					buf.push_back(ch);
@@ -204,10 +209,13 @@ tstring Utils::SubstituteSearchMetachars(tstring const& srcPath) {
 
 	bool ballow_short_path_commands = (nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0);
 		//replace sequence of \\\ by single \
+		//	there is exception here: net:\\networkpath and \\networkpath shouldn't be transformed
 		//replace sequence of ... by ..
 	if (! ballow_short_path_commands) {
-		s = Utils::Private::replace_sequence_chars(s, L'.', L"..", 2);
-		s = Utils::Private::replace_sequence_chars(s, L'\\', L"\\", 1);
+		s = Utils::Private::replace_sequence_chars(s, L'.', L"..", 2, 0);
+
+		int first_ch = nf::Parser::GetNetworkPathPrefixLength(s);
+		s = Utils::Private::replace_sequence_chars(s, L'\\', L"\\", 1, first_ch);
 		Utils::RemoveTrailingCharsOnPlace(s, SLASH_DIRS_CHAR);
 	}
 

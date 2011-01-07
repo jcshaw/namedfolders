@@ -163,7 +163,7 @@ namespace {
 		tstring common_folder;	//директория, общая для всех элементов списка
 		while (extract_common_folder(ListShortcuts, common_folder)) {
 			for (unsigned int i = 0; i < Paths.size(); ++i) 
-				Paths[i] += common_folder;
+				Paths[i] = Utils::CombinePath(Paths[i], common_folder, SLASH_DIRS);
 		}
 	}
 	void remove_exceptions(nf::tshortcuts_list& ListShortcuts) {

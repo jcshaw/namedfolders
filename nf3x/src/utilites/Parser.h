@@ -32,6 +32,10 @@ namespace Parser {
 	bool ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &d, tstring &p);
 	bool ParseString(tstring const &source, nf::tparsed_command &cmd);
 
+	//checks if path is network, i.e.: \\path, net:\\path, xyzxyz:\\path
+	//returns 0 if path is not network and index of first character that belongs to "path"
+	unsigned int GetNetworkPathPrefixLength(tstring const &source);
+
 	tstring ExtractPrefix(tstring const &CommandString);
 };
 };

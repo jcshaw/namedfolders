@@ -239,8 +239,18 @@ tstring nf::Parser::ConvertMaskToReqex(tstring const& srcName) {
 	static const nf::tregex esc(L"[\\^\\.\\$\\|\\(\\)\\+\\/\\\\]"); //dont' escape \\[\\]\\*\\? 
 	static const tstring rep(L"\\\\\\1"); //see http://stackoverflow.com/questions/1252992/how-to-escape-a-string-for-use-in-boost-regex
 
-	tstring smask = boost::regex_replace(srcName, esc, rep, boost::match_default | boost::format_sed);
+	tstring smask = NF_BOOST_REGEX_LIB::regex_replace(srcName, esc, rep, boost::match_default | boost::format_sed);
 
 	smask = Utils::ReplaceStringAll(smask, L"*", L".*");
 	return Utils::ReplaceStringAll(smask, L"?", L".?");
+}
+
+
+unsigned int nf::Parser::GetNetworkPathPrefixLength(tstring const &source) {
+	static const nf::tregex expression(L"(\\\\\\\\|[^\\\\]+:\\\\\\\\).*");
+	nf::tsmatch what;	
+	if (NF_BOOST_REGEX_LIB::regex_match(source, what, expression)) {
+		return static_cast<unsigned int>(tstring(what[1]).size());
+	}
+	return 0;
 }
