@@ -75,6 +75,7 @@ enum {
 	,CONFIRM_OVERRIDE_SHORTCUT	//The following value of shortcut will be overrided
 	,CONFIRM_INSERT_SHORTCUT //The following shortcut will be created
 	,CONFIRM_DELETE	//The following item will be deleted
+	,CONFIRM_INSERT_CATALOG
 
 	,DLG_MOVE_CATALOG_TITLE	//Move catalog to
 	,DLG_COPY_CATALOG_TITLE	//Copy catalog to

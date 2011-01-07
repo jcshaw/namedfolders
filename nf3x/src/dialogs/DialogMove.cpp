@@ -10,6 +10,13 @@
 #include "Kernel.h"
 #include "strings_utils.h"
 
+#include "stlcatalogs.h"
+
+//!TODO: find appropriate place for this function
+bool IsNamedFoldersCatalogExists(tstring const& catalogName) {
+	return nf::sc::CCatalog::IsCatalogExist(catalogName);
+}
+
 
 using namespace nf;
 CDialogMove::CDialogMove(wchar_t const* ItemName
@@ -37,7 +44,7 @@ UINT CDialogMove::ShowModal()
 	//вызываем диалог редактированик имени каталога
 	int nChoosedItem;
 	
-	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT, (m_DestinationCatalog + SLASH_CATS).c_str());
+	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT, m_DestinationCatalog.c_str());
 	GetDialogItemsRef()[ID_EDIT].Focus = 1;
 
 	if (Execute(nChoosedItem))

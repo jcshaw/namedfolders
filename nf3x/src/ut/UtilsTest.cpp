@@ -11,7 +11,8 @@ using boost::unit_test::test_suite;
 
 void nf::ut::test_ExpandCatalogPath() {
 	wchar_t const* tests[][3] = {	
-		{L"/a/b", L"/a/b/../..", L""}
+		{L"/a/b", L"/a/c/d", L"/a/b/c/d"}
+		, {L"/a/b", L"/a/b/../..", L""}
 		//, {L"a/b", L"a/b/../..", L""} //!TODO
 		, {L"a/b", L"..", L"/b"}
 		, {L"a/b/c", L"..", L"/a/c"}
@@ -34,6 +35,9 @@ void nf::ut::test_ExpandCatalogPath() {
 		);
 
 		BOOST_CHECK(dest == tests[i][2]); 
+		if (dest != tests[i][2]) {
+			std::wcout << dest << L" != " <<  tests[i][2] << std::endl;
+		}
 	}
 }
 
@@ -80,6 +84,9 @@ void nf::ut::test_GetCanonicalCatalogName() {
 	for (unsigned int i = 0; i < count_tests; ++i) {
 		tstring dest = Utils::GetCanonicalCatalogName(tests[i][0]);
 		BOOST_CHECK(dest == tests[i][1]); 
+		if (dest != tests[i][1]) {
+			std::wcout << dest << L" != " <<  tests[i][1] << std::endl;
+		}
 	}
 }
 

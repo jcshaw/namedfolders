@@ -86,6 +86,7 @@ bool nf::Shell::Private::remove_catalog(tstring const& srcCatalog, tstring const
 	if (! Utils::ExpandCatalogPath(srcCatalog, *pTargetCatalog, target_catalog, false)) return false;
 
 	tstring target_key = sc::CCatalog(target_catalog).GetCatalogRegkey();
+	if (target_key == srcCatalog) return true; //nothing to do
 
 	if (bDeleteSource) {
 		return rr.Move(src_key, target_key);

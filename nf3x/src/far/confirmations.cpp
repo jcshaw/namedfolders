@@ -111,21 +111,20 @@ nf::Confirmations::Private::ask_for_delete_general(tstring const& srcTitle, int 
 }
 
 UINT nf::Confirmations::AskForCreateCatalog(HANDLE hPlugin, nf::tcatalog_info const&cat) {
-// 	if (CSettings::GetInstance().GetValue(nf::ST_CONFIRM_IMPLICIT_CREATION) == 0) return 1;	//confirmation is not required
-// 
-// 	const wchar_t * Msg[4];
-// 	Msg[0] = GetMsg(lg::MSG_CREATE_SHORTCUT);
-// 	Msg[1] = GetMsg(lg::CONFIRM_INSERT_SHORTCUT);   
-// 	Msg[2] = cmd.shortcut.c_str();
-// 	Msg[3] = srcValue.c_str();
-// 
-// 	if (g_PluginInfo.Message(g_PluginInfo.ModuleNumber
-// 		, FMSG_MB_OKCANCEL
-// 		, 0
-// 		, Msg
-// 		, sizeof(Msg)/sizeof(Msg[0])
-// 		, 3) == 0) return 2;
-// 	else return 0;
+	if (CSettings::GetInstance().GetValue(nf::ST_CONFIRM_IMPLICIT_CREATION) == 0) return 1;	//confirmation is not required
+
+	const wchar_t * Msg[3];
+	Msg[0] = GetMsg(lg::DLG_CREATE_CATALOG_TITLE);
+	Msg[1] = GetMsg(lg::CONFIRM_INSERT_CATALOG);   
+	Msg[2] = cat.c_str();
+
+	if (g_PluginInfo.Message(g_PluginInfo.ModuleNumber
+		, FMSG_MB_OKCANCEL
+		, 0
+		, Msg
+		, sizeof(Msg)/sizeof(Msg[0])
+		, 3) == 0) return 2;
+	else return 0;
 	return 2;
 }
 

@@ -14,6 +14,8 @@ using namespace Utils;
 
 extern struct FarStandardFunctions g_FSF;
 
+extern bool IsNamedFoldersCatalogExists(tstring const& catalogName);
+
 tstring Utils::ExtractCatalogName(tstring const& srcPath) {
 	tstring path;
 	tstring filename;
@@ -106,6 +108,27 @@ bool Utils::ExpandCatalogPath(tstring const &srcCatalog
 	nf::tlist_strings target_tokens;
 	Utils::SplitStringByRegex(Utils::TrimChar(targetCatalog, SLASH_CATS_CHAR).c_str(), target_tokens, SLASH_CATS);
 
+	if (target_tokens.size() != 0) {
+	//пусть у нас есть каталоги 
+	// /1/10/100
+	// /1/20/200
+	// мы находимся в каталоге 1/20 и даем команду переместить его в 10/100
+	// в итоге у нас должен создасться каталог 1/10/100/20/200
+		tstring parent_sibling;
+		tstring name;
+		Utils::DividePathFilename(srcCatalog, parent_sibling, name, SLASH_CATS_CHAR, false);
+
+		BOOST_FOREACH(tstring const& token, target_tokens) {
+			tstring sibling_catalog = Utils::CombinePath(parent_sibling, token, SLASH_CATS);
+			
+			if (::IsNamedFoldersCatalogExists(sibling_catalog)) {
+				destCatalog = Utils::CombinePath(Utils::CombinePath(parent_sibling, token, SLASH_CATS)
+					, ExtractCatalogName(srcCatalog), SLASH_CATS);
+			}
+			parent_sibling = Utils::CombinePath(parent_sibling, token, SLASH_CATS);
+		}
+		if (! destCatalog.empty()) return true;
+	} 
 	destCatalog = Private::mix_paths(src_tokens, target_tokens, SLASH_CATS_CHAR, bForMovingShortcuts);
 	return true;
 }

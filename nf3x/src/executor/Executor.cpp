@@ -53,11 +53,15 @@ namespace {
 //!TODO: select exist catalog OR create new one
 		nf::tcatalog_info cat;
 		if (! nf::Selectors::GetCatalog(plugin, cmd, cat)) {
-// 				if (Confirmations::AskForCreateCatalog(plugin, cmd.catalog)) {
-// 					nf::Commands::AddCatalog(plugin, cmd.catalog);
-// 				} else return false;
-			return false;
+			if (Confirmations::AskForCreateCatalog(plugin, cmd.catalog)) {
+				nf::Commands::AddCatalog(plugin, cmd.catalog);
+				if (! nf::Selectors::GetCatalog(plugin, cmd, cat)) { //каталог не существует и создать его не удалось.. 
+					return false; 
+				}
+			} else return false;
+			//return false;
 		}
+
 		//add new shortcut to selected catalog
 		if (bInsertBoth) {
  			return nf::Commands::AddShortcutForBothPanels(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
@@ -157,6 +161,7 @@ bool nf::ExecuteCommand(nf::tparsed_command &cmd) {
 			)
 			, ((nf::QK_INSERT_SHORTCUT_TEMPORARY == cmd.kind)   //temporary
 				|| (nf::QK_INSERT_BOTH_TEMPORARY == cmd.kind)
+				|| (nf::QK_INSERT_BOTH_TEMPORARY_IMPLICIT == cmd.kind)
 				|| (nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT == cmd.kind))
 			, ((nf::QK_INSERT_BOTH == cmd.kind) 
 				|| (nf::QK_INSERT_BOTH_IMPLICIT == cmd.kind) 
@@ -169,8 +174,15 @@ bool nf::ExecuteCommand(nf::tparsed_command &cmd) {
 		return delete_shortcut(cmd, plugin, false);
 	case nf::QK_DELETE_CATALOG:	//cd:-
 		return delete_catalog(plugin, cmd);
-	case nf::QK_INSERT_CATALOG: //cd::catalog/
-		return insert_catalog(plugin, cmd);
+	case nf::QK_INSERT_CATALOG: //cd::catalog/ 
+		//The command has double meaning:
+		//1) create new catalog if catalog doesn't exist
+		//2) create shortcut implicitly if catalog exists
+		if (! nf::sc::CCatalog::IsCatalogExist(cmd.catalog)) {
+			return insert_catalog(plugin, cmd);
+		} else {
+			return insert_shortcut(cmd, plugin, true, false, false);
+		}
 	case nf::QK_START_SOFT_SHORTCUT:
 		return Start::OpenSoftShortcut(plugin, cmd);
 	default:;

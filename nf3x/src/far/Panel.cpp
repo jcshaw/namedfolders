@@ -209,7 +209,9 @@ int CPanel::ProcessKey(int Key, unsigned int ControlState) {
 		if (pi.SelectedItemsNumber) CopyItems(this, pi);	// исключаем ".."
 		return TRUE;
 	case VK_F6: //move
-		if (pi.SelectedItemsNumber) MoveItems(this, pi, false);	// исключаем ".."
+		if (pi.SelectedItemsNumber) {
+			MoveItems(this, pi, (PKF_SHIFT != ControlState) != 0 ? ID_CM_MOVE : ID_CM_RENAME);	// исключаем ".."
+		}
 		return TRUE;
 	case VK_F4: //edit/create shortcut name
 		if (PKF_SHIFT == ControlState) {

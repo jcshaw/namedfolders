@@ -26,8 +26,11 @@ namespace nf {
 	namespace Panel {
 		tstring get_inactive_panel_current_catalog(nf::Panel::CPanel *pPanel) {
 			tstring s = pPanel->get_hPlugin().GetPanelCurDir(false);
-			if (s.find_first_of(L":") != tstring::npos) return L"";
-			else return s;
+			if (s.find_first_of(L":") != tstring::npos) {
+				return SLASH_CATS;
+			} else {
+				return s.empty() ? SLASH_CATS : s;
+			}
 		}
 		void get_selected_shortcut_info(CPanel *pPanel, nf::tshortcut_info &destSh) {
 			PanelInfo const &pi = pPanel->get_hPlugin().GetPanelInfo(true);
@@ -43,7 +46,7 @@ namespace nf {
 	}
 }
 
-BOOL nf::Panel::MoveItems(CPanel* pPanel, PanelInfo const &pi, bool bCopy) {
+BOOL nf::Panel::MoveItems(CPanel* pPanel, PanelInfo const &pi, tcopy_mode copyMode) {
 	bool bSeveralCatalogs = 1 != pi.SelectedItemsNumber;
 	bool bFirstItemIsCatalog = IsSelectedItemIsCatalog(pPanel, pi, 0);
 	tstring name;
@@ -56,14 +59,16 @@ BOOL nf::Panel::MoveItems(CPanel* pPanel, PanelInfo const &pi, bool bCopy) {
 	};
 
 	//куда копируем? проверяем, не открыта ли директория на другой панели...
-	tstring default_path = get_inactive_panel_current_catalog(pPanel);
+	tstring default_path = copyMode == ID_CM_RENAME
+		? name
+		: Utils::CombinePath(get_inactive_panel_current_catalog(pPanel), Utils::ExtractCatalogName(name), SLASH_CATS);
 	bool bPluginOpenedOnInactivePanel = ! default_path.empty();
 
 	nf::CDialogMove dlg(name.c_str()
 		, default_path
 		, bFirstItemIsCatalog
 		, bSeveralCatalogs
-		, bCopy);
+		, copyMode == ID_CM_COPY);
 	if (dlg.ShowModal()) {
 		CPanelUpdater pu(pPanel, pi.CurrentItem);
 		bool bSingleItem = pi.SelectedItemsNumber == 1;
@@ -81,23 +86,20 @@ BOOL nf::Panel::MoveItems(CPanel* pPanel, PanelInfo const &pi, bool bCopy) {
 			if (IsSelectedItemIsCatalog(pPanel, pi, i)) {
 				tstring new_catalog_name;
 				tstring catalog_name = GetSelectedCatalog(pPanel, pi, i); 
-				if (bCopy) {
+				if (copyMode == ID_CM_COPY) {
 					bRet |= Shell::CopyCatalog(catalog_name.c_str(), new_path);
 				} else {
 					bRet |= Shell::MoveCatalog(catalog_name.c_str(), new_path);
 				}
 				if (bSingleItem) {
-					//если был переименован только один элемент и каталог его не изменился, то
-					//позиционируем курсор на этом элементе.
-					if (catalog_name == new_path) 
-						pu.SetCursorOnItem(new_catalog_name, FG_CATALOGS);
-					//!!!! сравнивать только имена каталогов, не полные пути
+					pu.UpdateActivePanel(); //обновляем список элементов
+					pu.SetCursorOnItem(Utils::ExtractCatalogName(new_path), FG_CATALOGS); //ставим курсор на переименованный элемент
 				}
 			} else {
 				nf::tshortcut_info new_sh;
 				nf::tshortcut_info sh;
 				GetSelectedShortcut(pPanel, pi, sh, i);
-				if (bCopy) { 
+				if (copyMode == ID_CM_COPY) { 
 					bRet |= Shell::CopyShortcut(sh, new_path, new_sh);
 				} else {
 					bRet |= Shell::MoveShortcut(sh, new_path, new_sh);

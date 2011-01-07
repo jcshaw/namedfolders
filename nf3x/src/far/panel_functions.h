@@ -12,11 +12,17 @@
 namespace nf {
 	namespace Panel {
 		class CPanel;
+
+		typedef enum tcopy_mode {
+			ID_CM_COPY
+			, ID_CM_MOVE
+			, ID_CM_RENAME
+		};
 	
 		bool CreateCatalog(CPanel* pPanel, tstring const& ParentCatalog, tstring &CreatedCatalogName);
-		BOOL MoveItems(CPanel* pPanel, PanelInfo const &pi, bool bCopy = false);
+		BOOL MoveItems(CPanel* pPanel, PanelInfo const &pi, tcopy_mode copyMode);
 		inline BOOL CopyItems(CPanel* pPanel, PanelInfo const &pi) { 
-			return MoveItems(pPanel, pi, true); }
+			return MoveItems(pPanel, pi, ID_CM_COPY); }
 		bool EditShortcut(CPanel* pPanel, nf::tshortcut_info const &sh, PanelInfo const &pi);
 		bool InsertShortcut(CPanel* pPanel, PanelInfo const &pi);
 		bool InsertShortcut(CPanel* pPanel, PanelInfo const &Pi, tshortcut_info const &Sh, tstring const &Value);
