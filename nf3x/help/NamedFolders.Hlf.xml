@@ -119,15 +119,29 @@ these commands.
   #cd:catalog/# - open virtual panel and jump to the specified catalog; 
 
 <ss>Execute program from #Start# menu</ss>
-  #cd: soft# - search shortcuts in Start Menu with names matched to "*soft*" and show list of them.
-Press Enter to execute program, Shift-Enter to open program's path in Far, Ctrl-Enter to open
-program's path in Explorer. It's possible to set in the <link section="Settings">settings</link> dialog list of masks for shortcuts that should be skipped.
-You can use parameters: #cd: soft params#
+	See <link section="StartApplication">Execute applications</link>.
 
 <ss>Additional method to execute plugin command</ss>
   It's possible to execute any command through "Command execution dialog".
 </section>
 
+<section title="StartApplications">
+<title>Execute applications</title>
+  #cd: soft# - search shortcuts in Start Menu with names matched to "*soft*" and show list of them.
+Press Enter to execute program, Shift-Enter to open program's path in Far, Ctrl-Enter to open
+program's path in Explorer. It's possible to set in the 
+<link section="Settings">settings</link> dialog list of masks for shortcuts that should be skipped.
+You can use parameters: #cd: soft params#
+
+<ss>Command keys in variants menu</ss>
+ #F11# - display/hide applications, that are matched to ignore masks, 
+specified in <link section="Settings">settings</link>.
+ #Enter# - execute selected application.
+ #Ctrl + Enter# - open application directory in FAR.
+ #Shift+ Enter# - open application directory in Explorer.
+ #F2# - show application names only.
+ #F3# - show catalogs and application names.
+</section>
 
 <section title="Settings">
 <title>Settings</title>

@@ -451,6 +451,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\utilites\PathsFinder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\PathsFinder.h"
+				>
+			</File>
+			<File
 				RelativePath=".\utilites\searcherpaths.cpp"
 				>
 			</File>

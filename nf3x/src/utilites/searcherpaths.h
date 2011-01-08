@@ -1,6 +1,6 @@
 /*
 * Far Named Folders 3.x
-* Copyright (c) 2002-2010 by Victor Derevyanko
+* Copyright (c) 2002-2011 by Victor Derevyanko
 * www: http://code.google.com/p/namedfolders/
 * e-mail: dvpublic0@gmail.com
 */
@@ -29,6 +29,9 @@ namespace Search {
 		, AddAllFollowingPathsToResuts(bAddAllFollowingPathsToResuts)
 		{}
 	//выполнить поиск поддиректории по заданному шаблону имени директории
+		twhat_to_search_t GetWhatToSearch() const {
+			return m_WhatToSearch;
+		}
 		void SearchItems(tstring const& RootDir, tstring const& Name, nf::tlist_strings &list, twhat_to_search_t whatToSearch) const;
 		inline void SearchItems(tstring const& rootDir, tstring const& srcName, nf::tlist_strings &destList) const {
 			SearchItems(rootDir, srcName, destList, m_WhatToSearch);
@@ -51,13 +54,5 @@ namespace Search {
 	//¬ токенах pathXXX могут встречатьс€ метасимволы ?, * или [a,b-z]
 	bool SearchMatched(tstring const& PathPattern, Search::CSearchEngine &searchPolice, nf::tlist_strings& dest);
 
-	namespace Private {
-		wchar_t const* extract_name(wchar_t const* srcPattern, tstring &destName, tstring &destLevel);
-		bool search_multisubdir(tstring const& RootDir, tstring const& Name
-			, unsigned levelIndex
-			, tstring const& level
-			, Search::CSearchEngine &searchPolice
-			, nf::tlist_strings &dest);
-	}
 }
 }

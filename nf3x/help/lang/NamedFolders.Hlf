@@ -2,7 +2,7 @@
 .PluginContents=Named Folders
 @Contents
 $^#Plugin for FAR "Named Folders".#
-$^#Version 3.0 beta, December 2010#
+$^#Version 3.0 RC1, January 2011#
 $^#Copyright (c) 2002-2010 by Victor Derevyanko#
 .
   Program-Plugin #Named Folders# for #Far#.
@@ -129,15 +129,32 @@ these commands.
   #Execute program from #Start# menu#
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-  #cd: soft# - search shortcuts in Start Menu with names matched to "*soft*" and show list of them.
-Press Enter to execute program, Shift-Enter to open program's path in Far, Ctrl-Enter to open
-program's path in Explorer. It's possible to set in the ~settings~@Settings@ dialog list of masks for shortcuts that should be skipped.
-You can use parameters: #cd: soft params#
+	See ~Execute applications~@StartApplication@.
 
   #Additional method to execute plugin command#
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
   It's possible to execute any command through "Command execution dialog".
+
+@StartApplications
+$^#Execute applications#
+
+  #cd: soft# - search shortcuts in Start Menu with names matched to "*soft*" and show list of them.
+Press Enter to execute program, Shift-Enter to open program's path in Far, Ctrl-Enter to open
+program's path in Explorer. It's possible to set in the 
+~settings~@Settings@ dialog list of masks for shortcuts that should be skipped.
+You can use parameters: #cd: soft params#
+
+  #Command keys in variants menu#
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+ #F11# - display/hide applications, that are matched to ignore masks, 
+specified in ~settings~@Settings@.
+ #Enter# - execute selected application.
+ #Ctrl + Enter# - open application directory in FAR.
+ #Shift+ Enter# - open application directory in Explorer.
+ #F2# - show application names only.
+ #F3# - show catalogs and application names.
 
 @Settings
 $^#Settings#

@@ -1,6 +1,6 @@
 /*
 * Far Named Folders 3.x
-* Copyright (c) 2002-2010 by Victor Derevyanko
+* Copyright (c) 2002-2011 by Victor Derevyanko
 * www: http://code.google.com/p/namedfolders/
 * e-mail: dvpublic0@gmail.com
 */
@@ -64,7 +64,7 @@ namespace Menu {
 
 	class CMenuApplications : public CMenu {
 	public:
-		CMenuApplications() : CMenu(L"F11, Ctrl+Enter, Shift+Enter, F2, F3", L""
+		CMenuApplications() : CMenu(L"F11, Ctrl+Enter, Shift+Enter, F2, F3", L"StartApplications"
 			, CMenu::FG_SHOW_SINGLE_VARIANT
 			, nf::ST_SELECT_SOFT_MENU_SHOWCATALOGS_MODE) {}
 		enum {
@@ -92,7 +92,7 @@ namespace Menu {
 
 	class CMenuEnvironmentVariables : public CMenu {
 	public:
-		CMenuEnvironmentVariables() : CMenu(L"F2, F3", L"", 0, nf::ST_SELECT_SH_MENU_MODE_EV) {}
+		CMenuEnvironmentVariables() : CMenu(L"F2, F3", L"MenuSelect", 0, nf::ST_SELECT_SH_MENU_MODE_EV) {}
 		enum {
 			MM_VARIABLE_AND_PATH	
 			, MM_PATH_ONLY 

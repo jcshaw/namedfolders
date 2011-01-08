@@ -9,7 +9,34 @@
 
 
 ----------------------------------------------------------------------------
-Version 3.0.0.248 [RC1]
+Version 3.0.0.249 RC1 [7.01.2011]
+----------------------------------------------------------------------------
+[*] Direct path commands use technology of search by related
+paths (see above). I.e. they support metachars "\**", "..*", "\*", "\..".
+Commands "cd:z:" and "cd:z:\" are executed as "cd:z:\*"
+[-] Command "cd:a/" created catalog. Now, it doesn't create
+catalog but only open exist catalog on NF-panel, see #38
+[+] Implicit commands of creation shortcuts for two directories
+(on both panels) are implemented: "cd:::", "cd::+", "cd:::catalog/",
+"cd::+catalog/", see #38
+[-] Command "cd::a/" didn't create catalog "a" if name of
+catalog contained only single letter, see #38
+[-] Pressing Ctrl+'/' on NF-panel resulted to creation garbage
+catalogs on panel, see #39. Now, Ctrl+'/' opens parent directory and set
+position on "..". Ctrl+PageUp opens parent directory and set position on
+previously selected catalog, see #41.
+[-] Implicit shorcut creation commands allow to specify catalog,
+i.e: cd::catalog1/. If "catalog1" doesn't exists the command will suggest
+to create catalog, not shorcut. So, to create shortcut with implicit name
+in new catalog "catalog1" you should execute command "cd::catalog1/" two
+times.
+[*] Command cd::a/b suggests to create "a", if "a" doesn't
+exist, and the suggests to create shortcut "b". Previously it did nothing
+if "a" didn't exist. See #20.
+[-] A lot of bugs were fixed.
+
+----------------------------------------------------------------------------
+Version 3.0.0.245 beta [25.12.2010]
 ----------------------------------------------------------------------------
 Key changes
 ~~~~~~~~~~~
@@ -59,20 +86,6 @@ directory matched to "path", it will show standard confirmation
 "do you want to go to nearest directory?". Previous version didn't
 show confirmation, they open the directory assigned to shortcut "a".
 You can disable this confirmations in plugin settings.
-[*] Direct path commands use technology of search by related
-paths (see above). I.e. they support metachars "\**", "..*", "\*", "\..". 
-Commands "cd:z:" and "cd:z:\" are executed as "cd:z:\*"
-[-] Command "cd:a/" created catalog. Now, it doesn't create
-catalog but only open exist catalog on NF-panel, see #38
-[+] Implicit commands of creation shortcuts for two
-directories (on both panels) are implemented: "cd:::", "cd::+", 
-"cd:::catalog/", "cd::+catalog/", see #38
-[-] Command "cd::a/" didn't create catalog "a" if name
-of catalog contained only single letter, see #38
-[-] Pressing Ctrl+'/' on NF-panel resulted to creation
-garbage catalogs on panel, see #39. Now, Ctrl+'/' opens parent directory
-and set position on "..". Ctrl+PageUp opens parent directory and set
-position on previously selected catalog, see #41.
 
 Settings
 ~~~~~~~~

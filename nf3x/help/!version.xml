@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <data>
 <RUS>
-	<VERSION>3.0 beta</VERSION>
-	<DATE>Декабрь 2010</DATE>
+	<VERSION>3.0 RC1</VERSION>
+	<DATE>Январь 2011</DATE>
 	<COPYRIGHT>Copyright (c) 2002-2010 by Виктор Деревянко</COPYRIGHT>
 	<AUTHOR>Виктор Деревянко</AUTHOR>
 </RUS>
 <ENG>
-	<VERSION>3.0 beta</VERSION>
-	<DATE>December 2010</DATE> 
+	<VERSION>3.0 RC1</VERSION>
+	<DATE>January 2011</DATE> 
 	<COPYRIGHT>Copyright (c) 2002-2010 by Victor Derevyanko</COPYRIGHT>
 	<AUTHOR>Victor Derevyanko</AUTHOR>
 </ENG>
