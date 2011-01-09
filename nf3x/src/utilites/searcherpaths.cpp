@@ -32,11 +32,20 @@ namespace {
 	}
 }
 
+nf::Search::MaskMatcher::MaskMatcher(tstring const& srcMask) 
+: m_R(NF_BOOST_REGEX_COMPILE(Parser::ConvertMaskToReqex(srcMask)), boost::regex_constants::icase)
+{
+}
+
+bool nf::Search::MaskMatcher::MatchTo(tstring const& fileName) {
+	tsmatch what;
+	return (NF_BOOST_REGEX_LIB::regex_match(fileName, what, m_R));
+}
+
+
 void nf::Search::CSearchEngine::SearchItems(tstring const& rootDir0, tstring const& Name, nf::tlist_strings &destList, twhat_to_search_t whatToSearch) const {
 	try {
-		tstring name = Parser::ConvertMaskToReqex(Name);
-		tregex expression(NF_BOOST_REGEX_COMPILE(name), boost::regex_constants::icase);
-		tsmatch what;
+		MaskMatcher mm(Name);
 
 		tstring RootDir = rootDir0;
 		if (Utils::IsAliasIsDisk(RootDir)) RootDir += L"\\";
@@ -44,7 +53,7 @@ void nf::Search::CSearchEngine::SearchItems(tstring const& rootDir0, tstring con
 		WinSTL::findfile_sequence_t f(RootDir.c_str(), L"*", get_search_flags(whatToSearch));
 		BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
 			tstring filename = t.get_filename();
-			if (NF_BOOST_REGEX_LIB::regex_match(filename, what, expression)) {
+			if (mm.MatchTo(filename)) {
 				destList.push_back(t.get_path());
 			}
 		}
@@ -72,8 +81,10 @@ void nf::Search::CSearchEngine::SearchBySystemFunctions(tstring const& RootDir0,
 
 bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir, CSearchEngine &searchPolice
 								 , nf::tlist_strings& dest) {	
-	PathsFinder finder(searchPolice);
-	return finder.SearchByPattern(Pattern, RootDir, dest);							
+	PathsFinder finder(searchPolice
+		, nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0
+		, Utils::atoi(nf::CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE)));
+	return finder.SearchByPattern(Pattern, RootDir, dest);
 }
 
 bool nf::Search::SearchMatched(tstring const& srcPathPattern, CSearchEngine &searchPolice, nf::tlist_strings& dest)

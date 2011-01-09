@@ -123,7 +123,12 @@ bool nf::Parser::ParseString(tstring const &srcStr, nf::tparsed_command &t) {
 		Utils::RemoveSingleTrailingCharOnPlace(t.local_directory, SLASH_DIRS_CHAR);
 		t.flags = t.flags | nf::FGC_ENABLED_LOCAL_DIRECTORY;
 	} else if (ParseCSDP(csdp, t.catalog, t.shortcut, t.local_directory, t.param)) {
-		Utils::RemoveSingleTrailingCharOnPlace(t.local_directory, SLASH_DIRS_CHAR);
+		//локальная директория должна содержать все слеши, иначе \\\ будет работать некорректно Utils::RemoveSingleTrailingCharOnPlace(t.local_directory, SLASH_DIRS_CHAR);
+		//в то же время если слеш всего один, то его надо игнорировать
+		if (! Utils::EndWith(t.local_directory, L"\\\\")) {
+			Utils::RemoveSingleTrailingCharOnPlace(t.local_directory, SLASH_DIRS_CHAR);
+		}
+
 		if (! t.catalog.empty()) t.flags = t.flags | nf::FGC_ENABLED_CATALOG;
 		if (! t.shortcut.empty()) t.flags = t.flags | nf::FGC_ENABLED_SHORTCUT;
 		if (! t.local_directory.empty()) t.flags = t.flags | nf::FGC_ENABLED_LOCAL_DIRECTORY;
@@ -214,30 +219,33 @@ tstring nf::Parser::ExtractPrefix(tstring const &srcCommand) {
 	return tstring(srcCommand.begin(), p + 1);
 }
 
-tstring nf::Parser::ConvertToMask(tstring const& srcStr) {	
+tstring nf::Parser::ConvertToMask(tstring const& srcStr, int mode012) {	
 	//добавляем звездочки только если маска, указанная пользователем, не содержит метасимволов
 	//если у нас маска \a\b*\c то она должна обрабатываться как маска \*a*\b*\*c* 
 	//поэтому обрабатываем a, b*, c по отдельности
 	//правило преобразование маски a -> *a* определяется режимом настроек
-	if (nf::Parser::ContainsMetachars(srcStr)) return srcStr;
-
-	tstring mode = CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE);
 	//1: a -> a*
 	//2: a -> a
 	//0: a -> *a*
 
+	if (nf::Parser::ContainsMetachars(srcStr)) return srcStr;
+
 	tstring result = srcStr;
-	if (mode == tstring(L"2")) return srcStr;
+	if (mode012 == 2) return srcStr;
 	result.push_back(L'*');	
-	if (mode == tstring(L"1")) return result;
+	if (mode012 == 1) return result;
 
 	result.insert(0, L"*");	
 	return result;
 }
 
+tstring nf::Parser::ConvertToMask(tstring const& srcStr) {
+	return ConvertToMask(srcStr, Utils::atoi(CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE)));
+}
+
 tstring nf::Parser::ConvertMaskToReqex(tstring const& srcName) {
 	static const nf::tregex esc(L"[\\^\\.\\$\\|\\(\\)\\+\\/\\\\]"); //dont' escape \\[\\]\\*\\? 
-	static const tstring rep(L"\\\\\\1"); //see http://stackoverflow.com/questions/1252992/how-to-escape-a-string-for-use-in-boost-regex
+	static const tstring rep(L"\\\\\\1&"); //see http://stackoverflow.com/questions/1252992/how-to-escape-a-string-for-use-in-boost-regex
 
 	tstring smask = NF_BOOST_REGEX_LIB::regex_replace(srcName, esc, rep, boost::match_default | boost::format_sed);
 
@@ -251,6 +259,15 @@ unsigned int nf::Parser::GetNetworkPathPrefixLength(tstring const &source) {
 	nf::tsmatch what;	
 	if (NF_BOOST_REGEX_LIB::regex_match(source, what, expression)) {
 		return static_cast<unsigned int>(tstring(what[1]).size());
+	}
+	return 0;
+}
+
+unsigned int nf::Parser::ExtractDeepOfSearch(tstring const& srcName) {
+	static const nf::tregex expression(L":(\\d+)");
+	nf::tsmatch what;	
+	if (NF_BOOST_REGEX_LIB::regex_match(srcName, what, expression)) {
+		return Utils::atoi(what[1]);
 	}
 	return 0;
 }

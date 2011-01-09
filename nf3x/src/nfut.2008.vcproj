@@ -357,6 +357,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PathsFinderTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\utilites\searcherpaths.cpp"
 				>
 			</File>
@@ -436,6 +440,10 @@
 			</File>
 			<File
 				RelativePath=".\utilites\PathsFinder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PathsFinderTest.h"
 				>
 			</File>
 			<File

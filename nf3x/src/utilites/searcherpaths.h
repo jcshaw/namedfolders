@@ -20,13 +20,12 @@ namespace Search {
 	//it's possible to use metachars "*", "?" and "[a-z]" in mask
 	//engine is able to convert mask to appropriate regexp and check name matching using this regexp
 	//if regexp failed then system search functions are used.
-	struct CSearchEngine {
+	class CSearchEngine {
+	public:
 		explicit CSearchEngine(twhat_to_search_t WhatToSearch
 			, bool bAutoConvertNamesToMetachars = true // true: c->*c* according asterix mode;  false: c->c
-			, bool bAddAllFollowingPathsToResuts = true // c:\a\b\c  true: c:\a and c\a\b will be added to results; false: won't be added.
 		) :  m_WhatToSearch(WhatToSearch)
 		, AutoConvertNamesToMetachars(bAutoConvertNamesToMetachars)
-		, AddAllFollowingPathsToResuts(bAddAllFollowingPathsToResuts)
 		{}
 	//выполнить поиск поддиректории по заданному шаблону имени директории
 		twhat_to_search_t GetWhatToSearch() const {
@@ -38,7 +37,6 @@ namespace Search {
 		}
 		void SearchBySystemFunctions(tstring const& RootDir, tstring const& Name, nf::tlist_strings &list, twhat_to_search_t whatToSearch) const;
 		const bool AutoConvertNamesToMetachars;
-		const bool AddAllFollowingPathsToResuts;
 	private:
 		twhat_to_search_t m_WhatToSearch;
 	};
@@ -53,6 +51,14 @@ namespace Search {
 	//причем C - люба€ одна буква или один из метасимволов ?, * или [a-z]
 	//¬ токенах pathXXX могут встречатьс€ метасимволы ?, * или [a,b-z]
 	bool SearchMatched(tstring const& PathPattern, Search::CSearchEngine &searchPolice, nf::tlist_strings& dest);
+
+	class MaskMatcher {	
+	public:
+		MaskMatcher(tstring const& srcMask);
+		bool MatchTo(tstring const& fileName);
+	private:
+		tregex m_R;
+	};
 
 }
 }

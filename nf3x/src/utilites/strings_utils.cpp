@@ -40,6 +40,7 @@ void Utils::DividePathFilename(tstring const &src
 	tstring::size_type npos = path.find_last_of(slashChar);
 	if (npos != tstring::npos) {
 		filename.assign(path, npos, path.size()-npos);
+		RemoveLeadingCharsOnPlace(filename, slashChar);
 		path.erase(npos, path.size()-npos);
 	} else {
 		path.clear();
@@ -202,16 +203,15 @@ namespace Private {
 } //Private
 } //nf
 
-tstring Utils::SubstituteSearchMetachars(tstring const& srcPath) {
+tstring Utils::SubstituteSearchMetachars(tstring const& srcPath, bool bAllowShortSyntaxInPath) {
 	tstring s = (boost::starts_with(srcPath, tstring(L"**")) || boost::starts_with(srcPath, tstring(L"..*")) ) 
 		? L"\\" + srcPath
 		: srcPath;
-
-	bool ballow_short_path_commands = (nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0);
-		//replace sequence of \\\ by single \
-		//	there is exception here: net:\\networkpath and \\networkpath shouldn't be transformed
-		//replace sequence of ... by ..
-	if (! ballow_short_path_commands) {
+	
+	//replace sequence of \\\ by single \
+	//	there is exception here: net:\\networkpath and \\networkpath shouldn't be transformed
+	//replace sequence of ... by ..
+	if (! bAllowShortSyntaxInPath) {
 		s = Utils::Private::replace_sequence_chars(s, L'.', L"..", 2, 0);
 
 		int first_ch = nf::Parser::GetNetworkPathPrefixLength(s);
@@ -224,7 +224,7 @@ tstring Utils::SubstituteSearchMetachars(tstring const& srcPath) {
 	s = Utils::ReplaceStringAll(s, tstring(MC_SEARCH_FORWARD_LONG) + SLASH_DIRS_CHAR, tstring(MC_SEARCH_FORWARD_SHORT) + SLASH_DIRS_CHAR);
 	s = Utils::ReplaceStringAll(s, MC_SEARCH_BACKWORD_LONG, MC_SEARCH_BACKWORD_SHORT);
 
-	if (ballow_short_path_commands) {
+	if (bAllowShortSyntaxInPath) {
 		s = Utils::ReplaceStringAll(s, LEVEL_UP_TWO_POINTS, MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH);
 	} else {
 		s = Utils::ReplaceStringAll(s, L".", L"");
@@ -242,4 +242,14 @@ void Utils::DivideDiskPath(tstring const &src, tstring &destDisk, tstring &destP
 		destDisk.assign(src, 0, 2);
 		destPath.assign(src, 2, src.size() - 2);
 	}
+}
+
+tstring Utils::ExtractFileName(tstring const& srcDir, bool bRemoveTrailingChar) {
+	tstring filename, dir;
+	DividePathFilename(srcDir, dir, filename, SLASH_DIRS_CHAR, bRemoveTrailingChar);
+	return filename;
+}
+
+bool Utils::EndWith(tstring const& srcStr, tstring const& strToSearch) {
+	return boost::algorithm::ends_with(srcStr, strToSearch);
 }

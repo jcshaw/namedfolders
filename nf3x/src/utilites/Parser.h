@@ -25,6 +25,7 @@ namespace Parser {
 
 	//превратить строку в маску с учетом режима настроек asterixmode, и наличия в строке метасимволов
 	tstring ConvertToMask(tstring const& SrcStr);
+	tstring ConvertToMask(tstring const& SrcStr, int mode012);
 	tstring ConvertMaskToReqex(tstring const& srcName);
 
 	bool GetCommandKind(tstring const& source, nf::tcommands_kinds &kind, tstring &prefix, tstring &csdp);
@@ -37,5 +38,9 @@ namespace Parser {
 	unsigned int GetNetworkPathPrefixLength(tstring const &source);
 
 	tstring ExtractPrefix(tstring const &CommandString);
+
+	//Определить глубину поиска 
+	//для строки типа ":N" (где N - число), вернуть N; иначе - 0
+	unsigned int ExtractDeepOfSearch(tstring const& srcName);
 };
 };

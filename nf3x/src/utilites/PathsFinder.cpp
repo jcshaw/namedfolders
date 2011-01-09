@@ -29,20 +29,11 @@ namespace {
 			|| MC_SEARCH_FORWARD_SHORT[0] == ch
 			|| MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH[0] == ch;
 	}
-	const int UNLIMITED_SEARCH_LEVEL = 9999;
-	const int MAX_DEEP_SEARCH = 100;
-	const int CHAR_FORWARD_SEARCH_BASE = 1;
-	const int CHAR_BACKWORD_SEARCH_BASE = 120;
-
-	const wchar_t CH_SEARCH_BACKWORD = L'2';
-	const wchar_t CH_SEARCH_FORWARD = L'1';
-	const wchar_t CH_SEARCH_FORWARD_UNLIMITED = L'3';
-	const wchar_t CH_SEARCH_BACKWORD_UNLIMITED = L'4';
-
 	typedef enum tsearch_ch_kind {
-		ID_SEARCH_FORWARD
-		, ID_SEARCH_BACKWORD
+		ID_SEARCH_FORWARD = L'f'
+		, ID_SEARCH_BACKWORD = L'b'
 	};
+	const int MAX_DEEP_LEVEL = 9999;
 
 	//У каждого метасимвола есть две характеристики: направление и глубина поиска.
 	//Символ "\*" имеет направление "вниз", символ "\.." - вверх.
@@ -50,41 +41,21 @@ namespace {
 	//У "\" глубина равна 1, у "\**" - 256 (неограничена), у "\**4" - 4,  у "\\\\" - либо 1 либо 4 в зависимости от настроек.
 	//Глубина поиска не может быть больше MAX_DEEP_SEARCH - если указана большая глубина, то поиск считается неограниченным.
 	tsearch_ch_kind get_metachar_kind(tstring const& metaChar) {
-		assert(metaChar.size() == 1);
-		return (static_cast<int>(metaChar[0]) < CHAR_BACKWORD_SEARCH_BASE) 
-			? ID_SEARCH_FORWARD
-			: ID_SEARCH_BACKWORD;
+		assert(metaChar.size() == 2);
+		return static_cast<int>(metaChar[0]) == ID_SEARCH_BACKWORD
+			? ID_SEARCH_BACKWORD
+			: ID_SEARCH_FORWARD;			
 	}
 	int get_metachar_deep(tstring const& metaChar) {
-		assert(metaChar.size() == 1);
-		return static_cast<int>(metaChar[0]) - (get_metachar_kind(metaChar) == ID_SEARCH_FORWARD
-			? CHAR_FORWARD_SEARCH_BASE 
-			: CHAR_BACKWORD_SEARCH_BASE);
-	}
-	tstring combine_metachar(int baseChar, int deepSearch) {
-		tstring dest;
-		dest.resize(1);
-		if (deepSearch == 0) {
-			dest[0] = static_cast<wchar_t>(MAX_DEEP_SEARCH);
-			return dest;
-		}
-		if (deepSearch < 0) deepSearch = 0;
-		if (deepSearch > MAX_DEEP_SEARCH) deepSearch = MAX_DEEP_SEARCH;
-		dest[0] = static_cast<wchar_t>(baseChar + deepSearch);
-		return dest;
+		assert(metaChar.size() == 2);
+		return static_cast<int>(metaChar[1]);
 	}
 	tstring create_metachar(tsearch_ch_kind slashKind, int deepSearch) {
-		switch (slashKind) {
-		case ID_SEARCH_FORWARD: return combine_metachar(CHAR_FORWARD_SEARCH_BASE, deepSearch);
-		case ID_SEARCH_BACKWORD: return combine_metachar(CHAR_BACKWORD_SEARCH_BASE, deepSearch);
-		}
-		return 0;
-	}
-	tstring increment_deep(tstring const& metaChar, int incValue) {
-		tsearch_ch_kind kind = get_metachar_kind(metaChar);
-		int deep = get_metachar_deep(metaChar);
-		deep += incValue;
-		return create_metachar(kind, deep);
+		tstring dest;
+		dest.resize(2);
+		dest[0] = static_cast<wchar_t>(slashKind);
+		dest[1] = static_cast<wchar_t>(deepSearch);
+		return dest;
 	}
 }
 
@@ -105,9 +76,10 @@ bool check_for_esc(void) {
 }
 
 
-nf::Search::PathsFinder::PathsFinder(CSearchEngine &searchPolice)
+nf::Search::PathsFinder::PathsFinder(CSearchEngine &searchPolice, bool bShortSyntaxInPathAllowed, int asterixMode012)
 : m_SearchPolice(searchPolice)
-, ShortSyntaxInPathAllowed(nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0)
+, ShortSyntaxInPathAllowed(bShortSyntaxInPathAllowed) 
+, AsterixMode012(asterixMode012)
 {
 }
 
@@ -115,49 +87,52 @@ nf::Search::PathsFinder::~PathsFinder(void)
 {
 }
 
-wchar_t const* nf::Search::PathsFinder::extract_name(wchar_t const* srcPattern, tpair_strings& nameMetachar) {
+wchar_t const* nf::Search::PathsFinder::extract_metachar(wchar_t const* srcPattern, tpair_strings& nameMetachar) {
 	//извлечь из srcPattern первый метасимвол и, если есть, первое имя; вернуть остаток
 	//повторяющиеся метасимволы \\\ и ... объединить в один с фиксированной глубиной поиска
 	wchar_t const* ps = srcPattern;
-	nameMetachar.first = L"*";
-	nameMetachar.second = L" ";
-	tstring& m = nameMetachar.second;
-	
-	wchar_t current_ch = 0;
-	while (is_slash(*ps)) {
-		if (*ps == L'\\' || *ps == MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH[0]) { 
-			if (current_ch == 0) {
-				m = create_metachar(ID_SEARCH_FORWARD, 1);
-			} else if (current_ch != *ps) {
-				return ps;
-			} else if (this->ShortSyntaxInPathAllowed) {
-				m = increment_deep(m, 1);
-			}
-		} else if (*ps == MC_SEARCH_FORWARD_SHORT[0]) {
-			m = create_metachar(ID_SEARCH_FORWARD, 1); // "\*"
-			++ps;
-			break;
-		} else if (*ps == MC_SEARCH_BACKWORD_SHORT[0]) {
-			m = create_metachar(ID_SEARCH_BACKWORD, 1); // "\.."
-			++ps;
-			break;
-		} else if (MC_DEEP_DIRECT_SEARCH_SHORT[0] == *ps) {
-			m = create_metachar(ID_SEARCH_FORWARD, 0);
-			++ps;
-			break;
-		} else if (MC_DEEP_REVERSE_SEARCH_SHORT[0] == *ps) {
-			m = create_metachar(ID_SEARCH_BACKWORD, 0);
-			++ps;
-			break;
+//определяем метасимвол
+	if (*ps == L'\\' || *ps == MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH[0]) { 
+		int deep = 0;
+		wchar_t ch = *ps;
+		while (*ps == ch) {
+			++ps; 
+			if (this->ShortSyntaxInPathAllowed) ++deep;
 		}
-		current_ch = *ps;
-		++ps;
+		--ps;
+		nameMetachar.second = create_metachar(ch == L'\\' ? ID_SEARCH_FORWARD : ID_SEARCH_BACKWORD, deep);
+	} else if (*ps == MC_SEARCH_FORWARD_SHORT[0]) {
+		nameMetachar.second = create_metachar(ID_SEARCH_FORWARD, 1); // "\*"
+	} else if (*ps == MC_SEARCH_BACKWORD_SHORT[0]) {
+		nameMetachar.second = create_metachar(ID_SEARCH_BACKWORD, 1); // "\.."
+	} else if (MC_DEEP_DIRECT_SEARCH_SHORT[0] == *ps) {
+		nameMetachar.second = create_metachar(ID_SEARCH_FORWARD, 0);
+	} else if (MC_DEEP_REVERSE_SEARCH_SHORT[0] == *ps) {
+		nameMetachar.second = create_metachar(ID_SEARCH_BACKWORD, 0);
+	} else {
+		nameMetachar.second = create_metachar(ID_SEARCH_FORWARD, 1);
 	}
+	++ps;
 
+//находим имя
 	wchar_t const* psend = ps;
 	while ((*psend) && (! is_slash(*psend))) ++psend;
 
-	if (psend != ps) nameMetachar.first.assign(ps, psend - ps);
+	if (psend != ps) {
+		nameMetachar.first.assign(ps, psend - ps);
+	} else {
+		nameMetachar.first = L"*";
+	}
+
+//если поиск неограничен по глубине и имя начинается на ":" - то это не имя, а ограничение поиска: \**:2
+	int d = get_metachar_deep(nameMetachar.second);
+	if (get_metachar_deep(nameMetachar.second) == 0) {
+		unsigned int deep = Parser::ExtractDeepOfSearch(nameMetachar.first);
+		if (deep != 0) {
+			nameMetachar.first = L"*";
+			nameMetachar.second = create_metachar(get_metachar_kind(nameMetachar.second), deep);
+		}
+	}
 	return psend;
 }
 
@@ -256,9 +231,9 @@ bool nf::Search::PathsFinder::SearchByPattern(tstring const& Pattern, tstring co
 	nf::tlist_pairs_strings list; //список метасимволы-имя
 
 	wchar_t const* p = Pattern.c_str();
-	while (p != NULL) {
+	while (*p != 0) {
 		tpair_strings name_metachar;
-		p = extract_name(Pattern.c_str(), name_metachar);
+		p = extract_metachar(p, name_metachar);
 		list.push_back(name_metachar);
 	} 
 
@@ -294,18 +269,28 @@ bool nf::Search::PathsFinder::deep_search(tpair_strings nameMetachar, tstring co
 	//1)находим все файлы/директории находящиеся на данном уровне и удовлетворяющие name и заносим их в результаты
 	//2)находим все директории на каждом уровне и затем ищем в них дальше 
 	unsigned int deep = get_metachar_deep(nameMetachar.second);
-	if (deep == 0) deep = 9999; //вряд ли уровень вложенности директорий будет больше..
+	if (deep == 0) deep = MAX_DEEP_LEVEL; //вряд ли уровень вложенности директорий будет больше..
 
+	tstring name_mask = nf::Parser::ConvertToMask(nameMetachar.first, this->AsterixMode012);
 
 	nf::tlist_strings dirs; 
 	if (get_metachar_kind(nameMetachar.second) == ID_SEARCH_FORWARD) {
 		dirs.push_back(rootDir);
+// 		if (get_metachar_deep(nameMetachar.second) == 0) {
+// 			nf::Search::MaskMatcher mm(name_mask);
+// 			if (mm.MatchTo(Utils::ExtractFileName(rootDir))) {
+// 				dest.push_back(rootDir);
+// 			}
+// 		}
+// 
 		for (unsigned int i = 0; i < deep; ++i) {
 			nf::tlist_strings level_dirs;
 			BOOST_FOREACH(tstring const& sdir, dirs) {
 				if (check_for_esc()) return false;	//exit by esc
-				m_SearchPolice.SearchItems(rootDir, L"*", level_dirs, WTS_DIRECTORIES);
-				m_SearchPolice.SearchItems(rootDir, nameMetachar.first, dest);
+				if (i != deep - 1) {
+					m_SearchPolice.SearchItems(sdir, L"*", level_dirs, WTS_DIRECTORIES);
+				}
+				m_SearchPolice.SearchItems(sdir, name_mask, dest);
 			}
 			if (level_dirs.size() == 0) break; //нет больше вложенных директорий
 			dirs.swap(level_dirs);
@@ -317,12 +302,14 @@ bool nf::Search::PathsFinder::deep_search(tpair_strings nameMetachar, tstring co
 			//переходим в директорию выше и проверяем, есть ли в ней директории, которые удовлетворяют name		
 			parent = Utils::RemoveTrailingChars(Utils::ExtractParentDirectory(parent), SLASH_DIRS_CHAR);
 			if (parent.empty()) return true; //если родительской директории нет, поиск завершен
-			if (nameMetachar.first == L".") { //!TODO
+
+ 			nf::Search::MaskMatcher mm(name_mask);
+ 			if (mm.MatchTo(Utils::ExtractFileName(parent, true))) {
 				Utils::AddTrailingCharIfNotExists(parent, SLASH_DIRS);
-				dest.push_back(parent); // cd:nf\.. ; add slash to replace "c:" by "c:\"
-			} else {
-				m_SearchPolice.SearchItems(parent, nameMetachar.first, dest);
-			}
+ 				dest.push_back(parent);
+ 			}
+
+			//m_SearchPolice.SearchItems(parent, name_mask, dest);
 		} 
 	}
 

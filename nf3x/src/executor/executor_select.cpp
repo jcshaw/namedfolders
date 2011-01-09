@@ -44,15 +44,16 @@ void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring con
 	//находим все директории, удовлетворяющие panel.value
 
 	//комбинации символов указывающие на поиск неограниченной глубины заменяем спецсимволами
-	tstring local_path = Utils::SubstituteSearchMetachars(localPath0); 
-	tstring svalue = Utils::SubstituteSearchMetachars(srcValue);
+	bool ballow_short_syntax = (nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0);
+	tstring local_path = Utils::SubstituteSearchMetachars(localPath0, ballow_short_syntax); 
+	tstring svalue = Utils::SubstituteSearchMetachars(srcValue, ballow_short_syntax);
 
-	nf::Search::CSearchEngine ssp(nf::WTS_DIRECTORIES, false, false); //nf::Search::CSearchSystemPolice ssp(false, false);
+	nf::Search::CSearchEngine ssp(nf::WTS_DIRECTORIES, false);
 	nf::Search::SearchMatched(svalue, ssp, destListPaths);
 
 	if (! local_path.empty()) {	//учитываем локальный путь относительно каждой найденной директории	
 		nf::tlist_strings list_paths;
-		nf::Search::CSearchEngine ssp(whatToSearch, true, true);
+		nf::Search::CSearchEngine ssp(whatToSearch, true);
 		BOOST_FOREACH(tstring const& path, destListPaths) {
 			nf::Search::SearchByPattern(local_path.c_str(), path, ssp, list_paths);
 		}

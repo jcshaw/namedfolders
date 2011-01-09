@@ -50,6 +50,7 @@ namespace Utils {
 	void DividePathFilename(tstring const &src, tstring &path, tstring &filename, wchar_t SlashChar, bool bRemoveTrailingChar);
 	void DivideDiskPath(tstring const &src, tstring &destDisk, tstring &destPath);
 	tpair_strings DivideString(tstring const& SrcStr, wchar_t ch);
+	tstring ExtractFileName(tstring const& srcDir, bool bRemoveTrailingChar);
 
 // string helper functions
 	tstring ReplaceStringAll(tstring SrcStr, tstring const& FromStr, tstring const& ToStr);
@@ -103,7 +104,7 @@ namespace Utils {
 		return &srcBuffer[0];
 	}
 
-	tstring SubstituteSearchMetachars(tstring const& srcPath);
+	tstring SubstituteSearchMetachars(tstring const& srcPath, bool bAllowShortSyntaxInPath);
 
 	inline tstring itoa(int n) {
 		wchar_t buffer[33]; //see description of far itoa function: 32 characters + 1 for "0"
@@ -113,6 +114,8 @@ namespace Utils {
 	inline int atoi(tstring srcStr) {
 		return g_FSF.atoi(srcStr.c_str());
 	}
+
+	bool EndWith(tstring const& srtStr, tstring const& strToSearch);
 
 namespace Private {
 	//removes sequence of srcCh with min length minCount by byString;
