@@ -112,7 +112,7 @@ namespace {
 		nf::tpath_selection_result ret = nf::Selectors::GetPath(hPlugin, srcPath, localPath, dest_path, whatToSearch);
 		if (ret != nf::ID_PATH_SELECTED) return ret;
 
-		if (! ::PathIsDirectory(dest_path.c_str())) {
+		if (whatToSearch != nf::WTS_DIRECTORIES && ! ::PathIsDirectory(dest_path.c_str())) {
 			//open directory where file is located; currently, we lost filename.
 			//!TODO: it world be perfect to position on this file
 			Utils::DividePathFilename(dest_path, dest_path, fnDest, SLASH_DIRS_CHAR, false);

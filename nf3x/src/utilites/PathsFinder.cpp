@@ -50,7 +50,7 @@ namespace {
 		assert(metaChar.size() == 2);
 		return static_cast<int>(metaChar[1]);
 	}
-	inline tstring create_metachar(tsearch_ch_kind slashKind, int deepSearch) {
+	tstring create_metachar(tsearch_ch_kind slashKind, int deepSearch) {
 		tstring dest;
 		dest.resize(2);
 		dest[0] = static_cast<wchar_t>(slashKind);
@@ -136,97 +136,6 @@ wchar_t const* nf::Search::PathsFinder::extract_metachar(wchar_t const* srcPatte
 	return psend;
 }
 
-// bool nf::Search::PathsFinder::search_dirs(tstring const& rootDir, tstring const& srcName
-// 										  , unsigned int levelIndex, tstring const& level, nf::tlist_strings &dest)
-// {	//поиск среди директорий любого уровня вложенности
-// 	if (check_for_esc()) return false;	//exit by esc
-// 	if (levelIndex >= level.size()) return true; //current directory is required one
-// 
-// 	nf::tlist_strings dirs; //директории, в которых вести поиск дальшейших метасимволов
-// 	if (get_metachar_kind(level[levelIndex]) == ID_SEARCH_FORWARD) {
-// 		//находим все вложенные директории, удовлетворяющие маске; ищем на заданных N уровнях вложенности
-// 		deep_search_forward(get_metachar_deep(level[levelIndex]), rootDir, srcName, dirs);
-// 		BOOST_FOREACH(tstring const& sdir, dirs) {
-// 			dest.push_back(sdir);
-// 		}
-// 	} else { //поиск в обратном направлении; 
-// 		//переходим в директорию выше и проверяем, есть ли в ней директории, которые удовлетворяют маске		
-// 		tstring parent = Utils::RemoveTrailingChars(Utils::ExtractParentDirectory(rootDir), SLASH_DIRS_CHAR);
-// 		if (parent.empty()) return true; //если родительской директории нет, поиск завершен
-// 
-// 		if (srcName.empty()) {
-// 			if (levelIndex == level.size() - 1) {
-// 				Utils::AddTrailingCharIfNotExists(parent, SLASH_DIRS);
-// 				dest.push_back(parent); // cd:nf\.. ; add slash to replace "c:" by "c:\"
-// 			}
-// 		} else {
-// 			//находим все вложенные директории, удовлетворяющие маске; ищем на заданных N уровнях вложенности
-// 			deep_search_backword(get_metachar_deep(level[levelIndex]), parent, srcName, dirs); TODO: здесь это не пройдет
-// 		}
-// 	}
-// 
-// 	if (++levelIndex >= level.size()) return true; //больше метасимволов для поиска нет
-// 	//в найденных директориях ищем оставшиеся метасимволы
-// 	BOOST_FOREACH(tstring const& subdir, dirs) {
-// 		if (! search_dirs(subdir, srcName, levelIndex, level, m_SearchPolice, dest)) {
-// 			return false;	//exit by esc
-// 		}
-// 	}
-// 
-// 	return true;
-// }
-// 
-// bool nf::Search::PathsFinder::SearchByPattern(tstring const& Pattern, tstring const &RootDir, nf::tlist_strings& dest)
-// {	// поиск директории, вложенной в текущую, по шаблону {[\dir]|[\\dir]|[\\\dir]|..}+
-// 	// вариант поиска имени в текущей директории определяется кол-вом слешей.
-// 	// "\dir"  - поиск имени dir только в текущей директории
-// 	// "\\dir" - поиск имени dir во всех вложенных директориях и в директориях вложенных в них
-// 	// "\\\dir" и т.д.
-// 	// Неограниченная глубина через \t и \n
-// 	nf::tlist_strings variants;
-// 
-// 	tstring name; 
-// 	tstring level;	//на скольких уровнях вложенности искать
-// 	wchar_t const* next_pattern = Private::extract_name(Pattern.c_str(), name, level);
-// 
-// 	//Подгонка под #7, комментарий 48
-// 	//Команда far... приведет к лишней точке и ненужной маске = ".*". Точку убираем
-// 	if (name == L".") name = L"";
-// 	//Команда cd:far\\\\\\\\\\ приводит к пустому name и level="1". Учитываем текущую директорию
-// 	if (! level.empty() 
-// 		&& m_SearchPolice.AddAllFollowingPathsToResuts 
-// 		&& next_pattern == 0 // cd:a\*\* , but not cd:\*\a*\b*, see #7.54
-// 		&& Parser::ContainsMetachars(name)) {
-// 			if (level[0] == CH_SEARCH_FORWARD || level[0] == CH_SEARCH_FORWARD_UNLIMITED) {
-// 				variants.push_back(RootDir);
-// 			}
-// 	}
-// 
-// 	if (! name.empty()) {
-// 		if (m_SearchPolice.AutoConvertNamesToMetachars) {
-// 			name = Parser::ConvertToMask(name);
-// 		}
-// 	} else {
-// 		if (level[0] == CH_SEARCH_FORWARD || level[0] == CH_SEARCH_FORWARD_UNLIMITED) {
-// 			name = L"*"; //противоречие: cd:nf\** и cd:nf\..*
-// 		}
-// 	}
-// 
-// 	Private::search_dirs(RootDir, name, 0, level, m_SearchPolice, variants);
-// 
-// 	if (! *next_pattern) {
-// 		// поиск завершен, variants содержит искомые директории
-// 		// копируем их в массив результатов
-// 		std::copy(variants.begin(), variants.end(), std::insert_iterator<nf::tlist_strings >(dest, dest.begin()));
-// 	} else {
-// 		//в каждой из найденных директорий ищем следующие имена 
-// 		BOOST_FOREACH(tstring const& dir, variants) {
-// 			SearchByPattern(next_pattern, dir, dest);
-// 		}
-// 	}
-// 	return true;
-// }
-
 bool nf::Search::PathsFinder::SearchByPattern(tstring const& Pattern, tstring const &RootDir, nf::tlist_strings& dest) {
 	nf::tlist_pairs_strings list; //список метасимволы-имя
 
@@ -302,8 +211,6 @@ bool nf::Search::PathsFinder::deep_search(tpair_strings nameMetachar, tstring co
 				Utils::AddTrailingCharIfNotExists(parent, SLASH_DIRS);
  				dest.push_back(parent);
  			}
-
-			//m_SearchPolice.SearchItems(parent, name_mask, dest);
 		} 
 	}
 
