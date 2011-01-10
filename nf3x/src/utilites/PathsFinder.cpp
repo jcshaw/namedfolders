@@ -40,17 +40,17 @@ namespace {
 	//Глубина поиска может быть неограниченной или ограниченной.
 	//У "\" глубина равна 1, у "\**" - 256 (неограничена), у "\**4" - 4,  у "\\\\" - либо 1 либо 4 в зависимости от настроек.
 	//Глубина поиска не может быть больше MAX_DEEP_SEARCH - если указана большая глубина, то поиск считается неограниченным.
-	tsearch_ch_kind get_metachar_kind(tstring const& metaChar) {
+	inline tsearch_ch_kind get_metachar_kind(tstring const& metaChar) {
 		assert(metaChar.size() == 2);
 		return static_cast<int>(metaChar[0]) == ID_SEARCH_BACKWORD
 			? ID_SEARCH_BACKWORD
 			: ID_SEARCH_FORWARD;			
 	}
-	int get_metachar_deep(tstring const& metaChar) {
+	inline int get_metachar_deep(tstring const& metaChar) {
 		assert(metaChar.size() == 2);
 		return static_cast<int>(metaChar[1]);
 	}
-	tstring create_metachar(tsearch_ch_kind slashKind, int deepSearch) {
+	inline tstring create_metachar(tsearch_ch_kind slashKind, int deepSearch) {
 		tstring dest;
 		dest.resize(2);
 		dest[0] = static_cast<wchar_t>(slashKind);
@@ -76,7 +76,7 @@ bool check_for_esc(void) {
 }
 
 
-nf::Search::PathsFinder::PathsFinder(CSearchEngine &searchPolice, bool bShortSyntaxInPathAllowed, int asterixMode012)
+nf::Search::PathsFinder::PathsFinder(CSearchEngine &searchPolice, bool bShortSyntaxInPathAllowed, tasterix_mode asterixMode012)
 : m_SearchPolice(searchPolice)
 , ShortSyntaxInPathAllowed(bShortSyntaxInPathAllowed) 
 , AsterixMode012(asterixMode012)
@@ -93,8 +93,8 @@ wchar_t const* nf::Search::PathsFinder::extract_metachar(wchar_t const* srcPatte
 	wchar_t const* ps = srcPattern;
 //определяем метасимвол
 	if (*ps == L'\\' || *ps == MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH[0]) { 
-		int deep = 0;
-		wchar_t ch = *ps;
+		int deep = 1;
+		wchar_t ch = *ps++;
 		while (*ps == ch) {
 			++ps; 
 			if (this->ShortSyntaxInPathAllowed) ++deep;
@@ -238,27 +238,28 @@ bool nf::Search::PathsFinder::SearchByPattern(tstring const& Pattern, tstring co
 	} 
 
 	nf::tlist_strings results;
-	bool bret = search(0, list, RootDir, results);
+	bool bret = search(list.begin(), list, RootDir, results);
 	dest.swap(results);
 
 	return bret;
 }
 
-bool nf::Search::PathsFinder::search(unsigned int itemIndex, nf::tlist_pairs_strings listItems, tstring const &rootDir, nf::tlist_strings& dest) {
-	if (itemIndex >= listItems.size()) return true; 
+bool nf::Search::PathsFinder::search(nf::tlist_pairs_strings::const_iterator listItemsPos, nf::tlist_pairs_strings  const& listItems
+									 , tstring const &rootDir, nf::tlist_strings& dest) {
+	if (listItemsPos == listItems.end()) return true; 
 
 	nf::tlist_strings list;
 //находим все директории, в которых нужно вести поиск остальных элементов 
 //если мы ищем файлы, то на последнем элементе в list попадут файлы, а не директории
-	nf::tlist_pairs_strings::const_iterator p = listItems.begin();
-	std::advance(p, itemIndex);
-	if (! deep_search(*p, rootDir, list)) return false;
+	if (! deep_search(*listItemsPos, rootDir, list)) return false;
 
-	if (itemIndex == listItems.size() - 1) {
+	nf::tlist_pairs_strings::const_iterator pnext = listItemsPos;
+	++pnext;
+	if (pnext == listItems.end()) {
 		std::copy(list.begin(), list.end(), std::insert_iterator<nf::tlist_strings >(dest, dest.begin()));
 	} else { //продолжаем поиск остальных элементов относительно найденных директорий
 		BOOST_FOREACH(tstring const& dir, list) {
-			if (! search(itemIndex + 1, listItems, dir, dest)) return false;
+			if (! search(pnext, listItems, dir, dest)) return false;
 		}	
 	}
 	return true;
@@ -276,13 +277,6 @@ bool nf::Search::PathsFinder::deep_search(tpair_strings nameMetachar, tstring co
 	nf::tlist_strings dirs; 
 	if (get_metachar_kind(nameMetachar.second) == ID_SEARCH_FORWARD) {
 		dirs.push_back(rootDir);
-// 		if (get_metachar_deep(nameMetachar.second) == 0) {
-// 			nf::Search::MaskMatcher mm(name_mask);
-// 			if (mm.MatchTo(Utils::ExtractFileName(rootDir))) {
-// 				dest.push_back(rootDir);
-// 			}
-// 		}
-// 
 		for (unsigned int i = 0; i < deep; ++i) {
 			nf::tlist_strings level_dirs;
 			BOOST_FOREACH(tstring const& sdir, dirs) {

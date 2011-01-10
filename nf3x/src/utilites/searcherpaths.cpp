@@ -79,15 +79,17 @@ void nf::Search::CSearchEngine::SearchBySystemFunctions(tstring const& RootDir0,
 	}
 }
 
-bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir, CSearchEngine &searchPolice
+bool nf::Search::SearchByPattern(tstring const& Pattern, tstring const &RootDir
+								 , CSearchEngine &searchPolice
+								 , tasterix_mode AsterixMaskMode012
 								 , nf::tlist_strings& dest) {	
 	PathsFinder finder(searchPolice
 		, nf::CSettings::GetInstance().GetValue(nf::ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH) != 0
-		, Utils::atoi(nf::CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE)));
+		, AsterixMaskMode012);
 	return finder.SearchByPattern(Pattern, RootDir, dest);
 }
 
-bool nf::Search::SearchMatched(tstring const& srcPathPattern, CSearchEngine &searchPolice, nf::tlist_strings& dest)
+bool nf::Search::SearchMatched(tstring const& srcPathPattern, CSearchEngine &searchPolice, tasterix_mode AsterixMaskMode012, nf::tlist_strings& dest)
 {	//найти все директории, удовлетвор€ющие паттерну
 	//PathPattern должен содержать полный локальный путь вида
 	//C:\path1\path2\...\pathN
@@ -119,7 +121,7 @@ bool nf::Search::SearchMatched(tstring const& srcPathPattern, CSearchEngine &sea
 			dest.push_back(path_pattern);
 			return true;
 		}
-		return SearchByPattern(path_pattern.c_str(), disk_pattern + L":", searchPolice, dest);
+		return SearchByPattern(path_pattern.c_str(), disk_pattern + L":", searchPolice, AsterixMaskMode012, dest);
 	} else {
 		//вместо буквы диска указан метасимвол
 		//перебираем все диски в системе, вызываем поиск
@@ -137,7 +139,7 @@ bool nf::Search::SearchMatched(tstring const& srcPathPattern, CSearchEngine &sea
 
 			tstring drive_name_short = driver_letter + L":";
 			if (nf::Parser::IsTokenMatchedToPattern(driver_letter.c_str(), disk_pattern, false)) {
-				SearchByPattern(path_pattern, drive_name_short, searchPolice, dest);		
+				SearchByPattern(path_pattern, drive_name_short, searchPolice, AsterixMaskMode012, dest);		
 			}
 		} //for
 	}

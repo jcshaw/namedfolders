@@ -71,6 +71,7 @@ enum {
 	, DR_SKIP = 3
 };
 
+
 namespace nf {
 
 #ifdef USE_BOOST_XPRESSIVE
@@ -183,4 +184,9 @@ namespace nf {
 	//typedef boost::ptr_vector<tstring_buffer> tlist_buffers;
 	typedef std::vector<tstring_buffer> tlist_buffers;
 
+	typedef enum {
+		ASTERIX_MODE_BOTH = 0  //c -> *c*
+		, ASTERIX_MODE_POSTFIX = 1 //c -> c*
+		, ASTERIX_MODE_AS_IS = 2 //c -> c
+	} tasterix_mode;
 }

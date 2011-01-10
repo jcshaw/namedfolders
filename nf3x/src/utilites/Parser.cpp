@@ -219,7 +219,7 @@ tstring nf::Parser::ExtractPrefix(tstring const &srcCommand) {
 	return tstring(srcCommand.begin(), p + 1);
 }
 
-tstring nf::Parser::ConvertToMask(tstring const& srcStr, int mode012) {	
+tstring nf::Parser::ConvertToMask(tstring const& srcStr, tasterix_mode asterixMode012) {	
 	//добавляем звездочки только если маска, указанная пользователем, не содержит метасимволов
 	//если у нас маска \a\b*\c то она должна обрабатываться как маска \*a*\b*\*c* 
 	//поэтому обрабатываем a, b*, c по отдельности
@@ -231,16 +231,16 @@ tstring nf::Parser::ConvertToMask(tstring const& srcStr, int mode012) {
 	if (nf::Parser::ContainsMetachars(srcStr)) return srcStr;
 
 	tstring result = srcStr;
-	if (mode012 == 2) return srcStr;
+	if (asterixMode012 == nf::ASTERIX_MODE_AS_IS) return srcStr;
 	result.push_back(L'*');	
-	if (mode012 == 1) return result;
+	if (asterixMode012 == nf::ASTERIX_MODE_POSTFIX) return result;
 
 	result.insert(0, L"*");	
 	return result;
 }
 
 tstring nf::Parser::ConvertToMask(tstring const& srcStr) {
-	return ConvertToMask(srcStr, Utils::atoi(CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE)));
+	return ConvertToMask(srcStr, static_cast<tasterix_mode>(Utils::atoi(CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE))));
 }
 
 tstring nf::Parser::ConvertMaskToReqex(tstring const& srcName) {

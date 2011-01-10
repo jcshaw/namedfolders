@@ -25,7 +25,7 @@ namespace Parser {
 
 	//превратить строку в маску с учетом режима настроек asterixmode, и наличия в строке метасимволов
 	tstring ConvertToMask(tstring const& SrcStr);
-	tstring ConvertToMask(tstring const& SrcStr, int mode012);
+	tstring ConvertToMask(tstring const& SrcStr, tasterix_mode asterixMode012);
 	tstring ConvertMaskToReqex(tstring const& srcName);
 
 	bool GetCommandKind(tstring const& source, nf::tcommands_kinds &kind, tstring &prefix, tstring &csdp);

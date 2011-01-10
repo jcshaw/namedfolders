@@ -43,14 +43,16 @@ namespace Search {
 
 	// поиск директории, вложенной в текущую, по шаблону {[\dir]|[\\dir]|[\\\dir]|..}+
 	// "\*", "\**", "\..", "\..*"
-	bool SearchByPattern(tstring const& srcPattern, tstring const &rootDir, Search::CSearchEngine &searchPolice, nf::tlist_strings& dest);
+	bool SearchByPattern(tstring const& srcPattern, tstring const &rootDir, Search::CSearchEngine &searchPolice
+		, tasterix_mode AsterixMaskMode012
+		, nf::tlist_strings& dest);
 
 	//найти все директории, удовлетворяющие паттерну
 	//PathPattern должен содержать полный локальный путь вида
 	//C:\path1\path2\...\pathN
 	//причем C - любая одна буква или один из метасимволов ?, * или [a-z]
 	//В токенах pathXXX могут встречаться метасимволы ?, * или [a,b-z]
-	bool SearchMatched(tstring const& PathPattern, Search::CSearchEngine &searchPolice, nf::tlist_strings& dest);
+	bool SearchMatched(tstring const& PathPattern, Search::CSearchEngine &searchPolice, tasterix_mode AsterixMaskMode012, nf::tlist_strings& dest);
 
 	class MaskMatcher {	
 	public:

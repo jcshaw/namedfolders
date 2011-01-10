@@ -14,17 +14,17 @@ namespace Search {
 //extended implementation of SearchByPattern function
 class PathsFinder {
 public:
-	PathsFinder(CSearchEngine &searchPolice, bool bShortSyntaxInPathAllowed, int asterixMode012);
+	PathsFinder(CSearchEngine &searchPolice, bool bShortSyntaxInPathAllowed, tasterix_mode asterixMode012);
 	~PathsFinder(void);
 
 	bool SearchByPattern(tstring const& Pattern, tstring const &RootDir, nf::tlist_strings& dest);
 private:
-	bool search(unsigned int itemIndex, nf::tlist_pairs_strings listItems, tstring const &RootDir, nf::tlist_strings& dest);
+	bool search(nf::tlist_pairs_strings::const_iterator listItemsPos, nf::tlist_pairs_strings const& listItems, tstring const &RootDir, nf::tlist_strings& dest);
 	bool deep_search(tpair_strings nameMetachar, tstring const& rootDir, nf::tlist_strings &dest);
 	wchar_t const* extract_metachar(wchar_t const* srcPattern, tpair_strings& nameMetachar);
 	CSearchEngine m_SearchPolice;
 	bool const ShortSyntaxInPathAllowed;
-	int const AsterixMode012;
+	tasterix_mode const AsterixMode012;
 };
 
 }

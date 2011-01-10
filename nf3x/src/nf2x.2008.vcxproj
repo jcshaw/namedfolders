@@ -93,8 +93,9 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\libs\stlport\STLport-5.2.1\stlport.bak;D:\libs\stlsoft-1.9.101\include;D:\libs\boost\include\boost-1_44;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\libs64\stlsoft-1.9.96\include;D:\libs64\boost\include\boost-1_44;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\libs64\stlsoft-1.9.96\include;D:\libs64\boost\include\boost-1_44;$(IncludePath)</IncludePath>
-    <RunCodeAnalysis Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</RunCodeAnalysis>
+    <RunCodeAnalysis Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</RunCodeAnalysis>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\libs\stlport\STLport-5.2.1\lib.bak;D:\libs\msvcrt.bak;$(LibraryPath)</LibraryPath>
+    <CodeAnalysisIgnoreGeneratedCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -171,7 +172,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <AdditionalDependencies>LIBCPMT.lib;LIBCMT.lib;kernel32.lib;uuid.lib;user32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;shlwapi.lib;comsupp.lib;libboost_regex-vc100-mt-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -243,6 +244,7 @@
     <ClCompile Include="executor\executor_select.cpp" />
     <ClCompile Include="main\Kernel.cpp" />
     <ClCompile Include="utilites\Parser.cpp" />
+    <ClCompile Include="utilites\PathsFinder.cpp" />
     <ClCompile Include="utilites\searcherpaths.cpp" />
     <ClCompile Include="utilites\select_variants.cpp" />
     <ClCompile Include="utilites\settings.cpp" />
@@ -286,6 +288,7 @@
     <ClInclude Include="executor\executor_select.h" />
     <ClInclude Include="main\Kernel.h" />
     <ClInclude Include="utilites\Parser.h" />
+    <ClInclude Include="utilites\PathsFinder.h" />
     <ClInclude Include="utilites\searcherpaths.h" />
     <ClInclude Include="utilites\select_variants.h" />
     <ClInclude Include="utilites\settings.h" />

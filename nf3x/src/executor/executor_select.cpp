@@ -49,13 +49,15 @@ void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring con
 	tstring svalue = Utils::SubstituteSearchMetachars(srcValue, ballow_short_syntax);
 
 	nf::Search::CSearchEngine ssp(nf::WTS_DIRECTORIES, false);
-	nf::Search::SearchMatched(svalue, ssp, destListPaths);
+	nf::Search::SearchMatched(svalue, ssp, nf::ASTERIX_MODE_AS_IS, destListPaths);
 
 	if (! local_path.empty()) {	//учитываем локальный путь относительно каждой найденной директории	
 		nf::tlist_strings list_paths;
 		nf::Search::CSearchEngine ssp(whatToSearch, true);
 		BOOST_FOREACH(tstring const& path, destListPaths) {
-			nf::Search::SearchByPattern(local_path.c_str(), path, ssp, list_paths);
+			nf::Search::SearchByPattern(local_path.c_str(), path, ssp
+				, static_cast<tasterix_mode>(Utils::atoi(nf::CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE)))
+				, list_paths);
 		}
 		destListPaths.swap(list_paths);
 	}
