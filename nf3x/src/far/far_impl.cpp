@@ -115,7 +115,9 @@ namespace {
 		if (whatToSearch != nf::WTS_DIRECTORIES && ! ::PathIsDirectory(dest_path.c_str())) {
 			//open directory where file is located; currently, we lost filename.
 			//!TODO: it world be perfect to position on this file
-			Utils::DividePathFilename(dest_path, dest_path, fnDest, SLASH_DIRS_CHAR, false);
+			tpair_strings kvp = Utils::DividePathFilename(dest_path, SLASH_DIRS_CHAR, false);
+			dest_path.swap(kvp.first);
+			fnDest.swap(kvp.second);
 			Utils::RemoveLeadingCharsOnPlace(fnDest, SLASH_DIRS_CHAR);
 		} else {
 			fnDest = L"";

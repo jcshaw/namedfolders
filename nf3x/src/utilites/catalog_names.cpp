@@ -17,11 +17,7 @@ extern struct FarStandardFunctions g_FSF;
 extern bool IsNamedFoldersCatalogExists(tstring const& catalogName);
 
 tstring Utils::ExtractCatalogName(tstring const& srcPath) {
-	tstring path;
-	tstring filename;
-	DividePathFilename(srcPath, path, filename, SLASH_CATS_CHAR, true);
-	RemoveLeadingCharsOnPlace(filename, SLASH_CATS_CHAR);
-	return filename;
+	return DividePathFilename(srcPath, SLASH_CATS_CHAR, true).second;
 }
 
 // a/b, c/d -> a/c/d
@@ -114,9 +110,7 @@ bool Utils::ExpandCatalogPath(tstring const &srcCatalog
 	// /1/20/200
 	// мы находимся в каталоге 1/20 и даем команду переместить его в 10/100
 	// в итоге у нас должен создасться каталог 1/10/100/20/200
-		tstring parent_sibling;
-		tstring name;
-		Utils::DividePathFilename(srcCatalog, parent_sibling, name, SLASH_CATS_CHAR, false);
+		tstring parent_sibling = Utils::DividePathFilename(srcCatalog, SLASH_CATS_CHAR, false).first;
 
 		BOOST_FOREACH(tstring const& token, target_tokens) {
 			tstring sibling_catalog = Utils::CombinePath(parent_sibling, token, SLASH_CATS);
@@ -184,25 +178,23 @@ bool Utils::PrepareMovingShortcut(nf::tshortcut_info const &srcSh, tstring const
 	//path can contain ".." and "."
 	destSh = srcSh;
 	if (! targetPath.empty()) {
-		tstring name;
-		tstring dest_catalog;
-		Utils::DividePathFilename(targetPath, dest_catalog, name, SLASH_CATS_CHAR, false);
-		Utils::RemoveLeadingCharsOnPlace(name, SLASH_CATS_CHAR);
+		tpair_strings kvp = Utils::DividePathFilename(targetPath, SLASH_CATS_CHAR, false);
+		Utils::RemoveLeadingCharsOnPlace(kvp.second, SLASH_CATS_CHAR);
 
 		if (Utils::IsCatalogPathRelated(targetPath)) {
-			dest_catalog = MakePathCompact(dest_catalog, true);
-			if (! dest_catalog.empty()) {
-				destSh.catalog = destSh.catalog + dest_catalog;
+			kvp.first = MakePathCompact(kvp.first, true);
+			if (! kvp.first.empty()) {
+				destSh.catalog = destSh.catalog + kvp.first;
 			}
 		} else {
-			destSh.catalog.swap(dest_catalog);
+			destSh.catalog.swap(kvp.first);
 		}
 
-		if (! name.empty()) {
-			if (name == L"..") {
+		if (! kvp.second.empty()) {
+			if (kvp.second == L"..") {
 				destSh.catalog += L"/..";
 			} else {
-				destSh.shortcut.swap(name);
+				destSh.shortcut.swap(kvp.second);
 			}
 		}
 	}

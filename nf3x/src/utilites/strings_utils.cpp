@@ -27,30 +27,31 @@ namespace {
 	}
 }
 
-void Utils::DividePathFilename(tstring const &src
-						  , tstring &path
-						  , tstring &filename
+tpair_strings Utils::DividePathFilename(tstring const &src
 						  , wchar_t slashChar
 						  , bool bRemoveTrailingChar)
 {
-	path = src;
+	tpair_strings ret;
+	ret.first = src;
 	if (bRemoveTrailingChar) 
-		RemoveTrailingCharsOnPlace(path, slashChar);
+		RemoveTrailingCharsOnPlace(ret.first, slashChar);
 	
-	tstring::size_type npos = path.find_last_of(slashChar);
+	tstring::size_type npos = ret.first.find_last_of(slashChar);
 	if (npos != tstring::npos) {
-		filename.assign(path, npos, path.size()-npos);
-		RemoveLeadingCharsOnPlace(filename, slashChar);
-		path.erase(npos, path.size()-npos);
+		ret.second.assign(ret.first, npos, ret.first.size()-npos);
+		RemoveLeadingCharsOnPlace(ret.second, slashChar);
+		ret.first.erase(npos, ret.first.size()-npos);
 	} else {
-		path.clear();
-		filename = src;
+		ret.first.clear();
+		ret.second = src;
 	}
 
-	if (filename == LEVEL_UP_TWO_POINTS) {
-		path += slashChar + filename;
-		filename.clear();
+	if (ret.second == LEVEL_UP_TWO_POINTS) {
+		ret.first += slashChar + ret.second;
+		ret.second.clear();
 	}
+
+	return ret;
 }
 
 tpair_strings Utils::DivideString(tstring const& srcStr, wchar_t ch) {
@@ -227,7 +228,7 @@ tstring Utils::SubstituteSearchMetachars(tstring const& srcPath, bool bAllowShor
 	if (bAllowShortSyntaxInPath) {
 		s = Utils::ReplaceStringAll(s, LEVEL_UP_TWO_POINTS, MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH);
 	} else {
-		s = Utils::ReplaceStringAll(s, L".", L"");
+		s = Utils::ReplaceStringAll(s, L"..", L"");
 	}
 		//cd:nf.. -> .. is ignored; 
 		//cd:nf\.. -> .. works 
@@ -242,12 +243,6 @@ void Utils::DivideDiskPath(tstring const &src, tstring &destDisk, tstring &destP
 		destDisk.assign(src, 0, 2);
 		destPath.assign(src, 2, src.size() - 2);
 	}
-}
-
-tstring Utils::ExtractFileName(tstring const& srcDir, bool bRemoveTrailingChar) {
-	tstring filename, dir;
-	DividePathFilename(srcDir, dir, filename, SLASH_DIRS_CHAR, bRemoveTrailingChar);
-	return filename;
 }
 
 bool Utils::EndWith(tstring const& srcStr, tstring const& strToSearch) {

@@ -118,14 +118,22 @@ namespace {
 		return Commands::AddCatalog(plugin, cmd.catalog);
 	}
 
-	bool open_directory_directly(CPanelInfoWrap &plugin, nf::tparsed_command &cmd) {	
+	inline bool open_directory_directly(CPanelInfoWrap &plugin, nf::tparsed_command &cmd) {	
 		if (Utils::IsLastCharEqualTo(cmd.local_directory, L':')) { 
 			cmd.local_directory += L"\\*"; //cd:z: must be automatically converted to cd:z:\*
 		}
-		tstring path;
-		tstring local;
-		Utils::DividePathFilename(cmd.local_directory, path, local, SLASH_DIRS_CHAR, true);
-		return nf::Commands::OpenPath(plugin, path, local);
+		tpair_strings kvp = Utils::DividePathFilename(cmd.local_directory, SLASH_DIRS_CHAR, true);
+		return nf::Commands::OpenPath(plugin, kvp.first, kvp.second);
+	}
+
+	inline bool open_network(CPanelInfoWrap &plugin, tstring const& networkPath) {
+		tshortcut_value_parsed vp;
+		vp.bValueEnabled = true;
+		vp.ValueType = VAL_TYPE_NET_DIRECTORY;
+		vp.value = networkPath;
+		return ::OpenShortcutOnPanel(plugin, vp, L"", false, false, true
+			, WTS_DIRECTORIES //!TODO: а если это файл?
+			);
 	}
 }
 
@@ -143,8 +151,8 @@ bool nf::ExecuteCommand(nf::tparsed_command &cmd) {
 		return open_by_path(plugin, cmd);
 	case nf::QK_OPEN_ENVIRONMENT_VARIABLE: //cd:%
 		return nf::Selectors::OpenEnvVar(plugin, cmd.shortcut, cmd.local_directory);
-	case nf::QK_OPEN_NETWORK:	/*cd:\\*/
-		return false; //!TODO: check
+	case nf::QK_OPEN_NETWORK: 	/*cd:\\*/
+		return open_network(plugin, L"\\" + cmd.local_directory);
 	case nf::QK_INSERT_SHORTCUT:	//cd::
 	case nf::QK_INSERT_SHORTCUT_IMPLICIT: //cd::
 	case nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT: //cd:+
@@ -274,9 +282,12 @@ bool nf::Commands::OpenShortcut(HANDLE hPlugin
 	select_panel(plugin, vp, bOpenOnActivePanel);
 
 	bool bOpenBoth = vp.first.bValueEnabled && vp.second.bValueEnabled;
-	if (vp.second.bValueEnabled) ::OpenShortcutOnPanel(hPlugin, vp.second, LocalPath, false, bOpenBoth, false, WhatToSearch);
-	if (vp.first.bValueEnabled) ::OpenShortcutOnPanel(hPlugin, vp.first, LocalPath, true, bOpenBoth
-		, (hPlugin != INVALID_HANDLE_VALUE), WhatToSearch);
+	if (vp.second.bValueEnabled) {
+		::OpenShortcutOnPanel(hPlugin, vp.second, LocalPath, false, bOpenBoth, false, WhatToSearch);
+	}
+	if (vp.first.bValueEnabled) {
+		::OpenShortcutOnPanel(hPlugin, vp.first, LocalPath, true, bOpenBoth, (hPlugin != INVALID_HANDLE_VALUE), WhatToSearch);
+	}
 
 	return true;
 }
@@ -318,8 +329,12 @@ bool nf::Commands::OpenShortcutInExplorer(HANDLE hPlugin, nf::tshortcut_info con
 	tstring value;
 	Shell::GetShortcutValue(sh, value);
 	nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(value);
-	if (vp.first.bValueEnabled) nf::Commands::OpenPathInExplorer(vp.first.value);
-	if (vp.second.bValueEnabled) nf::Commands::OpenPathInExplorer(vp.second.value);
+	if (vp.first.bValueEnabled) {
+		nf::Commands::OpenPathInExplorer(vp.first.value);
+	}
+	if (vp.second.bValueEnabled) {
+		nf::Commands::OpenPathInExplorer(vp.second.value);
+	}
 	return TRUE;
 }
 

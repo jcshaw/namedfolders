@@ -164,7 +164,10 @@ bool nf::Search::PathsFinder::search(nf::tlist_pairs_strings::const_iterator lis
 	nf::tlist_strings list;
 //находим все директории, в которых нужно вести поиск остальных элементов 
 //если мы ищем файлы, то на последнем элементе в list попадут файлы, а не директории
-	if (! deep_search(*listItemsPos, rootDir, list)) return false;
+	if (! deep_search(*listItemsPos, rootDir, list)) {
+		std::copy(list.begin(), list.end(), std::insert_iterator<nf::tlist_strings >(dest, dest.begin()));
+		return false;
+	}
 
 	nf::tlist_pairs_strings::const_iterator pnext = listItemsPos;
 	++pnext;
@@ -190,10 +193,13 @@ bool nf::Search::PathsFinder::deep_search(tpair_strings nameMetachar, tstring co
 	nf::tlist_strings dirs; 
 	if (get_metachar_kind(nameMetachar.second) == ID_SEARCH_FORWARD) {
 		dirs.push_back(rootDir);
-		for (unsigned int i = 0; i < deep; ++i) {
+		for (unsigned int i = 0; i < deep; ++i) {		
 			nf::tlist_strings level_dirs;
 			BOOST_FOREACH(tstring const& sdir, dirs) {
-				if (check_for_esc()) return false;	//exit by esc
+				if (check_for_esc()) {
+					dirs.swap(level_dirs);
+					return false;	//exit by esc
+				}
 				if (i != deep - 1) {
 					m_SearchPolice.SearchItems(sdir, L"*", level_dirs, WTS_DIRECTORIES);
 				}

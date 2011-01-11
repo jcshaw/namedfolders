@@ -65,6 +65,7 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
+				Description="del &quot;c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 				CommandLine="del &quot;c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 			/>
 			<Tool
@@ -100,6 +101,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="copy /b &quot;$(OutDir)\$(ProjectName).dll&quot; &quot;c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 				CommandLine="copy /b &quot;$(OutDir)\$(ProjectName).dll&quot; &quot;c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll&quot;"
 			/>
 		</Configuration>

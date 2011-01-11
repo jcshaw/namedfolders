@@ -47,10 +47,12 @@ namespace Utils {
 
 // path functions
 	tstring ExtractParentDirectory(tstring const& SrcDir);
-	void DividePathFilename(tstring const &src, tstring &path, tstring &filename, wchar_t SlashChar, bool bRemoveTrailingChar);
+	tpair_strings DividePathFilename(tstring const &src, wchar_t SlashChar, bool bRemoveTrailingChar);
 	void DivideDiskPath(tstring const &src, tstring &destDisk, tstring &destPath);
 	tpair_strings DivideString(tstring const& SrcStr, wchar_t ch);
-	tstring ExtractFileName(tstring const& srcDir, bool bRemoveTrailingChar);
+	inline tstring ExtractFileName(tstring const& srcDir, bool bRemoveTrailingChar) {
+		return DividePathFilename(srcDir, SLASH_DIRS_CHAR, bRemoveTrailingChar).second;
+	}
 
 // string helper functions
 	tstring ReplaceStringAll(tstring SrcStr, tstring const& FromStr, tstring const& ToStr);
