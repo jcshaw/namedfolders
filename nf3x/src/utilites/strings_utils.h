@@ -10,14 +10,14 @@
 #include <boost/bind.hpp>
 
 namespace Utils {
-// 	struct CmpStringLessCI
-// 		: public std::binary_function<tstring const&, tstring const&, bool> 
-// 	{
-// 		bool operator()(tstring const& s1, tstring const &s2) const {
-// 			return lstrcmpi(s1.c_str(), s2.c_str()) < 0;
-// 		}
-// 	};
-// 
+	struct CmpStringLessCI
+		: public std::binary_function<tstring const&, tstring const&, bool> 
+	{
+		bool operator()(tstring const& s1, tstring const &s2) const {
+			return lstrcmpi(s1.c_str(), s2.c_str()) < 0;
+		}
+	};
+
 	struct CmpStringEqualCI 
 		: public std::binary_function<tstring const&, tstring const&, bool>
 	{

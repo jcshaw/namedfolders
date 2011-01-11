@@ -150,6 +150,10 @@ bool nf::Search::PathsFinder::SearchByPattern(tstring const& Pattern, tstring co
 	bool bret = search(list.begin(), list, RootDir, results);
 	dest.swap(results);
 
+//сортируем результаты и отбрасываем повторения
+	dest.sort(Utils::CmpStringLessCI());
+	dest.unique();
+
 	return bret;
 }
 

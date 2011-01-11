@@ -17,17 +17,17 @@ typedef struct {
 void nf::ut::test_PathsFinder_with_shortsyntax() {
 	wchar_t const* root_folder = L"Z:\\projects\\GoogleCode\\namedfolders\\ut-data";
 	test_t tests[] = {	
-		{L"\\*\\*\\..*:2", 18} //директории всего 4, но они задваиваются
+		{L"\\a1\\..a", 1}
+		, {L"\\*\\*\\..*:2", 5} //директории всего 5, всего результатов 18
 		, {L"\\a1\\..b", 0}
-		, {L"\\a1\\..a", 1}
 		, {L"\\a1\\..", 1}
-		, {L"\\a1\\..\\*", 3}
-		, {L"\\a1\\*\\..1", 3} //директория одна, но возвращается три раза
+		, {L"\\a1\\..\\*", 3 + 1} //.svn
+		, {L"\\a1\\*\\..1", 1} //директория одна, но возвращается три раза
 		, {L"\\a1\\..\\b\\b", 3}
 		, {L"\\..$", 0} //символ которого заведомо нет в названиях директорий, расположенных выше ut-data
 		, {L"\\..*", 4}
 
-		, {L"\\**:1\\a", 1}
+		, {L"\\**:1\\a", 3} //2 добавляются из-за .svn
 		, {L"\\*\\*", 9}
 		, {L"\\*\\*\\*", 0}
 		, {L"\\a1", 1}
@@ -37,7 +37,7 @@ void nf::ut::test_PathsFinder_with_shortsyntax() {
 	unsigned int const count_tests = sizeof(tests) / sizeof(wchar_t const*[3]);
 
 
-	tasterix_mode asterix_mode = ASTERIX_MODE_POSTFIX;
+	tasterix_mode asterix_mode = ASTERIX_MODE_BOTH;
 	bool ballow_short_syntax = true;
 
 	nf::Search::CSearchEngine engine(nf::WTS_DIRECTORIES, true);
