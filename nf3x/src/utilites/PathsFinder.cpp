@@ -11,6 +11,7 @@
 #include <list>
 #include <functional>
 #include <boost/bind.hpp>
+#include <Shlwapi.h>
 #include <algorithm>
 #include <cmath>
 #include "stlsoft_def.h"
@@ -172,11 +173,32 @@ bool nf::Search::PathsFinder::search(nf::tlist_pairs_strings::const_iterator lis
 	nf::tlist_pairs_strings::const_iterator pnext = listItemsPos;
 	++pnext;
 	if (pnext == listItems.end()) {
-		std::copy(list.begin(), list.end(), std::insert_iterator<nf::tlist_strings >(dest, dest.begin()));
+		if (m_SearchPolice.GetWhatToSearch() != WTS_FILES) {
+			std::copy(list.begin(), list.end(), std::insert_iterator<nf::tlist_strings >(dest, dest.begin()));
+		} else {
+			//копируем только файлы, директории игнорируем
+			BOOST_FOREACH(tstring const& sfile, list) {
+				if (! ::PathIsDirectory(sfile.c_str())) {
+					dest.push_back(sfile);
+				}
+			}
+		}
 	} else { //продолжаем поиск остальных элементов относительно найденных директорий
+		nf::tlist_pairs_strings::const_iterator pnext_next = pnext;
+		++pnext_next;
 		BOOST_FOREACH(tstring const& dir, list) {
 			if (! search(pnext, listItems, dir, dest)) return false;
 		}	
+		if (m_SearchPolice.GetWhatToSearch() != WTS_DIRECTORIES && pnext_next == listItems.end()) { //помещаем найденные файлы в результаты
+			BOOST_FOREACH(tstring const& dir, list) {
+				tstring mask = nf::Parser::ConvertToMask(pnext->first, this->AsterixMode012);
+				if (! ::PathIsDirectory(dir.c_str())) {
+					if (Parser::IsTokenMatchedToPattern(::PathFindFileName(dir.c_str()), mask)) {
+						dest.push_back(dir);
+					}
+				}
+			}
+		}
 	}
 	return true;
 }
@@ -203,7 +225,9 @@ bool nf::Search::PathsFinder::deep_search(tpair_strings nameMetachar, tstring co
 				if (i != deep - 1) {
 					m_SearchPolice.SearchItems(sdir, L"*", level_dirs, WTS_DIRECTORIES);
 				}
-				m_SearchPolice.SearchItems(sdir, name_mask, dest);
+				m_SearchPolice.SearchItems(sdir, name_mask, dest, m_SearchPolice.GetWhatToSearch() == WTS_DIRECTORIES 
+					? nf::WTS_DIRECTORIES
+					: nf::WTS_DIRECTORIES_AND_FILES);
 			}
 			if (level_dirs.size() == 0) break; //нет больше вложенных директорий
 			dirs.swap(level_dirs);

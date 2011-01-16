@@ -37,7 +37,7 @@ namespace Commands {
 	}
 
 //открыть в Explorer
-	bool OpenPath(HANDLE hPlugin, tstring const& parentPath, tstring const& localPath);
+	bool OpenPath(HANDLE hPlugin, tstring const& parentPath, tstring const& localPath, nf::twhat_to_search_t whatToSearch);
 	void OpenPathInExplorer(tstring const& s);
 
 //создать новый псевдоним / каталог
@@ -53,12 +53,20 @@ namespace Commands {
 		, HANDLE hPlugin = INVALID_HANDLE_VALUE
 		, bool bGetDataFromActivePanel = true	//с активной или неактивной панели брать данные		
 	);
-	bool IsCatalogIsEmpty(nf::tcatalog_info const& cat);
+	bool CheckIfCatalogIsEmpty(nf::tcatalog_info const& cat);
 
 //класс для удаления одного/нескольких каталогов и/или псевдонимов
-	int DeleteShortcut(nf::tshortcut_info const& Shortcut, bool bImplicit = false);
-	int DeleteCatalog(nf::tcatalog_info const& Catalog, bool bImplicit = false);
 	int DeleteCatalogsAndShortcuts(nf::tshortcuts_list const& listSh
 		, nf::tcatalogs_list const& listCatalogs, bool bImplicit);
+	inline int DeleteShortcut(nf::tshortcut_info const& srcSh, bool bImplicit = false) {
+		nf::tshortcuts_list shortcuts;
+		shortcuts.push_back(srcSh);
+		return DeleteCatalogsAndShortcuts(shortcuts, nf::tcatalogs_list(), bImplicit);
+	}
+	inline int DeleteCatalog(nf::tcatalog_info const& srcCatalog, bool bImplicit = false) {
+		nf::tcatalogs_list catalogs;
+		catalogs.push_back(srcCatalog);
+		return DeleteCatalogsAndShortcuts(nf::tshortcuts_list(), catalogs, bImplicit);
+	}
 } 
 };

@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
+<version product_name="Named Folders" version="3.0.0.253 RC2" date="16.01.2011"> 
+<item type="!">Plugin supports two new  metacharacters "\**:N" and "\..*:N".
+They allow to limit deep search for search in deep and search up.
+Metacharacters "\**" and "\..*" are used for search with unlimited level search.
+If option "Short syntax in paths" is turned on, then you are able to use
+alternative variant for these metacharactes: N slashes and N+1 dots.</item>
+<item type="-">Command "cd:\\network_path" to open network paths directly 
+doesn't work in previous versions of the plugin. Now it's implemented.</item>
+<item type="-">Pressing Esc during process of searching stopped search process
+without visualisation of already found results.</item>
+<item type="-">Plugin don't open aliases that links network directories with
+dot(s) in path, i.e. "\\computer\abc.cde"</item>
+<item type="-">Commands "cd:%var%" and "cd:%var" don't work under WinXP in 
+some cases.</item>
+<item type="+">Command "cd:path" allows to specify path in quotes, i.e. 
+cd:"c:\temp"</item>
+<item type="+">Commands cd:--f" and "cd:--df" supports new possibility to
+specify required directory directly, without alias. I.e. "cd:--f c:\temp\**". 
+If required path contains spaces, the path should be qouted, i.e.:
+cd:--df "c:\program files\**:2\*diz"</item>
+<item type="*">Help is improved</item>
+</version>
+
 <version product_name="Named Folders" version="3.0.0.249 RC1" date="7.01.2011"> 
 <item type="*">Direct path commands use technology of search by related
 paths (see above). I.e. they support metachars "\**", "..*", "\*", "\..".

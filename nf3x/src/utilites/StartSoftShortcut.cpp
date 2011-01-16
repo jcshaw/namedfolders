@@ -328,7 +328,7 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd) {
 					tstring program_directory;
 					if (GetShortcutProgramPath(path, program_directory, true)) {
 						CPanelInfoWrap wrap(INVALID_HANDLE_VALUE);
-						nf::Commands::OpenPath(wrap, program_directory, L"");
+						nf::Commands::OpenPath(wrap, program_directory, L"", nf::WTS_DIRECTORIES);
 					}
 				} break;
 			case Menu::CMenuApplications::SWITCH_IGNORE_MODE_ONOFF: continue;

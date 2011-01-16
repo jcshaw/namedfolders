@@ -118,12 +118,12 @@ namespace {
 		return Commands::AddCatalog(plugin, cmd.catalog);
 	}
 
-	inline bool open_directory_directly(CPanelInfoWrap &plugin, nf::tparsed_command &cmd) {	
+	inline bool open_directory_directly(CPanelInfoWrap &plugin, nf::tparsed_command &cmd, nf::twhat_to_search_t whatToSearch) {	
 		if (Utils::IsLastCharEqualTo(cmd.local_directory, L':')) { 
 			cmd.local_directory += L"\\*"; //cd:z: must be automatically converted to cd:z:\*
 		}
 		tpair_strings kvp = Utils::DividePathFilename(cmd.local_directory, SLASH_DIRS_CHAR, true);
-		return nf::Commands::OpenPath(plugin, kvp.first, kvp.second);
+		return nf::Commands::OpenPath(plugin, kvp.first, kvp.second, whatToSearch);
 	}
 
 	inline bool open_network(CPanelInfoWrap &plugin, tstring const& networkPath) {
@@ -142,10 +142,18 @@ bool nf::ExecuteCommand(nf::tparsed_command &cmd) {
 
 	switch(cmd.kind) {
 	case nf::QK_OPEN_DIRECTORY_DIRECTLY:
-		return open_directory_directly(plugin, cmd);
+		return open_directory_directly(plugin, cmd, nf::WTS_DIRECTORIES);
 	case nf::QK_OPEN_SHORTCUT: //cd:
+		return open_shortcut(cmd, plugin, get_what_to_search(cmd.kind));
 	case nf::QK_SEARCH_DIRECTORIES_AND_FILES:
 	case nf::QK_SEARCH_FILE: 
+		if (cmd.catalog.empty()) {
+			if ((0 != Parser::GetNetworkPathPrefixLength(cmd.shortcut)) || ::PathFileExists(cmd.shortcut.c_str())) {
+				cmd.local_directory = Utils::CombinePath(cmd.shortcut, cmd.local_directory, SLASH_DIRS);
+				cmd.shortcut.clear();
+				return open_directory_directly(plugin, cmd, get_what_to_search(cmd.kind));
+			}
+		}
 		return open_shortcut(cmd, plugin, get_what_to_search(cmd.kind));
 	case nf::QK_OPEN_BY_PATH:	//cd:~ 
 		return open_by_path(plugin, cmd);
@@ -315,13 +323,13 @@ bool nf::Commands::OpenShortcut(HANDLE hPlugin
 	return ::SelectAndOpenPathOnPanel(hPlugin, list_sh_paths, WhatToSearch, bOpenOnActivePanel);
 }
 
-bool nf::Commands::OpenPath(HANDLE hPlugin, tstring const& srcPath, tstring const& localPath) {	//open specified directory on the active panel
+bool nf::Commands::OpenPath(HANDLE hPlugin, tstring const& srcPath, tstring const& localPath, nf::twhat_to_search_t whatToSearch) {	//open specified directory on the active panel
 	nf::tshortcut_value_parsed ap;		//active panel
 	ap.bValueEnabled = true;
 	ap.value = srcPath;
 	ap.ValueType = nf::VAL_DIRECT_PATH;
 
-	::OpenShortcutOnPanel(hPlugin, ap, localPath, true, false, true, nf::WTS_DIRECTORIES);
+	::OpenShortcutOnPanel(hPlugin, ap, localPath, true, false, true, whatToSearch);
 	return true;
 }
 
@@ -381,7 +389,7 @@ bool nf::Commands::AddShortcutForBothPanels(HANDLE hPlugin, nf::tcatalog_info co
 		, bImplicit);
 }
 
-bool nf::Commands::IsCatalogIsEmpty(nf::tcatalog_info const& cat) {
+bool nf::Commands::CheckIfCatalogIsEmpty(nf::tcatalog_info const& cat) {
 	sc::CCatalog c(cat);
 	return (0 == c.GetNumberSubcatalogs()) && (0 == c.GetNumberShortcuts());
 }
@@ -440,18 +448,6 @@ tpair_strings nf::Commands::get_implicit_name_and_value(bool bBothPanels, HANDLE
 	return result;
 }
 
-int nf::Commands::DeleteShortcut(nf::tshortcut_info const& srcSh, bool bImplicit) {
-	nf::tshortcuts_list shortcuts;
-	shortcuts.push_back(srcSh);
-	return DeleteCatalogsAndShortcuts(shortcuts, nf::tcatalogs_list(), bImplicit);
-}
-
-int nf::Commands::DeleteCatalog(nf::tcatalog_info const& srcCatalog, bool bImplicit) {
-	nf::tcatalogs_list catalogs;
-	catalogs.push_back(srcCatalog);
-	return DeleteCatalogsAndShortcuts(nf::tshortcuts_list(), catalogs, bImplicit);
-}
-
 int nf::Commands::DeleteCatalogsAndShortcuts(nf::tshortcuts_list const& listSh
 											 , nf::tcatalogs_list const& listCatalogs
 											 , bool bImplicit)
@@ -474,7 +470,7 @@ int nf::Commands::DeleteCatalogsAndShortcuts(nf::tshortcuts_list const& listSh
 			case R_SKIP: continue;
 			}
 		}
-		if (bConfirmNotEmpty && (! nf::Commands::IsCatalogIsEmpty(t))) {	
+		if (bConfirmNotEmpty && (! nf::Commands::CheckIfCatalogIsEmpty(t))) {	
 			switch (nf::Confirmations::AskForDelete(t, true, bSeveral)) {
 			case R_DELETEALL: bConfirmNotEmpty = false; break;
 			case R_CANCEL: return count_deleted;

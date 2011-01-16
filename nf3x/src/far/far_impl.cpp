@@ -130,7 +130,7 @@ namespace {
 bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, tstring path
 							 , bool bActivePanel, bool bOpenBoth
 							 , bool bClosePlugin
-							 , nf::twhat_to_search_t WhatToSearch) {
+							 , nf::twhat_to_search_t whatToSearch) {
 	using namespace nf;
 	assert(panel.bValueEnabled);
 	CPanelInfoWrap plugin(hPlugin);
@@ -164,7 +164,7 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 				if (! PathFileExists(full_path.c_str())) {
 					tstring disk;
 					Utils::DivideDiskPath(full_path, disk, path);
-					if (ID_PATH_SELECTED != nf::Selectors::GetPath(hPlugin, disk, path, dir, nf::WTS_DIRECTORIES)) return false;
+					if (ID_PATH_SELECTED != nf::Selectors::GetPath(hPlugin, disk, path, dir, whatToSearch)) return false;
 				} else {
 					dir.swap(full_path);
 				}
@@ -176,7 +176,7 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 				break;
 			}
 		default:
-			switch( ::find_path_and_filename(hPlugin, panel.value, WhatToSearch, path, panel.value, filename)) {
+			switch( ::find_path_and_filename(hPlugin, panel.value, whatToSearch, path, panel.value, filename)) {
 			case ID_PATH_NOT_FOUND: if (! nf::Selectors::FindBestDirectory(hPlugin, panel, path, dir)) return false;
 				break;
 			case ID_MENU_CANCELED: return false;				

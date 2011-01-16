@@ -9,6 +9,30 @@
 
 
 ----------------------------------------------------------------------------
+Version 3.0.0.253 RC2 [16.01.2011]
+----------------------------------------------------------------------------
+[!] Plugin supports two new  metacharacters "\**:N" and "\..*:N".
+They allow to limit deep search for search in deep and search up.
+Metacharacters "\**" and "\..*" are used for search with unlimited level search.
+If option "Short syntax in paths" is turned on, then you are able to use
+alternative variant for these metacharactes: N slashes and N+1 dots.
+[-] Command "cd:\\network_path" to open network paths directly 
+doesn't work in previous versions of the plugin. Now it's implemented.
+[-] Pressing Esc during process of searching stopped search process
+without visualisation of already found results.
+[-] Plugin don't open aliases that links network directories with
+dot(s) in path, i.e. "\\computer\abc.cde"
+[-] Commands "cd:%var%" and "cd:%var" don't work under WinXP in 
+some cases.
+[+] Command "cd:path" allows to specify path in quotes, i.e. 
+cd:"c:\temp"
+[+] Commands cd:--f" and "cd:--df" supports new possibility to
+specify required directory directly, without alias. I.e. "cd:--f c:\temp\**". 
+If required path contains spaces, the path should be qouted, i.e.:
+cd:--df "c:\program files\**:2\*diz"
+[*] Help is improved
+
+----------------------------------------------------------------------------
 Version 3.0.0.249 RC1 [7.01.2011]
 ----------------------------------------------------------------------------
 [*] Direct path commands use technology of search by related

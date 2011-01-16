@@ -18,14 +18,17 @@ namespace re {	//регул€рные выражени€
 //в регул€рном выражении не указан префикс (он задаетс€ отдельным регул€рным выражением RE_PREFIX)
 //каждое регул€рное выражение раскладывает строку на две части - команду (один или несколько спецсимовлов)
 //и путь к €рлыку и директорию
-	const int NUM_COMMANDS = 21;
+	const int NUM_COMMANDS = 24;
 	nf::tcommands_kinds LIST_COMMANDS[NUM_COMMANDS] = {
 		nf::QK_OPEN_DIRECTORY_DIRECTLY
+		, nf::QK_OPEN_DIRECTORY_DIRECTLY //второй вариант той же команды
 		, nf::QK_OPEN_SHORTCUT		
 		, nf::QK_INSERT_CATALOG
 		, nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT	
 		, nf::QK_INSERT_SHORTCUT_IMPLICIT	
 		, nf::QK_SEARCH_FILE
+		, nf::QK_SEARCH_FILE
+		, nf::QK_SEARCH_DIRECTORIES_AND_FILES
 		, nf::QK_SEARCH_DIRECTORIES_AND_FILES
 		, nf::QK_DELETE_CATALOG
 		, nf::QK_DELETE_SHORTCUT_IMPLICIT	
@@ -45,12 +48,15 @@ namespace re {	//регул€рные выражени€
 	};	//последовательность команд в списке RE_LIST_COMMANDS
 	wchar_t const* LIST_RE[NUM_COMMANDS] = {
 		L"()(\\w:.*)" //L"()(\\w:\\\\.*)" - заменено, чтобы работало cd:z:
+		,L"()\\\"(\\w:[^\\\"]*)\\\"" //
 		, L"()([\\*\\?\\w\\d_\\.@#\\(\\)].*)"
 		, L"(:)([^:\\+].*?/)$" //QK_INSERT_CATALOG
 		, L"(\\+)((?:[^:\\+]+\\/)?)$" //QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT
 		, L"(:)((?:[^:\\+]+\\/)?)$" //QK_INSERT_SHORTCUT_IMPLICIT
 		, L"(\\-\\-f\\s+)(.*)" //QK_SEARCH_FILE
+		, L"(\\-\\-f\\s+)\\\"([^\\\"]*)\\\"" //QK_SEARCH_FILE
 		, L"(\\-\\-df\\s+)(.*)" //QK_SEARCH_DIRECTORIES_AND_FILES
+		, L"(\\-\\-df\\s+)\\\"([^\\\"]*)\\\"" //QK_SEARCH_DIRECTORIES_AND_FILES
 		, L"(\\-)(.*\\/\\s*)" //QK_DELETE_CATALOG
 		, L"(\\-)((?:.+\\/)?)$" //QK_DELETE_SHORTCUT_IMPLICIT
 		, L"(:)([^:\\+].*)" //QK_INSERT_SHORTCUT
@@ -70,8 +76,10 @@ namespace re {	//регул€рные выражени€
 	};
 //префикс команды
 	wchar_t const * RE_PREFIX = L"^((?:[\\w]+)|(?::)):";
-//парсинг каталог/€рлычок\директори€
+//парсинг каталог/€рлычок\директори€ параметры
 	wchar_t const * RE_CSD = L"([^\\s\\.\\\\]*\\/)?(\\.?[^\\s\\.\\/\\\\]*)?([\\.\\\\][^\\s]*)?(\\s+.+)?";
+//парсинг каталог/"€рлычок\директори€" параметры (дл€ пр€мых путей)
+	wchar_t const * RE_CSD_QUOTED = L"([^\\s\\.\\\\]*\\/)?\\\"(\\.?[^\\\"\\.\\/\\\\]*)?([\\.\\\\][^\\\"]*)\\\"?(\\s+.+)?";
 //парсинг софт параметры
 	wchar_t const * RE_SOFT = L"([^\\s]+)(\\s+\"?([^\"]*)\"?)?";
 //		L"([^\\\\]*\\/)?([^\\/\\\\]*)?(\\\\[^\\s]+)?(\\s+.+)?";
@@ -158,8 +166,9 @@ bool nf::Parser::GetCommandKind(tstring const& source, nf::tcommands_kinds &kind
 bool nf::Parser::ParseCSDP(tstring const&csdp, tstring &c, tstring &s, tstring &d, tstring &p) {	
 //разделить каталог/€рлычек\директорию на составл€ющие
 	tregex expression(NF_BOOST_REGEX_COMPILE(re::RE_CSD));
+	tregex expression_q(NF_BOOST_REGEX_COMPILE(re::RE_CSD_QUOTED));
 	tsmatch what;
-	if (NF_BOOST_REGEX_LIB::regex_match(csdp, what, expression)) {
+	if (NF_BOOST_REGEX_LIB::regex_match(csdp, what, expression_q) || NF_BOOST_REGEX_LIB::regex_match(csdp, what, expression)) {
 		c = what[1];
 		s = what[2];
 		//remove_prefix_from_shortcut(s);

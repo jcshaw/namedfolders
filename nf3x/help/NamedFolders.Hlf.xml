@@ -31,14 +31,13 @@ Brilliant program!
   <link section="Patterns">Command patterns</link> - short notations for frequently used commands.
 
   <link section="Settings">Settings</link> - settings of the plugin.
-
+                            
   <link section="Reg">reg-files</link>  - description of registry files.
 
 </section>
 
 <section title="NamedFolderPaths">
 <title>Named folders paths</title>
-
   You can specify named folder explicitly (local path, network path) or implicitly
 (local path with metacharacters, environment variable, registry key). Implicit form
 forces the plugin to search proper directories and to show to user all appropriated 
@@ -46,22 +45,45 @@ variants through <link section="MenuSelect">menu of variants</link>.
 
 <ss>Variants of named folders paths</ss>
   #Local path# - path to local folders should be specified as "c:\path1\path2".
-  It's possible to use in these paths metacharacters of FAR (?, *, [a, b-z]). Scope "*" is not spreaded to
-subfolders (* is not matched to slash). So, you should specify explicitly the depth of searching by
-number of slashes. I.e. #c:\a# - search "a" in folders directly embedded in "c:\". 
-#c:\\a# - search "a" in theses folders and in their direct subfolders. And so on.
-  You can use "." instead of "\" to make search in reverse direction (in parent folders).
-  You can use "\*\" and "\," to search in all subfolders and all parent folders correspondingly.
-
   #Network paths# - "\\Computer\path1\path2".
-
   #Environment variable# - "%path%".  In the case of such path, the plugin will show all
 exists directories, specified in the environment variable with name "path" (through semicolons).
-
   #Registy key# - "$HKEY_LOCAL_MACHINE\\Software...".  Such path will force the plugin to find all
 variables in the specified registry key and show to user all exists paths specified in these variables.
 See <link section="Reg">sample</link>.
+
+<ss>Metacharacters in local paths</ss>
+It's possible to use metacharacters in local paths. Plugin supports a set of metacharacters. First of all, it supports standard FAR metacharacters:
+ #*# - 0 or more characters.
+ #?# - any character.
+ #[a-z]# - any character from the set.
+Secondly, it supports special metacharacters to limitate deep of search:
+ #\**# - search deep in all nested directories without any limitations on search deep.
+ #\..*# - search up in all parent directories without any limitations on search deep.
+ #\**:N# - search deep on N levels. There is shot
+syntax for the command: instead of #cd:pf\**:3# you can write #cd:pf\\\#. This possibility
+works if and only if flag "Short syntax in paths" is turned on in plugin settings. Otherwise,
+several slashes are handled as exactly single slash.                                                    
+ #\..*:N# - search up on N levels. Short syntax of the command is #\....# (N + 1 dots).
+If short syntax is turned off then N dots are interpreted as 2 dots (N > 2). Single dot is interpreted as single dot.
+ #..# - The command #cd:pf..# is equal to #cd:pf\..# if short syntax is turned on.
+
+ Possibility to regulate search deep is necessary to accelerate search. I.e. command "cd:pf\**\a" will search all directories in Program Files.
+Usually, it will take a lot of time. But if you remember, that required directory is nested on 1-2 levels in Program files, you can execute
+#cd:pf\**:2a" and take same results much(!) faster.
+
+ If you execute search without search level limitations, you can stop it by pressing Esc and view already found directories.
+
+<ss>Where you can use metacharacters</ss>
+In third places:
+ 1. In command #cd:alias\path# - the plugin will open "based" directory (corresponded to "alias") and then open directory related to based one according to "path"-instructions.
+ 2. In the path that is linked by alias. F.e. you can create alias pf and specify directiron #c:\program files\**:4# for it.
+ 3. In commands of direct search when you specify directory path instead of alias name. I.e. you can type: #cd:c:\program files# or  #cd:"c:\program files\**:4\a"# and etc.
+
+Plugin automatically transforms names to mask accoring to settings, see "Aliases mask expand mode" <link section="Settings">Settings</link>. But this
+mode is used in above variants 1 and 3. If you specify path for alias using metacharacters, then you should specify all required metacharacters yourself.
 </section>
+
  
 <section title="HowUseComandLine">
 <title>How use plugin through command line</title>
@@ -84,12 +106,18 @@ and its subcatalogs only.
   #cd:~~text# - find all shortcuts which named folders paths contain #text#.
 	#cd:%var%# - open directory corresponded to environment variable #var#; 
 if there are several directories in this directory (";"), the plugin allows
-to selecte required directory through variant selection menu. It's possible
-to specify variable name incompletely, i.e. #cd:%p# instead on #cd:%path%#.
-NF3: *path* is found in the name of variable AND in the directory corresponded
-to this environment variable.
-  #cd:path# - open specified path. Path must be absolute local path and may contains metacharacters.
-You can use ".RelativePath" to search "RelativePath" relatively current directory.
+to selecte required directory through variant selection menu. No exist
+directories are excluded from search results.
+ #cd:%var# - command same as previous. There are a couple of differences. 
+This command allows to specify part of environment variable name, not a 
+whole name. So, you can use #cd:%p# instead of #cd:%path%# and 
+#cd:%e# instead of #cd:%temp%#. Important issue: this command searchs
+mask *var* not only in the environment variable names, but in paths too.
+So, if results of command "cd:%c" will include "windir - c:\windows" because
+path "c:\windows" matches to mask "*c*".
+  #cd:path# - open specified path. Path must be absolute local path and may contains 
+metacharacters. You can use ".RelativePath" to search "RelativePath" relatively 
+current directory. "path" can be network directory, i.e. "cd:\\computer_name"
 
 <ss>Search files</ss>
   #cd:--f sh\path# - search all files matched "path" in named folder corresponded to alias "sh". Open directory which
@@ -98,6 +126,10 @@ contains selected file.
 Open selected subdirectory or subdirectory which contains selected file.
   The distributive of the plugin contains files "cdf.reg" and "cf.reg" to set command patterns for
 these commands.
+  Commands #cd:--f# and #cd:--df# allow to specify path directly, without using alias. 
+F.e. #cd:--f c:\temp#, #cd:--df \\computer\abc#, etc. If path contains spaces, it's necessary to quote it, f.e.:
+#cd: "c:\program files\**:3\*b"#.
+
 
 <ss>Creation of catalogs and shortcuts</ss>
   #cd::name# - create constant shortcut in the root catalog;
