@@ -146,7 +146,7 @@ bool nf::Panel::InsertShortcut(CPanel* pPanel, PanelInfo const &pi) {
 	nf::tshortcut_info default_sh;
 	tstring active_panel_value;
 
-	std::pair<tstring, tstring> pair_name_value = nf::Commands::get_implicit_name_and_value(false, pPanel->get_hPlugin(), false);
+	tpair_strings pair_name_value = nf::Commands::get_implicit_name_and_value(false, pPanel->get_hPlugin(), false);
 	default_sh.shortcut.swap(pair_name_value.first);
 	active_panel_value.swap(pair_name_value.second);
 
@@ -265,23 +265,20 @@ int nf::Panel::OpenSelectedItem(CPanel *pPanel, unsigned int ControlState, Panel
 	nf::tshortcut_info sh;
 	if (PKF_SHIFT == ControlState) {	//shift -> open explorer
 		if (! IsSelectedItemIsCatalog(pPanel, pi)) {
-			nf::Commands::OpenShortcutInExplorer(pPanel->get_hPlugin()
-				, GetSelectedShortcut(pPanel, pi, sh), tstring());
+			nf::Commands::OpenShortcutInExplorer(pPanel->get_hPlugin(), GetSelectedShortcut(pPanel, pi, sh), tstring());
 			return TRUE;	
 		}
 	}
 	if (pi.SelectedItemsNumber != 0) {	 //avoid  ".."
 		if (! IsSelectedItemIsCatalog(pPanel, pi)) { //open selected directory in FAR
 			if (PKF_CONTROL != ControlState) {
-				nf::Commands::OpenShortcut(pPanel->get_hPlugin()
-					, GetSelectedShortcut(pPanel, pi, sh), tstring());
+				nf::Commands::OpenShortcut(pPanel->get_hPlugin(), GetSelectedShortcut(pPanel, pi, sh), tstring());
 				return TRUE;	//itsn't necessary to update active panel
 			} else {//на неактивной панели
-				nf::Commands::OpenShortcut(pPanel->get_hPlugin()
-					, GetSelectedShortcut(pPanel, pi, sh), tstring(), false);
+				nf::Commands::OpenShortcut(pPanel->get_hPlugin(), GetSelectedShortcut(pPanel, pi, sh), tstring(), false);
 				return TRUE;	//itsn't necessary to update active panel
 			}
 		} 
 	}	
-	return FALSE; //let's FAR open calalog itself
+	return FALSE; //let's FAR open catalog itself
 }

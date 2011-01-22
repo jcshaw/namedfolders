@@ -8,6 +8,7 @@
 
 #include <list>
 #include <boost/bind.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace Utils {
 	struct CmpStringLessCI
@@ -59,8 +60,12 @@ namespace Utils {
 	void RemoveSingleLeadingCharOnPlace(tstring &str, wchar_t charToRemove);
 	void RemoveSingleTrailingCharOnPlace(tstring &str, wchar_t charToRemove);
 
-	void RemoveLeadingCharsOnPlace(tstring &str, wchar_t charToRemove);
-	void RemoveTrailingCharsOnPlace(tstring &str, wchar_t charToRemove);
+	inline void RemoveLeadingCharsOnPlace(tstring &str, wchar_t charToRemove) {
+		boost::trim_left_if(str, boost::bind(std::equal_to<wchar_t>(), _1, charToRemove));
+	}
+	inline void RemoveTrailingCharsOnPlace(tstring &str, wchar_t charToRemove) {
+		boost::trim_right_if(str, boost::bind(std::equal_to<wchar_t>(), _1, charToRemove));
+	}
 	inline tstring RemoveLeadingChars(tstring const &str, wchar_t charToRemove) {
 		tstring ret = str;
 		RemoveLeadingCharsOnPlace(ret, charToRemove);
@@ -117,7 +122,9 @@ namespace Utils {
 		return g_FSF.atoi(srcStr.c_str());
 	}
 
-	bool EndWith(tstring const& srtStr, tstring const& strToSearch);
+	inline bool EndWith(tstring const& srcStr, tstring const& strToSearch) {
+		return boost::algorithm::ends_with(srcStr, strToSearch);
+	}
 
 namespace Private {
 	//removes sequence of srcCh with min length minCount by byString;

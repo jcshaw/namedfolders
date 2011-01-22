@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
+<version product_name="Named Folders" version="3.0.0.254 release" date="22.01.2011"> 
+<item type="*">Незначительные правки кода.</item>
+<item type="*">Доработан хелп.</item>
+</version>
+
 <version product_name="Named Folders" version="3.0.0.253 RC2" date="16.01.2011"> 
 <item type="!">Введены новые метасимволы "\**:N" и "\..*:N", позволяющие
 ограничивать глубину поиска на N уровней вниз и вверх. Метасимволы "\**" и

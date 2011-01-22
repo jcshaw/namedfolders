@@ -2,8 +2,8 @@
 .PluginContents=Named Folders
 @Contents
 $^#Plugin for FAR "Named Folders".#
-$^#Version 3.0 RC2, January 2011#
-$^#Copyright (c) 2002-2010 by Victor Derevyanko#
+$^#Version 3.0 release, January 2011#
+$^#Copyright (c) 2002-2011 by Victor Derevyanko#
 .
   Program-Plugin #Named Folders# for #Far#.
 
@@ -295,19 +295,54 @@ and pseudo-treelike one).
 menu will show only paths which contains "abc" AND "cde". 
 
 @DialogEditCatalog
-$^#Edit catalog#
+$^#Catalog creation#
 
-!TODO
+Specify name of new catalog as "abc" or "abc/cde". Absolute name is
+started from "/".
 
 @DialogEditShortcut
 $^#Edit shortcut#
 
-!TODO
+  #Catalog# - catalog where shortcut will be placed. 
+  #Shortcut# - name of created shortcut.
+  #Directory for active panel#  - directory to be opened on active FAR panel after shortcut execution.
+This directory can be local, network or directory on the another plugin. It can contain metacharaters, see section ~Named Folder Paths~@NamedFolderPaths@ for details.
+  #Directory for inactive panel#- directory to be opened on inactive FAR panel after shortcut execution (optional parameter)
+  #Temporary# - this shortcut will be removed after computer restart.
 
 @DialogMove
-$^#Move catalogs and shortcuts#
+$^#Copy/move catalogs and shortcuts#
 
-!TODO
+Catalogs and shortcuts can be copied/moved from panel to panel (if you open two NF-panels in FAR).
+You can copy/move them using single panel only by edit their paths in appropriate way. New paths can be 
+specified as absolute or relative paths. Absolute path is started from "/".
+
+There is an example. Assume, that original catalog structure is:
+ /1
+ /1/2
+ /1/3
+
+Open catalog "/1" and command to rename catalog "2". Enter new path for "2":
+New path "/2". Result is:
+ /1
+ /1/3
+ /2
+
+New path "4". Result is:
+ /1
+ /1/4
+ /1/3
+
+New path "3". Result is:
+ /1
+ /1/3/2
+
+Путь "..". Результат:
+ /1
+ /1/3
+ /2
+
+and so on.
 
 @DialogPatterns
 $^#Edit command patterns#
@@ -397,13 +432,13 @@ See reg file: "cs.reg"
   Prefix: cc
   Command: [command]=--df ;[name]=.;[path]=[name]
 Examples:
-  cc:abc\\\ -> cc:.\\\abc
+  cc:abc\** -> cc:.\**abc
 See reg file: "cc.reg"
 
 
 @Author
 $^#Far Named Folders - the plugin for Far Manager.#
-Copyright (c) 2002-2010 by Victor Derevyanko
+Copyright (c) 2002-2011 by Victor Derevyanko
 
   This program is FREEWARE.
    

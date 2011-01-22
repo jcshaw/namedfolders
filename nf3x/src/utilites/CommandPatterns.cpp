@@ -70,15 +70,6 @@ namespace {
 		return lstrcmpi(srcPattern.first.c_str(), Prefix.c_str()) == 0;
 	}
 
-	inline tstring itoa(int n) {
-		wchar_t buffer[33]; //see description of far itoa function: 32 characters + 1 for "0"
-		return g_FSF.itoa(n, &buffer[0], 10);
-	}
-
-	inline int atoi(tstring const& s) {
-		return g_FSF.atoi(s.c_str());
-	}
-
 	class applier {	
 		nf::tregex m_RE;
 		nf::tregex m_SubRE;
@@ -100,7 +91,7 @@ namespace {
 #endif
 		{ 
 			for (int i = 0; i < NUM_PARTS; ++i) {
-				m_VarNames.push_back(std::make_pair(VAR_NAMES[i], itoa(i)) );
+				m_VarNames.push_back(std::make_pair(VAR_NAMES[i], Utils::itoa(i)) );
 			}
 			m_DestParts[ID_PREFIX] = L"cd:";
 		} 
@@ -161,7 +152,7 @@ namespace {
 				, boost::bind(&::is_pair_first_equal_to, _1, boost::cref(varName) ) );
 			if (p == m_VarNames.end()) return false;
 
-			destVarId = atoi(p->second);
+			destVarId = Utils::atoi(p->second);
 			return true;
 		}
 	};

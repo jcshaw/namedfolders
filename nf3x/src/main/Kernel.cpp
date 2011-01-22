@@ -96,14 +96,15 @@ bool nf::Shell::Private::remove_catalog(tstring const& srcCatalog, tstring const
 }
 
 bool nf::Shell::GetShortcutValue(tshortcut_info const& sh, tstring& value) {
-	sc::CCatalog c(sh.catalog);
-	return c.GetShortcutInfo(sh.shortcut, sh.bIsTemporary, value);
+	return sc::CCatalog(sh.catalog).GetShortcutInfo(sh.shortcut, sh.bIsTemporary, value);
 }
 
 bool nf::Shell::MoveShortcut(tshortcut_info const& sh, tstring const& new_shortcut_path, tshortcut_info &sh2) {	
 	if (Utils::PrepareMovingShortcut(sh, new_shortcut_path, sh2)) {
 		return Shell::ModifyShortcut(sh, sh2, 0);
-	} else return false;
+	} else {
+		return false;
+	}
 }
 
 bool nf::Shell::CopyShortcut(tshortcut_info const& srcSh, tstring const& targetPath, tshortcut_info &destSh) {	
@@ -111,7 +112,9 @@ bool nf::Shell::CopyShortcut(tshortcut_info const& srcSh, tstring const& targetP
 		tstring value;
 		if (! Shell::GetShortcutValue(srcSh, value)) return false;
 		return Shell::InsertShortcut(destSh, value, false);
-	} else return false;
+	} else {
+		return false;
+	}
 }
 
 

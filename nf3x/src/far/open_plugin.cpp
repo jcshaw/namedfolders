@@ -57,7 +57,6 @@ HANDLE nf::OpenFromPluginsMenu() {
 	switch(nSelectedItem) {
 	case 0:
 		return new nf::Panel::CPanel();
-		break;
 	case 1: {
 			std::pair<HANDLE, bool> result(INVALID_HANDLE_VALUE, false);
 			CDialogApplyCommand dlg;
@@ -83,7 +82,7 @@ HANDLE nf::OpenFromPluginsMenu() {
 }
 
 namespace {
-	tstring pattern_to_command(tstring const& srcCommand) {
+	inline tstring pattern_to_command(tstring const& srcCommand) {
 		//decode srcCommand using patterns 
 		nf::Patterns::CommandsManager cm(nf::GetRegistryKeyForCommandPatterns());
 		tstring prefix = nf::Parser::ExtractPrefix(srcCommand);
@@ -104,9 +103,8 @@ std::pair<HANDLE, bool> nf::OpenFromCommandLine(wchar_t const* pSrcCmd) {
 	nf::Parser::ParseString(command, cmd);
 
 	switch (cmd.kind) {
-	case nf::QK_OPEN_PANEL:
+	case nf::QK_OPEN_PANEL: 
 		return std::make_pair(static_cast<HANDLE>(new nf::Panel::CPanel()), true);
-		break;
 	case nf::QK_OPEN_SHORTCUT:
 		if (cmd.shortcut.empty()) {
 			//open catalog if and only if it exists

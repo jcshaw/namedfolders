@@ -58,7 +58,6 @@ void WINAPI _export GetPluginInfoW(struct PluginInfo *pInfo) {
 	PluginMenuStrings[0]= nf::GetMsg(lg::PLUGINMENUSTRING);
 	PluginConfigStrings[0]= nf::GetMsg(lg::PLUGINSCONFIGSTRING);
  
-	pInfo->DiskMenuNumbers = 0;
 	pInfo->DiskMenuStrings = menu_helper.GetStringsArray();
 	pInfo->PluginMenuStrings = PluginMenuStrings;
 	pInfo->PluginConfigStrings = PluginConfigStrings;

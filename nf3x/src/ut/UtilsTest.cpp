@@ -11,7 +11,7 @@ using boost::unit_test::test_suite;
 
 void nf::ut::test_ExpandCatalogPath() {
 	wchar_t const* tests[][3] = {	
-		{L"/a/b", L"/a/c/d", L"/a/b/c/d"}
+		{L"/a/b", L"/a/c/d", L"/a/c/d"}
 		, {L"/a/b", L"/a/b/../..", L""}
 		//, {L"a/b", L"a/b/../..", L""} //!TODO
 		, {L"a/b", L"..", L"/b"}

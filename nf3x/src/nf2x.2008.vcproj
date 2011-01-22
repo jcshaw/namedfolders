@@ -739,10 +739,6 @@
 			>
 		</File>
 		<File
-			RelativePath="ReadMe.txt"
-			>
-		</File>
-		<File
 			RelativePath=".\resource.h"
 			>
 		</File>

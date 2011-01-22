@@ -10,9 +10,7 @@
 #include "Parser.h"
 #include <vector>
 #include <cassert>
-#include <boost/bind.hpp>
 #include <Shlwapi.h>
-#include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 
 #include "settings.h"
@@ -139,13 +137,6 @@ void Utils::RemoveSingleTrailingCharOnPlace(tstring &str, wchar_t charToRemove) 
 	}
 }
 
-void Utils::RemoveLeadingCharsOnPlace(tstring &str, wchar_t charToRemove) {
-	boost::trim_left_if(str, boost::bind(std::equal_to<wchar_t>(), _1, charToRemove));
-}
-void Utils::RemoveTrailingCharsOnPlace(tstring &str, wchar_t charToRemove) {
-	boost::trim_right_if(str, boost::bind(std::equal_to<wchar_t>(), _1, charToRemove));
-}
-
 void Utils::AddTrailingCharIfNotExists(tstring &Str, wchar_t const* ch) {
 	if (! boost::ends_with(Str, ch)) {
 		Str += ch;
@@ -243,8 +234,4 @@ void Utils::DivideDiskPath(tstring const &src, tstring &destDisk, tstring &destP
 		destDisk.assign(src, 0, 2);
 		destPath.assign(src, 2, src.size() - 2);
 	}
-}
-
-bool Utils::EndWith(tstring const& srcStr, tstring const& strToSearch) {
-	return boost::algorithm::ends_with(srcStr, strToSearch);
 }

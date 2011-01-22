@@ -37,13 +37,13 @@ init_unit_test_suite( int, char* [] ) {
 	g_FSF.atoi = &far_atoi;
 	g_FSF.itoa = &far_itoa;
 
+	test->add( BOOST_TEST_CASE( &nf::ut::test_ExpandCatalogPath));
+	test->add( BOOST_TEST_CASE( &nf::ut::test_PrepareMovingShortcut));
 	test->add( BOOST_TEST_CASE( &nf::ut::test_PathsFinder_with_shortsyntax));
 
 	test->add( BOOST_TEST_CASE( &nf::ut::test_replace_sequence_chars));
 	
 	test->add( BOOST_TEST_CASE( &nf::ut::test_GetCanonicalCatalogName));
-	test->add( BOOST_TEST_CASE( &nf::ut::test_ExpandCatalogPath));
-	test->add( BOOST_TEST_CASE( &nf::ut::test_PrepareMovingShortcut));
 	
 // 	test->add( BOOST_TEST_CASE( &nf::ut::test_DetailedCommand ));
 // 	test->add( BOOST_TEST_CASE( &nf::ut::test_TransformCommand ));
