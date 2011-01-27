@@ -16,6 +16,15 @@
 
 namespace nf {
 namespace Search {
+	class MaskMatcher {	
+	public:
+		MaskMatcher(tstring const& srcMask);
+		MaskMatcher(tstring const& srcMask, tasterix_mode const asterixMode012);
+		bool MatchTo(tstring const& fileName) const;
+	private:
+		tregex m_R;
+	};
+
 	//search engine to search files and directories matched to specified mask
 	//it's possible to use metachars "*", "?" and "[a-z]" in mask
 	//engine is able to convert mask to appropriate regexp and check name matching using this regexp
@@ -31,11 +40,11 @@ namespace Search {
 		twhat_to_search_t GetWhatToSearch() const {
 			return m_WhatToSearch;
 		}
-		void SearchItems(tstring const& RootDir, tstring const& Name, nf::tlist_strings &list, twhat_to_search_t whatToSearch) const;
-		inline void SearchItems(tstring const& rootDir, tstring const& srcName, nf::tlist_strings &destList) const {
-			SearchItems(rootDir, srcName, destList, m_WhatToSearch);
+		void SearchItems(tstring const& RootDir, MaskMatcher const& maskMatcher, nf::tlist_strings &list, twhat_to_search_t whatToSearch) const;
+		inline void SearchItems(tstring const& rootDir, MaskMatcher const& maskMatcher, nf::tlist_strings &destList) const {
+			SearchItems(rootDir, maskMatcher, destList, m_WhatToSearch);
 		}
-		void SearchBySystemFunctions(tstring const& RootDir, tstring const& Name, nf::tlist_strings &list, twhat_to_search_t whatToSearch) const;
+		void SearchBySystemFunctions(tstring const& RootDir, MaskMatcher const& maskMatcher, nf::tlist_strings &list, twhat_to_search_t whatToSearch) const;
 		const bool AutoConvertNamesToMetachars;
 	private:
 		twhat_to_search_t m_WhatToSearch;
@@ -53,14 +62,5 @@ namespace Search {
 	//причем C - любая одна буква или один из метасимволов ?, * или [a-z]
 	//В токенах pathXXX могут встречаться метасимволы ?, * или [a,b-z]
 	bool SearchMatched(tstring const& PathPattern, Search::CSearchEngine &searchPolice, tasterix_mode AsterixMaskMode012, nf::tlist_strings& dest);
-
-	class MaskMatcher {	
-	public:
-		MaskMatcher(tstring const& srcMask);
-		bool MatchTo(tstring const& fileName);
-	private:
-		tregex m_R;
-	};
-
 }
 }

@@ -190,10 +190,10 @@ bool nf::Search::PathsFinder::search(nf::tlist_pairs_strings::const_iterator lis
 			if (! search(pnext, listItems, dir, dest)) return false;
 		}	
 		if (m_SearchPolice.GetWhatToSearch() != WTS_DIRECTORIES && pnext_next == listItems.end()) { //помещаем найденные файлы в результаты
+			MaskMatcher mm(pnext->first, this->AsterixMode012);
 			BOOST_FOREACH(tstring const& dir, list) {
-				tstring mask = nf::Parser::ConvertToMask(pnext->first, this->AsterixMode012);
 				if (! ::PathIsDirectory(dir.c_str())) {
-					if (Parser::IsTokenMatchedToPattern(::PathFindFileName(dir.c_str()), mask)) {
+					if (mm.MatchTo(dir.c_str())) {	//if (Parser::IsTokenMatchedToPattern(::PathFindFileName(dir.c_str()), mask)) {
 						dest.push_back(dir);
 					}
 				}
@@ -210,8 +210,9 @@ bool nf::Search::PathsFinder::deep_search(tpair_strings nameMetachar, tstring co
 	unsigned int deep = get_metachar_deep(nameMetachar.second);
 	if (deep == 0) deep = MAX_DEEP_LEVEL; //вряд ли уровень вложенности директорий будет больше..
 
-	tstring name_mask = nf::Parser::ConvertToMask(nameMetachar.first, this->AsterixMode012);
-
+	MaskMatcher name_mask(nameMetachar.first, this->AsterixMode012);
+	static MaskMatcher mm_all(L"*");
+	
 	nf::tlist_strings dirs; 
 	if (get_metachar_kind(nameMetachar.second) == ID_SEARCH_FORWARD) {
 		dirs.push_back(rootDir);
@@ -223,7 +224,7 @@ bool nf::Search::PathsFinder::deep_search(tpair_strings nameMetachar, tstring co
 					return false;	//exit by esc
 				}
 				if (i != deep - 1) {
-					m_SearchPolice.SearchItems(sdir, L"*", level_dirs, WTS_DIRECTORIES);
+					m_SearchPolice.SearchItems(sdir, mm_all, level_dirs, WTS_DIRECTORIES);
 				}
 				m_SearchPolice.SearchItems(sdir, name_mask, dest, m_SearchPolice.GetWhatToSearch() == WTS_DIRECTORIES 
 					? nf::WTS_DIRECTORIES
@@ -240,8 +241,7 @@ bool nf::Search::PathsFinder::deep_search(tpair_strings nameMetachar, tstring co
 			parent = Utils::RemoveTrailingChars(Utils::ExtractParentDirectory(parent), SLASH_DIRS_CHAR);
 			if (parent.empty()) return true; //если родительской директории нет, поиск завершен
 
- 			nf::Search::MaskMatcher mm(name_mask);
- 			if (mm.MatchTo(Utils::ExtractFileName(parent, true))) {
+ 			if (name_mask.MatchTo(Utils::ExtractFileName(parent, true))) {
 				Utils::AddTrailingCharIfNotExists(parent, SLASH_DIRS);
  				dest.push_back(parent);
  			}

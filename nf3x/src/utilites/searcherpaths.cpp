@@ -37,43 +37,47 @@ nf::Search::MaskMatcher::MaskMatcher(tstring const& srcMask)
 {
 }
 
-bool nf::Search::MaskMatcher::MatchTo(tstring const& fileName) {
+nf::Search::MaskMatcher::MaskMatcher(tstring const& srcMask, tasterix_mode const asterixMode012) 
+: m_R(NF_BOOST_REGEX_COMPILE(Parser::ConvertMaskToReqex(
+		nf::Parser::ConvertToMask(srcMask, asterixMode012)
+	  )), boost::regex_constants::icase)
+{
+
+}
+
+bool nf::Search::MaskMatcher::MatchTo(tstring const& fileName) const {
 	tsmatch what;
 	return (NF_BOOST_REGEX_LIB::regex_match(fileName, what, m_R));
 }
 
 
-void nf::Search::CSearchEngine::SearchItems(tstring const& rootDir0, tstring const& Name, nf::tlist_strings &destList, twhat_to_search_t whatToSearch) const {
+void nf::Search::CSearchEngine::SearchItems(tstring const& rootDir0, MaskMatcher const& maskMatcher, nf::tlist_strings &destList, twhat_to_search_t whatToSearch) const {
 	try {
-		MaskMatcher mm(Name);
-
 		tstring RootDir = rootDir0;
 		if (Utils::IsAliasIsDisk(RootDir)) RootDir += L"\\";
 
 		WinSTL::findfile_sequence_t f(RootDir.c_str(), L"*", get_search_flags(whatToSearch));
 		BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
 			tstring filename = t.get_filename();
-			if (mm.MatchTo(filename)) {
+			if (maskMatcher.MatchTo(filename)) {
 				destList.push_back(t.get_path());
 			}
 		}
 	} catch (...) {
-		SearchBySystemFunctions(rootDir0, Name, destList, whatToSearch);
+		SearchBySystemFunctions(rootDir0, maskMatcher, destList, whatToSearch);
 	}
 }
 
-void nf::Search::CSearchEngine::SearchBySystemFunctions(tstring const& RootDir0, tstring const& Name, nf::tlist_strings &destList
+void nf::Search::CSearchEngine::SearchBySystemFunctions(tstring const& RootDir0, MaskMatcher const& maskMatcher, nf::tlist_strings &destList
 														, twhat_to_search_t whatToSearch) const {	
-	//search using system functions (they don't support [] metachar)
-	tstring smask = Parser::ConvertToMask(Name);
-
 	//если в качестве RootDir передается z: то поиск не срабатывает
 	//проверяем и добавляем слеш
 	tstring RootDir = RootDir0;
 	if (Utils::IsAliasIsDisk(RootDir)) RootDir += L"\\";
 
-	WinSTL::findfile_sequence_t f(RootDir.c_str(), smask.c_str(), get_search_flags(whatToSearch));
+	WinSTL::findfile_sequence_t f(RootDir.c_str(), L"*", get_search_flags(whatToSearch));
 	BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
+		if (! maskMatcher.MatchTo(t.get_filename())) continue;
 		tstring full_filename = t.get_path(); //Utils::CombinePath(RootDir0, t.get_filename(), SLASH_DIRS);
 		destList.push_back(full_filename);
 	}
