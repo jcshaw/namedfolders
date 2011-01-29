@@ -13,16 +13,17 @@
 // *, ? è [a-z]
 /************************************************************************/
 #include "strings_utils.h"
+#include <boost/scoped_ptr.hpp>
 
 namespace nf {
 namespace Search {
 	class MaskMatcher {	
 	public:
-		MaskMatcher(tstring const& srcMask);
-		MaskMatcher(tstring const& srcMask, tasterix_mode const asterixMode012);
+		MaskMatcher(tstring const& srcMask, tasterix_mode const asterixMode012 = ASTERIX_MODE_AS_IS);
 		bool MatchTo(tstring const& fileName) const;
 	private:
-		tregex m_R;
+		boost::scoped_ptr<tregex> m_pR;
+		boost::scoped_ptr<tregex> m_pNegative;
 	};
 
 	//search engine to search files and directories matched to specified mask

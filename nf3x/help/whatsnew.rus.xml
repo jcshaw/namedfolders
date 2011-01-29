@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
+<version product_name="Named Folders" version="3.0.0.255 snapshot" date="31.01.2011"> 
+<item type="+">Добавлена возможность использовать негативные маски в путях.
+Негативная маска отделяется от основной символом "|". Пример: команда "cd:pf\*a*|*b*" 
+найдет все поддиректории директории "pf", которые удовлетворяют маске "*a*" и 
+НЕ удовлетворяют маске "*b*".</item>
+</version>
+
 <version product_name="Named Folders" version="3.0.0.254 release" date="22.01.2011"> 
 <item type="*">Незначительные правки кода.</item>
 <item type="*">Доработан хелп.</item>

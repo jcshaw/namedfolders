@@ -32,22 +32,25 @@ namespace {
 	}
 }
 
-nf::Search::MaskMatcher::MaskMatcher(tstring const& srcMask) 
-: m_R(NF_BOOST_REGEX_COMPILE(Parser::ConvertMaskToReqex(srcMask)), boost::regex_constants::icase)
-{
-}
-
-nf::Search::MaskMatcher::MaskMatcher(tstring const& srcMask, tasterix_mode const asterixMode012) 
-: m_R(NF_BOOST_REGEX_COMPILE(Parser::ConvertMaskToReqex(
-		nf::Parser::ConvertToMask(srcMask, asterixMode012)
-	  )), boost::regex_constants::icase)
-{
-
+nf::Search::MaskMatcher::MaskMatcher(tstring const& srcMask, tasterix_mode const asterixMode012) {
+	tpair_strings kvp = Utils::DivideString(srcMask, L'|');
+	m_pR.reset(new tregex(NF_BOOST_REGEX_COMPILE(Parser::ConvertMaskToReqex(
+		nf::Parser::ConvertToMask(Utils::TrimChar(kvp.first, L' '), asterixMode012)
+		)), boost::regex_constants::icase));
+	if (! kvp.second.empty()) {
+		m_pNegative.reset(new tregex(NF_BOOST_REGEX_COMPILE(Parser::ConvertMaskToReqex(
+			nf::Parser::ConvertToMask(Utils::TrimChar(kvp.second, L' '), asterixMode012)
+			)), boost::regex_constants::icase));
+	}
 }
 
 bool nf::Search::MaskMatcher::MatchTo(tstring const& fileName) const {
 	tsmatch what;
-	return (NF_BOOST_REGEX_LIB::regex_match(fileName, what, m_R));
+	return (NF_BOOST_REGEX_LIB::regex_match(fileName, what, *m_pR.get()))
+		&& (m_pNegative.get() == 0 
+			? true
+			: (! NF_BOOST_REGEX_LIB::regex_match(fileName, what, *m_pNegative.get()))
+		);
 }
 
 

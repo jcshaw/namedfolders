@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
+<version product_name="Named Folders" version="3.0.0.255 snapshot" date="31.01.2011"> 
+<item type="+">New possibility to specify negative mask in paths. Negative mask is
+separated from positive one by character "|". I.e. command "cd:pf\*a*|*b*" will 
+find all subdirectories of "pf" that are matched to "*a*" and, at the same time,
+not matched to "*b*".</item>
+</version>
+
 <version product_name="Named Folders" version="3.0.0.254 release" date="22.01.2011"> 
 <item type="*">Minor code improvements.</item>
 <item type="*">Help is improved.</item>
 </version>
-
 
 <version product_name="Named Folders" version="3.0.0.253 RC2" date="16.01.2011"> 
 <item type="!">Plugin supports two new  metacharacters "\**:N" and "\..*:N".
