@@ -36,12 +36,15 @@ namespace nf {
 		tstring GetSelectedCatalog(CPanel* pPanel, PanelInfo const&pi, int nSelectedItem = 0);
 		nf::tshortcut_info& GetSelectedShortcut(CPanel* pPanel, PanelInfo const &pi, nf::tshortcut_info& sh, int nSelectedItem = 0);
 
+		inline PluginPanelItem* allocate_PluginPanelItem(HANDLE hPlugin, int Command, int nSelectedItem) {
+			PluginPanelItem* ppi = reinterpret_cast<PluginPanelItem*>(malloc(g_PluginInfo.Control(hPlugin, Command, nSelectedItem, NULL)));
+
+			g_PluginInfo.Control(hPlugin, Command, nSelectedItem, reinterpret_cast<LONG_PTR>(ppi));
+			return ppi;
+		}
 		inline PluginPanelItem* allocate_PluginPanelItem(CPanel const* pSrcPanel, int Command, int nSelectedItem) {
 			HANDLE hplugin = static_cast<HANDLE>(const_cast<CPanel*>(pSrcPanel));
-			PluginPanelItem* ppi = reinterpret_cast<PluginPanelItem*>(malloc(g_PluginInfo.Control(hplugin, Command, nSelectedItem, NULL)));
-
-			g_PluginInfo.Control(hplugin, Command, nSelectedItem, reinterpret_cast<LONG_PTR>(ppi));
-			return ppi;
+			return allocate_PluginPanelItem(hplugin, Command, nSelectedItem);
 		}
 
 		inline void deallocate_PluginPanelItem(PluginPanelItem* p) {

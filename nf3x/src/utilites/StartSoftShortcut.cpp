@@ -21,6 +21,8 @@
 #include "menus_impl.h"
 #include "registry.h"
 #include "executor.h"
+#include "panel_functions.h"
+#include "PathsFinder.h"
 
 #include "executor_addons.h"
 #include "strings_utils.h"
@@ -29,52 +31,26 @@ using namespace nf;
 using namespace Start;
 
 namespace {
-	class exceptions_checker {
-		nf::tlist_strings m_ListEx;
-	public:
-		exceptions_checker() {
-			tstring comma_list = CSettings::GetInstance().GetValue(nf::ST_SOFT_MASKS_TO_IGNORE_COMMA_SEPARETED);
-			if (! comma_list.empty()) comma_list += L",";
-			//парсим строку "a,b,c,"  в список
-			Utils::SplitStringByRegex(comma_list, m_ListEx, L",");
-		}
-		bool IsShouldBeSkipped(nf::tshortcut_info const& sh) {
-			return std::find_if(m_ListEx.begin(), m_ListEx.end()
-				, boost::bind(&exceptions_checker::is_matched, this, sh.shortcut, _1)) != m_ListEx.end();
-		}
-	private:
-		inline bool is_matched(tstring const& s, tstring const& StrException) {
-			return nf::Parser::IsTokenMatchedToPattern(s, StrException, false);
-		}
-	};
-
 	class helper {
+		nf::Search::MaskMatcher m_MaskSh;
+		nf::Search::MaskMatcher m_MaskCatalogs;
 		tstring m_RootPath;
-		tstring m_Pattern;
-		tstring m_PatternDir;
 		nf::tshortcuts_list m_Data;
 		int m_bTemporaryValue;	//по значению Temporary различаем пути, к которым принадлежат €рлыки	
 	public:
-		helper(tstring const& srcRootPath, tstring const& srcPattern, tstring const& srcPatternDir, int bTemporaryValue) 
+		helper(tstring const& srcRootPath, nf::Search::MaskMatcher& mmSh, int bTemporaryValue) 
 			: m_RootPath(srcRootPath)
-			, m_Pattern(srcPattern)
-			, m_PatternDir(srcPatternDir)
+			, m_MaskSh(mmSh)
+			, m_MaskCatalogs(L"*", ASTERIX_MODE_BOTH)
 			, m_bTemporaryValue(bTemporaryValue)
-		{
-				if (! nf::Parser::ContainsMetachars(m_Pattern)) { //если пользователь ввел маску - искать по маске, иначе искать "*шаблон*"
-					m_Pattern = L"*" + m_Pattern + L"*";
-				}
-				if (! nf::Parser::ContainsMetachars(m_PatternDir)) { //если пользователь ввел маску - искать по маске, иначе искать "*шаблон*"
-					m_PatternDir = L"*" + m_PatternDir + L"*";
-				}
-		}
+		{}
 	public:
 		void LoadSubCatalogs(tstring const& relatedPath) {
 			tstring root_path = Utils::CombinePath(m_RootPath, relatedPath, SLASH_DIRS);
 			WinSTL::findfile_sequence_t f(root_path.c_str(), L"*.*", WinSTL::findfile_sequence_t::directories);
 			BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
 				tstring dir_name = Utils::CombinePath(relatedPath, t.get_filename(), SLASH_DIRS);
-				if (IsDirMatchedToPattern(dir_name)) LoadShortcuts(dir_name);
+				if (m_MaskCatalogs.MatchTo(dir_name)) LoadShortcuts(dir_name);
 				LoadSubCatalogs(dir_name);
 			}
 		}
@@ -84,7 +60,7 @@ namespace {
 			BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
 				nf::tshortcut_info sh;
 				sh.shortcut = t.get_filename();
-				if (is_matched_to_pattern(sh.shortcut)) {
+				if (m_MaskSh.MatchTo(sh.shortcut)) {
 					sh.catalog = relatedPath;
 					sh.bIsTemporary = static_cast<bool>(m_bTemporaryValue != 0);
 					assert(static_cast<int>(sh.bIsTemporary) == m_bTemporaryValue);	
@@ -93,24 +69,16 @@ namespace {
 				}
 			} 
 		}
-		inline bool IsDirMatchedToPattern(tstring const& DirName) {
-			return nf::Parser::IsTokenMatchedToPattern(DirName, m_PatternDir, false);
-		}
 		nf::tshortcuts_list& GetResults() {
 			return m_Data;
-		}
-		inline bool is_matched_to_pattern(tstring const& FileName) {
-			return nf::Parser::IsTokenMatchedToPattern(FileName, m_Pattern, false);
 		}
 	};
 }
 
-void Start::LoadShortcuts(tstring const& srcRootPath, tstring const& srcPattern, tstring const& srcPatternDir
-						  , int bTemporaryValue, nf::tshortcuts_list& destData) 
-{
-	helper h(srcRootPath, srcPattern, srcPatternDir, bTemporaryValue);
+void Start::LoadShortcuts(tstring const& srcRootPath, nf::Search::MaskMatcher& mmSh, int bTemporaryValue, nf::tshortcuts_list& destData) {
+	helper h(srcRootPath, mmSh, bTemporaryValue);
 	h.LoadSubCatalogs(L"");
-	if (h.IsDirMatchedToPattern(L"")) h.LoadShortcuts(L"");
+	/*if (h.IsDirMatchedToPattern(L"")) */h.LoadShortcuts(L"");
 	BOOST_FOREACH(nf::tshortcut_info const& item, h.GetResults()) {
 		destData.push_back(item);
 	}
@@ -166,18 +134,6 @@ namespace {
 				Paths[i] = Utils::CombinePath(Paths[i], common_folder, SLASH_DIRS);
 		}
 	}
-	void remove_exceptions(nf::tshortcuts_list& ListShortcuts) {
-		if (! nf::CSettings::GetInstance().GetValue(nf::ST_SELECT_SH_MENU_SHOWCATALOGS_MODE) 
-			== 1	//don't ignore any masks
-		) return;
-
-		exceptions_checker checker;
-
-		ListShortcuts.erase(
-			std::remove_if(ListShortcuts.begin(), ListShortcuts.end()
-				, boost::bind(&exceptions_checker::IsShouldBeSkipped, &checker, _1))
-			, ListShortcuts.end());
-	}
 }
 
 namespace {
@@ -227,7 +183,7 @@ namespace {
 		return bIsWow64;
 	}
 
-	void execute_selected_program64_under_w32( tstring & path, tstring &params ) {
+	void execute_selected_program64_under_w32( tstring & path, tstring const &params ) {
 		tstring dest_path;
 		if (GetShortcutProgramPath(path, dest_path, false)) {
 			DWORD buf_size = 2048;
@@ -243,7 +199,7 @@ namespace {
 			}
 		}
 	}
-	void execute_selected_program(tstring &path, tstring &params) {
+	void execute_selected_program(tstring &path, tstring const &params) {
 		HINSTANCE value = ShellExecuteW(0, NULL , path.c_str(), params.c_str(), NULL, SW_SHOWNORMAL); 
 		if ((int)(intptr_t)value < 32) { 
 			if (IsWow64()) { //workaround for #6
@@ -251,59 +207,77 @@ namespace {
 			}
 		}
 	}
+}
 
-	void divide_shortcut_and_params(tstring &shortcut_pattern, tstring& params) {
-		tstring::iterator spos = std::find(shortcut_pattern.begin(), shortcut_pattern.end(), L' ');
-		if (spos != shortcut_pattern.end()) {
-			std::back_insert_iterator<tstring> ins(params);
-			std::copy(spos+1, shortcut_pattern.end(), ins);
-			shortcut_pattern.erase(spos, shortcut_pattern.end());
+namespace {
+	typedef enum tadd_action {FH_NONE = 0
+		, FH_COLON = 1
+		, FH_PLUS = 2
+	}; 
+	tadd_action prepare_add_action(HANDLE hPlugin, tstring& pattern, tstring& params) {
+		tadd_action action = FH_NONE;
+		if (pattern.size()) {
+			if (pattern[0] == L':') {
+				action = FH_COLON;
+			} else if (pattern[0] == L'+') {
+				action = FH_PLUS;
+			}
+			if (action != FH_NONE) pattern.erase(0, 1);
+		}
+		return action;
+	}
+	void make_add_action(HANDLE hPlugin, tadd_action addAction) {
+		switch (addAction) {
+		case FH_COLON:
+			g_FSF.CopyToClipboard(CPanelInfoWrap(hPlugin).GetPanelCurDir(true).c_str()); //store current directory to clipboard
+			break;
+		case FH_PLUS:
+			PluginPanelItem* ppi = nf::Panel::allocate_PluginPanelItem(hPlugin, FCTL_GETCURRENTPANELITEM, 0);
+			BOOST_SCOPE_EXIT( (&ppi) ) {
+				nf::Panel::deallocate_PluginPanelItem(ppi);
+			} BOOST_SCOPE_EXIT_END;
+			g_FSF.CopyToClipboard(
+				Utils::CombinePath(CPanelInfoWrap(hPlugin).GetPanelCurDir(true)
+					, ppi->FindData.lpwszFileName, SLASH_DIRS).c_str()); //store current directory and file name to clipboard
+			break;
 		}
 	}
+	tlist_strings get_exceptions() { //generate list of exceptions that shouldn't be displayed
+		tlist_strings dest;
+		if (! nf::CSettings::GetInstance().GetValue(nf::ST_SELECT_SH_MENU_SHOWCATALOGS_MODE) 
+			== 1	//don't ignore any masks
+			) return dest; //empty list
 
+		tstring comma_list = CSettings::GetInstance().GetValue(nf::ST_SOFT_MASKS_TO_IGNORE_COMMA_SEPARETED);
+		if (! comma_list.empty()) comma_list += L",";
+		//парсим строку "a,b,c,"  в список
+		Utils::SplitStringByRegex(comma_list, dest, L",");
+		return dest;
+	}
 }
 
 bool Start::OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd) {
 	nf::tvector_strings paths;
 	get_soft_variants(hPlugin, paths); //get all possible paths
 
-	tstring shortcut_pattern;	// = (cmd.local_directory.size()) ? cmd.shortcut : cmd.local_directory;
-	tstring catalog_pattern;	// = L"*";
-
-	if (! cmd.local_directory.size()) {
-		shortcut_pattern = cmd.shortcut;
-		catalog_pattern = L"*";
-	} else  {
-		shortcut_pattern = cmd.local_directory;
-		catalog_pattern = cmd.shortcut;
-		Utils::RemoveLeadingCharsOnPlace(shortcut_pattern, SLASH_DIRS_CHAR);
-	}
-//провер€ем команду :
-//если вызов в виде cd: :soft то пользователь хочет, чтобы 
-//плагин не просто вызвал soft, но еще и скопировал текущий путь в буфер обмена
-//(например, когда открывешь Word и хочешь сохранить в текущую директорию вновь созданный файш)
-	bool bsave_directory_to_clipboard = false;
-	if (shortcut_pattern.size())
-		if (shortcut_pattern[0] == L':') {
-			bsave_directory_to_clipboard = true;
-			shortcut_pattern.erase(0, 1);
-		}
-
-	//shortcuts can contain params 
-	tstring params;	
-	divide_shortcut_and_params(shortcut_pattern, params); 
+	tstring shortcut_pattern = cmd.shortcut;
+	tstring params = cmd.param;
+	tadd_action add_action = prepare_add_action(hPlugin, shortcut_pattern, params); //cd: :soft, cd: +soft, etc
 
 	while (true) {	//при переключении режима отображени€ генерируем список заново
-	//!!!¬Ќ»ћјЌ»≈: используем флаг bTemporary чтобы различать какому path_XXX принадлежит выбраный €рлык
+		tlist_strings masks;
+		Utils::SplitStringByRegex(Utils::TrimChar(shortcut_pattern, L' '), masks, L"\\s");
+		nf::Search::MaskMatcher sh_mask(masks, get_exceptions(), ASTERIX_MODE_BOTH);
+
+	//¬Ќ»ћјЌ»≈: используем флаг bTemporary чтобы различать какому path_XXX принадлежит выбраный €рлык
 	//получаем список всех €рлыков, соответствующих паттерну
 		nf::tshortcuts_list list_shortcuts;
 		for (unsigned int i = 0; i < paths.size(); ++i) 
 			if (! paths[i].empty()) {
-				Start::LoadShortcuts(paths[i], shortcut_pattern, catalog_pattern, i, list_shortcuts);
+				Start::LoadShortcuts(paths[i], sh_mask, i, list_shortcuts);
 			}
 	//пытаемс€ минимизировать размеры списка 
 		try_to_minimize(paths, list_shortcuts);
-		remove_exceptions(list_shortcuts);
 
 		nf::tshortcut_info sh;
 		int nret = nf::Menu::SelectSoft(list_shortcuts, sh);		
@@ -335,9 +309,7 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd) {
 			default: return false;
 			}; //switch			
 		}		
-		if (bsave_directory_to_clipboard) { //store current directory in clipboard
-			g_FSF.CopyToClipboard(CPanelInfoWrap(hPlugin).GetPanelCurDir(true).c_str());
-		}
+		make_add_action(hPlugin, add_action);
 		return true;
 	}; //while
 

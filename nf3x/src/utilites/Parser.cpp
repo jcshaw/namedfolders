@@ -81,6 +81,7 @@ namespace re {	//регулярные выражения
 //парсинг каталог/"ярлычок\директория" параметры (для прямых путей)
 	wchar_t const * RE_CSD_QUOTED = L"([^\\s\\.\\\\]*\\/)?\\\"(\\.?[^\\\"\\.\\/\\\\]*)?([\\.\\\\][^\\\"]*)\\\"?(\\s+.+)?";
 //парсинг софт параметры
+	wchar_t const * RE_SOFT0 = L"\"([^\"]+)\"(\\s+\"?([^\"]*)\"?)?";
 	wchar_t const * RE_SOFT = L"([^\\s]+)(\\s+\"?([^\"]*)\"?)?";
 //		L"([^\\\\]*\\/)?([^\\/\\\\]*)?(\\\\[^\\s]+)?(\\s+.+)?";
 //парсинг пути содержащего переменную среды
@@ -118,13 +119,14 @@ bool nf::Parser::ParseString(tstring const &srcStr, nf::tparsed_command &t) {
 	if (! t.prefix.empty()) t.flags = t.flags | nf::FGC_ENABLED_PREFIX;
 
 	if (t.kind == nf::QK_START_SOFT_SHORTCUT) {
+		nf::tregex expression0(NF_BOOST_REGEX_COMPILE(re::RE_SOFT0));
 		nf::tregex expression(NF_BOOST_REGEX_COMPILE(re::RE_SOFT));
 		nf::tsmatch what;
-		if (NF_BOOST_REGEX_LIB::regex_match(csdp, what, expression)) {
+		if (NF_BOOST_REGEX_LIB::regex_match(csdp, what, expression0) || NF_BOOST_REGEX_LIB::regex_match(csdp, what, expression)) {
 			t.catalog = L"";
 			t.local_directory = L"";
-			t.shortcut = what[1] + tstring(L" ") + what[2];
-			t.param = L"";	//!TODO: сейчас параметры сохраняем в shortcut
+			t.shortcut = what[1];// + tstring(L" ") + what[2];
+			t.param = what[2];	//!TODO: сейчас параметры сохраняем в shortcut
 		}
 	} else if (t.kind == nf::QK_OPEN_DIRECTORY_DIRECTLY) {
 		t.local_directory = csdp;

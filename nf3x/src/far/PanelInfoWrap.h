@@ -27,6 +27,18 @@ public:
 		return &buffer[0];
 	}
 
+	tstring GetPanelActiveFileName(bool bActivePanel) {
+		PluginPanelItem ppi;
+		memset(&ppi, 0, sizeof(PluginPanelItem));
+		if (! g_PluginInfo.Control( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
+			, FCTL_GETCURRENTPANELITEM
+			, sizeof(ppi)
+			, reinterpret_cast<LONG_PTR>(&ppi)
+			)) return L"";
+
+		return ppi.FindData.lpwszFileName;
+	}
+
 	inline void SetPanelDir(bool bActivePanel, tstring const& srcDir) {
 		g_PluginInfo.Control( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
 			, FCTL_SETPANELDIR

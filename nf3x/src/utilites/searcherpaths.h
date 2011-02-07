@@ -6,6 +6,7 @@
 */
 
 #pragma once
+#include <vector>
 
 /************************************************************************/
 // поиск директорий по заданным паттернам
@@ -19,11 +20,17 @@ namespace nf {
 namespace Search {
 	class MaskMatcher {	
 	public:
-		MaskMatcher(tstring const& srcMask, tasterix_mode const asterixMode012 = ASTERIX_MODE_AS_IS);
-		bool MatchTo(tstring const& fileName) const;
+		MaskMatcher(tstring const& srcMask //positive and negative masks are divided by |, i.e. "a | b"
+			, tasterix_mode const asterixMode012 = ASTERIX_MODE_AS_IS);
+		MaskMatcher(tlist_strings const& positiveMasks, tlist_strings const& negativeMasks, tasterix_mode const asterixMode012);
+		bool MatchTo(tstring const& fileName) const {
+			return match_to(fileName, m_regexPositive) && ! match_to(fileName, m_regexNegative);
+		}
 	private:
-		boost::scoped_ptr<tregex> m_pR;
-		boost::scoped_ptr<tregex> m_pNegative;
+		static void add_masks(tstring const& srcMask, tasterix_mode const asterixMode012, std::vector<tregex>& destList);
+		static bool match_to(tstring const& srcText, std::vector<tregex> const& destList);
+		std::vector<tregex> m_regexPositive; //combined by logical OR
+		std::vector<tregex> m_regexNegative; //combined by logical OR
 	};
 
 	//search engine to search files and directories matched to specified mask
