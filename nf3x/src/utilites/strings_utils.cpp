@@ -20,9 +20,10 @@ namespace {
 		if (srcStr.size() <= MaxSize) return srcStr;
 		nf::tautobuffer_char buf(srcStr.size() + 1);
 		lstrcpy(&buf[0], srcStr.c_str());
-		PathCompactPathEx(&buf[0], srcStr.c_str(), static_cast<unsigned int>(MaxSize), 0);
+		PathCompactPathEx(&buf[0], srcStr.c_str(), static_cast<unsigned int>(MaxSize + 1), 0); //+1 for #54
 		return &buf[0];
 	}
+	const int COUNT_SPACES_BETWEEN_COLUMNS = 2;
 }
 
 tpair_strings Utils::DividePathFilename(tstring const &src
@@ -87,7 +88,7 @@ tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, size
 	result.reserve(Width1 + Value2.size() + 1);
 	tstring compact_path = get_compact_path(Value1, Width1);
 	result += compact_path;
-	size_t len1 = Width1 + 1 - (Value1.size() < Width1 ? Value1.size() : Width1);
+	size_t len1 = Width1 + COUNT_SPACES_BETWEEN_COLUMNS - (Value1.size() < Width1 ? Value1.size() : Width1);
  	for (unsigned int i = 0; i < len1; ++i) result += L" ";
  	result += Value2;
 	return result;
@@ -98,12 +99,12 @@ tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, tstr
 	result.reserve(Width1 + Width2 + Value3.size() + 2);
 	tstring compact_path = get_compact_path(Value1, Width1);
 	result += compact_path;
-	size_t len1 = Width1 + 1 - (Value1.size() < Width1 ? Value1.size() : result.size());
+	size_t len1 = Width1 + COUNT_SPACES_BETWEEN_COLUMNS - (Value1.size() < Width1 ? Value1.size() : result.size());
 	for (size_t i = 0; i < len1; ++i) result += L" ";
 	tstring prom = get_compact_path(Value2, Width2);
 	result += prom;
 
-	size_t len2 = Width2 + 1 - (Value2.size() < Width2 ? Value2.size() : prom.size());
+	size_t len2 = Width2 + COUNT_SPACES_BETWEEN_COLUMNS - (Value2.size() < Width2 ? Value2.size() : prom.size());
 	for (size_t i = 0; i < len2; ++i) result += L" ";
 	result += Value3;
 

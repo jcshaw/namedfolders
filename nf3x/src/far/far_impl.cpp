@@ -85,6 +85,9 @@ namespace {
 									, tstring srcDir
 									, tstring const& fileName) {
 		srcDir = Utils::ReplaceStringAll(srcDir, SLASH_CATS, SLASH_DIRS); // "/" are replaced by "\" - protection from UNIX-users
+		if (Utils::IsAliasIsDisk(srcDir)) {
+			srcDir += SLASH_DIRS; //C: -> C:\, otherwise FAR won't open C: correctly
+		}
 
 		Plugin.SetPanelDir(bActivePanel, srcDir);
 		Plugin.RedrawPanel(bActivePanel);
@@ -109,13 +112,18 @@ namespace {
 		, tstring &fnDest) 
 	{
 		tstring dest_path;
-		nf::tpath_selection_result ret = nf::Selectors::GetPath(hPlugin, srcPath, localPath, dest_path, whatToSearch);
-		if (ret != nf::ID_PATH_SELECTED) return ret;
+		bool bexist_file = PathFileExists(srcPath.c_str()) && ! ::PathIsDirectory(srcPath.c_str()); //work around #49
+		if (! bexist_file) {
+			nf::tpath_selection_result ret = nf::Selectors::GetPath(hPlugin, srcPath, localPath, dest_path, whatToSearch);
+			if (ret != nf::ID_PATH_SELECTED) return ret;
+		} else {
+			dest_path = srcPath;
+		}
 
-		if (whatToSearch != nf::WTS_DIRECTORIES && ! ::PathIsDirectory(dest_path.c_str())) {
+		if (bexist_file || (whatToSearch != nf::WTS_DIRECTORIES && ! ::PathIsDirectory(dest_path.c_str()))) {
 			//open directory where file is located; currently, we lost filename.
-			//!TODO: it world be perfect to position on this file
-			tpair_strings kvp = Utils::DividePathFilename(dest_path, SLASH_DIRS_CHAR, false);
+			tpair_strings kvp = Utils::DividePathFilename(dest_path
+				, SLASH_DIRS_CHAR, false);
 			dest_path.swap(kvp.first);
 			fnDest.swap(kvp.second);
 			Utils::RemoveLeadingCharsOnPlace(fnDest, SLASH_DIRS_CHAR);

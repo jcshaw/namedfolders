@@ -35,7 +35,8 @@ namespace Panel {
 				PluginPanelItem *ppi = reinterpret_cast<PluginPanelItem*>(&buffer[0]);
 				g_PluginInfo.Control(PANEL_ACTIVE, FCTL_GETPANELITEM, i, reinterpret_cast<LONG_PTR>(&buffer[0]));
 
-				if (m_ItemName == tstring(ppi->FindData.lpwszFileName)) {
+				tstring s = tstring(ppi->FindData.lpwszFileName);
+				if (m_ItemName == s) {
 					bool bIsCatalog = (ppi->FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0; 
 					if (((m_ItemsType & FG_CATALOGS) && bIsCatalog) || 
 						((m_ItemsType & FG_SHORTCUTS) && (!bIsCatalog))) {

@@ -27,6 +27,7 @@ int CMenuShortcuts::MakeAction(int BreakCode) {
 	case 0: return -MS_COMMAND_DELETE; //Del - remove selected shortcut
 	case 3: return -MS_COMMAND_EDIT; //F4 - edit selected shortcut
 	case 6: switch_view_mode(3); //F7 is used instead of F4 since build 243.
+		break;
 	default: switch_view_mode(BreakCode);
 	}	
 	return 0;
@@ -43,7 +44,7 @@ int CMenuApplications::MakeAction(int BreakCode) {
 					: MODE_IGNORE_EXCEPTIONS_ON);	
 		return -SWITCH_IGNORE_MODE_ONOFF;
 	default:
-		assert(BreakCode == 3 || BreakCode == 4);
+		assert(BreakCode == 3 || BreakCode == 4 || BreakCode == 5);
 		CSettings::GetInstance().SetValue(nf::ST_SELECT_SOFT_MENU_SHOWCATALOGS_MODE, BreakCode-3);
 		CSettings::GetInstance().SaveSettings();
 	}

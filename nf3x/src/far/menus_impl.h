@@ -64,7 +64,7 @@ namespace Menu {
 
 	class CMenuApplications : public CMenu {
 	public:
-		CMenuApplications() : CMenu(L"F11, Ctrl+Enter, Shift+Enter, F2, F3", L"StartApplications"
+		CMenuApplications() : CMenu(L"F11, Ctrl+Enter, Shift+Enter, F2, F3, F5", L"StartApplications"
 			, CMenu::FG_SHOW_SINGLE_VARIANT
 			, nf::ST_SELECT_SOFT_MENU_SHOWCATALOGS_MODE) {}
 		enum {
@@ -76,11 +76,11 @@ namespace Menu {
 			MODE_IGNORE_EXCEPTIONS_ON = 0		//не искать среди €рлыков, удовлетвор€ющих игнорируемым в соответствии с маской в настройках 
 			, MODE_IGNORE_EXCEPTIONS_OFF = 1	//искать среди всех €рлыков, ничего не игнорировать
 		};
-		enum { MM_PATH, MM_CAT_PATH };
+		enum { MM_PATH, MM_CAT_PATH, MM_PATH_CAT };
 		virtual int MakeAction(int BreakCode);
 	public:
 		virtual int* GetBreakKeys() {
-			static int soft_break_keys[] = {OPEN_PATH_IN_EXPLORER, OPEN_PATH_IN_FAR, SWITCH_IGNORE_MODE_ONOFF, VK_F2, VK_F3, 0};				
+			static int soft_break_keys[] = {OPEN_PATH_IN_EXPLORER, OPEN_PATH_IN_FAR, SWITCH_IGNORE_MODE_ONOFF, VK_F2, VK_F3, VK_F5, 0};				
 			return &soft_break_keys[0];
 		}
 		virtual tstring GetMenuTitle() {

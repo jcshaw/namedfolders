@@ -9,9 +9,17 @@
 
 
 ----------------------------------------------------------------------------
+Version 3.0.0.255 snapshot [31.01.2011]
+----------------------------------------------------------------------------
+[+] New possibility to specify negative mask in paths. Negative mask is
+separated from positive one by character "|". I.e. command "cd:pf\*a*|*b*" will 
+find all subdirectories of "pf" that are matched to "*a*" and, at the same time,
+not matched to "*b*".
+
+----------------------------------------------------------------------------
 Version 3.0.0.254 release [22.01.2011]
 ----------------------------------------------------------------------------
-[*] Small code improvements.
+[*] Minor code improvements.
 [*] Help is improved.
 
 ----------------------------------------------------------------------------

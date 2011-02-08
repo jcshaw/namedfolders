@@ -79,6 +79,9 @@ tshortcut_value_parsed_pair nf::DecodeValues(tstring const& Value) {
 		result.second.value.assign(v2.c_str(), n+1, v2.size());
 		result.second.ValueType = get_value_type(result.second.value);
 	}
+	//исключаем потенциальные проблемы с концевыми пробелами (не будет работать сравнение имен файлов)
+	result.first.value = Utils::TrimChar(result.first.value, L' ');
+	result.second.value = Utils::TrimChar(result.second.value, L' ');
 	return result;
 }
 

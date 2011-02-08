@@ -70,6 +70,7 @@ tpath_selection_result nf::Selectors::GetPath(HANDLE hPlugin, tstring const &src
 	//и вернуть его в ResultPath
 	nf::tlist_strings value_paths;
 	GetPath(hPlugin, srcPath, localPath0, whatToSearch, value_paths);
+
 	value_paths.sort();
 	//при игре в \ и .. легко могут появиться множественные варианты одного и того же файла
 	value_paths.unique();

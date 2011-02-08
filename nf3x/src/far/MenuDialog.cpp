@@ -114,7 +114,8 @@ namespace {
 		inline tstring operator() (tsoft_info const& Value) const {	
 			switch (m_ViewMode) { //!TODO: добавить режимы отображения
 			case CMenuApplications::MM_PATH: return Value.shortcut;
-			default: return Utils::CombineStrings(Value.catalog, Value.shortcut, m_Widths.first);
+			case CMenuApplications::MM_PATH_CAT: return Utils::CombineStrings(Value.shortcut, Value.catalog, m_Widths.first);
+			default: return Utils::CombineStrings(Value.catalog, Value.shortcut, m_Widths.first); //VALUE_CAT_PATH
 			} 
 		}
 		inline tstring operator() (tstr_info const& Value) const { 
