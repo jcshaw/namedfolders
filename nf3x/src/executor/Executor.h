@@ -11,7 +11,7 @@
 #include "PanelInfoWrap.h"
 
 namespace nf {
-	bool ExecuteCommand(nf::tparsed_command &cmd); //execute command (all commands except opening panel);
+	bool ExecuteCommand(nf::tparsed_command &cmd, bool bReadDataForDialogMode); //execute command (all commands except opening panel);
 
 namespace Commands {
 	bool OpenShortcut(HANDLE hPlugin

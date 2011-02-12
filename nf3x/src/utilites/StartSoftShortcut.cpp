@@ -134,9 +134,7 @@ namespace {
 				Paths[i] = Utils::CombinePath(Paths[i], common_folder, SLASH_DIRS);
 		}
 	}
-}
 
-namespace {
 	void get_soft_variants(HANDLE hPlugin, nf::tvector_strings &destPaths)
 	{	//составл€ем полный список программ из стартового меню
 		//получаем путь к каталогу StartMenu дл€ всех пользователей и дл€ текущего пользовател€
@@ -162,9 +160,7 @@ namespace {
 			destPaths.push_back(path_eng);
 		}
 	}
-}
 
-namespace {
 	typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 	LPFN_ISWOW64PROCESS fnIsWow64Process;
 
@@ -207,9 +203,7 @@ namespace {
 			}
 		}
 	}
-}
 
-namespace {
 	typedef enum tadd_action {FH_NONE = 0
 		, FH_COLON = 1
 		, FH_PLUS = 2
@@ -267,7 +261,7 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd) {
 	while (true) {	//при переключении режима отображени€ генерируем список заново
 		tlist_strings masks;
 		Utils::SplitStringByRegex(Utils::TrimChar(shortcut_pattern, L' '), masks, L"\\s");
-		nf::Search::MaskMatcher sh_mask(masks, get_exceptions(), ASTERIX_MODE_BOTH);
+		nf::Search::MaskMatcher sh_mask(masks, get_exceptions(), ASTERIX_MODE_BOTH, false);
 
 	//¬Ќ»ћјЌ»≈: используем флаг bTemporary чтобы различать какому path_XXX принадлежит выбраный €рлык
 	//получаем список всех €рлыков, соответствующих паттерну

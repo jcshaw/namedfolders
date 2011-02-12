@@ -30,7 +30,7 @@ int CMenuShortcuts::MakeAction(int breakCode) {
 		switch_mode(nf::ST_SELECT_SH_MENU_MODE, breakCode - 2); 
 		break;
 	case 7: case 8: case 9://sort mode
-		switch_mode(nf::ST_SORT_SH_MENU_COLUMN, breakCode - 5); 
+		switch_mode(nf::ST_SORT_SH_MENU_COLUMN, breakCode - 6); 
 		break;
 	case 10: //no sort 
 		switch_mode(nf::ST_SORT_SH_MENU_COLUMN, 0); 

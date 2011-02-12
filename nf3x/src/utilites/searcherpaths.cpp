@@ -32,7 +32,9 @@ namespace {
 	}
 }
 
-nf::Search::MaskMatcher::MaskMatcher(tstring const& srcMask, tasterix_mode const asterixMode012) {
+nf::Search::MaskMatcher::MaskMatcher(tstring const& srcMask, tasterix_mode const asterixMode012, bool bPositiveOR) 
+: m_bPositiveOR(bPositiveOR)
+{
 	tpair_strings kvp = Utils::DivideString(srcMask, L'|');
 	add_masks(kvp.first, asterixMode012, m_regexPositive);
 	if (! kvp.second.empty()) {
@@ -40,7 +42,10 @@ nf::Search::MaskMatcher::MaskMatcher(tstring const& srcMask, tasterix_mode const
 	}
 }
 
-nf::Search::MaskMatcher::MaskMatcher(tlist_strings const& positiveMasks, tlist_strings const& negativeMasks, nf::tasterix_mode const asterixMode012) {
+nf::Search::MaskMatcher::MaskMatcher(tlist_strings const& positiveMasks, tlist_strings const& negativeMasks
+									 , nf::tasterix_mode const asterixMode012, bool bPositiveOR) 
+: m_bPositiveOR(bPositiveOR)
+{
 	BOOST_FOREACH(tstring const& positive_mask, positiveMasks) {
 		add_masks(positive_mask, asterixMode012, m_regexPositive);
 	}
@@ -55,12 +60,19 @@ void nf::Search::MaskMatcher::add_masks(tstring const& srcMask, tasterix_mode co
 		)), boost::regex_constants::icase));
 }
 
-bool nf::Search::MaskMatcher::match_to(tstring const& srcText, std::vector<tregex> const& destList) {
+bool nf::Search::MaskMatcher::match_to(tstring const& srcText, std::vector<tregex> const& destList, bool bLogicalOR) {
 	tsmatch what;
-	BOOST_FOREACH(tregex const& regex, destList) {
-		if (NF_BOOST_REGEX_LIB::regex_match(srcText, what, regex)) return true;
+	if (bLogicalOR) {
+		BOOST_FOREACH(tregex const& regex, destList) {
+			if (NF_BOOST_REGEX_LIB::regex_match(srcText, what, regex)) return true;
+		}
+		return false;
+	} else {
+		BOOST_FOREACH(tregex const& regex, destList) {
+			if (! NF_BOOST_REGEX_LIB::regex_match(srcText, what, regex)) return false;
+		}
+		return true;
 	}
-	return false;
 }
 
 

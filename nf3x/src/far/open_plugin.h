@@ -8,5 +8,6 @@
 
 namespace nf {
 	HANDLE OpenFromPluginsMenu();
-	std::pair<HANDLE, bool>  OpenFromCommandLine(wchar_t const* pCmd );
+	std::pair<HANDLE, bool> OpenFromCommandLine(wchar_t const* pSrcCmd);
+	std::pair<HANDLE, bool> OpenFromDialog(wchar_t const* pSrcCmd);
 }

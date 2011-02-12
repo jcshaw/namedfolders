@@ -95,6 +95,13 @@ namespace {
 	}
 }
 
+std::pair<HANDLE, bool> nf::OpenFromDialog(wchar_t const* pSrcCmd) { 
+	tstring s = pSrcCmd;
+	nf::tparsed_command cmd;
+	nf::Parser::ParseString(L"cd:" + Utils::TrimChar(s, L' '), cmd);
+	return std::make_pair(INVALID_HANDLE_VALUE, nf::ExecuteCommand(cmd, true));
+}
+
 std::pair<HANDLE, bool> nf::OpenFromCommandLine(wchar_t const* pSrcCmd) {
 	tstring command = pattern_to_command(pSrcCmd);
 
@@ -114,7 +121,7 @@ std::pair<HANDLE, bool> nf::OpenFromCommandLine(wchar_t const* pSrcCmd) {
 			break;
 		}
 	default:
-		return std::make_pair(INVALID_HANDLE_VALUE, nf::ExecuteCommand(cmd));
+		return std::make_pair(INVALID_HANDLE_VALUE, nf::ExecuteCommand(cmd, false));
 	};
 	return std::make_pair(INVALID_HANDLE_VALUE, false);
 } //OpenFromCommandLine

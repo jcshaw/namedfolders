@@ -409,7 +409,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\DiskMenuHelper.h"
+				RelativePath=".\utilites\dialogs_completion.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\dialogs_completion.h"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\DiskMenuHelper.h"
 				>
 			</File>
 			<File

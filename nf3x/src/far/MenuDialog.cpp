@@ -8,7 +8,7 @@ using namespace Menu;
 using namespace Polices;
 
 namespace {
-	enum {FIRST_COLUMN_MAX_WIDTH = 50, MAX_WIDTH = 128};
+	enum {FIRST_COLUMN_MAX_WIDTH = 60, MAX_WIDTH = 256};
 
 	int additional_chars[] = { VK_OEM_PLUS
 		, VK_OEM_1
@@ -264,7 +264,9 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 	//display count of items at the bottom of menu
 	tstring bottom = m_Menu.m_KeysInMenu;
 	if (! bottom.empty()) bottom += L" ";
-	bottom += L"(" + Utils::itoa(static_cast<int>(MenuItems.size())) + L")";
+	bottom += L"(" + Utils::itoa(static_cast<int>(MenuItems.size()))  //visualization of results count
+		+ L"," +  Utils::itoa(static_cast<int>(m_Menu.GetCurrentSortMode()))  //visualization of sort mode
+		+ L")";
  
 	nSelectedItem = g_PluginInfo.Menu (
 		g_PluginInfo.ModuleNumber

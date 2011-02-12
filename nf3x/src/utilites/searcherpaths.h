@@ -21,16 +21,17 @@ namespace Search {
 	class MaskMatcher {	
 	public:
 		MaskMatcher(tstring const& srcMask //positive and negative masks are divided by |, i.e. "a | b"
-			, tasterix_mode const asterixMode012 = ASTERIX_MODE_AS_IS);
-		MaskMatcher(tlist_strings const& positiveMasks, tlist_strings const& negativeMasks, tasterix_mode const asterixMode012);
+			, tasterix_mode const asterixMode012 = ASTERIX_MODE_AS_IS, bool bPositiveOR = true);
+		MaskMatcher(tlist_strings const& positiveMasks, tlist_strings const& negativeMasks, tasterix_mode const asterixMode012, bool bPositiveOR = true);
 		bool MatchTo(tstring const& fileName) const {
-			return match_to(fileName, m_regexPositive) && ! match_to(fileName, m_regexNegative);
+			return match_to(fileName, m_regexPositive, m_bPositiveOR) && ! match_to(fileName, m_regexNegative, true);
 		}
 	private:
 		static void add_masks(tstring const& srcMask, tasterix_mode const asterixMode012, std::vector<tregex>& destList);
-		static bool match_to(tstring const& srcText, std::vector<tregex> const& destList);
-		std::vector<tregex> m_regexPositive; //combined by logical OR
+		static bool match_to(tstring const& srcText, std::vector<tregex> const& destList, bool bLogicalOR);
+		std::vector<tregex> m_regexPositive; //combined by logical OR or by logical AND (see m_bPositiveAND)
 		std::vector<tregex> m_regexNegative; //combined by logical OR
+		bool const m_bPositiveOR; 
 	};
 
 	//search engine to search files and directories matched to specified mask

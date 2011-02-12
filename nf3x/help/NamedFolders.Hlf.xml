@@ -261,12 +261,16 @@ plugin find several shortcuts matched to users command.
   Use #Enter# to choose selected shortcut.
   Use #Del# to delete selected shortcut.
 	Use #F4# to edit selected shortcut.
-  Use #F2#,#F3#,#F5-#F7# to change display mode.
-  #F2# - display shortcuts only;
-  #F3# - display values of shortcuts only;
-  #F5# - display shortcuts and their catalogs;
-  #F6# - display all: catalogs, shortcuts and their values.
-  #F7# - display shortcuts and values;
+	
+  Use #F5#-#F9# to change display mode.
+  #F5# - display shortcuts only;
+  #F6# - display values of shortcuts only;
+  #F7# - display shortcuts and their catalogs;
+  #F8# - display all: catalogs, shortcuts and their values.
+  #F9# - display shortcuts and values;
+
+  Use #Ctrl+F5#, #Ctrl+F6#, #Ctrl+F7# to sort results by columns 1, 2, 3. 
+Use #Ctrl+F12# to turn off sorting of results.	
 
   Use #F11# - to switch showing catalogs mode (between normal mode
 and pseudo-treelike one).

@@ -137,7 +137,7 @@ namespace {
 	}
 }
 
-bool nf::ExecuteCommand(nf::tparsed_command &cmd) {
+bool nf::ExecuteCommand(nf::tparsed_command &cmd, bool bReadDataForDialogMode) {
 	CPanelInfoWrap plugin(INVALID_HANDLE_VALUE);
 
 	switch(cmd.kind) {
@@ -161,6 +161,10 @@ bool nf::ExecuteCommand(nf::tparsed_command &cmd) {
 		return nf::Selectors::OpenEnvVar(plugin, cmd.shortcut, cmd.local_directory);
 	case nf::QK_OPEN_NETWORK: 	/*cd:\\*/
 		return open_network(plugin, L"\\" + cmd.local_directory);
+	}
+
+	if (bReadDataForDialogMode) return false; //it's not possible to use other commands from dialogs
+	switch(cmd.kind) {
 	case nf::QK_INSERT_SHORTCUT:	//cd::
 	case nf::QK_INSERT_SHORTCUT_IMPLICIT: //cd::
 	case nf::QK_INSERT_SHORTCUT_TEMPORARY_IMPLICIT: //cd:+

@@ -243,6 +243,7 @@
     <ClCompile Include="executor\executor_addons.cpp" />
     <ClCompile Include="executor\executor_select.cpp" />
     <ClCompile Include="main\Kernel.cpp" />
+    <ClCompile Include="utilites\dialogs_completion.cpp" />
     <ClCompile Include="utilites\Parser.cpp" />
     <ClCompile Include="utilites\PathsFinder.cpp" />
     <ClCompile Include="utilites\searcherpaths.cpp" />
@@ -287,6 +288,8 @@
     <ClInclude Include="executor\executor_addons.h" />
     <ClInclude Include="executor\executor_select.h" />
     <ClInclude Include="main\Kernel.h" />
+    <ClInclude Include="utilites\dialogs_completion.h" />
+    <ClInclude Include="utilites\DiskMenuHelper.h" />
     <ClInclude Include="utilites\Parser.h" />
     <ClInclude Include="utilites\PathsFinder.h" />
     <ClInclude Include="utilites\searcherpaths.h" />

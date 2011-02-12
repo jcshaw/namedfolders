@@ -14,6 +14,7 @@
 #include "ConfigureDialog.h"
 #include "open_plugin.h"
 #include "DiskMenuHelper.h"
+#include "dialogs_completion.h"
 
 // 
 // extern "C" {
@@ -63,14 +64,14 @@ void WINAPI _export GetPluginInfoW(struct PluginInfo *pInfo) {
 	pInfo->PluginConfigStrings = PluginConfigStrings;
 
 	pInfo->StructSize = sizeof(*pInfo); 
-	pInfo->Flags = PF_FULLCMDLINE;
+	pInfo->Flags = PF_FULLCMDLINE | PF_DIALOG;
 	
 	static std::wstring list_prefixes = CSettings::GetInstance().GetListPrefixes().c_str();
 	pInfo->CommandPrefix = list_prefixes.c_str();
 	return;
 }
 
-HANDLE WINAPI _export OpenPluginW(int OpenFrom,INT_PTR Item) {
+HANDLE WINAPI _export OpenPluginW(int OpenFrom, INT_PTR Item) {
 	try {
 		switch (OpenFrom) {
 		case OPEN_COMMANDLINE: 
@@ -94,6 +95,9 @@ HANDLE WINAPI _export OpenPluginW(int OpenFrom,INT_PTR Item) {
 				return nf::OpenFromCommandLine(menu_helper.GetCommand(static_cast<unsigned int>(Item)).c_str()).first;
 			}
 		break;
+		case OPEN_DIALOG:
+			nf::DialogsCompletion::OpenFromDialog(reinterpret_cast<OpenDlgPluginData*>(Item)->hDlg);
+			break;
 		}
 	} catch (...) {
 	}
@@ -191,6 +195,22 @@ int WINAPI _export ProcessEventW(HANDLE hPlugin, int Event, void *Param) {
 	try {
 		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
 		return p->ProcessEvent(Event, Param);
+	} catch (...) {
+		return FALSE;
+	}
+}
+
+int WINAPI _export ProcessDialogEventW(int Event, void *Param) {
+	try {
+		if (Event == DE_DEFDLGPROCINIT) {
+			FarDialogEvent *pevent = reinterpret_cast<FarDialogEvent*>(Param);
+			if (pevent->Msg == DN_KEY) {
+				if (KEY_F12 == pevent->Param2) {
+					int a = 0;
+				}
+			}
+		}
+		return 0;
 	} catch (...) {
 		return FALSE;
 	}

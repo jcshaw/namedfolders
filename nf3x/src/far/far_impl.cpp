@@ -22,6 +22,7 @@
 #include "PanelUpdater.h"
 #include "Parser.h"
 #include "autobuffer_wrapper.h"
+#include "dialogs_completion.h"
 
 extern struct PluginStartupInfo g_PluginInfo; 
 
@@ -89,19 +90,23 @@ namespace {
 			srcDir += SLASH_DIRS; //C: -> C:\, otherwise FAR won't open C: correctly
 		}
 
-		Plugin.SetPanelDir(bActivePanel, srcDir);
-		Plugin.RedrawPanel(bActivePanel);
+		if (nf::DialogsCompletion::IsDialogsCompletionOn()) {
+			nf::DialogsCompletion::SetDialogsCompletionResult(srcDir);
+		} else {
+			Plugin.SetPanelDir(bActivePanel, srcDir);
+			Plugin.RedrawPanel(bActivePanel);
 
-		if (! fileName.empty()) {
-			int current_item = nf::Panel::CPanelItemFinder(fileName.c_str())(); 
-			int top_item = (static_cast<LONG>(current_item) > 
-				Plugin.GetPanelInfo(true).PanelRect.bottom)
-				? current_item 
-				: 0;
-			Plugin.UpdateAndRedraw(true, current_item, top_item);
-		};
+			if (! fileName.empty()) {
+				int current_item = nf::Panel::CPanelItemFinder(fileName.c_str())(); 
+				int top_item = (static_cast<LONG>(current_item) > 
+					Plugin.GetPanelInfo(true).PanelRect.bottom)
+					? current_item 
+					: 0;
+				Plugin.UpdateAndRedraw(true, current_item, top_item);
+			};
 
-		if (bClosePlugin) Plugin.ClosePlugin(srcDir);
+			if (bClosePlugin) Plugin.ClosePlugin(srcDir);
+		}
 	}
 
 	nf::tpath_selection_result find_path_and_filename(HANDLE hPlugin
