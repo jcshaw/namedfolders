@@ -27,8 +27,8 @@ LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,0,1,255
- PRODUCTVERSION 3,0,1,255
+ FILEVERSION 3,0,1,256
+ PRODUCTVERSION 3,0,1,256
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -46,12 +46,12 @@ BEGIN
             VALUE "Comments", "Plugin for Far Manager"
             VALUE "CompanyName", "http://code.google.com/p/namedfolders"
             VALUE "FileDescription", "FAR Plugin: Far Named Folders 3x "
-            VALUE "FileVersion", "3, 0, 1, 255"
+            VALUE "FileVersion", "3, 0, 1, 256"
             VALUE "InternalName", "nf2x"
             VALUE "LegalCopyright", "Copyright (c) 2002-2011 by Victor V. Derevyanko, dvpublic0@gmail.com"
             VALUE "OriginalFilename", "NamedFolders.dll"
             VALUE "ProductName", "Far Named Folders "
-            VALUE "ProductVersion", "3, 0, 1, 255"
+            VALUE "ProductVersion", "3, 0, 1, 256"
         END
     END
     BLOCK "VarFileInfo"

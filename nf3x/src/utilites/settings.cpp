@@ -61,6 +61,11 @@ namespace
 		, {ST_SUBDIRECTORIES_AS_ALIASES, 0, L"ST_SUBDIRECTORIES_AS_ALIASES"}
 		, {ST_SHOW_CATALOGS_IN_DISK_MENU, 0, L"ST_SHOW_CATALOGS_IN_DISK_MENU"}
 		, {ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH, 1, L"ST_DISABLE_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH"}
+
+		, {ST_SORT_SH_MENU_COLUMN, 0, L"ST_SORT_SH_MENU_COLUMN"}	//колонка, по которой сортировать меню вариантов с шоткатами
+		, {ST_SORT_SOFT_MENU_COLUMN, 0, L"ST_SORT_SOFT_MENU_COLUMN"}   //колонка, по которой сортировать меню вариантов с программами
+		, {ST_SORT_SH_MENU_EV_COLUMN, 0, L"ST_SORT_SH_MENU_EV_COLUMN"}  //колонка, по которой сортировать меню вариантов с переменными среды
+
 	};
 
 	const int NUMBER_FLAGS = 

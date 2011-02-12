@@ -49,6 +49,9 @@ namespace nf {
 		//NF 3.0
 		, ST_SHOW_CATALOGS_IN_DISK_MENU //allow to show list of catalogs in disk menu
 		, ST_ALLOW_ABBREVIATED_SYNTAX_FOR_DEEP_SEARCH //disable possibility to use "\\\" instead of "\*\*\*", "...." instead of "\..\.." and use "cd:a.." instead of "cd:a\.."
+		, ST_SORT_SH_MENU_COLUMN	//колонка, по которой сортировать меню вариантов с шоткатами
+		, ST_SORT_SOFT_MENU_COLUMN   //колонка, по которой сортировать меню вариантов с программами
+		, ST_SORT_SH_MENU_EV_COLUMN  //колонка, по которой сортировать меню вариантов с переменными среды
 		// при добавлении - добавить значение по умолчанию в default_flags_values
 
 		, NUMBER_FLAG_SETTINGS 

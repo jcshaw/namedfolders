@@ -60,15 +60,18 @@ namespace Menu {
 		CMenuDialog(CMenu &M, tlist_menu_items &listItemsRef);
 		bool ShowMenu(tvariant_value &DestValue, int &DestRetCode);
 	private:			
-		std::pair<size_t, size_t> get_column_widths();
-		void set_items_visibility(tstring const& Filter, int Level);
+		std::pair<size_t, size_t> get_column_widths(bool bOnlyVisibleItems);
+		void set_items_visibility(tstring const& Filter, int Level, std::pair<size_t, size_t> maxSizes);
 		void load_items(tlist_far_menu_items &destMenuItems, tlist_buffers &destMenuBuffers); 
 		int show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem);
+		void sort_items_list();
 	private:
 		CMenu &m_Menu;
 		tlist_menu_items &m_List;
 		tstring m_Filter;	//введенный фильтр (только английские буквы)
 		bool m_bFilterFullUpdateMode; 
+		std::pair<size_t, size_t> m_MaxStringsSizes;
+		int m_ViewModeForMaxStringsSizes;
 		//при добавлении очередной буквы к фильтру нет необходимости проверять
 		//строки, которые не попали в результаты предыдущего поиска
 		//т.е. здесь возможна оптимизация, которая и реализуется через этот флаг

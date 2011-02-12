@@ -89,7 +89,7 @@ tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, size
 	tstring compact_path = get_compact_path(Value1, Width1);
 	result += compact_path;
 	size_t len1 = Width1 + COUNT_SPACES_BETWEEN_COLUMNS - (Value1.size() < Width1 ? Value1.size() : Width1);
- 	for (unsigned int i = 0; i < len1; ++i) result += L" ";
+	result.append(len1, L' ');
  	result += Value2;
 	return result;
 }
@@ -100,12 +100,12 @@ tstring Utils::CombineStrings(tstring const& Value1, tstring const& Value2, tstr
 	tstring compact_path = get_compact_path(Value1, Width1);
 	result += compact_path;
 	size_t len1 = Width1 + COUNT_SPACES_BETWEEN_COLUMNS - (Value1.size() < Width1 ? Value1.size() : result.size());
-	for (size_t i = 0; i < len1; ++i) result += L" ";
+	result.append(len1, L' ');
 	tstring prom = get_compact_path(Value2, Width2);
 	result += prom;
 
 	size_t len2 = Width2 + COUNT_SPACES_BETWEEN_COLUMNS - (Value2.size() < Width2 ? Value2.size() : prom.size());
-	for (size_t i = 0; i < len2; ++i) result += L" ";
+	result.append(len2, L' ');
 	result += Value3;
 
 	return result;

@@ -36,7 +36,7 @@ nf::Search::MaskMatcher::MaskMatcher(tstring const& srcMask, tasterix_mode const
 	tpair_strings kvp = Utils::DivideString(srcMask, L'|');
 	add_masks(kvp.first, asterixMode012, m_regexPositive);
 	if (! kvp.second.empty()) {
-		add_masks(kvp.first, asterixMode012, m_regexNegative);
+		add_masks(kvp.second, asterixMode012, m_regexNegative);
 	}
 }
 
