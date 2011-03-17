@@ -11,6 +11,8 @@
 
 
 //определения констант
+wchar_t const* PREFIX_CD = L"cd:";
+wchar_t const* PREFIX_ST = L"st:";
 
 wchar_t const * SLASH_CATS = L"/";		//разделитель каталогов
 wchar_t const * SLASH_DIRS = L"\\";	//разделитель директорий

@@ -140,6 +140,15 @@ namespace {
 bool nf::ExecuteCommand(nf::tparsed_command &cmd, bool bReadDataForDialogMode) {
 	CPanelInfoWrap plugin(INVALID_HANDLE_VALUE);
 
+	if (0 == lstrcmpi((cmd.prefix + L":").c_str(), PREFIX_ST)) {
+		if (bReadDataForDialogMode) return false; //not supported in dialogs
+		switch(cmd.kind) {
+		case QK_OPEN_SHORTCUT:
+		case QK_START_SOFT_SHORTCUT:
+			return Start::OpenSoftShortcut(plugin, cmd);
+		}
+	}
+
 	switch(cmd.kind) {
 	case nf::QK_OPEN_DIRECTORY_DIRECTLY:
 		return open_directory_directly(plugin, cmd, nf::WTS_DIRECTORIES);

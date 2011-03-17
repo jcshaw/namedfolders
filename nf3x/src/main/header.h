@@ -34,6 +34,9 @@
 typedef std::basic_string<wchar_t> tstring;
 typedef std::pair<tstring, tstring> tpair_strings;
 
+extern wchar_t const* PREFIX_CD;
+extern wchar_t const* PREFIX_ST;
+
 extern wchar_t const * SLASH_CATS;		//разделитель каталогов
 extern wchar_t const * SLASH_DIRS;		//разделитель директорий
 extern wchar_t const SLASH_CATS_CHAR;		//разделитель каталогов

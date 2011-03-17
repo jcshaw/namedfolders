@@ -188,6 +188,13 @@ tstring nf::Patterns::Private::DetailedCommand::GetResultString() const {
 	tstring result;
 	result.reserve(m_DestParts[ID_SHORCUT].size() + m_DestParts[ID_PATH].size() + 10);
 	for (int i = 0; i < NUM_PARTS; ++i) {
+		if (i == ID_SHORCUT) {
+			//if shortcut contains spaces, we should quote it, see #52
+			if (m_DestParts[ID_SHORCUT].find(L' ') != tstring.npos) {
+				result += L"\"" + m_DestParts[i] + L"\"";
+				continue;
+			} 
+		} 
 		result += m_DestParts[i];
 	}
 	return result;

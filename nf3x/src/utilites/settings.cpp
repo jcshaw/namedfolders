@@ -22,7 +22,7 @@ namespace
 	} _tdefault_string_value;
 
 	tdefault_string_value const default_strings_values [] = {
-		{STS_PREFIXES, L"cd:cc:", L"prefix"}
+		{STS_PREFIXES, L"cd:st:", L"prefix"}
 		, {ST_SOFT_MASKS_TO_IGNORE_COMMA_SEPARETED, L"*readme*,*uninstall*,*read me*", L"ST_SOFT_MASKS_TO_IGNORE_COMMA_SEPARETED"}
 		, {STS_PANELWIDTH, L"N,Z,C0;10,0,5", L"STS_PANELWIDTH"}
 		, {ST_ASTERIX_MODE, L"0", L"ST_ASTERIX_MODE"}
@@ -106,6 +106,9 @@ tstring const& CSettings::GetListPrefixes() {
 	m_FullListPrefixes = CSettings::GetInstance().GetValue(nf::STS_PREFIXES).c_str();
 	nf::Patterns::CommandsManager cm(nf::GetRegistryKeyForCommandPatterns());
 	m_FullListPrefixes += cm.GetListCommandPrefixes();
+// 	if (tstring::npos == m_FullListPrefixes.find(L"st:")) { //!TODO: we need possibility to turn of a support of "st:" 
+// 		m_FullListPrefixes += L"st:";
+// 	}
 	return m_FullListPrefixes;
 }
 
