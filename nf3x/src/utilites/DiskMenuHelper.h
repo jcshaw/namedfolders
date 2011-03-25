@@ -5,6 +5,7 @@
 
 #include "header.h"
 #include "stlcatalogs.h"
+#include "catalog_utils.h"
 
 namespace nf {
 	class DiskMenuHelper { //support of possibility to show catalogs in disk menu
@@ -60,7 +61,13 @@ namespace nf {
 			BOOST_FOREACH(sc::catalogs_sequence_item const& csi, seq) {
 				tstring name = csi.GetName();
 				if (name != L".." && name != L".") {					
-					m_Catalogs.push_back(tstring_buffer(Utils::Str2Buffer(L"nf:" + name)));
+					nf::sc::CCatalog subcatalog(name, &c);
+					tstring dest;
+					if (subcatalog.GetProperty(nf::sc::CATALOG_PROPERTY_SHOW_IN_DISK_MENU, dest)) {
+						if (dest.size() && dest[0] != L'0') {
+							m_Catalogs.push_back(tstring_buffer(Utils::Str2Buffer(L"nf:" + name)));
+						}
+					}
 				}
 			}
 		}

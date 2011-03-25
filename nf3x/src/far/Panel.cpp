@@ -216,7 +216,11 @@ int CPanel::ProcessKey(int Key, unsigned int ControlState) {
 	case VK_F4: //edit/create shortcut name
 		if (PKF_SHIFT == ControlState) {
 			InsertShortcut(this, pi);
-		} else if (! IsSelectedItemIsCatalog(this, pi)) {
+		} else if (IsSelectedItemIsCatalog(this, pi)) {
+			if (pi.SelectedItemsNumber) { // исключаем ".."
+				EditCatalog(this, GetSelectedCatalog(this, pi));
+			}
+		} else {
 			nf::tshortcut_info sh;
 			EditShortcut(this, GetSelectedShortcut(this, pi, sh), pi);
 		}

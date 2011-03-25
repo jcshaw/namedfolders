@@ -184,6 +184,19 @@ bool nf::Panel::CreateCatalog(CPanel* pPanel, tstring const& ParentCatalog, tstr
 	return false;
 }
 
+bool nf::Panel::EditCatalog(CPanel* pPanel, tstring const& catalogName) {
+	tpair_strings kvp = Utils::DividePathFilename(catalogName, SLASH_CATS_CHAR, true);
+	nf::CDialogEditCatalog dlg(kvp.first.c_str(), kvp.second.c_str(), false);
+	if (dlg.ShowModal()) {
+		tstring new_catalog_name = dlg.GetCatalogName(true);
+		if (new_catalog_name != catalogName) {
+			Shell::MoveCatalog(catalogName.c_str(), new_catalog_name);
+			return true;
+		}
+	}
+	return false;
+}
+
 void nf::Panel::SaveSetup(CPanel* pPanel) {
 	//запоминаем состояние панели
 	int ViewMode = pPanel->get_hPlugin().GetPanelInfo(true).ViewMode;

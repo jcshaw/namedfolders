@@ -39,7 +39,7 @@
 "Use single m&enu mode"
 "&Show keys in menu"
 "Masks ignored by 'cd: soft'"
-"Show catalogs in disk menu"
+"Allow to show selected catalogs in disk menu"
 "Panel mode"
 "&Aliases mask expand mode"
 
@@ -60,6 +60,7 @@
 "Jump to the nearest existing folder"
 "Error"
 "Skip"
+"Show in disk menu (see flag in settings)"
 
 "The following alias will be deleted"
 "Several aliases will be deleted"
@@ -79,8 +80,9 @@
 "Copy alias '%s' to"
 "Move items"
 "Copy items"
-"Create the catalog"
-"Make catalog"
+"Catalog name"
+"Create catalog"
+"Edit catalog"
 
 "Alias"
 "Directory for active panel"

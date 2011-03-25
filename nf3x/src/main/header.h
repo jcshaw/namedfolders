@@ -169,6 +169,10 @@ namespace nf {
 		, ID_MENU_CANCELED
 	};
 
+	typedef struct tcatalog_properties {
+		bool show_in_disk_menu;
+	} _tcatalog_properties;
+
 	typedef tstring tcatalog_info;	//информация о каталоге (путь относительно корневого каталога)
 
 	typedef std::list<tstring> tlist_strings;

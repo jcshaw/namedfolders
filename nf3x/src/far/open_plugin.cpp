@@ -13,6 +13,7 @@
 #include "strings_utils.h"
 #include "CommandPatternsDialog.h"
 #include "stlcatalogs.h"
+#include "catalog_utils.h"
 
 using namespace nf;
 
@@ -115,7 +116,7 @@ std::pair<HANDLE, bool> nf::OpenFromCommandLine(wchar_t const* pSrcCmd) {
 	case nf::QK_OPEN_SHORTCUT:
 		if (cmd.shortcut.empty()) {
 			//open catalog if and only if it exists
-			if (nf::sc::CCatalog::IsCatalogExist(cmd.catalog)) {
+			if (nf::sc::IsCatalogExist(cmd.catalog)) {
 				return std::make_pair(static_cast<HANDLE>(new nf::Panel::CPanel(cmd.catalog)), true);
 			}
 			break;

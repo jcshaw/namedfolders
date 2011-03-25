@@ -10,11 +10,11 @@
 #include "Kernel.h"
 #include "strings_utils.h"
 
-#include "stlcatalogs.h"
+#include "catalog_utils.h"
 
 //!TODO: find appropriate place for this function
 bool IsNamedFoldersCatalogExists(tstring const& catalogName) {
-	return nf::sc::CCatalog::IsCatalogExist(catalogName);
+	return nf::sc::IsCatalogExist(catalogName);
 }
 
 

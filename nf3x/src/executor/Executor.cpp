@@ -24,6 +24,7 @@
 #include "StartSoftShortcut.h"
 #include "far_impl.h"
 #include "DialogEditShortcut.h"
+#include "catalog_utils.h"
 
 extern struct PluginStartupInfo g_PluginInfo; 
 using namespace nf;
@@ -207,7 +208,7 @@ bool nf::ExecuteCommand(nf::tparsed_command &cmd, bool bReadDataForDialogMode) {
 		//The command has double meaning:
 		//1) create new catalog if catalog doesn't exist
 		//2) create shortcut implicitly if catalog exists
-		if (! nf::sc::CCatalog::IsCatalogExist(cmd.catalog)) {
+		if (! nf::sc::IsCatalogExist(cmd.catalog)) {
 			return insert_catalog(plugin, cmd);
 		} else {
 			return insert_shortcut(cmd, plugin, true, false, false);

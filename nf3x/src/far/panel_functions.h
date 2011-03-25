@@ -20,6 +20,7 @@ namespace nf {
 		};
 	
 		bool CreateCatalog(CPanel* pPanel, tstring const& ParentCatalog, tstring &CreatedCatalogName);
+		bool EditCatalog(CPanel* pPanel, tstring const& CatalogName);
 		BOOL MoveItems(CPanel* pPanel, PanelInfo const &pi, tcopy_mode copyMode);
 		inline BOOL CopyItems(CPanel* pPanel, PanelInfo const &pi) { 
 			return MoveItems(pPanel, pi, ID_CM_COPY); }

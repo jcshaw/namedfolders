@@ -68,6 +68,7 @@ enum {
 	,MSG_JUMP_TO_THE_NEAREST_EXISTING_FOLDER //
 	,MSG_ERROR	//Error
 	,MSG_SKIP
+	,MSG_SHOW_IN_DISKMENU 
 	
 	,CONFIRM_DELETE_SHORTCUT //The following shortcut will be deleted
 	,CONFIRM_DELETE_SEVERAL_SHORTCUTS //The following shortcut will be deleted
@@ -89,6 +90,7 @@ enum {
 	,DLG_COPY_ITEMS
 	,DLG_CREATE_CATALOG_TITLE
 	,DLG_MAKE_CATALOG
+	,DLG_EDIT_CATALOG
 	
 	,DLG_SHORTCUT	//shortcut
 	,DLG_ACTIVE_VALUE//Directory on active panel
