@@ -29,6 +29,9 @@
 #include "select_variants.h"
 #include "menus_impl.h"
 
+#include "known_folders.h"
+#include "searcherpaths.h"
+
 using namespace nf;
 
 namespace {
@@ -120,26 +123,42 @@ namespace {
 		return 0 != hkey;
 	}
 
-	void GetListPairsForRegKey(tstring const &RegKeyName
-		, tstring const& subkeyPatternName
-		, tlist_pairs_strings &DestListPaths) {	
-	//получить список <ключ реестра, путь>, удовлетворяющих шаблону KeyPattern
-		tstring subkey;
-		HKEY hkey;
-		if (! decode_reg_key(RegKeyName, hkey, subkey)) return;		//что-то пользователь не то передал...
+	bool is_known_folders_registry_key(tstring const &RegKeyName) {
+		wchar_t const* known_folders_reg_key = L"$HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\explorer\\FolderDescriptions";
+		tstring key_to_compare = Utils::TrimChar(Utils::RemoveTrailingChars(RegKeyName, L'\\'), L' ');
+		return lstrcmpi(known_folders_reg_key, key_to_compare.c_str()) == 0;
+	}
 
-		WinSTL::reg_key_t c(hkey, subkey.c_str());
-		WinSTL::reg_value_sequence_t s(c);
-		BOOST_FOREACH(WinSTL::reg_value_sequence_t::value_type const& value, s) {
-			//путь заносим в виде: имя ключа, путь
-			//если указан subkeyPatternName, оставляем только те переменные, пути которых 
-			//удовлетворяют шаблону subkeyPatternName*
-			tstring subkey_pattern_name = subkeyPatternName;
-			if (! subkeyPatternName.empty()) subkey_pattern_name += L"*";
-			if (subkeyPatternName.empty() || nf::Parser::IsTokenMatchedToPattern(value.name(), subkey_pattern_name, true)) {
-				tstring path = value.value_expand_sz();
-				if (::PathFileExists(path.c_str())) { //#18: only exist paths
-					DestListPaths.push_back(std::make_pair(value.name(), path)); //CHAR_LEADING_VALUE_ENVVAR
+	void GetListPairsForRegKey(tstring const &RegKeyName, tstring const& subkeyPatternName, tlist_pairs_strings &DestListPaths) {	
+	//получить список <ключ реестра, путь>, удовлетворяющих шаблону KeyPattern
+
+		tstring pattern = Utils::TrimChar(subkeyPatternName, L'\\'); //!TODO: \a\b\c - add support for b\c
+		
+		if (is_known_folders_registry_key(RegKeyName)) {
+			//this is key with known folders under Win7; we need to use spec functions to extract list of directories from there
+			nf::KnownFoldersManager kfm;
+			if (! kfm.AreKnownFoldersEnabled()) return;
+			nf::Search::MaskMatcher mm(pattern
+				, nf::ASTERIX_MODE_BOTH); //  static_cast<tasterix_mode>(Utils::atoi(nf::CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE))));
+			kfm.FindFolders(mm, DestListPaths);
+		} else {
+			tstring subkey;
+			HKEY hkey;
+			if (! decode_reg_key(RegKeyName, hkey, subkey)) return;		//что-то пользователь не то передал...
+
+			WinSTL::reg_key_t c(hkey, subkey.c_str());
+			WinSTL::reg_value_sequence_t s(c);
+			BOOST_FOREACH(WinSTL::reg_value_sequence_t::value_type const& value, s) {
+				//путь заносим в виде: имя ключа, путь
+				//если указан subkeyPatternName, оставляем только те переменные, пути которых 
+				//удовлетворяют шаблону subkeyPatternName*
+				tstring subkey_pattern_name = pattern; //!TODO
+				if (! subkeyPatternName.empty()) subkey_pattern_name += L"*";
+				if (subkeyPatternName.empty() || nf::Parser::IsTokenMatchedToPattern(value.name(), subkey_pattern_name, true)) {
+					tstring path = value.value_expand_sz();
+					if (::PathFileExists(path.c_str())) { //#18: only exist paths
+						DestListPaths.push_back(std::make_pair(value.name(), path)); //CHAR_LEADING_VALUE_ENVVAR
+					}
 				}
 			}
 		}
