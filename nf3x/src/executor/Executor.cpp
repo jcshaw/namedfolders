@@ -272,7 +272,8 @@ namespace {
 		if (SrcParsed.bValueEnabled) {
 			nf::tlist_strings list;
 			switch (SrcParsed.ValueType) {
-			case nf::VAL_ENVIRONMENT_VARIABLE: nf::Selectors::GetAllPathForEnvvar(hPlugin, SrcParsed.value, list); break;
+			case nf::VAL_ENVIRONMENT_VARIABLE: 
+				nf::Selectors::GetAllPathForEnvvar(hPlugin, SrcParsed.value, list); break;
 			case nf::VAL_REGISTRY_KEY: 
 				nf::Selectors::GetAllPathForRegKey(hPlugin, SrcParsed.value
 					, local_path //!TODO: передать сюда только первый токен LocalPath, для этих директорий LocalPath учитывать без первого токена

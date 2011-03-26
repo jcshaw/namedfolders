@@ -35,6 +35,12 @@ namespace Selectors {
 		, tstring LocalPath
 		, tstring &path	//выбранная пользователем директория из всех возможных директорий
 	);
+//value = shell:name 
+	bool GetKnownFolderPath(HANDLE hPlugins
+		, tstring const &srcPath
+		, tstring LocalPath
+		, tstring &destPath	
+	);
 
 //cd:~
 	bool GetShortcutByPathPattern(HANDLE hPlugin

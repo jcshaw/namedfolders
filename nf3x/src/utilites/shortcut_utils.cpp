@@ -7,6 +7,7 @@
 #include "stdafx.h"
 #include "shortcut_utils.h"
 #include "strings_utils.h"
+#include "Parser.h"
 
 using namespace nf;
 namespace {
@@ -45,8 +46,13 @@ namespace {
 
 		tstring::size_type npos = value.find_first_of(L':');
 		if (npos != tstring::npos &&  npos > 1) {
-			if (*value.begin() != L'[')	//метасимвол для имени диска... //!TODO: все ли учтено?
-				return nf::VAL_TYPE_PLUGIN_DIRECTORY;
+			if (*value.begin() != L'[')	{//метасимвол для имени диска... //!TODO: все ли учтено?
+				if (lstrcmpi(Parser::ExtractPrefix(value).c_str(), L"shell:") == 0) {
+					return nf::VAL_KNOWN_FOLDER;
+				} else {
+					return nf::VAL_TYPE_PLUGIN_DIRECTORY;
+				}
+			}
 		}
 
 		return nf::VAL_TYPE_LOCAL_DIRECTORY;

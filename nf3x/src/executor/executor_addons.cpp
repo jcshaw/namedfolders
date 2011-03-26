@@ -129,9 +129,8 @@ namespace {
 		return lstrcmpi(known_folders_reg_key, key_to_compare.c_str()) == 0;
 	}
 
-	void GetListPairsForRegKey(tstring const &RegKeyName, tstring const& subkeyPatternName, tlist_pairs_strings &DestListPaths) {	
+	void get_list_pairs_for_regkey(tstring const &RegKeyName, tstring const& subkeyPatternName, tlist_pairs_strings &DestListPaths) {	
 	//получить список <ключ реестра, путь>, удовлетворяющих шаблону KeyPattern
-
 		tstring pattern = Utils::TrimChar(subkeyPatternName, L'\\'); //!TODO: \a\b\c - add support for b\c
 		
 		if (is_known_folders_registry_key(RegKeyName)) {
@@ -165,76 +164,6 @@ namespace {
 	}
 }	//namespace
 
-void nf::Selectors::GetAllPathForRegKey(HANDLE hPlugins, tstring const &regKeyName, tstring const &varName
-										, nf::tlist_strings &destListPaths)
-{	//получить полный список вариантов именованных директорий 	
-	tlist_pairs_strings list_var_paths;
-	::GetListPairsForRegKey(regKeyName, varName, list_var_paths);
-	BOOST_FOREACH(tpair_strings const& kvp, list_var_paths) {
-		destListPaths.push_back(kvp.second);
-	}
-}
-
-bool nf::Selectors::GetPathByRegKey(HANDLE hPlugins
-									, tstring const &regKey //ключ реестра, содержащий переменные, содержащие требуемые пути
-									, tstring localPath
-									, tstring &destPath	//выбранная пользователем директория из всех возможных директорий
-									) {
-	tlist_pairs_strings list_var_paths;
-	::GetListPairsForRegKey(regKey
-		, localPath	//!TODO: здесь только первое имя из localpath
-		, list_var_paths);
-
-	tpair_strings result;
-	if (! Menu::SelectPathByRegKey(list_var_paths, result)) return false;
-	destPath = result.second;
-	return true;
-}
-
-bool nf::Selectors::OpenEnvVar(HANDLE hPlugin, tstring const &VarName, tstring const &LocalPath) {
-	tstring result_path;
-	if (! nf::Selectors::GetPathByEnvvarPattern(hPlugin, VarName, LocalPath, result_path)) return false;
-	return nf::Commands::OpenPath(hPlugin, result_path, L"", nf::WTS_DIRECTORIES);
-};
-
-void nf::Selectors::GetAllPathForEnvvar(HANDLE hPlugins, tstring const &varName, nf::tlist_strings &destListPaths) {	
-//get all paths for all environment variables matched to varName
-	tlist_pairs_strings list_var_paths;
-	tstring additional_local_path; //!TODO: что делать с этим значением?
-	::get_list_pairs_for_envvar(varName, list_var_paths, additional_local_path);
-
-	//we don't need names of environment variables, we need only their paths
-	BOOST_FOREACH(tpair_strings const& kvp, list_var_paths) {
-		destListPaths.push_back(kvp.second);
-	}
-
-	//remove duplicates from the list
-	destListPaths.sort(Utils::CmpStringEqualCI());
-	destListPaths.unique(Utils::CmpStringEqualCI());
-}
-
-bool nf::Selectors::GetPathByEnvvarPattern(HANDLE hPlugin, tstring const &varName, tstring const &localPath, tstring &destPath) {
-//get all matched environment variables and ask user to select required path
-	tlist_pairs_strings list_var_paths;
-	tstring add_local_path;
-	::get_list_pairs_for_envvar(varName, list_var_paths, add_local_path);
-	if (! localPath.empty()) {
-		add_local_path = add_local_path.empty()
-			? localPath
-			: Utils::CombinePath(add_local_path, localPath, SLASH_DIRS);
-		}
-
-	if (list_var_paths.size() == 1) {
-		destPath = (*list_var_paths.begin()).second;
-	} else {
-		tpair_strings result;
-		if (! Menu::SelectEnvVar(list_var_paths, result)) return false;
-		destPath = result.second;
-	}
-	if (! add_local_path.empty()) destPath = Utils::CombinePath(destPath, add_local_path, SLASH_DIRS);
-	return true;
-};
-
 //выбрать наиболее подходящий псевдоним из списка вариантов
 //выбор на основе директории, на которую ссылается псевдоним...
 bool nf::Selectors::GetShortcutByPathPattern(HANDLE hPlugin
@@ -266,3 +195,114 @@ bool nf::Selectors::GetShortcutByPathPattern(HANDLE hPlugin
 	}; 
 }
 
+
+
+
+bool nf::Selectors::OpenEnvVar(HANDLE hPlugin, tstring const &VarName, tstring const &LocalPath) {
+	tstring result_path;
+	if (! nf::Selectors::GetPathByEnvvarPattern(hPlugin, VarName, LocalPath, result_path)) return false;
+	return nf::Commands::OpenPath(hPlugin, result_path, L"", nf::WTS_DIRECTORIES);
+};
+
+void nf::Selectors::GetAllPathForRegKey(HANDLE hPlugins, tstring const &regKeyName, tstring const &varName
+										, nf::tlist_strings &destListPaths)
+{	//получить полный список вариантов именованных директорий 	
+	tlist_pairs_strings list_var_paths;
+	::get_list_pairs_for_regkey(regKeyName, varName, list_var_paths);
+	BOOST_FOREACH(tpair_strings const& kvp, list_var_paths) {
+		destListPaths.push_back(kvp.second);
+	}
+}
+
+void nf::Selectors::GetAllPathForEnvvar(HANDLE hPlugins, tstring const &varName, nf::tlist_strings &destListPaths) {	
+//get all paths for all environment variables matched to varName
+	tlist_pairs_strings list_var_paths;
+	tstring additional_local_path; //!TODO: что делать с этим значением?
+	::get_list_pairs_for_envvar(varName, list_var_paths, additional_local_path);
+
+	//we don't need names of environment variables, we need only their paths
+	BOOST_FOREACH(tpair_strings const& kvp, list_var_paths) {
+		destListPaths.push_back(kvp.second);
+	}
+
+	//remove duplicates from the list
+	destListPaths.sort(Utils::CmpStringEqualCI());
+	destListPaths.unique(Utils::CmpStringEqualCI());
+}
+
+namespace {
+	bool select_path(tlist_pairs_strings const& listPairs, tstring localPathMain, tstring const &localPathSecond, tstring &destPath) {
+	//user selects path from list of possible paths;
+	//there are two local paths here: first is taken from shortcut value, second one was enterd in command line by user; we combine them 
+		if (! localPathSecond.empty()) {
+			localPathMain = localPathMain.empty()
+				? localPathSecond
+				: Utils::CombinePath(localPathMain, localPathSecond, SLASH_DIRS);
+		}
+
+		if (listPairs.size() == 1) {
+			destPath = (*listPairs.begin()).second;
+		} else {
+			tpair_strings result;
+			if (! Menu::SelectStringPair(listPairs, result)) return false;
+			destPath = result.second;
+		}
+		if (! localPathMain.empty()) {
+			destPath = Utils::CombinePath(destPath, localPathMain, SLASH_DIRS);
+		}
+		return true;
+	}
+}
+
+bool nf::Selectors::GetPathByRegKey(HANDLE hPlugins
+									, tstring const &regKey //ключ реестра, содержащий переменные, содержащие требуемые пути
+									, tstring localPath
+									, tstring &destPath	//выбранная пользователем директория из всех возможных директорий
+									) {
+	tlist_pairs_strings list_var_paths;
+	::get_list_pairs_for_regkey(regKey
+		, localPath	//!TODO: здесь только первое имя из localpath
+		, list_var_paths);
+
+	tpair_strings result;
+	if (! Menu::SelectStringPair(list_var_paths, result)) return false;
+	destPath = result.second;
+	return true;
+}
+
+bool nf::Selectors::GetPathByEnvvarPattern(HANDLE hPlugin, tstring const &varName, tstring const &localPath, tstring &destPath) {
+//get all matched environment variables and ask user to select required path
+	tlist_pairs_strings list_var_paths;
+	tstring add_local_path;
+	::get_list_pairs_for_envvar(varName, list_var_paths, add_local_path);
+	return select_path(list_var_paths, add_local_path, localPath, destPath);
+}
+
+bool nf::Selectors::GetKnownFolderPath(HANDLE hPlugins, tstring const &srcPath, tstring localPath, tstring &destPath) {
+	KnownFoldersManager kfm;
+	tlist_pairs_strings list;
+	//srcPath is equal to "shell:patter"
+	//where pattern is "a\b\c"
+	//"a" should be used as a filter of appropriate known folder; "b\c" is part of local path.
+	size_t prefix_size = Parser::ExtractPrefix(srcPath).size();
+	tstring path(srcPath, prefix_size, srcPath.size() - prefix_size);
+
+	size_t pos = path.find_first_of(L'\\');
+	tstring mask;	
+	if (pos == tstring::npos) {
+		mask.swap(path);
+	} else {
+		mask.assign(path, 0, pos);
+	}
+	if (mask.empty()) mask = L"*";
+
+	tstring add_local_path;
+	if (pos != tstring::npos) {
+		add_local_path.assign(path, pos, path.size() - pos);
+	}
+
+	nf::Search::MaskMatcher mm(mask, nf::ASTERIX_MODE_BOTH);
+		
+	kfm.FindFolders(mm, list); 
+	return select_path(list, add_local_path, localPath, destPath);
+}

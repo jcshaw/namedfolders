@@ -165,6 +165,9 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 
 		tstring dir;
 		switch (panel.ValueType) {
+		case nf::VAL_KNOWN_FOLDER:
+			if (! nf::Selectors::GetKnownFolderPath(hPlugin, panel.value, path, dir)) return false;
+			break;
 		case nf::VAL_ENVIRONMENT_VARIABLE:
 			if (! nf::Selectors::GetPathByEnvvarPattern(hPlugin, panel.value, path, dir)) return false;
 			break;
@@ -197,7 +200,11 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 		}; //switch
 		
 		if (! PathFileExists(dir.c_str())) {
-			if (! nf::Selectors::FindBestDirectory(hPlugin, panel, L"", dir)) return false;
+			if (! nf::Selectors::FindBestDirectory(hPlugin, panel, L"", dir)) {
+				if (dir.empty() || ! nf::Selectors::FindBestDirectory(hPlugin, dir, dir, dir)) {				
+					return false;
+				}
+			}
 		}
 		::open_path_and_close_plugin(plugin, bClosePlugin, bActivePanel, dir, filename);
 	}; 

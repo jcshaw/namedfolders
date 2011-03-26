@@ -156,6 +156,22 @@ bool nf::Selectors::GetCatalog(HANDLE hPlugin, nf::tparsed_command const &cmd, n
 		return true;
 	}
 }
+bool nf::Selectors::FindBestDirectory(HANDLE hPlugin, tstring const& srcPath, tstring const& srcTitle, tstring &destDir) {
+	tstring dir = srcPath;
+
+	nf::tautobuffer_char buf(dir.size()+1);	
+	lstrcpy(&buf[0], dir.c_str());
+
+	while (! ::PathFileExists(&buf[0])) {
+		if (! ::PathRemoveFileSpec(&buf[0])) return false; //ближайшей директории не оказалось..
+	};
+
+	if (! nf::Confirmations::AskToGoToNearest(hPlugin, srcTitle, &buf[0])) return false;
+	dir = &buf[0];
+
+	destDir.swap(dir);
+	return true;
+}
 
 bool nf::Selectors::FindBestDirectory(HANDLE hPlugin, nf::tshortcut_value_parsed const &p, tstring const& localPath, tstring &destDir) {
 	//найти наилучшую директории; если требуемой директории нет - найти ближайшую
@@ -173,16 +189,5 @@ bool nf::Selectors::FindBestDirectory(HANDLE hPlugin, nf::tshortcut_value_parsed
 		: L"");
 	tstring dir = p.value;
 
-	nf::tautobuffer_char buf(dir.size()+1);	
-	lstrcpy(&buf[0], dir.c_str());
-
-	while (! ::PathFileExists(&buf[0])) {
-		if (! ::PathRemoveFileSpec(&buf[0])) return false; //ближайшей директории не оказалось..
-	};
-
-	if (! nf::Confirmations::AskToGoToNearest(hPlugin, title, &buf[0])) return false;
-	dir = &buf[0];
-
-	destDir.swap(dir);
-	return true;
+	return FindBestDirectory(hPlugin, dir, title, destDir);
 } 

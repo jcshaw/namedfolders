@@ -97,6 +97,7 @@ namespace nf {
 		, VAL_ENVIRONMENT_VARIABLE	//переменная среды
 		, VAL_DIRECT_PATH			//прямой путь к директории
 		, VAL_REGISTRY_KEY			//ссылка на ключ реестра; переменные в этом ключе содержат пути, из которых нужно произвести выбор
+		, VAL_KNOWN_FOLDER			//shell:KnownFolderName
 	} _tshortcutvalue_type;
 
 	typedef struct tshortcut_value_parsed {

@@ -55,5 +55,6 @@ namespace Selectors {
 		, nf::tshortcut_value_parsed const &p
 		, tstring const& localPath
 		, tstring &dir);
+	bool FindBestDirectory(HANDLE hPlugin, tstring const& srcPath, tstring const& srcTitle, tstring &dir);
 } //Selectors
 } //nf

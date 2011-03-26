@@ -53,7 +53,7 @@ int nf::Menu::SelectPath(nf::tlist_strings const& SrcList, tstring &DestPath) {
 	return select_from_menu<CMenuPaths, nf::tlist_strings, Polices::tdirect<tstring> >(SrcList, DestPath);
 }
 
-int nf::Menu::SelectEnvVar(nf::tlist_pairs_strings const &SrcList, std::pair<tstring, tstring> &DestVar) {
+int nf::Menu::SelectStringPair(nf::tlist_pairs_strings const &SrcList, std::pair<tstring, tstring> &DestVar) {
 	return select_from_menu<CMenuEnvironmentVariables, tlist_pairs_strings, Polices::tdirect<tpair_strings> >(SrcList, DestVar);
 }
 
