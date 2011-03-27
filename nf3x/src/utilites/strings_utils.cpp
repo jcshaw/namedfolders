@@ -236,3 +236,4 @@ void Utils::DivideDiskPath(tstring const &src, tstring &destDisk, tstring &destP
 		destPath.assign(src, 2, src.size() - 2);
 	}
 }
+

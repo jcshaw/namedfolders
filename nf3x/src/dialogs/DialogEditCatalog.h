@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <boost/scoped_ptr.hpp>
+
 #include "dialogsT.h"
 #include "lang.h"
 #include "strings_utils.h"
@@ -20,6 +22,11 @@ class CDialogEditCatalog : public dialogT {
 	tstring m_CatalogName;
 	bool const m_bCreateNew; //false - edit
 	tcatalog_properties m_Properties;
+
+	FarList m_FarList;
+	FarListItem* m_FarListItems;
+	nf::tlist_pairs_strings m_ListLibraries;
+	nf::tlist_buffers m_Buffers;
 public:
 	CDialogEditCatalog(wchar_t const* ParentCatalog, wchar_t const* CatalogName, bool bCreateNew);
 	~CDialogEditCatalog(void);
@@ -62,7 +69,8 @@ public:
 			<< &far_di_checkbox(ID_SHOW_IN_DISKMENU, lg::MSG_SHOW_IN_DISKMENU, left, 4)
 			<< &far_di_checkbox(ID_ADD_TO_WIN7_LIBRARY_BY_DEFAULT, lg::MSG_ADD_TO_WIN7_LIBRARY_BY_DEFAULT, left, 5)
 			<< &far_di_text(ID_TEXT_DEFAULT_WIN7_LIBRARY, lg::MSG_DEFAULT_WIN7_LIBRARY, left, 6, DIALOG_WIDTH/2)
-			<< &far_di_edit(ID_EDIT_WIN7_LIBRARY_NAME, DIALOG_WIDTH/2, 6, DIALOG_WIDTH-4, L"")
+			<< &far_di_combobox(ID_EDIT_WIN7_LIBRARY_NAME, DIALOG_WIDTH/2, 6, DIALOG_WIDTH-4, &m_FarList)
+			//<< &far_di_edit(ID_EDIT_WIN7_LIBRARY_NAME, DIALOG_WIDTH/2, 6, DIALOG_WIDTH-4, L"")
 			<< &far_di_box(DI_SINGLEBOX, ID_LINE1, 0, 2, 7, DIALOG_WIDTH-3, 7) 
 			<< &far_di_button(ID_OK, lg::MSG_OK, 28, 8, 0, FALSE, FALSE, TRUE)
 			<< &far_di_button(ID_CANCEL, lg::MSG_CANCEL, 37, 8, 0)

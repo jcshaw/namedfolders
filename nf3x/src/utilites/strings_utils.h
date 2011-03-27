@@ -54,6 +54,9 @@ namespace Utils {
 	inline tstring ExtractFileName(tstring const& srcDir, bool bRemoveTrailingChar) {
 		return DividePathFilename(srcDir, SLASH_DIRS_CHAR, bRemoveTrailingChar).second;
 	}
+	inline tstring RemoveExtension(tstring const& srcStr) {
+		return DivideString(srcStr, L'.').first;
+	}
 
 // string helper functions
 	tstring ReplaceStringAll(tstring SrcStr, tstring const& FromStr, tstring const& ToStr);

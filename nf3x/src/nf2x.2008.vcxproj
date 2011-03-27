@@ -123,6 +123,12 @@
       <ImportLibrary>$(OutDir)nf2x.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll"</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -151,6 +157,12 @@
       <ImportLibrary>$(OutDir)nf2x.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll"</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -191,6 +203,10 @@
       <TargetMachine>MachineX86</TargetMachine>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll"</Command>
+      <Message>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll"</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -235,6 +251,12 @@
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalDependencies>LIBCPMT.lib;LIBCMT.lib;kernel32.lib;uuid.lib;user32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;shlwapi.lib;comsupp.lib;libboost_regex-vc100-mt-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll"</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="utilites\catalog_names.cpp" />

@@ -67,10 +67,10 @@ CConfigureDialog::CConfigureDialog()
 	unsigned int count_items = sizeof(ITEM_TEXTS) / sizeof(wchar_t const*);
 
 	m_FarList.ItemsNumber = count_items;
-	m_FarList.Items = &g_Items[0]; //по какой то неясной причине динамические массивы тут не проходят... выравнивание???
+	m_FarList.Items = &g_Items[0]; //по какой то неясной причине динамические массивы тут не ПРОХОДИЛИ (вроде поправил, проверить)
 
 	for (unsigned int i = 0; i < count_items; ++ i) {
-		memset(&m_FarList.Items[i].Reserved, 0, sizeof(m_FarList.Items[i].Reserved));
+		memset(&m_FarList.Items[i], 0, sizeof(FarListItem));
 		m_FarList.Items[i].Text = ITEM_TEXTS[i];
 		m_FarList.Items[i].Flags = 0;
 	}

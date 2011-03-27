@@ -172,6 +172,8 @@ namespace nf {
 
 	typedef struct tcatalog_properties {
 		bool show_in_disk_menu;
+		bool flag_add_to_win7_lib_by_default;
+		tstring default_win7_lib;
 	} _tcatalog_properties;
 
 	typedef tstring tcatalog_info;	//информация о каталоге (путь относительно корневого каталога)

@@ -9,6 +9,7 @@
 #include "win7_libraries.h"
 
 #include <shobjidl.h>
+#include <KnownFolders.h>
 #include <boost/foreach.hpp>
 #include <boost/scope_exit.hpp>
 #include <boost/function.hpp>
@@ -19,10 +20,6 @@
 #include "known_folders.h"
 
 namespace {
-	// default library views that don't have a more specific template
-	// FOLDERTYPEID_Library:              {4badfc68-c4ac-4716-a0a0-4d5daa6b0f3e}
-	DEFINE_GUID(FOLDERTYPEID_Library_FOR_NF, 0x4badfc68, 0xc4ac, 0x4716, 0xa0, 0xa0, 0x4d, 0x5d, 0xaa, 0x6b, 0x0f, 0x3e);
-
 	void open_library_and_make_action(tstring const& libraryFilePath, boost::function<void (IShellLibrary*)> funcAction) {
 		IShellItem *psi_item;
 		if (SUCCEEDED(SHCreateItemFromParsingName(libraryFilePath.c_str(), NULL, IID_PPV_ARGS(&psi_item)))) 	{
@@ -72,12 +69,19 @@ namespace {
 		}
 	}
 
-	void add_folder_to_lib(IShellLibrary *plib, tstring const& folderPath) {
-		//!TODO
-	}
+	void add_remove_folder_to_lib(IShellLibrary *plib, tstring const& folderPath, bool bAdd) {
+		IShellItem *psi_item;
+		if (SUCCEEDED(SHCreateItemFromParsingName(folderPath.c_str(), NULL, IID_PPV_ARGS(&psi_item)))) 	{
+			BOOST_SCOPE_EXIT ((&psi_item)) {
+				psi_item->Release();
+			} BOOST_SCOPE_EXIT_END;
 
-	void remove_folder_from_lib(IShellLibrary *plib, tstring const& folderPath) {
-		//!TODO
+			if (bAdd) {
+				plib->AddFolder(psi_item);
+			} else {
+				plib->RemoveFolder(psi_item);
+			}
+		}
 	}
 }
 
@@ -95,13 +99,13 @@ void nf::Win7LibrariesManager::GetListLibraries(nf::tlist_pairs_strings& destLis
 //we need to enumerate list of files in Known Folder "Library"
 	if (!kfm.AreKnownFoldersEnabled()) return;
 
-	tstring libraries_catalog_path = kfm.GetLibraryPath(FOLDERTYPEID_Library_FOR_NF);
+	tstring libraries_catalog_path = kfm.GetLibraryPath(FOLDERID_Libraries);
 	if (libraries_catalog_path.empty()) return;
 
-	WinSTL::findfile_sequence_t f(libraries_catalog_path.c_str(), L"*.library-ms", WinSTL::findfile_sequence_t::directories);
+	WinSTL::findfile_sequence_t f(libraries_catalog_path.c_str(), L"*.library-ms", WinSTL::findfile_sequence_t::files);
 	BOOST_FOREACH(WinSTL::findfile_sequence_t::value_type const& t, f) {
 		tstring dir_name = Utils::CombinePath(libraries_catalog_path, t.get_filename(), SLASH_DIRS);
-		destList.push_back(std::make_pair(dir_name, Utils::ExtractFileName(dir_name, false))); //!TODO: remove extension
+		destList.push_back(std::make_pair(dir_name, Utils::RemoveExtension(Utils::ExtractFileName(dir_name, false)))); //!TODO: remove extension
 	}
 }
 
@@ -112,10 +116,10 @@ void nf::Win7LibrariesManager::GetListFoldersInLibrary(tstring const& libraryFil
 
 void nf::Win7LibrariesManager::AddFolderToLibrary(tstring const& libraryFilePath, tstring const& folderPath) {
 	open_library_and_make_action(libraryFilePath
-		, boost::bind(&add_folder_to_lib, _1, boost::cref(folderPath)));
+		, boost::bind(&add_remove_folder_to_lib, _1, boost::cref(folderPath), true));
 }
 
 void nf::Win7LibrariesManager::RemoveFolderFromLibrary(tstring const& libraryFilePath, tstring const& folderPath) {
 	open_library_and_make_action(libraryFilePath
-		, boost::bind(&remove_folder_from_lib, _1, boost::cref(folderPath)));	
+		, boost::bind(&add_remove_folder_to_lib, _1, boost::cref(folderPath), false));	
 }
