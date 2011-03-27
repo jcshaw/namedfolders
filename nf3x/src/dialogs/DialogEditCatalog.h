@@ -34,13 +34,16 @@ public:
 		return m_Properties;
 	}
 
-	enum {DIALOG_WIDTH = 72, DIALOG_HEIGHT = 9};
+	enum {DIALOG_WIDTH = 72, DIALOG_HEIGHT = 11};
 
 	enum {//all dialog items
 		ID_DOUBLEBOX
 		, ID_TEXT_CATALOG
 		, ID_EDIT_CATALOG
 		, ID_SHOW_IN_DISKMENU
+		, ID_ADD_TO_WIN7_LIBRARY_BY_DEFAULT
+		, ID_TEXT_DEFAULT_WIN7_LIBRARY
+		, ID_EDIT_WIN7_LIBRARY_NAME
 		, ID_LINE1
 		, ID_OK
 		, ID_CANCEL
@@ -57,9 +60,12 @@ public:
 			<< &far_di_text(ID_TEXT_CATALOG, lg::DLG_CREATE_CATALOG_TITLE, left, 2, DIALOG_WIDTH-3)
 			<< &far_di_edit(ID_EDIT_CATALOG, left, 3, DIALOG_WIDTH-4, L"")
 			<< &far_di_checkbox(ID_SHOW_IN_DISKMENU, lg::MSG_SHOW_IN_DISKMENU, left, 4)
-			<< &far_di_box(DI_SINGLEBOX, ID_LINE1, 0, 2, 5, DIALOG_WIDTH-3, 5) 
-			<< &far_di_button(ID_OK, lg::MSG_OK, 28, 6, 0, FALSE, FALSE, TRUE)	//default button
-			<< &far_di_button(ID_CANCEL, lg::MSG_CANCEL, 37, 6, 0)
+			<< &far_di_checkbox(ID_ADD_TO_WIN7_LIBRARY_BY_DEFAULT, lg::MSG_ADD_TO_WIN7_LIBRARY_BY_DEFAULT, left, 5)
+			<< &far_di_text(ID_TEXT_DEFAULT_WIN7_LIBRARY, lg::MSG_DEFAULT_WIN7_LIBRARY, left, 6, DIALOG_WIDTH/2)
+			<< &far_di_edit(ID_EDIT_WIN7_LIBRARY_NAME, DIALOG_WIDTH/2, 6, DIALOG_WIDTH-4, L"")
+			<< &far_di_box(DI_SINGLEBOX, ID_LINE1, 0, 2, 7, DIALOG_WIDTH-3, 7) 
+			<< &far_di_button(ID_OK, lg::MSG_OK, 28, 8, 0, FALSE, FALSE, TRUE)
+			<< &far_di_button(ID_CANCEL, lg::MSG_CANCEL, 37, 8, 0)
 		;
 	};
 };

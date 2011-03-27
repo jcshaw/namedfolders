@@ -749,6 +749,14 @@
 				RelativePath=".\utilites\known_folders.h"
 				>
 			</File>
+			<File
+				RelativePath=".\utilites\win7_libraries.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\utilites\win7_libraries.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\utilites\autobuffer_wrapper.h"

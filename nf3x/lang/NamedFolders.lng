@@ -60,7 +60,9 @@
 "Jump to the nearest existing folder"
 "Error"
 "Skip"
-"Show in disk menu (see flag in settings)"
+"Show in disk menu (check flag in settings)"
+"Ask to add to default Win7 library automatically"
+"Default win7-library"
 
 "The following alias will be deleted"
 "Several aliases will be deleted"

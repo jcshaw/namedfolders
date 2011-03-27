@@ -20,6 +20,7 @@ public:
 		return m_pKfm != NULL; }
 	void GetListUsefulFolders(nf::tlist_pairs_strings &destNamePath);
 	void FindFolders(nf::Search::MaskMatcher &maskMatcher, nf::tlist_pairs_strings &destNamePath);
+	tstring GetLibraryPath(GUID libraryGUID);
 private:
 	IKnownFolderManager* m_pKfm;
 };

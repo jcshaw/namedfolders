@@ -69,6 +69,8 @@ enum {
 	,MSG_ERROR	//Error
 	,MSG_SKIP
 	,MSG_SHOW_IN_DISKMENU 
+	,MSG_ADD_TO_WIN7_LIBRARY_BY_DEFAULT
+	,MSG_DEFAULT_WIN7_LIBRARY
 	
 	,CONFIRM_DELETE_SHORTCUT //The following shortcut will be deleted
 	,CONFIRM_DELETE_SEVERAL_SHORTCUTS //The following shortcut will be deleted

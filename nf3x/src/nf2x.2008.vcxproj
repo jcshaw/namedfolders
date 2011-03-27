@@ -238,12 +238,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="utilites\catalog_names.cpp" />
+    <ClCompile Include="utilites\catalog_utils.cpp" />
     <ClCompile Include="utilites\CommandPatterns.cpp" />
     <ClCompile Include="executor\Executor.cpp" />
     <ClCompile Include="executor\executor_addons.cpp" />
     <ClCompile Include="executor\executor_select.cpp" />
     <ClCompile Include="main\Kernel.cpp" />
     <ClCompile Include="utilites\dialogs_completion.cpp" />
+    <ClCompile Include="utilites\known_folders.cpp" />
     <ClCompile Include="utilites\Parser.cpp" />
     <ClCompile Include="utilites\PathsFinder.cpp" />
     <ClCompile Include="utilites\searcherpaths.cpp" />
@@ -280,9 +282,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="utilites\win7_libraries.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utilites\catalog_names.h" />
+    <ClInclude Include="utilites\catalog_utils.h" />
     <ClInclude Include="utilites\CommandPatterns.h" />
     <ClInclude Include="executor\Executor.h" />
     <ClInclude Include="executor\executor_addons.h" />
@@ -290,6 +294,7 @@
     <ClInclude Include="main\Kernel.h" />
     <ClInclude Include="utilites\dialogs_completion.h" />
     <ClInclude Include="utilites\DiskMenuHelper.h" />
+    <ClInclude Include="utilites\known_folders.h" />
     <ClInclude Include="utilites\Parser.h" />
     <ClInclude Include="utilites\PathsFinder.h" />
     <ClInclude Include="utilites\searcherpaths.h" />
@@ -328,6 +333,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="main\stlsoft_def.h" />
+    <ClInclude Include="utilites\win7_libraries.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="nf2x.rc" />

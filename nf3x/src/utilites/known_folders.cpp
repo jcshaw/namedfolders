@@ -77,3 +77,25 @@ void nf::KnownFoldersManager::FindFolders(nf::Search::MaskMatcher &maskMatcher, 
 		}
 	}
 }
+
+tstring nf::KnownFoldersManager::GetLibraryPath(GUID libraryGUID) {
+	PWSTR pszPath = NULL;
+	IKnownFolder* pkf = NULL;
+	HRESULT hr = m_pKfm->GetFolder(libraryGUID, &pkf);
+	if (SUCCEEDED(hr)) {
+		BOOST_SCOPE_EXIT( (&pkf) ) {
+			pkf->Release();
+		} BOOST_SCOPE_EXIT_END;
+		hr = pkf->GetPath(0, &pszPath);
+
+		if (SUCCEEDED(hr)) {
+			BOOST_SCOPE_EXIT( (&pszPath) ) {
+				CoTaskMemFree(pszPath);
+			} BOOST_SCOPE_EXIT_END;
+
+			return pszPath;
+		}
+		pkf->Release();
+	}
+	return L"";
+}
