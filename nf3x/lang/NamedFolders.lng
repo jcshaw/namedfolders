@@ -63,6 +63,7 @@
 "Show in disk menu (check flag in settings)"
 "Ask to add to default Win7 library automatically"
 "Default win7-library"
+"Win7-libraries:"
 
 "The following alias will be deleted"
 "Several aliases will be deleted"
@@ -71,6 +72,8 @@
 "The following alias will be created"
 "The following item will be deleted"
 "The following catalog will be created"
+"Would you like to add directory to Win7-library?"
+"Would you like to remove directory from Win7-library?"
 
 "Move"
 "Copy"

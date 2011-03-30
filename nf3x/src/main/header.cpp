@@ -21,6 +21,10 @@ wchar_t const SLASH_DIRS_CHAR = L'\\';	//разделитель директорий
 wchar_t const*const MC_DEEP_DIRECT_SEARCH_SHORT = L"\n";
 wchar_t const*const MC_DEEP_REVERSE_SEARCH_SHORT = L"\t";
 
+wchar_t const* COMMAND_PARAM_ADD_WIN7_LIBRARY = L"+lib";
+wchar_t const* COMMAND_PARAM_DELETE_WIN7_LIBRARY = L"-lib";
+
+
 wchar_t const*const MC_SEARCH_BACKWORD_SHORT = L"\b"; //символ, обозначающий переход на уровень выше = '..'
 wchar_t const*const MC_SEARCH_BACKWORD_SHORT_WITHOUT_SLASH = L"\a"; //символ, обозначающий переход на уровень выше = '..', когда используется "..", а не "\.."
 wchar_t const*const MC_SEARCH_FORWARD_SHORT = L"\r"; // \*\* is equal to \\

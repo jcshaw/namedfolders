@@ -305,6 +305,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="utilites\win7_libraries.cpp" />
+    <ClCompile Include="utilites\win7_libraries_utils.cpp" />
+    <ClCompile Include="utilites\x64.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utilites\catalog_names.h" />
@@ -356,6 +358,8 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="main\stlsoft_def.h" />
     <ClInclude Include="utilites\win7_libraries.h" />
+    <ClInclude Include="utilites\win7_libraries_utils.h" />
+    <ClInclude Include="utilites\x64.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="nf2x.rc" />

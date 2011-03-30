@@ -43,6 +43,9 @@ extern wchar_t const SLASH_CATS_CHAR;		//разделитель каталогов
 extern wchar_t const SLASH_DIRS_CHAR;		//разделитель директорий
 extern wchar_t const* LEVEL_UP_TWO_POINTS;
 
+extern wchar_t const* COMMAND_PARAM_ADD_WIN7_LIBRARY;
+extern wchar_t const* COMMAND_PARAM_DELETE_WIN7_LIBRARY;
+
 //спецсимволы для поиска с неограниченным уровнем вложенности - вверх и вниз
 extern wchar_t const*const MC_DEEP_DIRECT_SEARCH_LONG; // \**
 extern wchar_t const*const MC_DEEP_REVERSE_SEARCH_LONG; // \..*

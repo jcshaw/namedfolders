@@ -71,6 +71,7 @@ enum {
 	,MSG_SHOW_IN_DISKMENU 
 	,MSG_ADD_TO_WIN7_LIBRARY_BY_DEFAULT
 	,MSG_DEFAULT_WIN7_LIBRARY
+	,MSG_WIN7_LIBRARIES
 	
 	,CONFIRM_DELETE_SHORTCUT //The following shortcut will be deleted
 	,CONFIRM_DELETE_SEVERAL_SHORTCUTS //The following shortcut will be deleted
@@ -79,6 +80,8 @@ enum {
 	,CONFIRM_INSERT_SHORTCUT //The following shortcut will be created
 	,CONFIRM_DELETE	//The following item will be deleted
 	,CONFIRM_INSERT_CATALOG
+	,CONFIRM_ADD_DIR_TO_WIN7_LIBRARY
+	,CONFIRM_REMOVE_DIR_FROM_WIN7_LIBRARY
 
 	,DLG_MOVE_CATALOG_TITLE	//Move catalog to
 	,DLG_COPY_CATALOG_TITLE	//Copy catalog to

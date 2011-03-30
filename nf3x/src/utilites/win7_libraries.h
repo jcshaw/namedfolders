@@ -16,10 +16,12 @@ public:
 	Win7LibrariesManager();
 	virtual ~Win7LibrariesManager();
 	
-	void GetListLibraries(nf::tlist_pairs_strings& destList); //get list of libraries from Known Folder "Libraries"
-	void GetListFoldersInLibrary(tstring const& libraryFilePath, nf::tlist_strings& destList);
-	void AddFolderToLibrary(tstring const& libraryFilePath, tstring const& folderPath);
-	void RemoveFolderFromLibrary(tstring const& libraryFilePath, tstring const& folderPath);
+	void GetListLibraries(nf::tlist_pairs_strings& destList) const; //get list of libraries from Known Folder "Libraries"
+	void GetListFoldersInLibrary(tstring const& libraryFilePath, nf::tlist_strings& destList) const;
+	void AddFolderToLibrary(tstring const& libraryFilePath, tstring const& folderPath) const;
+	void RemoveFolderFromLibrary(tstring const& libraryFilePath, tstring const& folderPath) const;
+private:
+	bool const m_bEnabled;
 };
 
 }

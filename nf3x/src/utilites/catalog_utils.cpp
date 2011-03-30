@@ -54,7 +54,6 @@ namespace {
 	}
 }
 
-
 bool nf::sc::IsCatalogExist(tstring const& pathCatalog) {
 	tstring s = Utils::RemoveTrailingChars(pathCatalog, SLASH_CATS_CHAR);
 	Utils::RemoveLeadingCharsOnPlace(s, SLASH_CATS_CHAR);

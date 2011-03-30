@@ -25,6 +25,7 @@ namespace nf {
 		UINT AskForImplicitInsert(HANDLE hPlugin, nf::tshortcut_info const&cmd, tstring const& value);
 		UINT AskToGoToNearest(HANDLE hPlugin, tstring const& srcDir, tstring const& nearestDir);
 		UINT AskForCreateCatalog(HANDLE hPlugin, nf::tcatalog_info const&cat);
+		UINT AskForAddRemoveDirectoryToWin7Library(HANDLE hPlugin, tstring const& targetLibrary, tstring const& targetDirectory, bool bRemove);
 
 //confirmation to delete shortcut(s)/catalog(s)
 		namespace Private {

@@ -25,6 +25,7 @@
 #include "far_impl.h"
 #include "DialogEditShortcut.h"
 #include "catalog_utils.h"
+#include "win7_libraries_utils.h"
 
 extern struct PluginStartupInfo g_PluginInfo; 
 using namespace nf;
@@ -41,7 +42,23 @@ namespace {
 			if (! nf::Selectors::GetShortcut(plugin, cmd, sh)) return false;
 		}
 		//remove selected shortcut
-		return DR_DELETE == nf::Commands::DeleteShortcut(sh, bImplicit);	
+
+		tstring sh_value;
+		bool bexist = nf::Shell::GetShortcutValue(sh, sh_value);
+		bool bret = DR_DELETE == nf::Commands::DeleteShortcut(sh, bImplicit);
+		
+		bexist = bexist && ::PathFileExists(sh_value.c_str());
+		if (bexist && bret && (nf::IsAddToWin7BYDefaultFlagChecked(cmd.catalog) || Utils::TrimChar(cmd.param, L' ') == COMMAND_PARAM_DELETE_WIN7_LIBRARY)) {
+			nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(sh_value);
+			bool bOpenBoth = vp.first.bValueEnabled && vp.second.bValueEnabled;
+			if (vp.second.bValueEnabled) {
+				nf::RemoveFromWin7Library(plugin, vp.second.value, nf::GetDefaultWin7LibraryForCatalog(cmd.catalog));
+			}
+			if (vp.first.bValueEnabled) {
+				nf::RemoveFromWin7Library(plugin, vp.first.value, nf::GetDefaultWin7LibraryForCatalog(cmd.catalog));
+			}					
+		}
+		return bret;
 	}
 
 	bool insert_shortcut(nf::tparsed_command &cmd, CPanelInfoWrap &plugin, bool bImplicit, bool bTemporary, bool bInsertBoth) {
@@ -49,7 +66,7 @@ namespace {
 			cmd.shortcut = nf::Commands::get_implicit_name_and_value(bInsertBoth).first;
 		}
 		if (cmd.shortcut.empty()) return false;
-		//select best matchec catalog
+		//select best matched catalog
 
 //!TODO: select exist catalog OR create new one
 		nf::tcatalog_info cat;
@@ -64,12 +81,16 @@ namespace {
 		}
 
 		//add new shortcut to selected catalog
-		if (bInsertBoth) {
- 			return nf::Commands::AddShortcutForBothPanels(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
-		} else {
-			return nf::Commands::AddShortcut(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
+		bool bret = bInsertBoth 
+			? nf::Commands::AddShortcutForBothPanels(plugin, cat, cmd.shortcut, bTemporary, bImplicit)
+			: nf::Commands::AddShortcut(plugin, cat, cmd.shortcut, bTemporary, bImplicit);
+		if (bret && (nf::IsAddToWin7BYDefaultFlagChecked(cmd.catalog) ||  Utils::TrimChar(cmd.param, L' ') == COMMAND_PARAM_ADD_WIN7_LIBRARY)) {
+			nf::AddToWin7Library(plugin, plugin.GetPanelCurDir(true), nf::GetDefaultWin7LibraryForCatalog(cmd.catalog));
+			if (bInsertBoth) {
+				nf::AddToWin7Library(plugin, plugin.GetPanelCurDir(false), nf::GetDefaultWin7LibraryForCatalog(cmd.catalog));
+			} 
 		}
-		return false;
+		return bret;
 	}
 
 	nf::twhat_to_search_t get_what_to_search(tcommands_kinds srcKind) {
@@ -134,7 +155,7 @@ namespace {
 		vp.value = networkPath;
 		return ::OpenShortcutOnPanel(plugin, vp, L"", false, false, true
 			, WTS_DIRECTORIES //!TODO: а если это файл?
-			);
+		);
 	}
 }
 
@@ -213,8 +234,16 @@ bool nf::ExecuteCommand(nf::tparsed_command &cmd, bool bReadDataForDialogMode) {
 		} else {
 			return insert_shortcut(cmd, plugin, true, false, false);
 		}
-	case nf::QK_START_SOFT_SHORTCUT:
-		return Start::OpenSoftShortcut(plugin, cmd);
+	case nf::QK_START_SOFT_SHORTCUT: {
+		tstring param_value =  Utils::TrimChar(cmd.shortcut, L' ');
+		if (param_value == COMMAND_PARAM_ADD_WIN7_LIBRARY) {
+			return nf::AddToWin7Library(plugin, plugin.GetPanelCurDir(true), L"");
+		} else if (param_value == COMMAND_PARAM_DELETE_WIN7_LIBRARY) {
+			return nf::RemoveFromWin7Library(plugin, plugin.GetPanelCurDir(true), L"");
+		} else {
+			return Start::OpenSoftShortcut(plugin, cmd);
+		}
+	} break;
 	default:;
 	}
 	return false;

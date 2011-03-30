@@ -14,7 +14,7 @@ using namespace nf::Confirmations;
 
 namespace {
 	int call_menu(HANDLE hPlugin,  DWORD menuFlags, wchar_t const* const* menuStrings, unsigned int itemsNumber, unsigned int buttonsNumber, tsetting_flags confirmationFlag) {
-		if (CSettings::GetInstance().GetValue(confirmationFlag) == 0) return 1;	//confirmation is not required
+		if (confirmationFlag != 0 && CSettings::GetInstance().GetValue(confirmationFlag) == 0) return 1;	//confirmation is not required
 
 		if (g_PluginInfo.Message(g_PluginInfo.ModuleNumber
 			, menuFlags
@@ -113,3 +113,15 @@ UINT nf::Confirmations::AskForCreateCatalog(HANDLE hPlugin, nf::tcatalog_info co
 	return call_menu(hPlugin,  FMSG_MB_OKCANCEL, &msg[0], sizeof(msg)/sizeof(msg[0]), 3, nf::ST_CONFIRM_IMPLICIT_CREATION);
 }
 
+
+UINT nf::Confirmations::AskForAddRemoveDirectoryToWin7Library(HANDLE hPlugin, tstring const& targetLibrary, tstring const& targetDirectory, bool bRemove) {
+	wchar_t const * msg[4] = {
+		GetMsg(lg::MSG_WIN7_LIBRARIES)
+		, GetMsg(bRemove ? lg::CONFIRM_REMOVE_DIR_FROM_WIN7_LIBRARY : lg::CONFIRM_ADD_DIR_TO_WIN7_LIBRARY)
+		, targetDirectory.c_str()
+		, targetLibrary.c_str()
+	};
+
+	return call_menu(hPlugin, FMSG_MB_OKCANCEL, &msg[0], sizeof(msg)/sizeof(msg[0]), 3, nf::ST_CONFIRM_IMPLICIT_CREATION);
+
+}

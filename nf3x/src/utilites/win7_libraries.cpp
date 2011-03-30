@@ -9,6 +9,8 @@
 #include "win7_libraries.h"
 
 #include <shobjidl.h>
+#include <Shlobj.h>
+
 #include <KnownFolders.h>
 #include <boost/foreach.hpp>
 #include <boost/scope_exit.hpp>
@@ -18,17 +20,22 @@
 
 #include "stlsoft_def.h"
 #include "known_folders.h"
+#include "x64.h"
 
+//see https://cfx.svn.codeplex.com/svn/Visual%20Studio%202008/CppWin7ShellLibrary/CppWin7ShellLibrary.cpp
 namespace {
 	void open_library_and_make_action(tstring const& libraryFilePath, boost::function<void (IShellLibrary*)> funcAction) {
-		IShellItem *psi_item;
-		if (SUCCEEDED(SHCreateItemFromParsingName(libraryFilePath.c_str(), NULL, IID_PPV_ARGS(&psi_item)))) 	{
+		IShellItem2* psi_item = NULL;
+// 		HRESULT hr = GetShellLibraryItem(Utils::ExtractFileName(libraryFilePath, false).c_str(), &psi_item);
+		HRESULT hr = SHCreateItemFromParsingName(libraryFilePath.c_str(), NULL, IID_PPV_ARGS(&psi_item));
+ 		if (SUCCEEDED(hr))  {
 			BOOST_SCOPE_EXIT ((&psi_item)) {
 				psi_item->Release();
 			} BOOST_SCOPE_EXIT_END;
 
-			IShellLibrary *plib;
-			if (SUCCEEDED(SHLoadLibraryFromItem(psi_item, STGM_READ | STGM_SHARE_DENY_NONE, IID_PPV_ARGS(&plib)))) {
+			IShellLibrary *plib = NULL;
+			hr = SHLoadLibraryFromItem(psi_item, STGM_READWRITE, IID_PPV_ARGS(&plib));
+			if (SUCCEEDED(hr)) {
 				BOOST_SCOPE_EXIT ((&plib)) {
 					plib->Release();
 				} BOOST_SCOPE_EXIT_END;
@@ -50,43 +57,68 @@ namespace {
 				for (unsigned int i = 0; i < count_items; ++i) {
 					IShellItem* ppsi;
 					if (SUCCEEDED(pfolders->GetItemAt(i, &ppsi))) {
-						BOOST_SCOPE_EXIT ((&ppsi)) {
-							ppsi->Release();
-						} BOOST_SCOPE_EXIT_END;
-
 						LPWSTR folder_path = NULL;
 						if (SUCCEEDED(ppsi->GetDisplayName(SIGDN_FILESYSPATH, &folder_path))) {
-							BOOST_SCOPE_EXIT ((&folder_path)) {
-								CoTaskMemFree(folder_path);
-							} BOOST_SCOPE_EXIT_END;
-
 							destList.push_back(folder_path);
+							CoTaskMemFree(folder_path);
 						}
+						ppsi->Release();
 					}
 				}
 			}
-
 		}
 	}
 
-	void add_remove_folder_to_lib(IShellLibrary *plib, tstring const& folderPath, bool bAdd) {
-		IShellItem *psi_item;
-		if (SUCCEEDED(SHCreateItemFromParsingName(folderPath.c_str(), NULL, IID_PPV_ARGS(&psi_item)))) 	{
-			BOOST_SCOPE_EXIT ((&psi_item)) {
-				psi_item->Release();
-			} BOOST_SCOPE_EXIT_END;
-
-			if (bAdd) {
-				plib->AddFolder(psi_item);
+	class function_loader {
+		typedef HRESULT (t_SHCreateItemFromParsingName)(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv);
+		t_SHCreateItemFromParsingName* m_pf;
+		HINSTANCE m_hinstLib;
+	public:
+		function_loader() {
+			m_pf = NULL;
+			m_hinstLib = ::LoadLibrary(TEXT("Shell32.dll")); 
+			if (m_hinstLib != NULL) { 
+				m_pf = (t_SHCreateItemFromParsingName*)::GetProcAddress(m_hinstLib, "SHCreateItemFromParsingName"); 
+			} 
+		}
+		~function_loader() {
+			::FreeLibrary(m_hinstLib); 
+		}
+		HRESULT SHCreateItemFromParsingName(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv) {
+			if (m_pf != NULL) {
+				return m_pf(pszPath, pbc, riid, ppv);
 			} else {
-				plib->RemoveFolder(psi_item);
+				return E_FAIL;
 			}
 		}
-	}
+	};
+
+	void add_remove_folder_to_lib(IShellLibrary *plib, tstring const& folderPath, bool bAdd) {
+		function_loader shell32;
+		IShellItem *psi_item;
+		if (SUCCEEDED(shell32.SHCreateItemFromParsingName(folderPath.c_str(), NULL, IID_PPV_ARGS(&psi_item)))) 	{
+			if (bAdd) {
+				HRESULT hr = plib->AddFolder(psi_item);
+				if (SUCCEEDED(hr)) {
+					plib->Commit();
+				}
+			} else {
+				if (SUCCEEDED(plib->RemoveFolder(psi_item))) {
+					plib->Commit();
+				}
+			}
+			psi_item->Release();
+		}
+	}	
 }
 
-nf::Win7LibrariesManager::Win7LibrariesManager() {
 
+nf::Win7LibrariesManager::Win7LibrariesManager() 
+	: m_bEnabled(! nf::x64::IsWow64())
+{
+	// when running the 32-bit version of Plugin on x64 OS,
+	// we must not create the library! This would break
+	// the library in the x64 explorer.
 }
 
 nf::Win7LibrariesManager::~Win7LibrariesManager()
@@ -94,7 +126,9 @@ nf::Win7LibrariesManager::~Win7LibrariesManager()
 
 }
 
-void nf::Win7LibrariesManager::GetListLibraries(nf::tlist_pairs_strings& destList) {
+void nf::Win7LibrariesManager::GetListLibraries(nf::tlist_pairs_strings& destList) const{
+	if (! m_bEnabled) return;
+
 	KnownFoldersManager kfm;
 //we need to enumerate list of files in Known Folder "Library"
 	if (!kfm.AreKnownFoldersEnabled()) return;
@@ -109,17 +143,23 @@ void nf::Win7LibrariesManager::GetListLibraries(nf::tlist_pairs_strings& destLis
 	}
 }
 
-void nf::Win7LibrariesManager::GetListFoldersInLibrary(tstring const& libraryFilePath, nf::tlist_strings& destList) {
+void nf::Win7LibrariesManager::GetListFoldersInLibrary(tstring const& libraryFilePath, nf::tlist_strings& destList) const {
+	if (! m_bEnabled) return;
+
 	open_library_and_make_action(libraryFilePath
 		, boost::bind(&extract_list_folders_from_lib, _1, boost::ref(destList)));
 }
 
-void nf::Win7LibrariesManager::AddFolderToLibrary(tstring const& libraryFilePath, tstring const& folderPath) {
+void nf::Win7LibrariesManager::AddFolderToLibrary(tstring const& libraryFilePath, tstring const& folderPath) const {
+	if (! m_bEnabled) return;
+
 	open_library_and_make_action(libraryFilePath
 		, boost::bind(&add_remove_folder_to_lib, _1, boost::cref(folderPath), true));
 }
 
-void nf::Win7LibrariesManager::RemoveFolderFromLibrary(tstring const& libraryFilePath, tstring const& folderPath) {
+void nf::Win7LibrariesManager::RemoveFolderFromLibrary(tstring const& libraryFilePath, tstring const& folderPath) const {
+	if (! m_bEnabled) return;
+
 	open_library_and_make_action(libraryFilePath
 		, boost::bind(&add_remove_folder_to_lib, _1, boost::cref(folderPath), false));	
 }

@@ -26,6 +26,7 @@
 
 #include "executor_addons.h"
 #include "strings_utils.h"
+#include "x64.h"
 
 using namespace nf;
 using namespace Start;
@@ -161,24 +162,6 @@ namespace {
 		}
 	}
 
-	typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
-	LPFN_ISWOW64PROCESS fnIsWow64Process;
-
-	BOOL IsWow64()	{
-		BOOL bIsWow64 = FALSE;
-
-		//IsWow64Process is not available on all supported versions of Windows.
-		//Use GetModuleHandle to get a handle to the DLL that contains the function
-		//and GetProcAddress to get a pointer to the function if available.
-		fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(GetModuleHandle(TEXT("kernel32")),"IsWow64Process");
-		if (NULL != fnIsWow64Process) {
-			if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64)) {
-				//handle error
-			}
-		}
-		return bIsWow64;
-	}
-
 	void execute_selected_program64_under_w32( tstring & path, tstring const &params ) {
 		tstring dest_path;
 		if (GetShortcutProgramPath(path, dest_path, false)) {
@@ -198,7 +181,7 @@ namespace {
 	void execute_selected_program(tstring &path, tstring const &params) {
 		HINSTANCE value = ShellExecuteW(0, NULL , path.c_str(), params.c_str(), NULL, SW_SHOWNORMAL); 
 		if ((int)(intptr_t)value < 32) { 
-			if (IsWow64()) { //workaround for #6
+			if (nf::x64::IsWow64()) { //workaround for #6
 				execute_selected_program64_under_w32(path, params);
 			}
 		}
