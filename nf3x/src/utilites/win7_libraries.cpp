@@ -70,7 +70,7 @@ namespace {
 	}
 
 	class function_loader {
-		typedef HRESULT (t_SHCreateItemFromParsingName)(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv);
+		typedef HRESULT (__stdcall t_SHCreateItemFromParsingName)(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv);
 		t_SHCreateItemFromParsingName* m_pf;
 		HINSTANCE m_hinstLib;
 	public:
@@ -84,7 +84,7 @@ namespace {
 		~function_loader() {
 			::FreeLibrary(m_hinstLib); 
 		}
-		HRESULT SHCreateItemFromParsingName(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv) {
+		HRESULT SHCreateItemFromParsingName(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv) {			
 			if (m_pf != NULL) {
 				return m_pf(pszPath, pbc, riid, ppv);
 			} else {
@@ -96,7 +96,8 @@ namespace {
 	void add_remove_folder_to_lib(IShellLibrary *plib, tstring const& folderPath, bool bAdd) {
 		function_loader shell32;
 		IShellItem *psi_item;
-		if (SUCCEEDED(shell32.SHCreateItemFromParsingName(folderPath.c_str(), NULL, IID_PPV_ARGS(&psi_item)))) 	{
+		HRESULT hr = shell32.SHCreateItemFromParsingName(folderPath.c_str(), NULL, IID_PPV_ARGS(&psi_item));
+		if (SUCCEEDED(hr)) {
 			if (bAdd) {
 				HRESULT hr = plib->AddFolder(psi_item);
 				if (SUCCEEDED(hr)) {
@@ -114,7 +115,7 @@ namespace {
 
 
 nf::Win7LibrariesManager::Win7LibrariesManager() 
-	: m_bEnabled(! nf::x64::IsWow64())
+	: m_bEnabled(true || ! nf::x64::IsWow64())
 {
 	// when running the 32-bit version of Plugin on x64 OS,
 	// we must not create the library! This would break

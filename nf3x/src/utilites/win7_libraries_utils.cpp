@@ -14,18 +14,22 @@
 #include "confirmations.h"
 
 namespace {
-	bool select_library( tstring const& defaultLibraryName, nf::tlist_pairs_strings listLibs, tpair_strings& destLib) {
-		BOOST_FOREACH(tpair_strings const& kvp, listLibs) {
-			if (kvp.second == defaultLibraryName) {
-				destLib = kvp;
-				return true;
+	bool select_library( tstring const& defaultLibraryName, nf::tlist_pairs_strings& listLibs, tpair_strings& destLib) {
+		for (nf::tlist_pairs_strings::iterator p = listLibs.begin(); p != listLibs.end(); ++p) {
+			if (p->second == defaultLibraryName) {
+				destLib = *p;
+			//move default library to first position
+				listLibs.erase(p);
+				listLibs.insert(listLibs.begin(), destLib);
+				
+				break;
 			}
 		}
 		int ret = nf::Menu::SelectStringPair(listLibs, destLib);
 		return (ret >= 0);
 	}
 
-	bool find_library(nf::Win7LibrariesManager const& m, tstring const& defaultLibraryName, nf::tlist_pairs_strings listLibs, tstring const& targetDirectory, nf::tlist_pairs_strings& destLibs) {
+	bool find_library(nf::Win7LibrariesManager const& m, tstring const& defaultLibraryName, nf::tlist_pairs_strings& listLibs, tstring const& targetDirectory, nf::tlist_pairs_strings& destLibs) {
 		BOOST_FOREACH(tpair_strings const& kvp, listLibs) {
 			nf::tlist_strings paths;
 			m.GetListFoldersInLibrary(kvp.first, paths);

@@ -19,7 +19,7 @@ void nf::sc::GetDefaultCatalogProperties(tcatalog_properties &destP) {
 }
 
 void nf::sc::LoadCatalogProperties(tstring const& srcCatalogPath, tcatalog_properties &destP) {
-	CCatalog catalog(srcCatalogPath);
+	CCatalog catalog(Utils::RemoveTrailingChars(srcCatalogPath, SLASH_CATS_CHAR));
 	GetDefaultCatalogProperties(destP);
 
 	tstring dest;
