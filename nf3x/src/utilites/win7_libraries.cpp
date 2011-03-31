@@ -24,10 +24,34 @@
 
 //see https://cfx.svn.codeplex.com/svn/Visual%20Studio%202008/CppWin7ShellLibrary/CppWin7ShellLibrary.cpp
 namespace {
-	void open_library_and_make_action(tstring const& libraryFilePath, boost::function<void (IShellLibrary*)> funcAction) {
+	class function_loader {
+		typedef HRESULT (__stdcall t_SHCreateItemFromParsingName)(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv);
+		t_SHCreateItemFromParsingName* m_pf;
+		HINSTANCE m_hinstLib;
+	public:
+		function_loader() {
+			m_pf = NULL;
+			m_hinstLib = ::LoadLibrary(TEXT("Shell32.dll")); 
+			if (m_hinstLib != NULL) { 
+				m_pf = (t_SHCreateItemFromParsingName*)::GetProcAddress(m_hinstLib, "SHCreateItemFromParsingName"); 
+			} 
+		}
+		~function_loader() {
+			::FreeLibrary(m_hinstLib); 
+		}
+		HRESULT SHCreateItemFromParsingName(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv) {			
+			if (m_pf != NULL) {
+				return m_pf(pszPath, pbc, riid, ppv);
+			} else {
+				return E_FAIL;
+			}
+		}
+	};
+
+	void open_library_and_make_action(function_loader &shell32, tstring const& libraryFilePath, boost::function<void (IShellLibrary*)> funcAction) {
 		IShellItem2* psi_item = NULL;
 // 		HRESULT hr = GetShellLibraryItem(Utils::ExtractFileName(libraryFilePath, false).c_str(), &psi_item);
-		HRESULT hr = SHCreateItemFromParsingName(libraryFilePath.c_str(), NULL, IID_PPV_ARGS(&psi_item));
+		HRESULT hr = shell32.SHCreateItemFromParsingName(libraryFilePath.c_str(), NULL, IID_PPV_ARGS(&psi_item));
  		if (SUCCEEDED(hr))  {
 			BOOST_SCOPE_EXIT ((&psi_item)) {
 				psi_item->Release();
@@ -69,32 +93,7 @@ namespace {
 		}
 	}
 
-	class function_loader {
-		typedef HRESULT (__stdcall t_SHCreateItemFromParsingName)(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv);
-		t_SHCreateItemFromParsingName* m_pf;
-		HINSTANCE m_hinstLib;
-	public:
-		function_loader() {
-			m_pf = NULL;
-			m_hinstLib = ::LoadLibrary(TEXT("Shell32.dll")); 
-			if (m_hinstLib != NULL) { 
-				m_pf = (t_SHCreateItemFromParsingName*)::GetProcAddress(m_hinstLib, "SHCreateItemFromParsingName"); 
-			} 
-		}
-		~function_loader() {
-			::FreeLibrary(m_hinstLib); 
-		}
-		HRESULT SHCreateItemFromParsingName(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv) {			
-			if (m_pf != NULL) {
-				return m_pf(pszPath, pbc, riid, ppv);
-			} else {
-				return E_FAIL;
-			}
-		}
-	};
-
-	void add_remove_folder_to_lib(IShellLibrary *plib, tstring const& folderPath, bool bAdd) {
-		function_loader shell32;
+	void add_remove_folder_to_lib(function_loader &shell32, IShellLibrary *plib, tstring const& folderPath, bool bAdd) {
 		IShellItem *psi_item;
 		HRESULT hr = shell32.SHCreateItemFromParsingName(folderPath.c_str(), NULL, IID_PPV_ARGS(&psi_item));
 		if (SUCCEEDED(hr)) {
@@ -147,20 +146,23 @@ void nf::Win7LibrariesManager::GetListLibraries(nf::tlist_pairs_strings& destLis
 void nf::Win7LibrariesManager::GetListFoldersInLibrary(tstring const& libraryFilePath, nf::tlist_strings& destList) const {
 	if (! m_bEnabled) return;
 
-	open_library_and_make_action(libraryFilePath
+	function_loader f;
+	open_library_and_make_action(f, libraryFilePath
 		, boost::bind(&extract_list_folders_from_lib, _1, boost::ref(destList)));
 }
 
 void nf::Win7LibrariesManager::AddFolderToLibrary(tstring const& libraryFilePath, tstring const& folderPath) const {
 	if (! m_bEnabled) return;
 
-	open_library_and_make_action(libraryFilePath
-		, boost::bind(&add_remove_folder_to_lib, _1, boost::cref(folderPath), true));
+	function_loader f;
+	open_library_and_make_action(f, libraryFilePath
+		, boost::bind(&add_remove_folder_to_lib, boost::ref(f), _1, boost::cref(folderPath), true));
 }
 
 void nf::Win7LibrariesManager::RemoveFolderFromLibrary(tstring const& libraryFilePath, tstring const& folderPath) const {
 	if (! m_bEnabled) return;
 
-	open_library_and_make_action(libraryFilePath
-		, boost::bind(&add_remove_folder_to_lib, _1, boost::cref(folderPath), false));	
+	function_loader f;
+	open_library_and_make_action(f, libraryFilePath
+		, boost::bind(&add_remove_folder_to_lib, boost::ref(f), _1, boost::cref(folderPath), false));	
 }

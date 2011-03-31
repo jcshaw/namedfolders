@@ -34,37 +34,25 @@ void nf::KnownFoldersManager::GetListUsefulFolders(nf::tlist_pairs_strings &dest
 	UINT cKFIDs = 0;
 	HRESULT hr = m_pKfm->GetFolderIds(&rgKFIDs, &cKFIDs);
 	if (SUCCEEDED(hr)) {
-		BOOST_SCOPE_EXIT( (&rgKFIDs) ) {
-			CoTaskMemFree(rgKFIDs);
-		} BOOST_SCOPE_EXIT_END;
-
 		IKnownFolder *pkfCurrent = NULL;
 		for (UINT i = 0; i < cKFIDs; ++i) {
-			BOOST_SCOPE_EXIT( (&pkfCurrent) ) {
-				pkfCurrent->Release();
-			} BOOST_SCOPE_EXIT_END;
-
 			hr = m_pKfm->GetFolder(rgKFIDs[i], &pkfCurrent);
 			if (SUCCEEDED(hr)) {
 				KNOWNFOLDER_DEFINITION kfd;
 				hr = pkfCurrent->GetFolderDefinition(&kfd);
 				if (SUCCEEDED(hr)) {
-					BOOST_SCOPE_EXIT( (&kfd) ) {
-						FreeKnownFolderDefinitionFields(&kfd);
-					} BOOST_SCOPE_EXIT_END;
-
 					PWSTR pszPath = NULL;
 					hr = pkfCurrent->GetPath(0, &pszPath); 
 					if (SUCCEEDED(hr)) {
-						BOOST_SCOPE_EXIT( (&pszPath) ) {
-							CoTaskMemFree(pszPath);
-						} BOOST_SCOPE_EXIT_END;
-
 						destNamePath.push_back(std::make_pair(kfd.pszName, pszPath));						
+						CoTaskMemFree(pszPath);
 					}					
+					FreeKnownFolderDefinitionFields(&kfd);
 				}
+				pkfCurrent->Release();
 			}			
 		}		
+		CoTaskMemFree(rgKFIDs);
 	}
 }
 
@@ -83,17 +71,11 @@ tstring nf::KnownFoldersManager::GetLibraryPath(GUID libraryGUID) {
 	IKnownFolder* pkf = NULL;
 	HRESULT hr = m_pKfm->GetFolder(libraryGUID, &pkf);
 	if (SUCCEEDED(hr)) {
-		BOOST_SCOPE_EXIT( (&pkf) ) {
-			pkf->Release();
-		} BOOST_SCOPE_EXIT_END;
 		hr = pkf->GetPath(0, &pszPath);
-
 		if (SUCCEEDED(hr)) {
-			BOOST_SCOPE_EXIT( (&pszPath) ) {
-				CoTaskMemFree(pszPath);
-			} BOOST_SCOPE_EXIT_END;
-
-			return pszPath;
+			tstring ret = pszPath;
+			CoTaskMemFree(pszPath);
+			return ret;
 		}
 		pkf->Release();
 	}

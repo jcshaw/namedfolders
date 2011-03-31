@@ -14,7 +14,7 @@ namespace nf {
 class Win7LibrariesManager : boost::noncopyable {
 public:
 	Win7LibrariesManager();
-	virtual ~Win7LibrariesManager();
+	~Win7LibrariesManager();
 	
 	void GetListLibraries(nf::tlist_pairs_strings& destList) const; //get list of libraries from Known Folder "Libraries"
 	void GetListFoldersInLibrary(tstring const& libraryFilePath, nf::tlist_strings& destList) const;
