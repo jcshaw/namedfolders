@@ -2,7 +2,7 @@
 .PluginContents=Named Folders
 @Contents
 $^#Plugin for FAR "Named Folders".#
-$^#Version 3.0 release, January 2011#
+$^#Version 3.0.1 snapshot, April 2011#
 $^#Copyright (c) 2002-2011 by Victor Derevyanko#
 .
   Program-Plugin #Named Folders# for #Far#.

@@ -9,12 +9,92 @@
 
 
 ----------------------------------------------------------------------------
-Version 3.0.0.255 snapshot [31.01.2011]
+Version 3.0.0.258 snapshot [2.04.2011]
+----------------------------------------------------------------------------
+[+] NF supports Known Folders under Vista/Windows 7.
+(see. http://www.sevenforums.com/tutorials/4941-shell-command.html).
+There are to variants of using known folders. Firsly, you can create alias
+for registy key
+$HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\explorer\\FolderDescriptions
+The plugins "knows" this key and is able to read list of registered known
+directories from it. Such shortuct "shell" is add to standard file "StdPaths.reg". 
+"shell" is replaced depricated "stdu" and "stda" under Vista/Win7.
+Secondly, you can set expressions "shell:abc" as shortcut values.
+Plugin recognizes command "shell:abc" as request to open known folder with
+name matched to "*abc*" (issue #55). 
+[+] Now it's possible to edit catalog properties using F4.
+[+] Support of Windows 7 is implemented. Two new command parameters
+are introduced: "+lib" and "-lib". You can use it in such way:
+1) cd::abc +lib - create shortcut abc for current directory + add current directory
+to exist win7-library.
+2) cd:-abc -lib - remove shortcut abc and remove its directory from win7-libraries.
+3) cd: +lib - add current directory to exist win7-library.
+4) cd: -lib - remove current directory from win7-libraries.
+NF always suggest to select required Win7-library from list of exist libraries.
+Plugin uses libraries that are registered in Windows Explorer.
+
+[+] New flag in catalog properties: 
+"Ask to add to default Win7 library automatically". If this flag turned on,
+then if you add new shortcut to catalog then plugin will suggest to add
+directory for this plugin to Win7-library even if "-lib" wasn't used.. And
+in opposite, if you remove shortcut from library, the plugin will suggest
+to remove it from win7-libraries even if "-lib" wasn't used.
+
+[+] New catalog property "Default Win7-library". This is library
+that should be shown first in the list of libraries when plugin suggest to user
+to select win7-library.
+
+[+] Pattern "cs: abc" allows to specify name abc in quotes and use
+spaces in abc, i.e. cs: "a b c"
+[+] New prefix "st:" to launch application through NF. This is first
+step for #29. Now, it's possible to launch applications in such way: "st:soft". 
+Modificators ":" and "+" (i.e. "cd: :soft" and "cd: +soft") are NOT supported yet,
+we need different syntax here. Important: plugins registers two prefixes by
+default: "cd:" and "st:". If you install the plugin over previos versions,
+new prefix "st:" won't be added automatically, you need to specify it 
+manually in settings.
+[+] New catalog attribute: "show in disk menu". If this flag
+is turned on AND flag "allow to show in disk menu" is turned on in plugin
+settings, then plugin will show this catalog in disk menu.
+[+] Flag "Show catalogs in disk menu" in the plugin configuration
+dialog is replaced by "Allow to show catalogs in disk menu" (issue #8).
+
+----------------------------------------------------------------------------
+Version 3.0.0.256 snapshot [12.02.2011]
 ----------------------------------------------------------------------------
 [+] New possibility to specify negative mask in paths. Negative mask is
 separated from positive one by character "|". I.e. command "cd:pf\*a*|*b*" will 
 find all subdirectories of "pf" that are matched to "*a*" and, at the same time,
 not matched to "*b*".
+[+] New modificator for application launch command:
+"cd: +soft" automatically copies path to currently active file to clipboard, 
+issue #52.
+[+] Command "cd: soft" allows to use quotes, i.e. 'cd: "soft"'.
+"Soft" can contain spaces. Spaces work as logical OR, i.e. command 'cd: "a b c"' 
+shows applications which names match to "a" OR "b" OR" "c", issue #52
+[-] Не работали ярлыки, ссылающиеся ни на директории, а на файлы.
+Issue #49
+[-] Fixed issue #53 - there was a problem with jumping to root
+folder from subdirectory using command "cd:.\..\".
+[-] Mode "shotrcuts-values" in shorctucts variant menu didn't work.
+[*] Distance between columns in variants menu are made equal 2 spaces
+instead of 1 space.
+[-] Columns in variants menu were formatted incorrectly if item
+names were very long, issue #54
+[+] New view mode in variants menu for command "cd: soft": 
+"application-directory", issue #54
+[*] View modes in variants menu are changed by F5-F9. 
+Keys F1-F4 are reserved for other possible commands.
+[+] New possibility to sort results by selected column in variants
+menu. Use Ctrl+F5, Ctrl+F6 and Ctrl+F7 to select 1,2,3 columns, Ctrl+F12 -
+to display results unsorted. Selected column are displayed in variant menu
+in round brackets.
+[*] Performance of filter in variants menu is significantly improved.
+[+] New possibility to select NF in FAR dialogs. Open dialog, set cursor
+to edit box, enter command (with or without prefix "cd:"), press F11 and select
+Named Folders in the opened list of plugins. NF executes the command and returns
+result directory to the edit box. All "open" commands are supported beside "cd: soft". 
+All commands for creation and deletion are ignored.
 
 ----------------------------------------------------------------------------
 Version 3.0.0.254 release [22.01.2011]

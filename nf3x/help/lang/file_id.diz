@@ -1,5 +1,5 @@
 Плагин FAR: Именованные Директории      
-Версия: 3.0 release, Январь 2011
+Версия: 3.0.1 snapshot, Апрель 2011
 
 Плагин для быстрого доступа к локальным, сетевым и виртуальным 
 директориям в FAR. Командой "cd::abc" пользователь присваивает 
@@ -12,7 +12,7 @@ www: http://code.google.com/p/namedfolders
 
 
 FAR Plugin: Named Folders        
-Version: 3.0 release, January 2011
+Version: 3.0.1 snapshot, April 2011
 
 This plugin can be used for fast access to local, net and virtual 
 directories in the FAR. Using "cd::abc" you set short name "abc" for 
