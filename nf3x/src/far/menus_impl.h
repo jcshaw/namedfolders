@@ -78,14 +78,16 @@ namespace Menu {
 
 	class CMenuApplications : public CMenu {
 	public:
-		CMenuApplications() : CMenu(L"F11, Ctrl+Enter, Shift+Enter; F5-F7; Ctrl+F5,F6,F12", L"StartApplications"
+		CMenuApplications() : CMenu(L"F11, Ctrl/Shift/Alt+Enter[+Shift]; F5-F7; Ctrl+F5,F6,F12", L"StartApplications"
 			, CMenu::FG_SHOW_SINGLE_VARIANT
 			, nf::ST_SELECT_SOFT_MENU_SHOWCATALOGS_MODE
 			, nf::ST_SORT_SOFT_MENU_COLUMN) {}
 		enum {
 			OPEN_PATH_IN_EXPLORER = VK_RETURN | PKF_CONTROL << 16
-			, OPEN_PATH_IN_FAR = VK_RETURN | PKF_SHIFT << 16
+			, OPEN_PATH_IN_FAR = VK_RETURN | ((PKF_CONTROL | PKF_ALT) << 16)
 			, SWITCH_IGNORE_MODE_ONOFF = VK_F11
+			, OPEN_APPLICATION_IN_BACKGROUND = (VK_RETURN | (PKF_SHIFT << 16))
+			, OPEN_PATH_IN_EXPLORER_IN_BACKGROUND = VK_RETURN | ((PKF_SHIFT | PKF_CONTROL) << 16)
 		};
 		enum {
 			MODE_IGNORE_EXCEPTIONS_ON = 0		//не искать среди €рлыков, удовлетвор€ющих игнорируемым в соответствии с маской в настройках 
@@ -95,8 +97,15 @@ namespace Menu {
 		virtual int MakeAction(int BreakCode);
 	public:
 		virtual int* GetBreakKeys() {
-			static int soft_break_keys[] = {OPEN_PATH_IN_EXPLORER, OPEN_PATH_IN_FAR, SWITCH_IGNORE_MODE_ONOFF, VK_F5, VK_F6, VK_F7
-				, CMenu::F_SORT_COLUMN_1, CMenu::F_SORT_COLUMN_2, CMenu::F_NO_SORT_BY_COLUMNS, 0};				
+			return CMenuApplications::GetTotalListBreakKeys();
+		}
+		static int* GetTotalListBreakKeys() {
+			static int soft_break_keys[] = {OPEN_PATH_IN_FAR, OPEN_PATH_IN_EXPLORER, SWITCH_IGNORE_MODE_ONOFF
+				, VK_F5, VK_F6, VK_F7
+				, CMenu::F_SORT_COLUMN_1, CMenu::F_SORT_COLUMN_2, CMenu::F_NO_SORT_BY_COLUMNS
+				, OPEN_APPLICATION_IN_BACKGROUND
+				, OPEN_PATH_IN_EXPLORER_IN_BACKGROUND
+				, 0};				
 			return &soft_break_keys[0];
 		}
 		virtual tstring GetMenuTitle() {
@@ -110,8 +119,8 @@ namespace Menu {
 	public:
 		CMenuEnvironmentVariables() : CMenu(L"F5,F6; Ctrl+F5,F6,F12", L"MenuSelect", 0, nf::ST_SELECT_SH_MENU_MODE_EV, nf::ST_SORT_SH_MENU_EV_COLUMN) {}
 		enum {
-			MM_VARIABLE_AND_PATH	
-			, MM_PATH_ONLY 
+			MM_PATH_ONLY = 1
+			, MM_VARIABLE_AND_PATH = 2
 
 			, NUMBER_MENU_MODES
 		};	

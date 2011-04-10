@@ -103,7 +103,13 @@ namespace {
 
 	bool open_shortcut( nf::tparsed_command &cmd, CPanelInfoWrap& plugin, nf::twhat_to_search_t whatToSearch) {
 		nf::tshortcut_info sh;
-		if (! cmd.local_directory.empty() && CSettings::GetInstance().GetValue(nf::ST_USE_SINGLE_MENU_MODE) != 0) {
+		if (cmd.prefix == L"shell") { //support commands like: cd:shell:abc
+			nf::tshortcut_value_parsed value;
+			value.ValueType = VAL_KNOWN_FOLDER;
+			value.bValueEnabled = true;
+			value.value = Parser::ConvertToMask(cmd.shortcut, Parser::GetCurrentAsterixMode());
+			nf::OpenShortcutOnPanel(plugin, value, cmd.local_directory, true, false, true, whatToSearch);
+		} else if (! cmd.local_directory.empty() && CSettings::GetInstance().GetValue(nf::ST_USE_SINGLE_MENU_MODE) != 0) {
 			//find all matched shortcuts, find all paths form them 
 			//give possibility to user select path (not shortcut) and open it
 			nf::tshortcuts_list list_all_shortcuts;
@@ -382,15 +388,15 @@ bool nf::Commands::OpenShortcutInExplorer(HANDLE hPlugin, nf::tshortcut_info con
 	Shell::GetShortcutValue(sh, value);
 	nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(value);
 	if (vp.first.bValueEnabled) {
-		nf::Commands::OpenPathInExplorer(vp.first.value);
+		nf::Commands::OpenPathInExplorer(vp.first.value, true);
 	}
 	if (vp.second.bValueEnabled) {
-		nf::Commands::OpenPathInExplorer(vp.second.value);
+		nf::Commands::OpenPathInExplorer(vp.second.value, true);
 	}
 	return TRUE;
 }
 
-void nf::Commands::OpenPathInExplorer(tstring const& srcPath) {
+void nf::Commands::OpenPathInExplorer(tstring const& srcPath, bool bActivate) {
 	tstring path = tstring(L"explorer \"") + srcPath + L"\"";
 
 	nf::tautobuffer_char sv(path.size() + 1);
@@ -399,6 +405,11 @@ void nf::Commands::OpenPathInExplorer(tstring const& srcPath) {
 	STARTUPINFO si;
 	memset(&si, 0, sizeof(STARTUPINFO));
 	si.cb = sizeof(STARTUPINFO);
+	if (! bActivate) {
+		si.wShowWindow = SW_SHOWNOACTIVATE; //!TODO: it doesn't work. Why?
+		si.dwFlags = STARTF_USESHOWWINDOW;
+	}
+	HWND hfar = GetActiveWindow();
 	PROCESS_INFORMATION pi;
 	::CreateProcess(0, &sv[0], NULL, NULL, 0, 0, NULL, 0, &si, &pi);
 }

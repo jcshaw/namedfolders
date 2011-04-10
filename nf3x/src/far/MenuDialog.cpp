@@ -240,12 +240,13 @@ namespace {
 }
 
 
-nf::Menu::CMenuDialog::CMenuDialog(CMenu &srcMenu, tlist_menu_items &listItemsRef) 
+nf::Menu::CMenuDialog::CMenuDialog(CMenu &srcMenu, tlist_menu_items &listItemsRef, tbackground_action_maker *pBckgActionMaker)
 : m_Menu(srcMenu)
 , m_List(listItemsRef)
 , m_bFilterFullUpdateMode(true) 
 , m_MaxStringsSizes(get_column_widths(false))
 , m_ViewModeForMaxStringsSizes(srcMenu.GetCurrentViewMode())
+, m_pBckgActionMaker(pBckgActionMaker)
 {	
 	sort_items_list();
 }
@@ -287,6 +288,12 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 		if (nSelectedItem >= 0) return true;	//enter
 	}
 	m_bFilterFullUpdateMode = true;
+	if (m_pBckgActionMaker != NULL) {
+		tvariant_value dest;
+		get_selected_item(nSelectedItem, dest);
+		if ((*m_pBckgActionMaker)(BreakCode, dest)) return true; //action was made; continue work without closing the menu
+	}
+
 	if (BreakCode < static_cast<int>(num_custom_break_codes)) return true; //нажата заданная в m_Menu.GetBreakKeys клавиша
 	if (VK_BACK == LOWORD(buf[BreakCode])) {	//удаляем последний символ фильтра
 		if (m_Filter.size()) m_Filter.erase(m_Filter.size()-1, 1);
@@ -309,11 +316,11 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 	return false;
 }
 
-bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &DestValue, int &DestRetCode) {
+bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &destValue, int &DestRetCode) {
 	if (! m_List.size()) return 0;	//there is no suitable item 
 
 	if ( (! (m_Menu.m_Flags & CMenu::FG_SHOW_SINGLE_VARIANT)) && (1 == m_List.size())) {	//there is a single variant - menu is not required
-		DestValue = m_List.begin()->second;
+		destValue = m_List.begin()->second;
 		DestRetCode = 1;		 
 		return true;
 	}
@@ -336,15 +343,7 @@ bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &DestValue, int &DestRetCode
 		if (-1 == break_code && -1 == nselected_item) return false;	//user has canceled menu
 	
 		//m_List.first contain indices of items in farmenu; find item with index nselected_item
-		tvariant_value const *pvalue = NULL;  //std::advance(p, nselected_item) is not suitable because some items can be invisible
-		BOOST_FOREACH(tmenu_item const& mi, m_List) {
-			if (mi.first == nselected_item) {
-				pvalue = &mi.second;
-				break; 
-			}
-		}
-		assert(pvalue != NULL);
-		DestValue = *pvalue;
+		get_selected_item(nselected_item, destValue);
 
 		if (-1 == break_code) {
 			DestRetCode = 1; //menu item is selected
@@ -354,6 +353,18 @@ bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &DestValue, int &DestRetCode
 		}
 		if (DestRetCode < 0) return true; //action should be made outside (i.e. delete selected shortcut)
 	};
+}
+
+void nf::Menu::CMenuDialog::get_selected_item(int nselectedItem, tvariant_value& destValue) {
+	tvariant_value const *pvalue = NULL;  //std::advance(p, nselected_item) is not suitable because some items can be invisible
+	BOOST_FOREACH(tmenu_item const& mi, m_List) {
+		if (mi.first == nselectedItem) {
+			pvalue = &mi.second;
+			break; 
+		}
+	}
+	assert(pvalue != NULL);
+	destValue = *pvalue;
 }
 
 std::pair<size_t, size_t> nf::Menu::CMenuDialog::get_column_widths(bool bOnlyVisibleItems) {

@@ -38,7 +38,7 @@ namespace Commands {
 
 //открыть в Explorer
 	bool OpenPath(HANDLE hPlugin, tstring const& parentPath, tstring const& localPath, nf::twhat_to_search_t whatToSearch);
-	void OpenPathInExplorer(tstring const& s);
+	void OpenPathInExplorer(tstring const& s, bool bActivate);
 
 //создать новый псевдоним / каталог
 	bool AddShortcut(HANDLE hPlugin, nf::tshortcut_info const &sh, tstring const& Value, bool bImplicit);

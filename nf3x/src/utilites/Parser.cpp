@@ -250,8 +250,12 @@ tstring nf::Parser::ConvertToMask(tstring const& srcStr, tasterix_mode asterixMo
 	return result;
 }
 
+nf::tasterix_mode nf::Parser::GetCurrentAsterixMode() {
+	return static_cast<tasterix_mode>(Utils::atoi(CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE)));
+}
+
 tstring nf::Parser::ConvertToMask(tstring const& srcStr) {
-	return ConvertToMask(srcStr, static_cast<tasterix_mode>(Utils::atoi(CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE))));
+	return ConvertToMask(srcStr, nf::Parser::GetCurrentAsterixMode());
 }
 
 tstring nf::Parser::ConvertMaskToReqex(tstring const& srcName) {

@@ -3,22 +3,17 @@
 #include <boost/variant.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 
 #include "strings_utils.h"
 #include "Panel.h"
 #include "menus_impl.h"
 #include "stlcatalogs.h"
 
+#include "menu_header.h"
+
 namespace nf {
 namespace Menu {
-	typedef std::pair<tshortcut_info, tstring> tsh_info;
-	typedef tshortcut_info tsoft_info;
-	typedef std::pair<tstring, tstring> tenv_info;	
-	typedef tstring tstr_info;
-
-	//элементы в списке меню будем хранить в виде варианта
-	typedef boost::variant<tsh_info, tenv_info, tsoft_info, tstr_info> tvariant_value;
-
 	namespace Polices {	
 		struct tsh {
 			typedef tshortcut_info R;
@@ -57,8 +52,9 @@ namespace Menu {
 
 		typedef std::vector<FarMenuItem> tlist_far_menu_items; 
 
-		CMenuDialog(CMenu &M, tlist_menu_items &listItemsRef);
+		CMenuDialog(CMenu &M, tlist_menu_items &listItemsRef, tbackground_action_maker *pBckgActionMaker);
 		bool ShowMenu(tvariant_value &DestValue, int &DestRetCode);
+
 	private:			
 		std::pair<size_t, size_t> get_column_widths(bool bOnlyVisibleItems);
 		void set_items_visibility(tstring const& Filter, int Level, std::pair<size_t, size_t> maxSizes);
@@ -66,7 +62,9 @@ namespace Menu {
 		int show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem);
 		void sort_items_list();
 	private:
+		void get_selected_item(int nselectedItem, tvariant_value& destValue);
 		CMenu &m_Menu;
+		tbackground_action_maker* m_pBckgActionMaker;
 		tlist_menu_items &m_List;
 		tstring m_Filter;	//введенный фильтр (только английские буквы)
 		bool m_bFilterFullUpdateMode; 

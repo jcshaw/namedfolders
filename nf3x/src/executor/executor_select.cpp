@@ -56,7 +56,7 @@ void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring con
 		nf::Search::CSearchEngine ssp(whatToSearch, true);
 		BOOST_FOREACH(tstring const& path, destListPaths) {
 			nf::Search::SearchByPattern(local_path.c_str(), path, ssp
-				, static_cast<tasterix_mode>(Utils::atoi(nf::CSettings::GetInstance().GetValue(nf::ST_ASTERIX_MODE)))
+				, Parser::GetCurrentAsterixMode()
 				, list_paths);
 		}
 		destListPaths.swap(list_paths);

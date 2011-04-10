@@ -180,7 +180,9 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 				if (! PathFileExists(full_path.c_str())) {
 					tstring disk;
 					Utils::DivideDiskPath(full_path, disk, path);
-					if (ID_PATH_SELECTED != nf::Selectors::GetPath(hPlugin, disk, path, dir, whatToSearch)) return false;
+					if (ID_PATH_SELECTED != nf::Selectors::GetPath(hPlugin, disk, path, dir, whatToSearch)) {
+						if (! nf::Selectors::FindBestDirectory(hPlugin, full_path, full_path, dir)) return false;
+					}
 				} else {
 					dir.swap(full_path);
 				}

@@ -19,6 +19,7 @@
 #include "stlsoft_def.h"
 #include "menu2.h"
 #include "menus_impl.h"
+#include "menu_header.h"
 #include "registry.h"
 #include "executor.h"
 #include "panel_functions.h"
@@ -162,7 +163,7 @@ namespace {
 		}
 	}
 
-	void execute_selected_program64_under_w32( tstring & path, tstring const &params ) {
+	void execute_selected_program64_under_w32(tstring & path, tstring const &params, bool bActivate) {
 		tstring dest_path;
 		if (GetShortcutProgramPath(path, dest_path, false)) {
 			DWORD buf_size = 2048;
@@ -174,15 +175,15 @@ namespace {
 
 			if (pf32 != pf64) {
 				dest_path = Utils::ReplaceStringAll(dest_path, pf32, pf64);
-				HINSTANCE value = ShellExecuteW(0, NULL , dest_path.c_str(), params.c_str(), NULL, SW_SHOWNORMAL); 
+				HINSTANCE value = ShellExecuteW(0, NULL , dest_path.c_str(), params.c_str(), NULL, bActivate ? SW_SHOWNORMAL : SW_SHOWMINNOACTIVE); 
 			}
 		}
 	}
-	void execute_selected_program(tstring &path, tstring const &params) {
-		HINSTANCE value = ShellExecuteW(0, NULL , path.c_str(), params.c_str(), NULL, SW_SHOWNORMAL); 
+	void execute_selected_program(tstring &path, tstring const &params, bool bActivate) {
+		HINSTANCE value = ShellExecuteW(0, NULL , path.c_str(), params.c_str(), NULL, bActivate ? SW_SHOWNORMAL : SW_SHOWMINNOACTIVE); 
 		if ((int)(intptr_t)value < 32) { 
 			if (nf::x64::IsWow64()) { //workaround for #6
-				execute_selected_program64_under_w32(path, params);
+				execute_selected_program64_under_w32(path, params, bActivate);
 			}
 		}
 	}
@@ -233,6 +234,29 @@ namespace {
 	}
 }
 
+namespace {
+	tstring get_application_path(nf::tvector_strings const& srcPaths, nf::tshortcut_info const& sh) {
+		assert(static_cast<unsigned int>(sh.bIsTemporary) < srcPaths.size());
+		return L"\"" + Utils::CombinePath(tstring(srcPaths[static_cast<int>(sh.bIsTemporary)])
+			, Utils::CombinePath(sh.catalog, sh.shortcut, SLASH_DIRS), SLASH_DIRS)+ L"\"";
+	}
+
+	bool make_action_in_background(nf::tvector_strings const& srcPaths, int breakCode, nf::Menu::tvariant_value selectedItem) {		
+		nf::tshortcut_info const& sh = boost::get<nf::tshortcut_info>(selectedItem);
+
+		switch (nf::Menu::CMenuApplications::GetTotalListBreakKeys()[breakCode]) {
+		case nf::Menu::CMenuApplications::OPEN_APPLICATION_IN_BACKGROUND:
+			OpenApplication(get_application_path(srcPaths, sh), L"", false);
+			return true;
+		case nf::Menu::CMenuApplications::OPEN_PATH_IN_EXPLORER_IN_BACKGROUND:
+			OpenApplicationCatalogInExplorer(get_application_path(srcPaths, sh), false);
+			return true;
+		}
+
+		return false;
+	}
+}
+
 bool Start::OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd) {
 	nf::tvector_strings paths;
 	get_soft_variants(hPlugin, paths); //get all possible paths
@@ -257,32 +281,24 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd) {
 		try_to_minimize(paths, list_shortcuts);
 
 		nf::tshortcut_info sh;
-		int nret = nf::Menu::SelectSoft(list_shortcuts, sh);		
+		nf::Menu::tbackground_action_maker bkg = boost::bind(&make_action_in_background, boost::cref(paths), _1, _2);
+		int nret = nf::Menu::SelectSoft(list_shortcuts, sh, &bkg);		
 		if (! nret) return false;
 
-		assert(static_cast<unsigned int>(sh.bIsTemporary) < paths.size());
-		tstring path = L"\"" + Utils::CombinePath(tstring(paths[static_cast<int>(sh.bIsTemporary)])
-			, Utils::CombinePath(sh.catalog, sh.shortcut, SLASH_DIRS), SLASH_DIRS)+ L"\"";
+		tstring path = get_application_path(paths, sh);
+
 		if (nret > 0) {	
-			execute_selected_program(path, params); 
+			OpenApplication(path, params, true);
 		} else {
 			switch (-nret) {
 			case Menu::CMenuApplications::OPEN_PATH_IN_EXPLORER:
-				{	//открыть директорию, из которой запускается программа, в Far
-					tstring program_directory;
-					if (GetShortcutProgramPath(path, program_directory, true)) {
-						nf::Commands::OpenPathInExplorer(program_directory);
-					}
-				} break;
+				OpenApplicationCatalogInExplorer(path, true);
+				break;
 			case Menu::CMenuApplications::OPEN_PATH_IN_FAR:
-				{	//открыть директорию, из которой запускатся программа, в Explorer
-					tstring program_directory;
-					if (GetShortcutProgramPath(path, program_directory, true)) {
-						CPanelInfoWrap wrap(INVALID_HANDLE_VALUE);
-						nf::Commands::OpenPath(wrap, program_directory, L"", nf::WTS_DIRECTORIES);
-					}
-				} break;
-			case Menu::CMenuApplications::SWITCH_IGNORE_MODE_ONOFF: continue;
+				OpenApplicationPathInFAR(path);
+				break;
+			case Menu::CMenuApplications::SWITCH_IGNORE_MODE_ONOFF: 
+				continue;
 			default: return false;
 			}; //switch			
 		}		
@@ -333,4 +349,55 @@ bool Start::GetShortcutProgramPath(tstring const& PathToShortcut, tstring &destP
 	destPath = &wbuffer[0];
 
 	return true;
+}
+
+namespace {
+	struct tthread_param { //data for launch app / open app catalog in separate thread 
+		tstring Path;
+		tstring Params;
+		int actionKind;
+		bool activateWindow;
+		tthread_param(int action_kind, tstring path, tstring params, bool activate_window) {
+			this->Path = path;
+			this->Params = params;
+			this->actionKind = action_kind;
+			this->activateWindow = activate_window;
+		}
+	};
+	DWORD WINAPI thread_proc_execute_app(__in  LPVOID lpParameter) {
+		//launch app in separate thread to avoid FAR "hanging" during process of application launching
+		tthread_param* pp = (tthread_param*)lpParameter;
+		if (pp != NULL) {
+			switch (pp->actionKind) {
+			case 0:
+				execute_selected_program(pp->Path, pp->Params, pp->activateWindow);
+				break;
+			case 1:
+				tstring program_directory;
+				if (GetShortcutProgramPath(pp->Path, program_directory, true)) {
+					nf::Commands::OpenPathInExplorer(program_directory, pp->activateWindow);
+				}
+				break;
+			}
+			delete pp;
+		}
+		return 0;
+	}
+}
+
+void Start::OpenApplication(tstring const& applicationPath, tstring const& launchParams, bool bActivate) {
+	tthread_param* p_path_param = new tthread_param(0, applicationPath, launchParams, bActivate);
+	::CreateThread(NULL, 0, &thread_proc_execute_app, p_path_param, 0, NULL); //execute application in separate thread to avoid any delays in FAR
+
+}
+void Start::OpenApplicationCatalogInExplorer(tstring const& applicationPath, bool bActivate) {
+	tthread_param* p_path_param = new tthread_param(1, applicationPath, L"", bActivate);
+	::CreateThread(NULL, 0, &thread_proc_execute_app, p_path_param, 0, NULL);
+}
+
+void Start::OpenApplicationPathInFAR(tstring const& applicationPath) {
+	tstring program_directory;
+	if (GetShortcutProgramPath(applicationPath, program_directory, true)) {
+		nf::Commands::OpenPath(CPanelInfoWrap(INVALID_HANDLE_VALUE), program_directory, L"", nf::WTS_DIRECTORIES);
+	}
 }

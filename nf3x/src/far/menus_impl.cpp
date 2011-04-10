@@ -10,6 +10,7 @@
 #include <Shlwapi.h>
 #include <cassert>
 #include "stlcatalogs.h"
+#include "StartSoftShortcut.h"
 
 using namespace nf;
 using namespace Menu;
@@ -58,6 +59,11 @@ int CMenuApplications::MakeAction(int breakCode) {
 	case 8: //no sort
 		switch_mode(nf::ST_SORT_SOFT_MENU_COLUMN, 0);
 		break;
+	case 9: //open application in background and continue operation
+		
+		return 0; //-OPEN_APPLICATION_IN_BACKGROUND;
+	case 10:
+		return 0; //-OPEN_PATH_IN_EXPLORER_IN_BACKGROUND;
 	}
 	return 0;	
 }

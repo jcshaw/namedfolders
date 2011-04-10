@@ -301,7 +301,7 @@ bool nf::Selectors::GetKnownFolderPath(HANDLE hPlugins, tstring const &srcPath, 
 		add_local_path.assign(path, pos, path.size() - pos);
 	}
 
-	nf::Search::MaskMatcher mm(mask, nf::ASTERIX_MODE_BOTH);
+	nf::Search::MaskMatcher mm(mask, nf::ASTERIX_MODE_POSTFIX);
 		
 	kfm.FindFolders(mm, list); 
 	return select_path(list, add_local_path, localPath, destPath);

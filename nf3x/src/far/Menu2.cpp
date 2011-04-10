@@ -13,7 +13,7 @@
 
 namespace {
 	template <class TMenu, class TList, class Policy> inline 
-		int select_from_menu(TList const &ListItems, typename Policy::R &DestValue) {
+		int select_from_menu(TList const &ListItems, typename Policy::R &DestValue, nf::Menu::tbackground_action_maker* pBackgroundActionMaker) {
 		using namespace nf;
 		using namespace Menu;
 
@@ -25,7 +25,7 @@ namespace {
 		}
 
 		TMenu menu;
-		CMenuDialog dlg(menu, list);
+		CMenuDialog dlg(menu, list, pBackgroundActionMaker);
 
 		int result_code;
 		tvariant_value result_value;
@@ -38,22 +38,22 @@ namespace {
 }
 
 int nf::Menu::SelectShortcut(nf::tshortcuts_list const &SrcList, nf::tshortcut_info& DestSh) {
-	return select_from_menu<CMenuShortcuts, tshortcuts_list, Polices::tsh>(SrcList, DestSh);
+	return select_from_menu<CMenuShortcuts, tshortcuts_list, Polices::tsh>(SrcList, DestSh, NULL);
 }
 
-int nf::Menu::SelectSoft(nf::tshortcuts_list const &SrcList, nf::tshortcut_info& DestSoft) {
-	return select_from_menu<CMenuApplications, tshortcuts_list, Polices::tdirect<nf::tshortcut_info> >(SrcList, DestSoft);
+int nf::Menu::SelectSoft(nf::tshortcuts_list const &SrcList, nf::tshortcut_info& DestSoft, nf::Menu::tbackground_action_maker* pBackgroundActionMaker) {
+	return select_from_menu<CMenuApplications, tshortcuts_list, Polices::tdirect<nf::tshortcut_info> >(SrcList, DestSoft, pBackgroundActionMaker);
 }
 
 int nf::Menu::SelectCatalog(nf::tvector_strings const &SrcList, nf::tcatalog_info& DestCatalog) {
-	return select_from_menu<CMenuCatalogs, tvector_strings, Polices::tdirect<tstring> >(SrcList, DestCatalog);
+	return select_from_menu<CMenuCatalogs, tvector_strings, Polices::tdirect<tstring> >(SrcList, DestCatalog, NULL);
 }
 
 int nf::Menu::SelectPath(nf::tlist_strings const& SrcList, tstring &DestPath) {
-	return select_from_menu<CMenuPaths, nf::tlist_strings, Polices::tdirect<tstring> >(SrcList, DestPath);
+	return select_from_menu<CMenuPaths, nf::tlist_strings, Polices::tdirect<tstring> >(SrcList, DestPath, NULL);
 }
 
 int nf::Menu::SelectStringPair(nf::tlist_pairs_strings const &SrcList, std::pair<tstring, tstring> &DestVar) {
-	return select_from_menu<CMenuEnvironmentVariables, tlist_pairs_strings, Polices::tdirect<tpair_strings> >(SrcList, DestVar);
+	return select_from_menu<CMenuEnvironmentVariables, tlist_pairs_strings, Polices::tdirect<tpair_strings> >(SrcList, DestVar, NULL);
 }
 

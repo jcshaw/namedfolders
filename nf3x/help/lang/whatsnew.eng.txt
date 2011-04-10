@@ -9,6 +9,22 @@
 
 
 ----------------------------------------------------------------------------
+Version 3.0.0.259 snapshot [10.04.2011]
+----------------------------------------------------------------------------
+[+] Now, it's possible to execute known folders directly from command
+line using "cd:shell:abc" comman (abc - is known folder name).
+[*] From this version command cd: soft executes applications from
+separate thread. So, command returns control to FAR immediatelly, without waiting
+when finish of application launch. Catalog of the application is also opened in 
+separate thread, so this operation doesn't hang FAR anymore.
+[+] Set of supported keys in variant menu in command cd: soft was changed.
+Now, Ctrl+Alt+Enter is used instead of Shift+Enter for opening application directory
+in FAR. There are two new key sequences here. Shift+Enter executes application
+without closing menu, Shift+Ctrl+Enter opens application directory in Explorer 
+without closing menu.
+[-] cs: "word" didn't work without space after ":". 
+
+----------------------------------------------------------------------------
 Version 3.0.0.258 snapshot [2.04.2011]
 ----------------------------------------------------------------------------
 [+] NF supports Known Folders under Vista/Windows 7.

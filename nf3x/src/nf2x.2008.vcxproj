@@ -319,6 +319,7 @@
     <ClInclude Include="utilites\dialogs_completion.h" />
     <ClInclude Include="utilites\DiskMenuHelper.h" />
     <ClInclude Include="utilites\known_folders.h" />
+    <ClInclude Include="utilites\menu_header.h" />
     <ClInclude Include="utilites\Parser.h" />
     <ClInclude Include="utilites\PathsFinder.h" />
     <ClInclude Include="utilites\searcherpaths.h" />

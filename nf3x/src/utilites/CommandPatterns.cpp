@@ -332,6 +332,21 @@ bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd, tstring
 		}
 		assert(p != all_commands.end());
 		
+	//!TODO: выкинуть шаблоны
+	//здесь шаблоны реализованы совершенно некорректно
+	//шаблоны должны раскрыться до определения типа команды, а у нас - наоборот
+	//в результате, например, cs:"word" не работает, требует пробела после двоеточия.
+	//Чтобы этого избежать, заменяем cs:" на cs: "		
+	//очень плохой код, ЗАМЕНИТЬ НА DOSKEY
+		if (DestCmd.size() > 4) {
+			if (
+				(DestCmd[0] == L'c' || DestCmd[0] == L'C')
+				&& (DestCmd[1] == L's' || DestCmd[1] == L'S')
+				&& (DestCmd[2] == L':')
+				&& (DestCmd[3] == L'\"') ) {
+					DestCmd.insert(DestCmd.begin() + 3, L' ');
+			}
+		}
 		nf::tparsed_command cmd;
 		nf::Parser::ParseString(DestCmd, cmd);
 		if (! cp.TransformCommand(cmd, DestCmd)) return true;

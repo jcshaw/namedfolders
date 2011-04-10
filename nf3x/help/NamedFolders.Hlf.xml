@@ -160,7 +160,7 @@ F.e. #cd:--f c:\temp#, #cd:--df \\computer\abc#, etc. If path contains spaces, i
 <section title="StartApplications">
 <title>Execute applications</title>
   #cd: soft# - search shortcuts in Start Menu with names matched to "*soft*" and show list of them.
-Press Enter to execute program, Shift-Enter to open program's path in Far, Ctrl-Enter to open
+Press Enter to execute program, Ctrl+Alt+Enter to open program's path in Far, Ctrl+Enter to open
 program's path in Explorer. It's possible to set in the 
 <link section="Settings">settings</link> dialog list of masks for shortcuts that should be skipped.
 You can use parameters: #cd: soft params#
@@ -169,8 +169,10 @@ You can use parameters: #cd: soft params#
  #F11# - display/hide applications, that are matched to ignore masks, 
 specified in <link section="Settings">settings</link>.
  #Enter# - execute selected application.
- #Ctrl + Enter# - open application directory in FAR.
- #Shift+ Enter# - open application directory in Explorer.
+ #Ctrl + Enter# - open application directory in Explorer.
+ #Ctrl + Altr + Enter# - open application directory in FAR.
+ #Shift + Enter# - execute selected application in background without closing the menu.
+ #Ctrl + Shift + Enter# - open application directory in Explorer without closing the menu.
  #F2# - show application names only.
  #F3# - show catalogs and application names.
 </section>

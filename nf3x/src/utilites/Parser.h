@@ -42,5 +42,6 @@ namespace Parser {
 	//Определить глубину поиска 
 	//для строки типа ":N" (где N - число), вернуть N; иначе - 0
 	unsigned int ExtractDeepOfSearch(tstring const& srcName);
+	tasterix_mode GetCurrentAsterixMode();
 };
 };

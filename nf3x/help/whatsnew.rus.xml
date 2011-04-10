@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
+<version product_name="Named Folders" version="3.0.0.259 snapshot" date="10.04.2011"> 
+<item type="+">Реализована поддержка cd:shell:abc, где abc - имя known folder.</item>
+<item type="*">Команда cd: soft теперь выполняет запуск приложений из отдельного
+потока. За счет этого, команда сразу возвращает управление FAR, не дожидаясь,
+пока выбранное прложение запустится. Аналогично, открытие каталога программы
+в Explorer так же проводится через отдельный поток и не подвешивает FAR.</item>
+<item type="+">В команде cd: soft изменен набор клавиш в меню вариантов: для открытия
+директории программы в FAR теперь используется Ctrl+Alt+Enter, вместо Shift+Enter.
+Кроме того, в это меню добавлено две новые команды. Shift+Enter запускает приложение
+без закрытия меню, Shift+Ctrl+Enter - открывает каталог приложения в Explorer без
+закрытия меню вариантов.</item>
+<item>Команда cs: "abc" не работала без пробела после двоеточия.</item>
+</version>
+
 <version product_name="Named Folders" version="3.0.0.258 snapshot" date="3.04.2011"> 
 <item type="+">Реализована поддержка Known Folders под Vista/Windows 7.
 (см. http://www.sevenforums.com/tutorials/4941-shell-command.html).

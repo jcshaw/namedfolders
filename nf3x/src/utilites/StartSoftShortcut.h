@@ -18,6 +18,10 @@ namespace Start {
 	bool OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd);
 	bool GetShortcutProgramPath(tstring const& PathToShortcut, tstring &destPath, bool bRemoveFileName);
 	void LoadShortcuts(tstring const& srcRootPath, nf::Search::MaskMatcher& mmSh, int bTemporaryValue, nf::tshortcuts_list& destData);
+
+	void OpenApplication(tstring const& applicationPath, tstring const& launchParams, bool bActivate);
+	void OpenApplicationCatalogInExplorer(tstring const& applicationPath, bool bActivate);
+	void OpenApplicationPathInFAR(tstring const& applicationPath);
 }
 
 #pragma warning(default: 4800)
