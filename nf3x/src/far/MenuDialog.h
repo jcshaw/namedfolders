@@ -62,7 +62,7 @@ namespace Menu {
 		int show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem);
 		void sort_items_list();
 	private:
-		void get_selected_item(int nselectedItem, tvariant_value& destValue);
+		bool get_selected_item(int nselectedItem, tvariant_value& destValue);
 		CMenu &m_Menu;
 		tbackground_action_maker* m_pBckgActionMaker;
 		tlist_menu_items &m_List;

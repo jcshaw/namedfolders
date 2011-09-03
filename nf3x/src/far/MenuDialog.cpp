@@ -288,10 +288,11 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 		if (nSelectedItem >= 0) return true;	//enter
 	}
 	m_bFilterFullUpdateMode = true;
-	if (m_pBckgActionMaker != NULL) {
+	if (m_pBckgActionMaker != NULL && (VK_BACK != LOWORD(buf[BreakCode])) ) {
 		tvariant_value dest;
-		get_selected_item(nSelectedItem, dest);
-		if ((*m_pBckgActionMaker)(BreakCode, dest)) return true; //action was made; continue work without closing the menu
+		if (get_selected_item(nSelectedItem, dest)) {
+			if ((*m_pBckgActionMaker)(BreakCode, dest)) return true; //action was made; continue work without closing the menu
+		}
 	}
 
 	if (BreakCode < static_cast<int>(num_custom_break_codes)) return true; //нажата заданная в m_Menu.GetBreakKeys клавиша
@@ -355,16 +356,16 @@ bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &destValue, int &DestRetCode
 	};
 }
 
-void nf::Menu::CMenuDialog::get_selected_item(int nselectedItem, tvariant_value& destValue) {
+bool nf::Menu::CMenuDialog::get_selected_item(int nselectedItem, tvariant_value& destValue) {
 	tvariant_value const *pvalue = NULL;  //std::advance(p, nselected_item) is not suitable because some items can be invisible
 	BOOST_FOREACH(tmenu_item const& mi, m_List) {
 		if (mi.first == nselectedItem) {
 			pvalue = &mi.second;
-			break; 
+			destValue = *pvalue;
+			return true;
 		}
 	}
-	assert(pvalue != NULL);
-	destValue = *pvalue;
+	return false;
 }
 
 std::pair<size_t, size_t> nf::Menu::CMenuDialog::get_column_widths(bool bOnlyVisibleItems) {
