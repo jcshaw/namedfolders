@@ -12,6 +12,7 @@
 #include <boost/utility.hpp>
 #include <Windows.h>
 #include <algorithm>
+//#include "far2/plugin.hpp"
 
 namespace nf {
 

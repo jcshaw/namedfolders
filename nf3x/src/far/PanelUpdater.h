@@ -7,7 +7,7 @@
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 
-#include "plugin.hpp"
+//#include "far2/plugin.hpp"
 #include "PanelInfoWrap.h"
 #include "panel_types.h"
 #include "Panel.h"

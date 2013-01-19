@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "dialogs_completion.h"
+//#include "far2/plugin.hpp"
 
 #include <boost/scope_exit.hpp>
 #include "open_plugin.h"

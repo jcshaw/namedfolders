@@ -6,7 +6,7 @@
 #pragma once
 
 #include "header.h"
-#include "plugin.hpp"
+//#include "far2/plugin.hpp"
 #include "PanelInfoWrap.h"
 
 namespace nf {

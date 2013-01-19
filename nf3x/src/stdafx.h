@@ -26,13 +26,23 @@
 #define _STLP_VENDOR_TERMINATE_STD
 #endif
 
+#define NF_FAR_API_3
+//#define NF_FAR_API_2
+
+#ifdef NF_FAR_API_3
+#include "far3/plugin.hpp" 
+#else 
+#include "far2/plugin.hpp" // этот файл хочет 1-byte alignment
+#include "far2/farkeys.hpp"
+#endif
+
+
 #pragma warning (disable: 4290) //C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 
-#include "plugin.hpp" // этот файл хочет 1-byte alignment
-#include "farkeys.hpp"
 #include <windows.h>
 #include <wtypes.h>
 #include <WinDef.h>
 #include "header.h"
+#include "far_utils.h" //!TODO: remove
 
 #include <crtdbg.h>

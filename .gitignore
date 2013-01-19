@@ -1,0 +1,13 @@
+.svn*
+bin
+bin2010
+build
+*.aps
+*.ncb
+*.sdf
+*.old
+*.user
+*.filters
+*.suo
+*.opensdf
+ipch

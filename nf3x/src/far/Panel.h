@@ -6,7 +6,7 @@
 #pragma once
 #include <vector>
 #include <boost/utility.hpp>
-#include "plugin.hpp"
+//#include "far2/plugin.hpp"
 #include "kernel.h"
 #include "regnotify.h"
 #include "PanelInfoWrap.h"
