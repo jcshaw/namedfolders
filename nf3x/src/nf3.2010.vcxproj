@@ -262,6 +262,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="far3\nf3.cpp" />
     <ClCompile Include="far\confirmations.cpp" />
     <ClCompile Include="far\far_impl.cpp" />
     <ClCompile Include="far\Menu2.cpp" />
