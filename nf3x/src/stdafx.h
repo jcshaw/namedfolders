@@ -26,9 +26,6 @@
 #define _STLP_VENDOR_TERMINATE_STD
 #endif
 
-#define NF_FAR_API_3
-//#define NF_FAR_API_2
-
 #ifdef NF_FAR_API_3
 #include "far3/plugin.hpp" 
 #else 

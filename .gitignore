@@ -1,6 +1,7 @@
 .svn*
 bin
-bin2010
+bin2010_f2
+bin2010_f3
 build
 *.aps
 *.ncb
