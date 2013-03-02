@@ -85,7 +85,7 @@ CPanel::~CPanel(void)
 }
 
 
-void CPanel::GetOpenPluginInfo(struct OpenPluginInfo *pi)
+void CPanel::GetOpenPluginInfo(struct InfoPanelLine *pi)
 {
 	pi->StructSize = sizeof(*pi);
 	pi->Flags = OPIF_USEFILTER 

@@ -27,7 +27,7 @@ public:
 	CPanel(tstring catalog = L"");
 	~CPanel(void);
 
-	void GetOpenPluginInfo(struct OpenPluginInfo *Info);
+	void GetOpenPluginInfo(struct InfoPanelLine *Info);
 	int GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpMode);	
 	void FreeFindData(struct PluginPanelItem *PanelItem, int ItemsNumber);
 	int SetDirectory(const wchar_t *Dir, int OpMode);

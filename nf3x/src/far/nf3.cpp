@@ -58,7 +58,7 @@ void WINAPI GetGlobalInfoW(struct GlobalInfo *dest) {
 	dest->StructSize = sizeof(GlobalInfo);
 	dest->MinFarVersion = FARMANAGERVERSION;
 	dest->Guid = nf::NF_PLUGIN_GUID;
-	dest->Version = MAKEFARVERSION(3, 0, 3052, 0, VS_RELEASE);
+	dest->Version = MAKEFARVERSION(3, 0, 0, 3052, VS_RELEASE);
 	dest->Title = L"Named Folders"; //!TODO
 	dest->Description = L"Fast access to directories"; //!TODO
 	dest->Author = L"Victor Derevyanko, dvpublic0@gmail.com";
@@ -75,22 +75,26 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *pInfo) {
 void WINAPI GetPluginInfoW(struct PluginInfo *pInfo) {	
 	static nf::DiskMenuHelper menu_helper;
 
-	pInfo->DiskMenuStringsNumber = static_cast<int>(menu_helper.GetCountStrings());
-	pInfo->DiskMenuStrings = menu_helper.GetStringsArray();
+	pInfo->DiskMenu.Count = static_cast<int>(menu_helper.GetCountStrings());
+	pInfo->DiskMenu.Strings = menu_helper.GetStringsArray();
+	pInfo->DiskMenu.Guids = menu_helper.GetGuidsPtr();
 
 	static const wchar_t *PluginMenuStrings[1];
 	static const GUID *PluginMenuGuids[1];
 	PluginMenuStrings[0]= nf::GetMsg(lg::PLUGINMENUSTRING);
+	PluginMenuGuids[0] = &nf::NF_PLUGINSMENU_GUID;
 
-	pInfo->PluginMenuStringsNumber = CSettings::GetInstance().GetValue(nf::ST_SHOW_IN_PLUGINS_MENU) ? 1 : 0;
-	pInfo->PluginMenuStrings = PluginMenuStrings;
+	pInfo->PluginMenu.Count = CSettings::GetInstance().GetValue(nf::ST_SHOW_IN_PLUGINS_MENU) ? 1 : 0;
+	pInfo->PluginMenu.Strings = PluginMenuStrings;
+	pInfo->PluginMenu.Guids = PluginMenuGuids[0];
 
 	static const wchar_t *PluginConfigStrings[1];
 	static const GUID *PluginConfigGuids[1];
 	PluginConfigStrings[0]= nf::GetMsg(lg::PLUGINSCONFIGSTRING);
+	PluginConfigGuids[0]= &nf::NF_CONFIGMENU_GUID;
 
-	pInfo->PluginConfigStringsNumber = 1;
-	pInfo->PluginConfigStrings = PluginConfigStrings;
+	pInfo->PluginConfig.Count = 1;
+	pInfo->PluginConfig.Strings = PluginConfigStrings;
 
 	pInfo->StructSize = sizeof(*pInfo); 
 	pInfo->Flags = PF_FULLCMDLINE | PF_DIALOG;
@@ -114,7 +118,8 @@ HANDLE WINAPI  OpenPluginW(int OpenFrom, INT_PTR Item) {
 		case OPEN_PLUGINSMENU:
 			return nf::OpenFromPluginsMenu();
 			break;
-		case OPEN_DISKMENU:
+		case OPEN_RIGHTDISKMENU:
+		case OPEN_LEFTDISKMENU:
 			if (Item == 0) {
 				return new nf::Panel::CPanel();
 			} else {
@@ -134,10 +139,10 @@ HANDLE WINAPI  OpenPluginW(int OpenFrom, INT_PTR Item) {
 	return INVALID_HANDLE_VALUE;
 }
 
-void WINAPI  GetOpenPluginInfoW(HANDLE hPlugin, struct OpenPluginInfo *Info) {
+void WINAPI  GetOpenPluginInfoW(HANDLE hPlugin, struct InfoPanelLine *info) {
 	try {
 		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
-		p->GetOpenPluginInfo(Info);
+		p->GetOpenPluginInfo(info);
 	} catch (...) {
 	}
 }
@@ -175,22 +180,15 @@ void WINAPI  ClosePluginW(HANDLE hPlugin) {
 	} catch (...) {
 	}
 }
-
-int WINAPI  ProcessKeyW(HANDLE hPlugin,int Key,unsigned int ControlState) {
-	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
-		return p->ProcessKey(Key, ControlState);
-	} catch (...) {
-		return FALSE;
-	}
-}
-
-int WINAPI  GetMinFarVersionW(void) {
-	return MAKEFARVERSION(2, 0
-		//, 1692
-		, 1500
-	);
-}
+//  !TODO: ProcessPanelInputW  
+// int WINAPI  ProcessKeyW(HANDLE hPlugin,int Key,unsigned int ControlState) {
+// 	try {
+// 		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
+// 		return p->ProcessKey(Key, ControlState);
+// 	} catch (...) {
+// 		return FALSE;
+// 	}
+// }
 
 int WINAPI  ConfigureW(int ItemNumber) {
 	try {
@@ -220,6 +218,7 @@ int WINAPI  PutFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int Items
 	}
 }
 
+//!TODO: этой функции в API больше нет! ProcessPanelEventW  ???
 int WINAPI  ProcessEventW(HANDLE hPlugin, int Event, void *Param) {
 	try {
 		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
@@ -229,13 +228,16 @@ int WINAPI  ProcessEventW(HANDLE hPlugin, int Event, void *Param) {
 	}
 }
 
-int WINAPI  ProcessDialogEventW(int Event, void *Param) {
+int WINAPI  ProcessDialogEventW(int Event, void *param) {
 	try {
 		if (Event == DE_DEFDLGPROCINIT) {
-			FarDialogEvent *pevent = reinterpret_cast<FarDialogEvent*>(Param);
-			if (pevent->Msg == DN_KEY) {
-				if (KEY_F12 == pevent->Param2) {
-					int a = 0;
+			FarDialogEvent *pevent = reinterpret_cast<FarDialogEvent*>(param);
+			if (pevent->Msg == DN_CONTROLINPUT) {
+				const INPUT_RECORD* record = (const INPUT_RECORD *)pevent->Param2;
+				if (record->EventType == KEY_EVENT && record->Event.KeyEvent.bKeyDown) {
+					if (VK_F12 == record->Event.KeyEvent.wVirtualKeyCode) {
+						int a = 0; //!TODO: что за тесты?
+					}
 				}
 			}
 		}
