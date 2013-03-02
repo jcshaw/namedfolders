@@ -33,13 +33,12 @@ HANDLE nf::OpenFromPluginsMenu() {
 	tlist_buffers menu_buffers(NUM_ITEMS);
 	for (unsigned int i = 0; i < NUM_ITEMS; ++i) {
 		menu_buffers[i].reset(Utils::Str2Buffer(GetMsg(PLUGINSMENU_ITEMS[i])));
+		memset(&MenuItems[i], 0, sizeof(FarMenuItem));
 		MenuItems[i].Text = &(*menu_buffers[i])[0];	
-		MenuItems[i].Selected = 0;
-		MenuItems[i].Checked = 0;
-		MenuItems[i].Separator = 0;
 	}
 
-	int nSelectedItem = g_PluginInfo.Menu(g_PluginInfo.ModuleNumber
+	int nSelectedItem = g_PluginInfo.Menu(&nf::NF_PLUGIN_GUID
+		, &nf::NF_PLUGINSMENU_GUID
 		, -1
 		, -1
 		, 0	//max count of visible items - regulated by FAR

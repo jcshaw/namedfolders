@@ -26,57 +26,63 @@
 
 extern struct PluginStartupInfo g_PluginInfo; 
 
-int nf::FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath) {
-	return g_PluginInfo.CmpName(Pattern, String, SkipPath);
+int nf::FarCmpName(const wchar_t *pattern, const wchar_t *str, int skipPath) {
+	return g_FSF.ProcessName(pattern, const_cast<wchar_t*>(str), 0
+		, skipPath 
+			? PN_CMPNAME | PN_SKIPPATH 
+			: PN_CMPNAME
+	);
+	//return g_PluginInfo.CmpName(Pattern, String, SkipPath);
 }
 
 void nf::CloseAndStartAnotherPlugin(HANDLE hPlugin, tstring const& Command, bool bActivePanel, bool bOpenBoth)
 {	//"press" all keys - Command + Enter
-	using namespace nf;
-	//ignore all prefixes except first one 
-	tstring prefix = CSettings::GetInstance().GetPrimaryPluginPrefix();
 
-	ULONG add_size = 1 + 4 + static_cast<int>(prefix.size()); //CTRL+Y + TAB + ENTER + TAB + "cd:" + ENTER  
-	nf::autobuffer_wrapper<DWORD> ks_buffer;
-	ks_buffer.resize(static_cast<unsigned int>(Command.size() + add_size));
+	//!TODO: ¬ Far3 команда ACTL_POSTKEYSEQUENCE выброшена, заменена на MacroControl + (похоже) MCTL_SENDSTRING
 
-	//always add Ctrl + Y at the beginning to clear command line
-	ks_buffer.push_back(int('y') | KEY_CTRL);
-
-	if (! bActivePanel) {
-		ks_buffer.push_back(VK_TAB);
-		for (unsigned int i = 0; i < Command.size(); ++i) {
-			ks_buffer.push_back( static_cast<DWORD>(Command[i]));
-		}
-		ks_buffer.push_back(VK_RETURN);
-
-		if (! bOpenBoth) {
-			ks_buffer.push_back(VK_TAB);
-				for (unsigned int i = 0; i < prefix.size(); ++i) {
-					ks_buffer.push_back( static_cast<DWORD>(prefix[i]));
-				}
-				ks_buffer.push_back(VK_RETURN);
-		}
-	} else {
-		for (unsigned int i = 0; i < Command.size(); ++i) {
-			if (static_cast<DWORD>(Command[i]) == L'\n') {
-				ks_buffer.push_back(VK_RETURN);
-			} else {
-				ks_buffer.push_back( static_cast<DWORD>(Command[i]));
-			}
-		}
-		ks_buffer.push_back(VK_RETURN);
-	}
-
-	static KeySequence ks;
-	ks.Flags = 0;//KSFLAGS_DISABLEOUTPUT;
-	ks.Count = static_cast<int>(ks_buffer.size());
-	ks.Sequence = &ks_buffer[0];
-
-	BOOL bSuccess = static_cast<BOOL>(g_PluginInfo.AdvControl(g_PluginInfo.ModuleNumber
-		, ACTL_POSTKEYSEQUENCE
-		, reinterpret_cast<void*>(&ks)));
-	assert(bSuccess);
+// 	using namespace nf;
+// 	//ignore all prefixes except first one 
+// 	tstring prefix = CSettings::GetInstance().GetPrimaryPluginPrefix();
+// 
+// 	ULONG add_size = 1 + 4 + static_cast<int>(prefix.size()); //CTRL+Y + TAB + ENTER + TAB + "cd:" + ENTER  
+// 	nf::autobuffer_wrapper<DWORD> ks_buffer;
+// 	ks_buffer.resize(static_cast<unsigned int>(Command.size() + add_size));
+// 
+// 	//always add Ctrl + Y at the beginning to clear command line
+// 	ks_buffer.push_back(int('y') | KEY_CTRL);
+// 
+// 	if (! bActivePanel) {
+// 		ks_buffer.push_back(VK_TAB);
+// 		for (unsigned int i = 0; i < Command.size(); ++i) {
+// 			ks_buffer.push_back( static_cast<DWORD>(Command[i]));
+// 		}
+// 		ks_buffer.push_back(VK_RETURN);
+// 
+// 		if (! bOpenBoth) {
+// 			ks_buffer.push_back(VK_TAB);
+// 				for (unsigned int i = 0; i < prefix.size(); ++i) {
+// 					ks_buffer.push_back( static_cast<DWORD>(prefix[i]));
+// 				}
+// 				ks_buffer.push_back(VK_RETURN);
+// 		}
+// 	} else {
+// 		for (unsigned int i = 0; i < Command.size(); ++i) {
+// 			if (static_cast<DWORD>(Command[i]) == L'\n') {
+// 				ks_buffer.push_back(VK_RETURN);
+// 			} else {
+// 				ks_buffer.push_back( static_cast<DWORD>(Command[i]));
+// 			}
+// 		}
+// 		ks_buffer.push_back(VK_RETURN);
+// 	}
+// 
+// 	static KeySequence ks;
+// 	ks.Flags = 0;//KSFLAGS_DISABLEOUTPUT;
+// 	ks.Count = static_cast<int>(ks_buffer.size());
+// 	ks.Sequence = &ks_buffer[0];
+// 
+// 	BOOL bSuccess = static_cast<BOOL>(g_PluginInfo.AdvControl(&nf::NF_PLUGIN_GUID, ACTL_POSTKEYSEQUENCE, reinterpret_cast<void*>(&ks)));
+// 	assert(bSuccess);
 }
 
 namespace {
@@ -151,8 +157,8 @@ bool nf::OpenShortcutOnPanel(HANDLE hPlugin, nf::tshortcut_value_parsed &panel, 
 
 	if (panel.ValueType == VAL_TYPE_PLUGIN_DIRECTORY) {	//открыть виртуальную директорию
 		nf::CloseAndStartAnotherPlugin(hPlugin, panel.value, bActivePanel, bOpenBoth);
-		g_PluginInfo.Control(hPlugin
-			, FCTL_CLOSEPLUGIN
+		g_PluginInfo.PanelControl(hPlugin
+			, FCTL_CLOSEPANEL
 			, 0
 			, 0
 		);	//плагин необходимо закрывать, иначе при вызове из панели //!TODO: проверить на Far 2.0

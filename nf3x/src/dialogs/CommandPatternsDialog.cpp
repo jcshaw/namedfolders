@@ -35,8 +35,7 @@ namespace {
 void nf::Patterns::EditPatterns(nf::Patterns::CommandsManager &cm)
 {
 	const int NUM_BREAK_KEYS = 4;
-	static int BreakKeys[NUM_BREAK_KEYS+1] = {VK_F4, VK_INSERT, VK_DELETE, VK_ESCAPE, 0};	
-
+	static struct FarKey BreakKeys[NUM_BREAK_KEYS+1]={{VK_F4,0}, {VK_INSERT, 0}, {VK_DELETE, 0}, {VK_ESCAPE, 0}};
 	while (true) {
 		std::vector<FarMenuItem> menu_items;
 		tlist_buffers mi_buffers;
@@ -46,7 +45,8 @@ void nf::Patterns::EditPatterns(nf::Patterns::CommandsManager &cm)
 		::load_list_patterns_to_menu(cm, list, menu_items, mi_buffers);
 
 		int selected_key;
-		int nSelectedItem = g_PluginInfo.Menu(g_PluginInfo.ModuleNumber	//!TODO: в этом меню фильтр сейчас не действует...
+		int nSelectedItem = g_PluginInfo.Menu(&nf::NF_PLUGIN_GUID	//!TODO: в этом меню фильтр сейчас не действует...
+			, &nf::NF_DIALOG_EDIT_PATTERN
 			, -1
 			, -1
 			, 0	//макс кол-во видимых элементов

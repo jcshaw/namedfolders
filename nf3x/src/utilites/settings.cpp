@@ -83,8 +83,7 @@ CSettings::CSettings()
 	assert(NUMBER_STRINGS == NUMBER_STRING_SETTINGS);
 	assert(NUMBER_FLAGS == NUMBER_FLAG_SETTINGS);
 
-	assert(g_PluginInfo.RootKey);
-	m_nf_reg_key = tstring(g_PluginInfo.RootKey);
+	m_nf_reg_key = L"Software\\Far3\\Plugins"; //!TODO: заменить на Settings API
 	m_nf_reg_key += L"\\NamedFolders";
 	ReloadSettings();
 }

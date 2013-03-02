@@ -14,7 +14,7 @@
 using namespace nf;
 
 CDialogApplyCommand::CDialogApplyCommand(void)
-: dialogT(DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, L"DialogExecuteCommand")
+: dialogT(nf::NF_DIALOG_APPLY_COMMAND, DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, L"DialogExecuteCommand")
 {
 	SetDialogItems();
 }

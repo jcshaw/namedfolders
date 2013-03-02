@@ -12,14 +12,14 @@ namespace
 }
 
 DialogEditPattern::DialogEditPattern(void)
-: dialogT(DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, HELP_TOPIC_ID)
+: dialogT(nf::NF_DIALOG_EDIT_PATTERN, DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, HELP_TOPIC_ID)
 , m_bCreateNewPattern(true)
 {
 	SetDialogItems();
 }
 
 DialogEditPattern::DialogEditPattern(tstring const& Prefix, tstring const& Pattern)
-: dialogT(DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, HELP_TOPIC_ID)
+: dialogT(nf::NF_DIALOG_EDIT_PATTERN, DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, HELP_TOPIC_ID)
 , m_bCreateNewPattern(false)
 , m_Prefix(Prefix)
 , m_Pattern(Pattern)
@@ -35,7 +35,7 @@ UINT DialogEditPattern::ShowModal() {
 	//вызываем диалог редактирования имени каталога
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_PREFIX, m_Prefix.c_str());
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_PATTERN, m_Pattern.c_str());
-	GetDialogItemsRef()[ID_EDIT_PREFIX].Focus = 1;
+	//GetDialogItemsRef()[ID_EDIT_PREFIX].Focus = 1; //!TODO
 
 	int nChoosedItem;
 	if (Execute(nChoosedItem))

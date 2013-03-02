@@ -19,7 +19,7 @@ using namespace nf;
 CDialogEditCatalog::CDialogEditCatalog(wchar_t const* parentCatalog
 									   , wchar_t const* catalogName
 									   , bool bCreateNew)
-: dialogT(DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, L"DialogEditCatalog")
+: dialogT(nf::NF_DIALOG_EDIT_CATALOG, DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, L"DialogEditCatalog")
 , m_bCreateNew(bCreateNew)
 , m_ParentCatalog(parentCatalog)
 , m_CatalogName(catalogName)
@@ -65,7 +65,7 @@ UINT CDialogEditCatalog::ShowModal() {
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_CATALOG, m_CatalogName.c_str());
 	GetDialogItemsRef()[ID_SHOW_IN_DISKMENU].Selected = m_Properties.show_in_disk_menu ? 1 : 0;
 	GetDialogItemsRef()[ID_ADD_TO_WIN7_LIBRARY_BY_DEFAULT].Selected = m_Properties.flag_add_to_win7_lib_by_default ? 1 : 0;
-	GetDialogItemsRef()[ID_EDIT_CATALOG].Focus = 1;
+	//GetDialogItemsRef()[ID_EDIT_CATALOG].Focus = 1; //!TODO
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_WIN7_LIBRARY_NAME, m_Properties.default_win7_lib.c_str());
 	int nChoosedItem;
 	if (Execute(nChoosedItem))

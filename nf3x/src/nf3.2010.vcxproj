@@ -116,7 +116,7 @@
     <Link>
       <Version>
       </Version>
-      <ModuleDefinitionFile>far3/$(ProjectName).def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)nf3.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -150,7 +150,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <ModuleDefinitionFile>far3/$(ProjectName).def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)nf3.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -191,7 +191,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>LIBCPMT.lib;LIBCMT.lib;kernel32.lib;uuid.lib;user32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;shlwapi.lib;comsupp.lib;libboost_regex-vc100-mt-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>far3/$(ProjectName).def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>
@@ -238,7 +238,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <ModuleDefinitionFile>far3/$(ProjectName).def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)nf3.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
@@ -262,12 +262,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="far3\nf3.cpp" />
     <ClCompile Include="far\confirmations.cpp" />
     <ClCompile Include="far\far_impl.cpp" />
     <ClCompile Include="far\Menu2.cpp" />
     <ClCompile Include="far\MenuDialog.cpp" />
     <ClCompile Include="far\menus_impl.cpp" />
+    <ClCompile Include="far\nf3.cpp" />
     <ClCompile Include="far\open_plugin.cpp" />
     <ClCompile Include="utilites\catalog_names.cpp" />
     <ClCompile Include="utilites\catalog_utils.cpp" />
@@ -310,12 +310,10 @@
     <ClCompile Include="utilites\x64.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="far3\farcolor.hpp" />
-    <ClInclude Include="far3\farkeys.hpp" />
     <ClInclude Include="far3\far_utils2.h" />
-    <ClInclude Include="far3\PanelInfoWrap2.h" />
-    <ClInclude Include="far3\plugin.hpp" />
+    <ClInclude Include="far3\panel_types.h" />
     <ClInclude Include="far\confirmations.h" />
+    <ClInclude Include="far\farcolor.hpp" />
     <ClInclude Include="far\far_impl.h" />
     <ClInclude Include="far\far_utils.h" />
     <ClInclude Include="far\lang.h" />
@@ -323,6 +321,7 @@
     <ClInclude Include="far\MenuDialog.h" />
     <ClInclude Include="far\menus_impl.h" />
     <ClInclude Include="far\open_plugin.h" />
+    <ClInclude Include="far\plugin.hpp" />
     <ClInclude Include="utilites\catalog_names.h" />
     <ClInclude Include="utilites\catalog_utils.h" />
     <ClInclude Include="utilites\CommandPatterns.h" />
@@ -369,6 +368,10 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="far2\nf3.rc" />
+    <ResourceCompile Include="far\nf3.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="far\nf3.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

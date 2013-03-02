@@ -207,16 +207,15 @@ namespace {
 	void make_add_action(HANDLE hPlugin, tadd_action addAction) {
 		switch (addAction) {
 		case FH_COLON:
-			g_FSF.CopyToClipboard(CPanelInfoWrap(hPlugin).GetPanelCurDir(true).c_str()); //store current directory to clipboard
+			g_FSF.CopyToClipboard(FCT_STREAM, CPanelInfoWrap(hPlugin).GetPanelCurDir(true).c_str()); //store current directory to clipboard
 			break;
 		case FH_PLUS:
 			PluginPanelItem* ppi = nf::Panel::allocate_PluginPanelItem(hPlugin, FCTL_GETCURRENTPANELITEM, 0);
 			BOOST_SCOPE_EXIT( (&ppi) ) {
 				nf::Panel::deallocate_PluginPanelItem(ppi);
 			} BOOST_SCOPE_EXIT_END;
-			g_FSF.CopyToClipboard(
-				Utils::CombinePath(CPanelInfoWrap(hPlugin).GetPanelCurDir(true)
-					, ppi->FindData.lpwszFileName, SLASH_DIRS).c_str()); //store current directory and file name to clipboard
+			g_FSF.CopyToClipboard(FCT_STREAM, 
+				Utils::CombinePath(CPanelInfoWrap(hPlugin).GetPanelCurDir(true), ppi->FileName, SLASH_DIRS).c_str()); //store current directory and file name to clipboard
 			break;
 		}
 	}
@@ -244,11 +243,12 @@ namespace {
 	bool make_action_in_background(nf::tvector_strings const& srcPaths, int breakCode, nf::Menu::tvariant_value selectedItem) {		
 		nf::tshortcut_info const& sh = boost::get<nf::tshortcut_info>(selectedItem);
 
-		switch (nf::Menu::CMenuApplications::GetTotalListBreakKeys()[breakCode]) {
-		case nf::Menu::CMenuApplications::OPEN_APPLICATION_IN_BACKGROUND:
+		//!TODO: рефакторин сравнений, убого сейчас
+		FarKey& fk = nf::Menu::CMenuApplications::GetTotalListBreakKeys()[breakCode];
+		if (fk.ControlKeyState  == nf::Menu::CMenuApplications::OPEN_APPLICATION_IN_BACKGROUND.ControlKeyState && fk.VirtualKeyCode  == nf::Menu::CMenuApplications::OPEN_APPLICATION_IN_BACKGROUND.VirtualKeyCode) {
 			OpenApplication(get_application_path(srcPaths, sh), L"", false);
 			return true;
-		case nf::Menu::CMenuApplications::OPEN_PATH_IN_EXPLORER_IN_BACKGROUND:
+		} else if (fk.ControlKeyState  == nf::Menu::CMenuApplications::OPEN_PATH_IN_EXPLORER_IN_BACKGROUND.ControlKeyState && fk.VirtualKeyCode  == nf::Menu::CMenuApplications::OPEN_PATH_IN_EXPLORER_IN_BACKGROUND.VirtualKeyCode) {
 			OpenApplicationCatalogInExplorer(get_application_path(srcPaths, sh), false);
 			return true;
 		}
@@ -291,13 +291,13 @@ bool Start::OpenSoftShortcut(HANDLE hPlugin, nf::tparsed_command const &cmd) {
 			OpenApplication(path, params, true);
 		} else {
 			switch (-nret) {
-			case Menu::CMenuApplications::OPEN_PATH_IN_EXPLORER:
+			case Menu::CMenuApplications::CMD_OPEN_PATH_IN_EXPLORER:
 				OpenApplicationCatalogInExplorer(path, true);
 				break;
-			case Menu::CMenuApplications::OPEN_PATH_IN_FAR:
+			case Menu::CMenuApplications::CMD_OPEN_PATH_IN_FAR:
 				OpenApplicationPathInFAR(path);
 				break;
-			case Menu::CMenuApplications::SWITCH_IGNORE_MODE_ONOFF: 
+			case Menu::CMenuApplications::CMD_SWITCH_IGNORE_MODE_ONOFF: 
 				continue;
 			default: return false;
 			}; //switch			

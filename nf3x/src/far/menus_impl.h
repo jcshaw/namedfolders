@@ -17,12 +17,10 @@ namespace Menu {
 		enum {
 			FG_SHOW_SINGLE_VARIANT = 0x1	//показывать меню даже если вариант единственный 
 		};
-		enum { //keysequences for sorting menu by 
-			F_NO_SORT_BY_COLUMNS = VK_F12 | PKF_CONTROL << 16
-			, F_SORT_COLUMN_1 = VK_F5 | PKF_CONTROL << 16
-			, F_SORT_COLUMN_2 = VK_F6 | PKF_CONTROL << 16
-			, F_SORT_COLUMN_3 = VK_F7 | PKF_CONTROL << 16
-		};
+		static const struct FarKey F_NO_SORT_BY_COLUMNS;
+		static const struct FarKey F_SORT_COLUMN_1;
+		static const struct FarKey F_SORT_COLUMN_2;
+		static const struct FarKey F_SORT_COLUMN_3;
 
 		tstring const m_KeysInMenu;
 		tstring const m_HelpTopic;
@@ -41,14 +39,16 @@ namespace Menu {
 		{}
 	public:
 		virtual tstring GetMenuTitle() {return L"";}
-		virtual int* GetBreakKeys() {return 0;}
+		virtual FarKey* GetBreakKeys() {return 0;}
 		int GetCurrentViewMode() {
 			return m_MenuMode != 0 ? nf::CSettings::GetInstance().GetValue(m_MenuMode) : 0;
 		}
 		int GetCurrentSortMode() {
 			return m_SortMenuMode != 0 ? nf::CSettings::GetInstance().GetValue(m_SortMenuMode) : 0;
 		}
-		virtual int MakeAction(int BreakCode) {return 0;}
+		virtual int MakeAction(int BreakCode) {
+			return 0;
+		}
 	};
 
 	class CMenuShortcuts : public CMenu {
@@ -68,9 +68,15 @@ namespace Menu {
 			, MS_COMMAND_EDIT = 2
 		};
 	public:
-		virtual int* GetBreakKeys() {
-			static int shortcuts_break_keys [] = {VK_DELETE, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9
-				, CMenu::F_SORT_COLUMN_1, CMenu::F_SORT_COLUMN_2, CMenu::F_SORT_COLUMN_3, CMenu::F_NO_SORT_BY_COLUMNS, 0};
+		virtual FarKey* GetBreakKeys() {
+			static FarKey shortcuts_break_keys [] = {
+				{VK_DELETE, 0}, {VK_F4, 0}, {VK_F5, 0}, {VK_F6, 0}, {VK_F7, 0}, {VK_F8, 0}, {VK_F9, 0}
+				, nf::Menu::CMenu::F_SORT_COLUMN_1
+				, nf::Menu::CMenu::F_SORT_COLUMN_2
+				, nf::Menu::CMenu::F_SORT_COLUMN_3
+				, nf::Menu::CMenu::F_NO_SORT_BY_COLUMNS		
+				, 0
+			};
 			return &shortcuts_break_keys[0];
 		}
 		virtual int MakeAction(int BreakCode);
@@ -82,26 +88,32 @@ namespace Menu {
 			, CMenu::FG_SHOW_SINGLE_VARIANT
 			, nf::ST_SELECT_SOFT_MENU_SHOWCATALOGS_MODE
 			, nf::ST_SORT_SOFT_MENU_COLUMN) {}
-		enum {
-			OPEN_PATH_IN_EXPLORER = VK_RETURN | PKF_CONTROL << 16
-			, OPEN_PATH_IN_FAR = VK_RETURN | ((PKF_CONTROL | PKF_ALT) << 16)
-			, SWITCH_IGNORE_MODE_ONOFF = VK_F11
-			, OPEN_APPLICATION_IN_BACKGROUND = (VK_RETURN | (PKF_SHIFT << 16))
-			, OPEN_PATH_IN_EXPLORER_IN_BACKGROUND = VK_RETURN | ((PKF_SHIFT | PKF_CONTROL) << 16)
-		};
+
+		static const struct FarKey OPEN_PATH_IN_EXPLORER;
+		static const struct FarKey OPEN_PATH_IN_FAR;
+		static const struct FarKey SWITCH_IGNORE_MODE_ONOFF;
+		static const struct FarKey OPEN_APPLICATION_IN_BACKGROUND;
+		static const struct FarKey OPEN_PATH_IN_EXPLORER_IN_BACKGROUND;
+
 		enum {
 			MODE_IGNORE_EXCEPTIONS_ON = 0		//не искать среди ярлыков, удовлетворяющих игнорируемым в соответствии с маской в настройках 
 			, MODE_IGNORE_EXCEPTIONS_OFF = 1	//искать среди всех ярлыков, ничего не игнорировать
+			, CMD_OPEN_PATH_IN_FAR
+			, CMD_OPEN_PATH_IN_EXPLORER
+			, CMD_SWITCH_IGNORE_MODE_ONOFF
 		};
 		enum { MM_PATH, MM_CAT_PATH, MM_PATH_CAT };
 		virtual int MakeAction(int BreakCode);
 	public:
-		virtual int* GetBreakKeys() {
+		virtual FarKey* GetBreakKeys() {
 			return CMenuApplications::GetTotalListBreakKeys();
 		}
-		static int* GetTotalListBreakKeys() {
-			static int soft_break_keys[] = {OPEN_PATH_IN_FAR, OPEN_PATH_IN_EXPLORER, SWITCH_IGNORE_MODE_ONOFF
-				, VK_F5, VK_F6, VK_F7
+		static FarKey* GetTotalListBreakKeys() {
+			static FarKey soft_break_keys[] = {
+				OPEN_PATH_IN_FAR
+				, OPEN_PATH_IN_EXPLORER
+				, SWITCH_IGNORE_MODE_ONOFF
+				, {VK_F5, 0}, {VK_F6, 0}, {VK_F7, 0}
 				, CMenu::F_SORT_COLUMN_1, CMenu::F_SORT_COLUMN_2, CMenu::F_NO_SORT_BY_COLUMNS
 				, OPEN_APPLICATION_IN_BACKGROUND
 				, OPEN_PATH_IN_EXPLORER_IN_BACKGROUND
@@ -126,9 +138,15 @@ namespace Menu {
 		};	
 	public:
 		virtual int MakeAction(int BreakCode);
-		virtual int* GetBreakKeys() {
-			static int env_var_break_keys[] = {VK_F5, VK_F6
-				, CMenu::F_SORT_COLUMN_1, CMenu::F_SORT_COLUMN_2, CMenu::F_NO_SORT_BY_COLUMNS,  0};	
+		virtual FarKey* GetBreakKeys() {
+			static FarKey env_var_break_keys[] = {
+				{VK_F5, 0}
+				, {VK_F6, 0}
+				, CMenu::F_SORT_COLUMN_1
+				, CMenu::F_SORT_COLUMN_2
+				, CMenu::F_NO_SORT_BY_COLUMNS
+				, 0
+			};	
 			return &env_var_break_keys[0];
 		}
 	};

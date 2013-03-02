@@ -24,7 +24,7 @@ CDialogMove::CDialogMove(wchar_t const* ItemName
 						 , bool bMoveCatalog
 						 , bool bSeveralItems
 						 , bool bCopyDialog)
-: dialogT(DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, L"DialogMove")
+: dialogT(nf::NF_DIALOG_MOVE, DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, L"DialogMove")
 , m_ItemName(ItemName)
 , m_bMoveCatalog(bMoveCatalog)
 , m_bSeveralItems(bSeveralItems)
@@ -45,7 +45,7 @@ UINT CDialogMove::ShowModal()
 	int nChoosedItem;
 	
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT, m_DestinationCatalog.c_str());
-	GetDialogItemsRef()[ID_EDIT].Focus = 1;
+	//GetDialogItemsRef()[ID_EDIT].Focus = 1; //!TODO
 
 	if (Execute(nChoosedItem))
 		if (nChoosedItem != ID_CANCEL)

@@ -16,7 +16,7 @@ CDialogEditShortcut::CDialogEditShortcut(nf::tshortcut_info const &sh
 										 , tstring const &ValueInActivePanel
 										 , bool bInsertMode
 										 )
-	: dialogT(DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 12, L"DialogEditShortcut")
+	: dialogT(nf::NF_DIALOG_EDIT_SHORTCUT, DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 12, L"DialogEditShortcut")
 	, m_sh(sh)
 	, m_ValueActivePanel(ValueActivePanel)
 	, m_ValueInActivePanel(ValueInActivePanel)
@@ -37,7 +37,7 @@ UINT CDialogEditShortcut::ShowModal() {
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_VALUE_INACTIVE, m_ValueInActivePanel.c_str());
 	GetDialogItemsRef()[ID_SHOW_ISTEMPORARY].Selected = m_sh.bIsTemporary ? 1 : 0;
 
-	GetDialogItemsRef()[ID_EDIT_SHORTCUT].Focus = 1;
+	//GetDialogItemsRef()[ID_EDIT_SHORTCUT].Focus = 1; //!TODO
 
 	int nChoosedItem;
 	if (Execute(nChoosedItem))

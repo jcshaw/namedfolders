@@ -70,7 +70,7 @@ public:
 
 		if (! m_bSeveralItems) {
 			GetDialogItemsRef().SetFarDialogItemData(ID_TEXT
-				, Utils::SubstituteSubstringLikePrintf(GetDialogItemsRef()[ID_TEXT].PtrData, m_ItemName).c_str()
+				, Utils::SubstituteSubstringLikePrintf(GetDialogItemsRef()[ID_TEXT].Data, m_ItemName).c_str()
 				);
 		};
 	} //SetDialogItems

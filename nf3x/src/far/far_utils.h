@@ -1,7 +1,12 @@
 #pragma once
 
-#ifdef NF_FAR_API_3
-#include "far3/far_utils3.h"
-#else
-#include "far2/far_utils2.h"
-#endif
+#include "header.h"
+namespace nf {
+	namespace nffar3 {
+		extern const GUID g_NamedFolderFar3_GUID;
+	}
+
+	inline const wchar_t *GetMsg(int MsgId) {
+		return g_PluginInfo.GetMsg(&nf::nffar3::g_NamedFolderFar3_GUID, MsgId);
+	}
+}

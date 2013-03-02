@@ -53,7 +53,7 @@ namespace
 }
 
 CConfigureDialog::CConfigureDialog() 
-	: dialogT(DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, L"Settings")
+	: dialogT(nf::NF_DIALOG_CONFIGURE, DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, L"Settings")
 	, m_dwParams(max(nf::NUMBER_FLAG_SETTINGS, NUM_MAIN_DW_SETTINGS))
 	, m_strParams(max(nf::NUMBER_STRING_SETTINGS, NUM_MAIN_STR_SETTINGS))
 {
