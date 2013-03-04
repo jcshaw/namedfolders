@@ -84,17 +84,32 @@ CPanel::~CPanel(void)
 	}
 }
 
+namespace {
+	void set_keybar_label(KeyBarTitles &kb, int index, wchar_t const* pMsg) {
+		// 	KeyBar.Titles[3-1] = L"";
+		// 	KeyBar.Titles[5-1] = (wchar_t*)nf::GetMsg(lg::F5);
+		// 	KeyBar.Titles[6-1] = (wchar_t*)nf::GetMsg(lg::F6);
+		// 	KeyBar.Titles[8-1] = (wchar_t*)nf::GetMsg(lg::F8);
+		// 	KeyBar.Titles[7-1] = (wchar_t*)nf::GetMsg(lg::F7);
+		memset(&kb.Labels[index], 0, sizeof(KeyBarLabel));
+		if (pMsg != nullptr) {
+			kb.Labels[index].Text = pMsg;
+		}
+	}
+}
 
-void CPanel::GetOpenPluginInfo(struct InfoPanelLine *pi)
-{
+
+void CPanel::GetOpenPluginInfo(struct OpenPanelInfo *pi) {
+	memset(pi, 0, sizeof(OpenPanelInfo));
 	pi->StructSize = sizeof(*pi);
-	pi->Flags = OPIF_USEFILTER 
-		| OPIF_ADDDOTS 
+	pi->Flags = OPIF_ADDDOTS 
+		//OPIF_USEFILTER  // = !OPIF_DISABLEFILTER
 		| OPIF_SHOWNAMESONLY 
 		| OPIF_SHOWRIGHTALIGNNAMES
 		| OPIF_RAWSELECTION
 		| OPIF_SHOWPRESERVECASE
-		| OPIF_USEHIGHLIGHTING;
+		//| OPIF_USEHIGHLIGHTING //OPIF_DISABLEHIGHLIGHTING
+		;
 	pi->HostFile = 0;
 	pi->CurDir = const_cast<wchar_t*>(m_CurrentCatalog.c_str());
 	pi->Format = (wchar_t*)nf::GetMsg(lg::NAMEDFOLDERS);
@@ -113,11 +128,9 @@ void CPanel::GetOpenPluginInfo(struct InfoPanelLine *pi)
 	const int NUM_PANEL_MODES = 10;
 	static struct PanelMode PanelModesArray[NUM_PANEL_MODES];
 	PanelMode& panel_mode = PanelModesArray[panel_mode_id];
+	memset(&panel_mode, 0, sizeof(PanelMode) );
 	panel_mode.ColumnTypes = NULL;
-	panel_mode.ColumnWidths = NULL; //"8,0";
-	panel_mode.FullScreen = FALSE;
-	panel_mode.Reserved[0] = 0;
-	panel_mode.Reserved[1] = 0;
+	panel_mode.ColumnWidths = NULL; //"8,0";	
 
 	static wchar_t *ColumnTitles[3] = {
 		(wchar_t*)nf::GetMsg(lg::NF_PANEL_NAME),
@@ -144,20 +157,19 @@ void CPanel::GetOpenPluginInfo(struct InfoPanelLine *pi)
 	PanelModesArray[8].ColumnWidths = &buf_widths[0];
 
 	PanelModesArray[8].ColumnTitles = &ColumnTitles[0];
-	PanelModesArray[8].FullScreen=FALSE;
 
 	pi->PanelModesArray = PanelModesArray;
 	pi->PanelModesNumber = NUM_PANEL_MODES;
 	pi->StartPanelMode='0' + panel_mode_id;
 
-	static struct KeyBarTitles KeyBar;
-	memset(&KeyBar, 0, sizeof(KeyBar));
-	KeyBar.Titles[3-1] = L"";
-	KeyBar.Titles[5-1] = (wchar_t*)nf::GetMsg(lg::F5);
-	KeyBar.Titles[6-1] = (wchar_t*)nf::GetMsg(lg::F6);
-	KeyBar.Titles[8-1] = (wchar_t*)nf::GetMsg(lg::F8);
-	KeyBar.Titles[7-1] = (wchar_t*)nf::GetMsg(lg::F7);
-	pi->KeyBar = &KeyBar;
+	static struct KeyBarTitles kb; 
+	memset(&kb, 0, sizeof(kb));
+	set_keybar_label(kb, 3-1, nullptr);
+	set_keybar_label(kb, 5-1, (wchar_t*)nf::GetMsg(lg::F5));
+	set_keybar_label(kb, 6-1, (wchar_t*)nf::GetMsg(lg::F6));
+	set_keybar_label(kb, 7-1, (wchar_t*)nf::GetMsg(lg::F7));
+	set_keybar_label(kb, 8-1, (wchar_t*)nf::GetMsg(lg::F8));
+	pi->KeyBar = &kb;
 }
 
 
@@ -180,29 +192,38 @@ int CPanel::SetDirectory(const wchar_t *Dir, int OpMode)
 	return TRUE;
 }
 
-int CPanel::ProcessKey(int Key, unsigned int ControlState) {	
-	switch(Key) {	//let's FAR handle cursor movements 
-		case VK_LEFT: case VK_UP: case VK_RIGHT: case VK_DOWN: return FALSE;
+int CPanel::ProcessPanelInputW(INPUT_RECORD const& inputRecord) {	
+	if (inputRecord.EventType != KEY_EVENT) {
+		return 0;
+	}
+	KEY_EVENT_RECORD const& ker = inputRecord.Event.KeyEvent;
+
+	switch(ker.wVirtualKeyCode) {	//let's FAR handle cursor movements 
+		case VK_LEFT: 
+		case VK_UP: 
+		case VK_RIGHT: 
+		case VK_DOWN: 
+			return FALSE;
 	};
 	PanelInfo const& pi = get_hPlugin().GetPanelInfo(true); 
 
-	switch (Key) {
+	switch (ker.wVirtualKeyCode) {
 	case VK_RETURN:
 	case VK_LBUTTON: //open
-		return OpenSelectedItem(this, ControlState, pi);
-	case VK_PRIOR:	//go to up level - Ctrp + PgUp = BACKSPACE 
-		if (PKF_CONTROL == ControlState) { 
+		return OpenSelectedItem(this, ker.dwControlKeyState, pi);
+	case VK_PRIOR:	//go to up level - Ctrp + PgUp = BACKSPACE 		
+		if (LEFT_CTRL_PRESSED == ker.dwControlKeyState) { 
 			return go_to_up_folder(0);
 		}
 		return FALSE;
 	case VK_DELETE:  //delete
-		if (PKF_SHIFT != ControlState) return FALSE; 
+		if (SHIFT_PRESSED != ker.dwControlKeyState) return FALSE; 
 		//no break here!
 	case VK_F8:  
 		DeleteSelectedCatalogsAndShortcuts(this, pi);
 		return TRUE;
 	case 'R': //Ctrl + R update state
-		if ((ControlState & PKF_CONTROL) == 0) return FALSE; 
+		if ((ker.dwControlKeyState & LEFT_CTRL_PRESSED) == 0) return FALSE; 
 		UpdateCursorPositionOnFarPanel(this, pi);
 		return TRUE;
 	case VK_F5:	 //copy
@@ -210,11 +231,11 @@ int CPanel::ProcessKey(int Key, unsigned int ControlState) {
 		return TRUE;
 	case VK_F6: //move
 		if (pi.SelectedItemsNumber) {
-			MoveItems(this, pi, (PKF_SHIFT != ControlState) != 0 ? ID_CM_MOVE : ID_CM_RENAME);	// исключаем ".."
+			MoveItems(this, pi, (SHIFT_PRESSED != ker.dwControlKeyState) != 0 ? ID_CM_MOVE : ID_CM_RENAME);	// исключаем ".."
 		}
 		return TRUE;
 	case VK_F4: //edit/create shortcut name
-		if (PKF_SHIFT == ControlState) {
+		if (SHIFT_PRESSED == ker.dwControlKeyState) {
 			InsertShortcut(this, pi);
 		} else if (IsSelectedItemIsCatalog(this, pi)) {
 			if (pi.SelectedItemsNumber) { // исключаем ".."
@@ -226,7 +247,7 @@ int CPanel::ProcessKey(int Key, unsigned int ControlState) {
 		}
 		return TRUE;
 	case VK_F9: //save settings by F9
-		if (PKF_SHIFT == ControlState) {
+		if (SHIFT_PRESSED == ker.dwControlKeyState) {
 			SaveSetup(this);
 			return TRUE;
 		} 
@@ -264,8 +285,8 @@ int CPanel::PutFiles(struct PluginPanelItem *PanelItem
 
 	for (int i = 0; i < ItemsNumber; ++i) {
 		tstring cur_dir = get_hPlugin().GetPanelCurDir(true);	
-		if (PanelItem[i].FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-			nf::tshortcut_info sht = nf::MakeShortcut(m_CurrentCatalog, PanelItem[i].FindData.lpwszFileName, false);
+		if (PanelItem[i].FileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+			nf::tshortcut_info sht = nf::MakeShortcut(m_CurrentCatalog, PanelItem[i].FileName, false);
 			if (sht.shortcut == LEVEL_UP_TWO_POINTS) continue;
 			tstring value = Utils::CombinePath(cur_dir, sht.shortcut, SLASH_DIRS);
 			InsertShortcut(this, get_hPlugin().GetPanelInfo(false), sht, value);
@@ -335,7 +356,7 @@ int CPanel::ProcessEvent(int Event, void *Param) {
 		if (m_RegNotify.Check()) {
 			//обновляем, если панель плагина не активна... ???
 			PanelInfo const& pi = get_hPlugin().GetPanelInfo(true);
-			if (pi.Plugin) {
+			if ((pi.Flags & PFLAGS_PLUGIN) != 0) {
 				CPanelUpdater pu(this, pi.CurrentItem);
 				pu.UpdateActivePanel();
 				pu.UpdateInactivePanel();
@@ -359,9 +380,9 @@ void set_panel_item(PluginPanelItem& item
 	item.Description = folder.empty() ? 0 : folder.c_str();
 	item.Flags = 0;
 	itemBuffer.reset(Utils::Str2Buffer(name));
-	item.FindData.lpwszFileName = &(*itemBuffer)[0];
-	item.FindData.dwFileAttributes =  (bIsHidden) ? FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM : 0;
-	if (bIsDirectory) item.FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
+	item.FileName = &(*itemBuffer)[0];
+	item.FileAttributes =  (bIsHidden) ? FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM : 0;
+	if (bIsDirectory) item.FileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
 	item.Owner = NULL;
 	static wchar_t const* AddColumns[NUMBER_STATES] = {
 		nf::GetMsg(lg::STATE_UNKNOWN)

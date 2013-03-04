@@ -27,12 +27,12 @@ public:
 	CPanel(tstring catalog = L"");
 	~CPanel(void);
 
-	void GetOpenPluginInfo(struct InfoPanelLine *Info);
+	void GetOpenPluginInfo(struct OpenPanelInfo *Info);
 	int GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpMode);	
 	void FreeFindData(struct PluginPanelItem *PanelItem, int ItemsNumber);
 	int SetDirectory(const wchar_t *Dir, int OpMode);
 	int PutFiles(struct PluginPanelItem *PanelItem, int ItemsNumber, int Move, int OpMode);
-	int ProcessKey(int Key, unsigned int ControlState);
+	int ProcessPanelInputW(INPUT_RECORD const& inputRecord);
 	int MakeDirectory (wchar_t *Name, int OpMode);
 	int ProcessEvent(int Event, void *Param);
 	void UpdateListItems(DWORD flags = FG_ALL);

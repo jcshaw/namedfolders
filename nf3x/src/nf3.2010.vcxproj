@@ -267,7 +267,7 @@
     <ClCompile Include="far\Menu2.cpp" />
     <ClCompile Include="far\MenuDialog.cpp" />
     <ClCompile Include="far\menus_impl.cpp" />
-    <ClCompile Include="far\nf3.cpp" />
+    <ClCompile Include="nf3.cpp" />
     <ClCompile Include="far\open_plugin.cpp" />
     <ClCompile Include="utilites\catalog_names.cpp" />
     <ClCompile Include="utilites\catalog_utils.cpp" />
@@ -298,7 +298,6 @@
     <ClCompile Include="utilites\registry_remover.cpp" />
     <ClCompile Include="utilites\stlcatalogs.cpp" />
     <ClCompile Include="main\header.cpp" />
-    <ClCompile Include="far2\nf3.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -367,11 +366,10 @@
     <ClInclude Include="utilites\x64.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="far2\nf3.rc" />
-    <ResourceCompile Include="far\nf3.rc" />
+    <ResourceCompile Include="nf3.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="far\nf3.def" />
+    <None Include="nf3.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

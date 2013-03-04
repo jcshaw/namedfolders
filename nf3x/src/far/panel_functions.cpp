@@ -276,7 +276,7 @@ void nf::Panel::UpdateCursorPositionOnFarPanel(CPanel *pPanel, PanelInfo const& 
 
 int nf::Panel::OpenSelectedItem(CPanel *pPanel, unsigned int ControlState, PanelInfo const &pi) {
 	nf::tshortcut_info sh;
-	if (PKF_SHIFT == ControlState) {	//shift -> open explorer
+	if (SHIFT_PRESSED == ControlState) {	//shift -> open explorer
 		if (! IsSelectedItemIsCatalog(pPanel, pi)) {
 			nf::Commands::OpenShortcutInExplorer(pPanel->get_hPlugin(), GetSelectedShortcut(pPanel, pi, sh), tstring());
 			return TRUE;	
@@ -284,7 +284,7 @@ int nf::Panel::OpenSelectedItem(CPanel *pPanel, unsigned int ControlState, Panel
 	}
 	if (pi.SelectedItemsNumber != 0) {	 //avoid  ".."
 		if (! IsSelectedItemIsCatalog(pPanel, pi)) { //open selected directory in FAR
-			if (PKF_CONTROL != ControlState) {
+			if (LEFT_CTRL_PRESSED != ControlState) {
 				nf::Commands::OpenShortcut(pPanel->get_hPlugin(), GetSelectedShortcut(pPanel, pi, sh), tstring());
 				return TRUE;	//itsn't necessary to update active panel
 			} else {//на неактивной панели
