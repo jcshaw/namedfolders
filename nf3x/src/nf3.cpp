@@ -41,42 +41,43 @@ void WINAPI SetStartupInfoW(const struct PluginStartupInfo *pInfo) {
 void WINAPI GetPluginInfoW(struct PluginInfo *pInfo) {	
 	static nf::DiskMenuHelper menu_helper;
 
+	pInfo->StructSize = sizeof(*pInfo); 
+	pInfo->Flags = PF_FULLCMDLINE | PF_DIALOG;
+
 	pInfo->DiskMenu.Count = static_cast<int>(menu_helper.GetCountStrings());
 	pInfo->DiskMenu.Strings = menu_helper.GetStringsArray();
 	pInfo->DiskMenu.Guids = menu_helper.GetGuidsPtr();
 
 	static const wchar_t *PluginMenuStrings[1];
-	static const GUID *PluginMenuGuids[1];
 	PluginMenuStrings[0]= nf::GetMsg(lg::PLUGINMENUSTRING);
-	PluginMenuGuids[0] = &nf::NF_PLUGINSMENU_GUID;
 
 	pInfo->PluginMenu.Count = CSettings::GetInstance().GetValue(nf::ST_SHOW_IN_PLUGINS_MENU) ? 1 : 0;
 	pInfo->PluginMenu.Strings = PluginMenuStrings;
-	pInfo->PluginMenu.Guids = PluginMenuGuids[0];
+	pInfo->PluginMenu.Guids = &nf::NF_PLUGINSMENU_GUID;
 
 	static const wchar_t *PluginConfigStrings[1];
-	static const GUID *PluginConfigGuids[1];
 	PluginConfigStrings[0]= nf::GetMsg(lg::PLUGINSCONFIGSTRING);
-	PluginConfigGuids[0]= &nf::NF_CONFIGMENU_GUID;
 
 	pInfo->PluginConfig.Count = 1;
 	pInfo->PluginConfig.Strings = PluginConfigStrings;
+	pInfo->PluginConfig.Guids = &nf::NF_CONFIGMENU_GUID;
 
-	pInfo->StructSize = sizeof(*pInfo); 
-	pInfo->Flags = PF_FULLCMDLINE | PF_DIALOG;
-	
+
 	static std::wstring list_prefixes = CSettings::GetInstance().GetListPrefixes().c_str();
 	pInfo->CommandPrefix = list_prefixes.c_str();
 	return;
 }
 
-HANDLE WINAPI  OpenPluginW(int OpenFrom, INT_PTR Item) {
+HANDLE WINAPI  OpenW(const struct OpenInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(OpenInfo))) {
+		return 0;
+	}
 	try {
-		switch (OpenFrom) {
+		switch (pInfo->OpenFrom) {
 		case OPEN_COMMANDLINE: 
 			{
 #pragma warning(disable: 4312)
-				wchar_t const* pCmd = reinterpret_cast<wchar_t const*>(Item);
+				wchar_t const* pCmd = reinterpret_cast<OpenCommandLineInfo const*>(pInfo->Data)->CommandLine;
 #pragma warning(default: 4312)
 				return nf::OpenFromCommandLine(pCmd).first;
 			}
@@ -86,77 +87,101 @@ HANDLE WINAPI  OpenPluginW(int OpenFrom, INT_PTR Item) {
 			break;
 		case OPEN_RIGHTDISKMENU:
 		case OPEN_LEFTDISKMENU:
-			if (Item == 0) {
+			if (pInfo->Data == 0) {
 				return new nf::Panel::CPanel();
 			} else {
 				//we get "nf:catalogname"
 				//so, open "cd:catalogname/*"
 				nf::DiskMenuHelper menu_helper;
-				return nf::OpenFromCommandLine(menu_helper.GetCommand(static_cast<unsigned int>(Item)).c_str()).first;
+				return nf::OpenFromCommandLine(menu_helper.GetCommand(static_cast<unsigned int>(pInfo->Data)).c_str()).first;
 			}
 		break;
 		case OPEN_DIALOG:
-			nf::DialogsCompletion::OpenFromDialog(reinterpret_cast<OpenDlgPluginData*>(Item)->hDlg);
+			nf::DialogsCompletion::OpenFromDialog(reinterpret_cast<OpenDlgPluginData*>(pInfo->Data)->hDlg);
 			break;
 		}
 	} catch (...) {
 	}
 
-	return INVALID_HANDLE_VALUE;
+	return 0;
 }
 
-void WINAPI  GetOpenPluginInfoW(HANDLE hPlugin, OpenPanelInfo *info) {
+void WINAPI GetOpenPanelInfoW(struct OpenPanelInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(OpenPanelInfo))) {
+		return;
+	}
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
-		p->GetOpenPluginInfo(info);
+		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
+		p->GetOpenPanelInfo(pInfo);
 	} catch (...) {
 	}
 }
 
-int WINAPI  GetFindDataW(HANDLE hPlugin, struct PluginPanelItem **pPanelItem, int *pItemsNumber, int OpMode) {
+int WINAPI GetFindDataW(struct GetFindDataInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(GetFindDataInfo))) {
+		return FALSE;
+	}
+	if (pInfo->hPanel == INVALID_HANDLE_VALUE) {
+		return FALSE;
+	}
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
-		return p->GetFindData(pPanelItem, pItemsNumber, OpMode);
+		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
+		return p->GetFindData(pInfo);
 	} catch (...) {
 		return FALSE;
 	}
 }
 
-void WINAPI  FreeFindDataW(HANDLE hPlugin, struct PluginPanelItem *PanelItem, int ItemsNumber) {
+void WINAPI FreeFindDataW(const struct FreeFindDataInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(FreeFindDataInfo))) {
+		return;
+	}
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
-		p->FreeFindData(PanelItem, ItemsNumber);
+		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
+		p->FreeFindData(pInfo);
 	} catch (...) {
 	}
 }
 
-int WINAPI  SetDirectoryW(HANDLE hPlugin, const wchar_t *Dir, int OpMode) {
+int WINAPI SetDirectoryW(const struct SetDirectoryInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(SetDirectoryInfo))) {
+		return 0;
+	}
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
-		return p->SetDirectory(Dir, OpMode);
+		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
+		return p->SetDirectory(pInfo);
 	} catch (...) {
-		return FALSE;
+		return 0;
 	}
 }
 
-void WINAPI  ClosePluginW(HANDLE hPlugin) {
+void WINAPI ClosePanelW(const struct ClosePanelInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(ClosePanelInfo))) {
+		return;
+	}
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
+		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
 		delete p;
 	} catch (...) {
 	}
 }
 
 intptr_t WINAPI ProcessPanelInputW(const struct ProcessPanelInputInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(ProcessPanelInputInfo))) {
+		return 0;
+	}
 	try {
 		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
 		return p->ProcessPanelInputW(pInfo->Rec);
 	} catch (...) {
-		return FALSE;
+		return 0;
 	}
 }
 
-int WINAPI  ConfigureW(int ItemNumber) {
+int WINAPI ConfigureW(const struct ConfigureInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(ConfigureInfo))) {
+		return 0;
+	}
 	try {
 		nf::CConfigureDialog dlg;
 		return dlg.ShowModal();
@@ -165,39 +190,49 @@ int WINAPI  ConfigureW(int ItemNumber) {
 	}
 }
 
-
-int WINAPI  MakeDirectoryW(HANDLE hPlugin, wchar_t *Name, int OpMode) {
+int WINAPI MakeDirectoryW(struct MakeDirectoryInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(MakeDirectoryInfo))) {
+		return 0;
+	}
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
-		return p->MakeDirectory(Name, OpMode);
+		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
+		return p->MakeDirectory(pInfo);
 	} catch (...) {
 		return FALSE;
 	}
 }
 
-int WINAPI  PutFilesW(HANDLE hPlugin,struct PluginPanelItem *PanelItem,int ItemsNumber,int Move,const wchar_t *SrcPath, int OpMode) {
+int WINAPI PutFilesW(const struct PutFilesInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(PutFilesInfo))) {
+		return 0;
+	}
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
-		return p->PutFiles(PanelItem, ItemsNumber, Move, OpMode);
+		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
+		return p->PutFiles(pInfo);
 	} catch (...) {
 		return FALSE;
 	}
 }
 
-//!TODO: этой функции в API больше нет! ProcessPanelEventW  ???
-int WINAPI  ProcessEventW(HANDLE hPlugin, int Event, void *Param) {
+int WINAPI ProcessPanelEventW(const struct ProcessPanelEventInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(ProcessPanelEventInfo))) {
+		return 0;
+	}
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(hPlugin);
-		return p->ProcessEvent(Event, Param);
+		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
+		return p->ProcessEvent(pInfo);
 	} catch (...) {
 		return FALSE;
 	}
 }
 
-int WINAPI  ProcessDialogEventW(int Event, void *param) {
+int WINAPI ProcessDialogEventW(const struct ProcessDialogEventInfo *pInfo) {
+	if (! (pInfo->StructSize >= sizeof(ProcessDialogEventInfo))) {
+		return 0;
+	}
 	try {
-		if (Event == DE_DEFDLGPROCINIT) {
-			FarDialogEvent *pevent = reinterpret_cast<FarDialogEvent*>(param);
+		if (pInfo->Event == DE_DEFDLGPROCINIT) {
+			FarDialogEvent *pevent = reinterpret_cast<FarDialogEvent*>(pInfo->Param);
 			if (pevent->Msg == DN_CONTROLINPUT) {
 				const INPUT_RECORD* record = (const INPUT_RECORD *)pevent->Param2;
 				if (record->EventType == KEY_EVENT && record->Event.KeyEvent.bKeyDown) {

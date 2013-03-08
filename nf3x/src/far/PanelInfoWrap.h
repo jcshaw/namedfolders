@@ -25,8 +25,11 @@ public:
 			, FCTL_GETPANELDIRECTORY
 			, buffer_size
 			, reinterpret_cast<void*>(&buffer[0])
-		)) return L"";
-		return reinterpret_cast<FarPanelDirectory*>(&buffer[0])->File;
+		)) {
+			return L"";
+		}
+		FarPanelDirectory* pfpd = reinterpret_cast<FarPanelDirectory*>(&buffer[0]);
+		return pfpd->Name;
 	}
 
 	tstring GetPanelActiveFileName(bool bActivePanel) {

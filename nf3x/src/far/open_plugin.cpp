@@ -121,7 +121,7 @@ std::pair<HANDLE, bool> nf::OpenFromCommandLine(wchar_t const* pSrcCmd) {
 			break;
 		}
 	default:
-		return std::make_pair(INVALID_HANDLE_VALUE, nf::ExecuteCommand(cmd, false));
+		return std::make_pair(nullptr, nf::ExecuteCommand(cmd, false));
 	};
-	return std::make_pair(INVALID_HANDLE_VALUE, false);
+	return std::make_pair(nullptr, false);
 } //OpenFromCommandLine

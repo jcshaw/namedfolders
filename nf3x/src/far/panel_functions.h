@@ -38,10 +38,13 @@ namespace nf {
 		nf::tshortcut_info& GetSelectedShortcut(CPanel* pPanel, PanelInfo const &pi, nf::tshortcut_info& sh, int nSelectedItem = 0);
 
 		inline PluginPanelItem* allocate_PluginPanelItem(HANDLE hPlugin, FILE_CONTROL_COMMANDS Command, int nSelectedItem) {
-			PluginPanelItem* ppi = reinterpret_cast<PluginPanelItem*>(malloc(g_PluginInfo.PanelControl(hPlugin, Command, nSelectedItem, nullptr)));
+			FarGetPluginPanelItem fgpp;
+			fgpp.Size = g_PluginInfo.PanelControl(hPlugin, Command, nSelectedItem, nullptr);
+			fgpp.StructSize = sizeof(FarGetPluginPanelItem);
+			fgpp.Item = reinterpret_cast<PluginPanelItem*>(malloc(fgpp.Size));
 
-			g_PluginInfo.PanelControl(hPlugin, Command, nSelectedItem, reinterpret_cast<void*>(ppi));
-			return ppi;
+			g_PluginInfo.PanelControl(hPlugin, Command, nSelectedItem, reinterpret_cast<void*>(&fgpp));
+			return fgpp.Item;
 		}
 		inline PluginPanelItem* allocate_PluginPanelItem(CPanel const* pSrcPanel, FILE_CONTROL_COMMANDS Command, int nSelectedItem) {
 			HANDLE hplugin = static_cast<HANDLE>(const_cast<CPanel*>(pSrcPanel));

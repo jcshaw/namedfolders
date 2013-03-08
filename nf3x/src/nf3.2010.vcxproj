@@ -65,7 +65,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../bin2010_f3/$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files %28x86%29\Far Manager\Plugins\NamedFolders\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../bin2010_f3/$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../bin2010_f3/$(Platform)\$(Configuration)\</OutDir>
@@ -99,6 +99,8 @@
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\libs\boost\lib;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\libs\boost\lib64;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\libs\boost\lib64;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSdkDir)lib\x64;</LibraryPath>
+    <PostBuildEventUseInBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PostBuildEventUseInBuild>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NamedFolders</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -125,12 +127,13 @@
       </DataExecutionPrevention>
       <ImportLibrary>$(OutDir)nf3.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <OutputFile>C:\Program Files (x86)\Far Manager\Plugins\NamedFolders\NamedFolders.dll </OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll"</Command>
+      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files (x86)\Far Manager\Plugins\NamedFolders\NamedFolders.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll"</Message>
+      <Message>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\FarManager\Plugins\NamedFolders\NamedFolders.dll"</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

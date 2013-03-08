@@ -59,9 +59,13 @@ namespace nf {
 			}
 			_ArrayNames = new wchar_t const*[1 + _Catalogs.size()];
 			_ArrayNames[0] = nf::GetMsg(lg::DISKMENUSTRING);	
+
+			_ArrayGuids = new GUID const*[1 + _Catalogs.size()];
+			_ArrayGuids[0] = &nf::NF_DISKMENU_GUID;
 			for (unsigned int i = 0; i < _Catalogs.size(); ++i) {
 				tautobuffer_char& b = *_Catalogs[i].get();
 				_ArrayNames[1 + i] = &b[0];
+				_ArrayGuids[0] = nullptr; //!TODO
 			}
 		}
 		bool show_main_string() {
