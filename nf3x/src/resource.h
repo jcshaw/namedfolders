@@ -1,6 +1,7 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by nf2x.rc
+// Used by nf3.rc
+//
 
 // Next default values for new objects
 // 
