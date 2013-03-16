@@ -18,15 +18,20 @@
 #include "Registry.h"
 #include "strings_utils.h"
 #include "PanelInfoWrap.h"
+#include "PluginSettings.h"
 
-nf::sc::CCatalog::CCatalog() 
-: m_key(HKEY_CURRENT_USER, get_far_reg_key()) 
-{
+extern struct PluginStartupInfo g_PluginInfo; 
+
+nf::sc::CCatalog::CCatalog() {
+
 }
 
-//конструктор для каталога вложенного в текущий
-nf::sc::CCatalog::CCatalog(tstring SubCatalog, CCatalog const *pParent, bool bCreateIfNotExists) {
-	m_CatalogPath = get_combined_path(SubCatalog.c_str(), pParent);
+nf::sc::CCatalog::~CCatalog() {
+	
+}
+
+nf::sc::CCatalog::CCatalog(tstring subCatalog, CCatalog const *pParent, bool bCreateIfNotExists) {
+	m_CatalogPath = get_combined_path(subCatalog.c_str(), pParent);
 	tstring regkey = GetCatalogRegkey();
 	if (bCreateIfNotExists) {
 		nf::CRegistry(HKEY_CURRENT_USER, regkey.c_str());

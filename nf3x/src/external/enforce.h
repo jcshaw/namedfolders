@@ -14,7 +14,7 @@ ENFORCE(pWidget)("Widget number ")(n)(" is null and it shouldn't!");
 
 По сравнению со стандартным кодом, внесены изменения:
 
-* char заменен на TCHAR
+* char заменен на wchar_t
 + макрос COM_ENFORCE
 + namespace'ы
 + ComChecker 
@@ -29,15 +29,16 @@ ENFORCE(pWidget)("Widget number ")(n)(" is null and it shouldn't!");
 #include <string>
 #include <sstream>
 #include <stdexcept>
-#include <tchar.h>
+
+#define _ENFORCER_WIDEN2(x) L ## x
+#define _ENFORCER_WIDEN(x) _ENFORCER_WIDEN2(x)
 
 namespace Ext
 {
 
 	namespace Private
 	{
-		struct DefaultPredicate
-		{
+		struct DefaultPredicate {
 			template <class T>
 			static bool Wrong(const T& obj)
 			{
@@ -45,31 +46,17 @@ namespace Ext
 			}
 		};
 		
-		struct ComChecker
-		{
-			static bool Wrong(const HRESULT& hr)
-			{
-				return FAILED(hr);
-			}
-		};
-
-		struct DefaultRaiser
-		{
+		struct DefaultRaiser {
 			template <class T>
-			static void Throw(const T&, const std::basic_string<TCHAR>& message, const TCHAR* locus)
-			{
-		#ifndef UNICODE
-				throw std::runtime_error(message + _T('\n') + locus);
-		#else
-				throw std::runtime_error(static_cast<char const*>(_bstr_t((message + _T('\n') + locus).c_str())));
-		#endif
+			static void Throw(const T&, const std::basic_string<wchar_t>& message, const wchar_t* locus) {
+				throw std::runtime_error(message + std::basic_string<char_t>('\n') + locus);
 			}
 		};
 	}
 
 	namespace Shims {
 		template<class T> inline
-		std::basic_stringstream<TCHAR>& place_message_to_stream(std::basic_stringstream<TCHAR> &Stream, T const& Value) 
+		std::basic_stringstream<wchar_t>& place_message_to_stream(std::basic_stringstream<wchar_t> &Stream, T const& Value) 
 		{
 			Stream << Value;
 			return Stream;
@@ -77,7 +64,7 @@ namespace Ext
 	//если необходимо значения определенного типа выводить в stream как-то хитро
 	//необходиомо где-то в проекте объявлить специализацию
 	//template<> inline
-	//std::basic_stringstream<TCHAR> Ext::Shims::place_message_to_stream(std::basic_stringstream<TCHAR> &Stream, MyType Value)
+	//std::basic_stringstream<wchar_t> Ext::Shims::place_message_to_stream(std::basic_stringstream<wchar_t> &Stream, MyType Value)
 	//{ //!TODO };
 	}
 
@@ -85,10 +72,10 @@ template<typename Ref, typename P, typename R>
 class Enforcer
 {
 public:
-    Enforcer(Ref t, const TCHAR* locus) 
+    Enforcer(Ref t, const wchar_t* locus) 
 		: t_(t)
 		, locus_(locus)
-		, pmsg_(P::Wrong(t) ? new std::basic_stringstream<TCHAR>() : 0)
+		, pmsg_(P::Wrong(t) ? new std::basic_stringstream<wchar_t>() : 0)
     {
     }
 	Enforcer(Enforcer<Ref, P, R> const& S) 
@@ -122,24 +109,24 @@ public:
 
 private:
     Ref t_;
-	mutable std::basic_stringstream<TCHAR>* pmsg_;
-    TCHAR const* const locus_;
+	mutable std::basic_stringstream<wchar_t>* pmsg_;
+    wchar_t const* const locus_;
 };
 
 template <class P, class R, typename T>
-inline Enforcer<const T&, P, R> MakeEnforcer(const T& t, const TCHAR* locus)
+inline Enforcer<const T&, P, R> MakeEnforcer(const T& t, const wchar_t* locus)
 {
     return Enforcer<const T&, P, R>(t, locus);
 }
 
 template <class P, class R, typename T>
-inline Enforcer<T&, P, R> MakeEnforcer(T& t, const TCHAR* locus)
+inline Enforcer<T&, P, R> MakeEnforcer(T& t, const wchar_t* locus)
 {
     return Enforcer<T&, P, R>(t, locus);
 }
 
 template <class P, class R, typename T>
-inline Enforcer<const T&, P, R> MakeEnforcerAndPrintExpression(const T& t, const TCHAR* locus)
+inline Enforcer<const T&, P, R> MakeEnforcerAndPrintExpression(const T& t, const wchar_t* locus)
 {
 	Enforcer<const T&, P, R> e(t, locus);
 	e(t)(_T("\n"));
@@ -147,7 +134,7 @@ inline Enforcer<const T&, P, R> MakeEnforcerAndPrintExpression(const T& t, const
 }
 
 template <class P, class R, typename T>
-inline Enforcer<T&, P, R> MakeEnforcerAndPrintExpression(T& t, const TCHAR* locus)
+inline Enforcer<T&, P, R> MakeEnforcerAndPrintExpression(T& t, const wchar_t* locus)
 {
 	Enforcer<T&, P, R> e(t, locus);
 	e(t)(_T("\n"));
