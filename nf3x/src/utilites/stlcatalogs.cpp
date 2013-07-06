@@ -22,7 +22,9 @@
 
 extern struct PluginStartupInfo g_PluginInfo; 
 
-nf::sc::CCatalog::CCatalog() {
+nf::sc::CCatalog::CCatalog() 
+: _Key(0)
+{
 
 }
 
@@ -30,26 +32,19 @@ nf::sc::CCatalog::~CCatalog() {
 	
 }
 
-nf::sc::CCatalog::CCatalog(tstring subCatalog, CCatalog const *pParent, bool bCreateIfNotExists) {
+nf::sc::CCatalog::CCatalog(tstring const& subCatalog, CCatalog const *pParent, bool bCreateIfNotExists) {
 	m_CatalogPath = get_combined_path(subCatalog.c_str(), pParent);
-	tstring regkey = GetCatalogRegkey();
-	if (bCreateIfNotExists) {
-		nf::CRegistry(HKEY_CURRENT_USER, regkey.c_str());
+	_Key = PluginSettings::FarOpenKey(pParent == nullptr ? 0 : pParent->get_key_handle(), subCatalog);
+	if (PluginSettings::isInvalidHandle(_Key) && bCreateIfNotExists) {
+		_Key = PluginSettings::FarCreateKey(pParent == nullptr ? 0 : pParent->get_key_handle(), subCatalog);
 	}
-	m_key = basic_class(HKEY_CURRENT_USER, regkey, KEY_ALL_ACCESS);		
 }
 
 //копирующий конструктор
 nf::sc::CCatalog::CCatalog(CCatalog const &catalog) 
-: m_key(catalog.m_key)
+: _Key(catalog._Key)
 , m_CatalogPath(catalog.m_CatalogPath) 
 {
-}
-
-//конструктор для создания обертки вокруг итератора последовательности каталогов
-nf::sc::CCatalog::CCatalog(sc::catalogs_sequence_item &c, CCatalog const *pParent) {
-	m_CatalogPath = get_combined_path(c.GetName().c_str(), pParent);
-	m_key = basic_class(HKEY_CURRENT_USER, GetCatalogRegkey(), KEY_ALL_ACCESS);		
 }
 
 tstring nf::sc::CCatalog::get_catalog_regkey(tstring key) const {
@@ -81,7 +76,7 @@ bool nf::sc::CCatalog::IsSubcatalogExist(tstring const& subCatalog) {
 }
 
 bool nf::sc::CCatalog::InsertSubcatalog(tstring const& name) {
-	nf::CRegistry newkey(m_key.get_key_handle(), GetKeyName(REG_SUB_CATALOGS));
+	nf::CRegistry newkey(_Key, GetKeyName(REG_SUB_CATALOGS));
 	nf::CRegistry hkey(newkey, name.c_str());
 	return true;
 }
@@ -90,7 +85,7 @@ bool nf::sc::CCatalog::DeleteSubcatalog(tstring const& Name) {
 	tstring name = Name;
 	if (*name.begin() == SLASH_CATS_CHAR) name.erase(name.begin());
 
-	nf::CRegistry r(m_key.get_key_handle(), GetKeyName(REG_SUB_CATALOGS), true, false);
+	nf::CRegistry r(_Key.get_key_handle(), GetKeyName(REG_SUB_CATALOGS), true, false);
 	return ERROR_SUCCESS == ::RegDeleteKey(r, name.c_str());
 }
 
@@ -118,21 +113,21 @@ wchar_t const* nf::sc::CCatalog::GetKeyName(tregs_enum Index) {
 };
 
 bool nf::sc::CCatalog::set_key(tregs_enum regKey, tstring const& srcName, tstring const& srcValue) {
-	nf::CRegistry r(m_key.get_key_handle(), GetKeyName(regKey));
+	nf::CRegistry r(_Key.get_key_handle(), GetKeyName(regKey));
 	r.SetValue(srcName.c_str(), srcValue.c_str());
 	return true;
 }
 
 bool nf::sc::CCatalog::delete_key(tregs_enum regKey, tstring const& srcName) {
-	basic_class key(m_key.get_key_handle(), GetKeyName(regKey), KEY_ALL_ACCESS);
+	basic_class key(_Key.get_key_handle(), GetKeyName(regKey), KEY_ALL_ACCESS);
 	return ERROR_SUCCESS == ::RegDeleteValue(key.get_key_handle(), srcName.c_str());
 }
 
 bool nf::sc::CCatalog::get_key_value(tregs_enum regKey, tstring const& srcName, tstring& destValue) {
 	tstring subkey = GetKeyName(regKey);
-	if (! nf::Registry::IsSubkeyExist(m_key.get_key_handle(), subkey.c_str())) return false;
+	if (! nf::Registry::IsSubkeyExist(_Key.get_key_handle(), subkey.c_str())) return false;
 
-	basic_class key(m_key.get_key_handle(), subkey.c_str(), KEY_ALL_ACCESS);
+	basic_class key(_Key.get_key_handle(), subkey.c_str(), KEY_ALL_ACCESS);
 	DWORD size = 256;
 	DWORD type;
 	DWORD ErrorCode;

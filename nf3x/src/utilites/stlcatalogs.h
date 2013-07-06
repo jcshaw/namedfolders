@@ -5,11 +5,13 @@
 * e-mail: dvpublic0@gmail.com
 */
 #pragma once
+#include "main/header.h"
 #include "Kernel.h"
 #include "strings_utils.h"
 #include "settings.h"
 #include "registry_functions.h"
 #include <boost/shared_ptr.hpp>
+#include "CatalogSequences.h"
 
 namespace nf {
 namespace sc {
@@ -27,7 +29,7 @@ class CCatalog {
 public:
 	CCatalog(); //default - root NF-catalog
 	CCatalog(CCatalog const &catalog); 
-	CCatalog(tstring subCatalog, CCatalog const *pParent = 0, bool bCreateIfNotExists = true); //constructor for subcatalog of catalog
+	CCatalog(tstring const& subCatalog, CCatalog const *pParent = 0, bool bCreateIfNotExists = true); //constructor for subcatalog of catalog
 	~CCatalog();
 public:
 	inline tstring const& CatalogPath() const {//путь к каталогу относительно корневого каталога	
@@ -37,20 +39,22 @@ public:
 		return get_catalog_regkey(m_CatalogPath); 
 	}
 	inline size_t GetNumberSubcatalogs() const {
-		return get_number_keys<WinSTL::reg_key_sequence_t>(GetKeyName(REG_SUB_CATALOGS)); 
+		return get_sequence<tstring>(GetKeyName(REG_SUB_CATALOGS))->getItems().size();			
 	}
 	inline size_t GetNumberShortcuts() const {
-		return get_number_keys<WinSTL::reg_value_sequence_t>(GetKeyName(REG_STATIC_KEYS)); 
+		return get_sequence<tstring>(GetKeyName(REG_STATIC_KEYS))->getItems().size(); 
+	}
+	PluginSettings::tkey_handle get_key_handle() const {
+		return _Key;
 	}
 public:	
-	inline basic_class GetSequenceShortcuts(bool bTemporary) {
-		return get_sequence(GetKeyName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS)); 
+	//TODO: c11: use unique_ptr instead of shared ptr
+	inline boost::shared_ptr<nf::SequenceShortcuts> GetSequenceShortcuts(bool bTemporary) {
+		return get_sequence<nf::shortcuts_sequence_item>(GetKeyName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS)); 
 	}
-	inline basic_class GetSequenceSubcatalogs() {
-		return get_sequence(GetKeyName(REG_SUB_CATALOGS)); 
-	}
-	inline basic_class GetSequenceProperties() {
-		return get_sequence(GetKeyName(REG_PROPERTIES)); 
+	//TODO: c11: use unique_ptr instead of shared ptr
+	inline boost::shared_ptr<nf::SequenceItems> GetSequenceSubcatalogs() {
+		return get_sequence<nf::catalogs_sequence_item>(GetKeyName(REG_SUB_CATALOGS)); 
 	}
 public: 
 	bool IsSubcatalogExist(tstring const& subCatalog);
@@ -65,6 +69,7 @@ public:
 	}
 	bool GetShortcutInfo(tstring const& Name, bool bTemporary, tstring &Value);
 
+public:
 	bool SetProperty(tstring const& propertyName, tstring const& propertyValue) {
 		return set_key(REG_PROPERTIES, propertyName, propertyValue); 
 	}
@@ -75,16 +80,13 @@ public:
 		return get_key_value(REG_PROPERTIES, propertyName, destValue);
 	}
 private: 
-	inline basic_class get_sequence(wchar_t const* subkey) { 
-		return m_key.has_sub_key(subkey)
-			? basic_class(m_key.get_key_handle(), subkey)
-			: m_key.create_sub_key(subkey);
-	}
 	template<class T>
-	inline size_t get_number_keys(wchar_t const* skey) const {
-		if (! nf::Registry::IsSubkeyExist(m_key.get_key_handle(), skey)) return 0;
-		WinSTL::reg_key_t c(m_key.get_key_handle(), skey);
-		return T(c).size();
+	inline boost::shared_ptr<nf::SequenceSettings<T>> get_sequence(wchar_t const* subkey) const { 
+		auto sk = PluginSettings::FarOpenKey(_Key, subkey);
+		if (sk == 0) {
+			sk = PluginSettings::FarCreateKey(_Key, subkey);
+		} 
+		return boost::shared_ptr<nf::SequenceSettings<T>>(new nf::SequenceSettings<T>(sk));
 	}
 	tstring get_combined_path(wchar_t const* catalog, CCatalog const *parent = 0); //получить полный путь к каталогу относительно корневого пути
 	tstring get_catalog_regkey(tstring catalogName) const;
@@ -98,6 +100,7 @@ private:
 private: //members
 	boost::shared_ptr<FarSettingsItem> _pFSI;
 	tstring m_CatalogPath;
+	PluginSettings::tsettings_handle _Key;
 };
 } //sc
 } //nf

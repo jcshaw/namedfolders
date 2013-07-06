@@ -46,7 +46,7 @@ UINT DialogEditPattern::ShowModal() {
 
 			//префикс всегда должен заканчиваться двоеточием
 			//если пользователь забыл его указать - доставляем : автоматически
-			if (m_Prefix[m_Prefix.size()-1] != _T(':')) m_Prefix += L":";
+			if (m_Prefix[m_Prefix.size()-1] != L':') m_Prefix += L":";
 			return 1;
 		}
 

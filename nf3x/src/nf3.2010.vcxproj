@@ -314,7 +314,9 @@
   <ItemGroup>
     <ClInclude Include="far3\far_utils2.h" />
     <ClInclude Include="far3\panel_types.h" />
+    <ClInclude Include="far\CatalogSequences.h" />
     <ClInclude Include="far\confirmations.h" />
+    <ClInclude Include="far\EnumSettings.h" />
     <ClInclude Include="far\farcolor.hpp" />
     <ClInclude Include="far\far_impl.h" />
     <ClInclude Include="far\far_utils.h" />

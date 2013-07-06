@@ -129,3 +129,8 @@ __int64 nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, _
 		: 0;
 }
 
+bool nf::PluginSettings::FarEnum(tkey_handle keyHandle, FarSettingsEnum& fse) {
+	fse.StructSize = sizeof(FarSettingsEnum);
+	return g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_ENUM, 0, &fse);
+}	
+

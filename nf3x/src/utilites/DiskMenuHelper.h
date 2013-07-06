@@ -73,10 +73,10 @@ namespace nf {
 		}
 		void load_list_nf_catalogs() {
 			nf::sc::CCatalog c;
-			nf::sc::subcatalogs_sequence seq(c.GetSequenceSubcatalogs());
-			_Catalogs.reserve(seq.size());
-			BOOST_FOREACH(sc::catalogs_sequence_item const& csi, seq) {
-				tstring name = csi.GetName();
+			auto seq = c.GetSequenceSubcatalogs();
+			_Catalogs.reserve(seq->getItems().size());
+			BOOST_FOREACH(auto const& csi, seq->getItems()) {
+				auto name = nf::get_catalog_item_name(csi);
 				if (name != L".." && name != L".") {					
 					nf::sc::CCatalog subcatalog(name, &c);
 					tstring dest;

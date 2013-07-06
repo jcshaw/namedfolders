@@ -224,6 +224,4 @@ namespace nf {
 	extern const GUID NF_DIALOG_MOVE;
 
 	extern const GUID NF_MESSAGE_SAFE_PANEL_STATE;
-
-
 }

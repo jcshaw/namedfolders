@@ -21,6 +21,8 @@
 #include "Parser.h"
 #include "catalog_names.h"
 
+#include "far/CatalogSequences.h"
+
 using namespace nf;
 using namespace Panel;
 namespace {
@@ -398,23 +400,23 @@ void CPanel::read_list_panelitems(DWORD flags) {
 	sc::CCatalog c(m_CurrentCatalog);
 	if (flags & FG_CATALOGS) { //load list of NF-catalogs
 		m_ListCatalogs.clear();
-		sc::subcatalogs_sequence cseq(c.GetSequenceSubcatalogs());
-		m_ListCatalogs.reserve(cseq.size());
-		BOOST_FOREACH(sc::catalogs_sequence_item const& csi, cseq) {
-			m_ListCatalogs.push_back(csi.GetName());
+		auto cseq = c.GetSequenceSubcatalogs();
+		m_ListCatalogs.reserve(cseq->getItems().size());
+		BOOST_FOREACH(auto const& csi, cseq->getItems()) {
+			m_ListCatalogs.push_back(nf::get_catalog_item_name(csi));
 		}
 	}
 	if (flags & FG_SHORTCUTS) { //load list of temporal and not-temporal shortcuts
 		m_ListShortcuts.clear();
-		sc::shortcuts_sequence seq_shtemp(c.GetSequenceShortcuts(true));
-		sc::shortcuts_sequence seq_sh(c.GetSequenceShortcuts(false));
-		//m_ListShortcuts.reserve(seq_shtemp.size() + seq_sh.size());
-		BOOST_FOREACH(sc::shortcuts_sequence_item si, seq_shtemp) { //temporal shortcuts
-			m_ListShortcuts.push_back(std::make_pair(si.GetName(), si.GetValue()));
+		auto seq_shtemp = c.GetSequenceShortcuts(true);
+		auto seq_sh = c.GetSequenceShortcuts(false);
+		
+		BOOST_FOREACH(auto const& si, seq_shtemp->getItems()) { //temporal shortcuts
+			m_ListShortcuts.push_back(std::make_pair(nf::get_ssi_name(si), nf::get_ssi_value(si)));
 		}
-		m_NumberTemporaryShortcuts = static_cast<int>(seq_shtemp.size());
-		BOOST_FOREACH(sc::shortcuts_sequence_item const& si, seq_sh) { //not-temporal shortcuts
-			m_ListShortcuts.push_back(std::make_pair(si.GetName(), si.GetValue()));
+		m_NumberTemporaryShortcuts = static_cast<int>(seq_shtemp->getItems().size());
+		BOOST_FOREACH(auto const& si, seq_sh->getItems()) { //not-temporal shortcuts
+			m_ListShortcuts.push_back(std::make_pair(nf::get_ssi_name(si), nf::get_ssi_value(si)));
 		}
 	}
 }

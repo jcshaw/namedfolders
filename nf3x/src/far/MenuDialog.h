@@ -39,7 +39,7 @@ namespace Menu {
 			typedef tstring R;
 			typedef tenv_info V;		
 			inline static V Encode(R const& SrcValue) {	
-				return static_cast<tenv_info>(Utils::DivideString(SrcValue, _T('%'))); }
+				return static_cast<tenv_info>(Utils::DivideString(SrcValue, L'%')); }
 			inline static R Decode(V const& SrcValue) { 
 				return Utils::CombinePath(SrcValue.first, SrcValue.second, L"%");	} //!TODO
 		};

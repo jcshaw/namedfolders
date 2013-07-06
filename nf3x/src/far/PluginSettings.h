@@ -24,8 +24,11 @@ namespace nf {
 		static __int64 FarGet(tkey_handle keyHandle, tstring const& name, __int64 defaultValue);
 
 	public:
-		static void FarEnum(tkey_handle keyHandle, tstring const& name); //!TODO
+		static bool FarEnum(tkey_handle keyHandle, FarSettingsEnum& dest);
 
+		static bool isInvalidHandle(tsettings_handle const& h) {
+			return h == 0;
+		}
 
 	private:
 		tsettings_handle const _Handle;
