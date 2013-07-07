@@ -80,25 +80,27 @@ bool nf::Shell::InsertCatalog(tstring const& srcCatalog, tstring const& subCatal
 /// удалить каталог и все вложенные в него каталоги и псевдонимы
 bool nf::Shell::Private::remove_catalog(tstring const& srcCatalog, tstring const* pTargetCatalog, bool bDeleteSource) {
 	nf::registry_remover rr;
+	assert(false); //!TODO: перейти от реестра к настройкам
+	return false;
 
-	tstring src_key = sc::CCatalog(srcCatalog).GetCatalogRegkey();
-	if (! pTargetCatalog) {
-		return rr.Erase(src_key);
-	}
-
-	tstring target_catalog;
-	if (! Utils::ExpandCatalogPath(srcCatalog, *pTargetCatalog, target_catalog, false)) {
-		return false;
-	}
-
-	tstring target_key = sc::CCatalog(target_catalog).GetCatalogRegkey();
-	if (target_key == srcCatalog) {
-		return true; //nothing to do
-	}
-
-	return bDeleteSource
-		? rr.Move(src_key, target_key)
-		: rr.Copy(src_key, target_key);
+// 	tstring src_key = sc::CCatalog(srcCatalog).GetCatalogRegkey();
+// 	if (! pTargetCatalog) {
+// 		return rr.Erase(src_key);
+// 	}
+// 
+// 	tstring target_catalog;
+// 	if (! Utils::ExpandCatalogPath(srcCatalog, *pTargetCatalog, target_catalog, false)) {
+// 		return false;
+// 	}
+// 
+// 	tstring target_key = sc::CCatalog(target_catalog).GetCatalogRegkey();
+// 	if (target_key == srcCatalog) {
+// 		return true; //nothing to do
+// 	}
+// 
+// 	return bDeleteSource
+// 		? rr.Move(src_key, target_key)
+// 		: rr.Copy(src_key, target_key);
 }
 
 bool nf::Shell::GetShortcutValue(tshortcut_info const& sh, tstring& value) {

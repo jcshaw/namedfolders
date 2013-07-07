@@ -23,7 +23,6 @@ class CCatalog {
 	typedef enum tregs_enum	{REG_STATIC_KEYS
 		, REG_TEMP_KEYS
 		, REG_SUB_CATALOGS
-		, REG_B_SUB_CATALOGS_B
 		, REG_PROPERTIES
 	};
 public:
@@ -32,12 +31,8 @@ public:
 	CCatalog(tstring const& subCatalog, CCatalog const *pParent = 0, bool bCreateIfNotExists = true); //constructor for subcatalog of catalog
 	~CCatalog();
 public:
-	inline tstring const& CatalogPath() const {//путь к каталогу относительно корневого каталога	
-		return m_CatalogPath; 
-	}
-	inline tstring GetCatalogRegkey() const {
-		return get_catalog_regkey(m_CatalogPath); 
-	}
+	/// @return full path to catalog, i.e. "a/b/c"
+	tstring getCatalogPath() const;
 	inline size_t GetNumberSubcatalogs() const {
 		return get_sequence<tstring>(GetKeyName(REG_SUB_CATALOGS))->getItems().size();			
 	}
@@ -62,22 +57,22 @@ public:
 	bool DeleteSubcatalog(tstring const& Name);
 
 	bool SetShortcut(tstring const& Name, tstring const& Value, bool bTemporary) {
-		return set_key((bTemporary) ? REG_TEMP_KEYS : REG_STATIC_KEYS, Name, Value); 
+		return set_value((bTemporary) ? REG_TEMP_KEYS : REG_STATIC_KEYS, Name, Value); 
 	}
 	bool DeleteShortcut(tstring const& Name, bool bTemporary) {
-		return delete_key((bTemporary) ? REG_TEMP_KEYS : REG_STATIC_KEYS, Name); 
+		return delete_value((bTemporary) ? REG_TEMP_KEYS : REG_STATIC_KEYS, Name); 
 	}
 	bool GetShortcutInfo(tstring const& Name, bool bTemporary, tstring &Value);
 
 public:
 	bool SetProperty(tstring const& propertyName, tstring const& propertyValue) {
-		return set_key(REG_PROPERTIES, propertyName, propertyValue); 
+		return set_value(REG_PROPERTIES, propertyName, propertyValue); 
 	}
 	bool DeleteProperty(tstring const& propertyName) {
-		return delete_key(REG_PROPERTIES, propertyName); 
+		return delete_value(REG_PROPERTIES, propertyName); 
 	}
 	bool GetProperty(tstring const& propertyName, tstring& destValue) {
-		return get_key_value(REG_PROPERTIES, propertyName, destValue);
+		return get_value(REG_PROPERTIES, propertyName, destValue);
 	}
 private: 
 	template<class T>
@@ -88,18 +83,19 @@ private:
 		} 
 		return boost::shared_ptr<nf::SequenceSettings<T>>(new nf::SequenceSettings<T>(sk));
 	}
-	tstring get_combined_path(wchar_t const* catalog, CCatalog const *parent = 0); //получить полный путь к каталогу относительно корневого пути
-	tstring get_catalog_regkey(tstring catalogName) const;
-	inline static tstring const& get_far_reg_key() { 
-		return nf::CSettings::GetInstance().get_NamedFolders_reg_key();
-	}
+	std::list<tstring> get_combined_path(tstring const& catalog, CCatalog const *parent = 0); //получить полный путь к каталогу относительно корневого пути
+
 	static wchar_t const* GetKeyName(tregs_enum Index);
-	bool set_key(tregs_enum regKey, tstring const& srcName, tstring const& srcValue);
-	bool delete_key(tregs_enum regKey, tstring const& srcName);
-	bool get_key_value(tregs_enum regKey, tstring const& srcName, tstring& destValue);
+	bool set_value(tregs_enum regKey, tstring const& srcName, tstring const& srcValue);
+	bool delete_value(tregs_enum regKey, tstring const& srcName);
+	bool get_value(tregs_enum regKey, tstring const& srcName, tstring& destValue);
+	/// a/b/c -> keys/a/keys/b/keys/c
+	std::list<tstring> path2list(tstring const& path);
 private: //members
 	boost::shared_ptr<FarSettingsItem> _pFSI;
-	tstring m_CatalogPath;
+
+	/// contains "a", "b", "c" for catalog "a/b/c"
+	std::list<tstring> _CatalogPath;
 	PluginSettings::tsettings_handle _Key;
 };
 } //sc

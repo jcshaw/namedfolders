@@ -33,7 +33,7 @@ nf::sc::CCatalog::~CCatalog() {
 }
 
 nf::sc::CCatalog::CCatalog(tstring const& subCatalog, CCatalog const *pParent, bool bCreateIfNotExists) {
-	m_CatalogPath = get_combined_path(subCatalog.c_str(), pParent);
+	_CatalogPath = get_combined_path(subCatalog, pParent);
 	_Key = PluginSettings::FarOpenKey(pParent == nullptr ? 0 : pParent->get_key_handle(), subCatalog);
 	if (PluginSettings::isInvalidHandle(_Key) && bCreateIfNotExists) {
 		_Key = PluginSettings::FarCreateKey(pParent == nullptr ? 0 : pParent->get_key_handle(), subCatalog);
@@ -43,50 +43,26 @@ nf::sc::CCatalog::CCatalog(tstring const& subCatalog, CCatalog const *pParent, b
 //копирующий конструктор
 nf::sc::CCatalog::CCatalog(CCatalog const &catalog) 
 : _Key(catalog._Key)
-, m_CatalogPath(catalog.m_CatalogPath) 
+, _CatalogPath(catalog._CatalogPath) 
 {
 }
 
-tstring nf::sc::CCatalog::get_catalog_regkey(tstring key) const {
-	//получить ключ реестра соответствующий каталогу
-	//алгоритм: если каталог равер "/" или пустой то в качестве ключа принимаем ключ реестра плагина
-	//иначе: (добавляем (если его нет) первым символом "/"), заменяем все "/" на "catalogs\", затем добавляем к ключу реестра плагина
-	if ((key != SLASH_CATS) && (! key.empty())) {
-		if (key[0] != SLASH_CATS_CHAR) key = SLASH_CATS_CHAR + key;
-
-		//заменяем "/" на "catalogs\"
-		key = Utils::ReplaceStringAll(key, SLASH_CATS, GetKeyName(REG_B_SUB_CATALOGS_B));
-
-		if (key.size() > 1 && *key.begin() == SLASH_DIRS_CHAR) key.erase(key.begin());	//удаляем первый /
-		return Utils::CombinePath(get_far_reg_key(), key, SLASH_DIRS);
-	}
-	return get_far_reg_key();
-}
-
 bool nf::sc::CCatalog::IsSubcatalogExist(tstring const& subCatalog) {
-	tstring catalog_path = get_combined_path(subCatalog.c_str(), this);
-	tstring regkey = get_catalog_regkey(catalog_path);
-
-	HKEY hkey;
-	return ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER
-		, regkey.c_str()
-		, 0
-		, KEY_READ
-		, &hkey);
+	auto subcatalogs_key = PluginSettings::FarOpenKey(_Key, GetKeyName(REG_SUB_CATALOGS));
+	if (PluginSettings::isInvalidHandle(subcatalogs_key)) {
+		return false;
+	}
+	return ! PluginSettings::isInvalidHandle(PluginSettings::FarOpenKey(subcatalogs_key, subCatalog));
 }
 
 bool nf::sc::CCatalog::InsertSubcatalog(tstring const& name) {
-	nf::CRegistry newkey(_Key, GetKeyName(REG_SUB_CATALOGS));
-	nf::CRegistry hkey(newkey, name.c_str());
-	return true;
+	auto subcatalogs_key = PluginSettings::FarCreateKey(_Key, GetKeyName(REG_SUB_CATALOGS));
+	return ! PluginSettings::isInvalidHandle(PluginSettings::FarCreateKey(subcatalogs_key, name));
 }
 
-bool nf::sc::CCatalog::DeleteSubcatalog(tstring const& Name) {
-	tstring name = Name;
-	if (*name.begin() == SLASH_CATS_CHAR) name.erase(name.begin());
-
-	nf::CRegistry r(_Key.get_key_handle(), GetKeyName(REG_SUB_CATALOGS), true, false);
-	return ERROR_SUCCESS == ::RegDeleteKey(r, name.c_str());
+bool nf::sc::CCatalog::DeleteSubcatalog(tstring const& name) {
+	auto subcatalogs_key = PluginSettings::FarCreateKey(_Key, GetKeyName(REG_SUB_CATALOGS));
+	return PluginSettings::FarDeleteKey(_Key, name);
 }
 
 bool nf::sc::CCatalog::GetShortcutInfo(tstring const& shName, bool bTemporary, tstring &destValue) {	
@@ -95,52 +71,70 @@ bool nf::sc::CCatalog::GetShortcutInfo(tstring const& shName, bool bTemporary, t
 		destValue = Utils::CombinePath(CPanelInfoWrap(INVALID_HANDLE_VALUE).GetPanelCurDir(true), subdirectory, SLASH_DIRS);
 		return true;
 	} else {
-		return get_key_value(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS, shName, destValue);
+		return get_value(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS, shName, destValue);
 	}
 }
 
-tstring nf::sc::CCatalog::get_combined_path(wchar_t const* catalog, CCatalog const *parent)
-{	//получить полный путь к каталогу относительно корневого пути
-	tstring name = (parent) ? parent->CatalogPath() : L"";
-	if (! name.empty()) name += tstring(SLASH_CATS);
-	name += catalog;
-	return name;
+std::list<tstring> nf::sc::CCatalog::get_combined_path(tstring const& catalog, CCatalog const *parent) {	
+	auto path = parent == nullptr ? std::list<tstring>() : parent->_CatalogPath;
+	auto addons = path2list(catalog);
+	BOOST_FOREACH(auto const& item, addons) {
+		path.push_back(item);
+	}
+	return path;
 }
 
 wchar_t const* nf::sc::CCatalog::GetKeyName(tregs_enum Index) {
-	static wchar_t const* regs[] = {L"keys", L"tempkeys", L"Catalogs", L"\\Catalogs\\", L"Properties"};
+	static wchar_t const* regs[] = {L"Values", L"TempValues", L"Catalogs", L"Properties"};
 	return regs[static_cast<int>(Index)];
 };
 
-bool nf::sc::CCatalog::set_key(tregs_enum regKey, tstring const& srcName, tstring const& srcValue) {
-	nf::CRegistry r(_Key.get_key_handle(), GetKeyName(regKey));
-	r.SetValue(srcName.c_str(), srcValue.c_str());
-	return true;
-}
-
-bool nf::sc::CCatalog::delete_key(tregs_enum regKey, tstring const& srcName) {
-	basic_class key(_Key.get_key_handle(), GetKeyName(regKey), KEY_ALL_ACCESS);
-	return ERROR_SUCCESS == ::RegDeleteValue(key.get_key_handle(), srcName.c_str());
-}
-
-bool nf::sc::CCatalog::get_key_value(tregs_enum regKey, tstring const& srcName, tstring& destValue) {
-	tstring subkey = GetKeyName(regKey);
-	if (! nf::Registry::IsSubkeyExist(_Key.get_key_handle(), subkey.c_str())) return false;
-
-	basic_class key(_Key.get_key_handle(), subkey.c_str(), KEY_ALL_ACCESS);
-	DWORD size = 256;
-	DWORD type;
-	DWORD ErrorCode;
-	nf::tautobuffer_byte buf(size * sizeof(wchar_t));
-	do {
-		buf.resize(size);
-		ErrorCode = ::RegQueryValueEx(key.get_key_handle(), srcName.c_str(), 0, &type, reinterpret_cast<BYTE*>(&buf[0]), &size);
-	} while (ErrorCode == ERROR_MORE_DATA);
-
-	if (ErrorCode != ERROR_SUCCESS) return false;
-	if (type != REG_SZ) return false;
-	if (size) {
-		destValue.assign(reinterpret_cast<wchar_t*>(&buf[0]), static_cast<int>(size / sizeof(wchar_t)) - 1);
+bool nf::sc::CCatalog::set_value(tregs_enum regKey, tstring const& name, tstring const& keyValue) {
+	auto key = PluginSettings::FarOpenKey(_Key, GetKeyName(regKey));
+	if (PluginSettings::isInvalidHandle(key)) {
+		return false;
 	}
-	return true;
+	return PluginSettings::FarSet(key, name, keyValue);
+}
+
+bool nf::sc::CCatalog::delete_value(tregs_enum regKey, tstring const& srcName) {
+	auto key = PluginSettings::FarOpenKey(_Key, GetKeyName(regKey));
+	if (PluginSettings::isInvalidHandle(key)) {
+		return false;
+	}
+	return PluginSettings::FarDeleteKey(key, srcName);
+}
+
+bool nf::sc::CCatalog::get_value(tregs_enum regKey, tstring const& name, tstring& destValue) {
+	auto key = PluginSettings::FarOpenKey(_Key, GetKeyName(regKey));
+	if (PluginSettings::isInvalidHandle(key)) {
+		return false;
+	}
+	return PluginSettings::FarGet(key, name, destValue);
+}
+
+std::list<tstring> nf::sc::CCatalog::path2list(tstring const& path) {
+	std::list<tstring> dest;
+	dest.push_back(path);
+	return dest; //!TODO
+}
+
+tstring nf::sc::CCatalog::getCatalogPath() const {
+	if (_CatalogPath.empty()) {
+		return tstring();
+	}
+	if (_CatalogPath.size() == 1) {
+		return *_CatalogPath.begin();
+	}
+	tstring ss; //avoid stringstream because paths are short 
+	bool first = true;
+	BOOST_FOREACH(tstring const& item, _CatalogPath) {
+		if (first) {
+			ss += SLASH_CATS;
+			first = false;
+		}
+		ss  += item;
+	}
+
+	return ss;
 }

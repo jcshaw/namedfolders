@@ -29,8 +29,11 @@ namespace nf {
 
 		template<> 
 		inline nf::shortcuts_sequence_item create_sequence_item(PluginSettings::tkey_handle key, wchar_t const* name) {
-			auto sh_value = PluginSettings::FarGet(key, name);
-			return std::make_pair(name, sh_value);
+			tstring dest;
+			if (! PluginSettings::FarGet(key, name, dest)) {
+				dest.clear();
+			}
+			return std::make_pair(name, dest);
 		}
 		template<> 
 		inline nf::catalogs_sequence_item create_sequence_item(PluginSettings::tkey_handle key, wchar_t const* name) {

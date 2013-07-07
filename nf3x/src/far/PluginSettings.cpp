@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "PluginSettings.h"
 
+#include <boost/foreach.hpp>
+
 extern struct PluginStartupInfo g_PluginInfo; 
 
 #define _ENFORCER_WIDEN2(x) L ## x
@@ -49,6 +51,8 @@ nf::PluginSettings::tsettings_handle nf::PluginSettings::FarOpenKey(tkey_handle 
 		, &fsv
 	);
 }
+
+
 nf::PluginSettings::tsettings_handle nf::PluginSettings::FarCreateKey(tkey_handle keyHandle, tstring const& keyName) {
 	FarSettingsValue fsv = {
 		sizeof(FarSettingsValue)
@@ -90,7 +94,7 @@ bool nf::PluginSettings::FarSet(tkey_handle keyHandle, tstring const& name, tstr
 		, &fsi
 	);
 }
-tstring nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name) {
+bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, tstring& dest) {
 	FarSettingsItem fsi = {
 		sizeof(FarSettingsItem)
 		, reinterpret_cast<size_t>(keyHandle) 
@@ -98,9 +102,12 @@ tstring nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name) {
 		, FST_UNKNOWN
 		, 0
 	};
-	return g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_GET, 0, &fsi)
-		? fsi.String
-		: tstring();
+	if (g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_GET, 0, &fsi)) {
+		dest = fsi.String;
+		return true;
+	} else {
+		return false;
+	}
 }
 bool nf::PluginSettings::FarSet(tkey_handle keyHandle, tstring const& name, __int64 number) {
 	FarSettingsItem fsi = {
@@ -131,6 +138,64 @@ __int64 nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, _
 
 bool nf::PluginSettings::FarEnum(tkey_handle keyHandle, FarSettingsEnum& fse) {
 	fse.StructSize = sizeof(FarSettingsEnum);
-	return g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_ENUM, 0, &fse);
+	return 0 != g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_ENUM, 0, &fse);
 }	
 
+
+nf::PluginSettings::tsettings_handle nf::PluginSettings::FarOpenKey(tkey_handle keyHandle, std::list<tstring> const& keys) {
+	if (keys.empty()) {
+		return INVALID_HANDLE_VALUE;
+	}
+
+	tkey_handle key = keyHandle;
+	BOOST_FOREACH(auto const& path_item, keys) {
+		key = FarOpenKey(key, path_item);
+		if (key == INVALID_HANDLE_VALUE) {
+			break;
+		}
+	}
+	return key;
+}
+
+nf::PluginSettings::tsettings_handle nf::PluginSettings::FarCreateKey(tkey_handle keyHandle, std::list<tstring> const& keys) {
+	if (keys.empty()) {
+		return INVALID_HANDLE_VALUE;
+	}
+
+	tkey_handle key = keyHandle;
+	BOOST_FOREACH(auto const& path_item, keys) {
+		key = FarOpenKey(key, path_item);
+		if (key == INVALID_HANDLE_VALUE) {
+			key = FarCreateKey(key, path_item);
+			if (key == INVALID_HANDLE_VALUE) {
+				break;
+			}
+		}
+	}
+	return key;
+}
+
+bool nf::PluginSettings::FarDeleteLastKey(tkey_handle keyHandle, std::list<tstring> const& keys) {
+	if (keys.empty()) {
+		return false;
+	}
+
+	if (keys.size() == 1) {
+		return FarDeleteKey(keyHandle, *keys.begin());
+	}
+
+	tkey_handle key = keyHandle;
+	auto n = keys.size();
+	BOOST_FOREACH(auto const& path_item, keys) {
+		if (n == 1) {
+			return FarDeleteKey(key, path_item);
+		} else {
+			key = FarOpenKey(key, path_item);
+			if (key == INVALID_HANDLE_VALUE) {
+				return false;
+			}
+			--n;
+		}
+	}
+	return false;
+}

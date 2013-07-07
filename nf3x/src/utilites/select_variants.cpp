@@ -178,7 +178,7 @@ namespace {
 			//для каждого найденного совпадения осуществляем рекурсивный поиск для следующих элементов шаблона
 			sc::CCatalog subc(nf::get_catalog_item_name(t), &c);
 			if (ListCatalogParts.empty()) {
-				list.push_back(subc.CatalogPath()); //если это последний элемент шаблона - заносим найденную директорию в список
+				list.push_back(subc.getCatalogPath()); //если это последний элемент шаблона - заносим найденную директорию в список
 			} else {
 				search_catalogs(subc, ListCatalogParts, list); //рекурсивно ищем следующий элемент шаблона
 			}
