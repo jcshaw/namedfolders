@@ -83,14 +83,13 @@ private:
 		} 
 		return boost::shared_ptr<nf::SequenceSettings<T>>(new nf::SequenceSettings<T>(sk));
 	}
-	std::list<tstring> get_combined_path(tstring const& catalog, CCatalog const *parent = 0); //получить полный путь к каталогу относительно корневого пути
-
 	static wchar_t const* GetKeyName(tregs_enum Index);
 	bool set_value(tregs_enum regKey, tstring const& srcName, tstring const& srcValue);
 	bool delete_value(tregs_enum regKey, tstring const& srcName);
 	bool get_value(tregs_enum regKey, tstring const& srcName, tstring& destValue);
-	/// a/b/c -> keys/a/keys/b/keys/c
-	std::list<tstring> path2list(tstring const& path);
+
+	/// a/b/c -> "Catalogs/a/Catalogs/b/Catalogs/c"
+	std::list<tstring> prepare_full_path(std::list<tstring> src);
 private: //members
 	boost::shared_ptr<FarSettingsItem> _pFSI;
 
