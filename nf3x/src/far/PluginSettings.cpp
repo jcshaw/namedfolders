@@ -18,7 +18,7 @@ namespace {
 			, 0
 		};
 
-		if (! g_PluginInfo.SettingsControl(INVALID_HANDLE_VALUE, SCTL_CREATE, PSL_LOCAL, &fsc)) {
+		if (! g_PluginInfo.SettingsControl(INVALID_HANDLE_VALUE, SCTL_CREATE, PSL_ROAMING, &fsc)) {
 			throw std::exception("SCTL_CREATE");
 		}
 		return fsc.Handle;
@@ -99,7 +99,7 @@ bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, tstr
 		sizeof(FarSettingsItem)
 		, reinterpret_cast<size_t>(keyHandle) 
 		, name.c_str()
-		, FST_UNKNOWN
+		, FST_STRING
 		, 0
 	};
 	if (g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_GET, 0, &fsi)) {
@@ -128,7 +128,7 @@ __int64 nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, _
 		sizeof(FarSettingsItem)
 		, reinterpret_cast<size_t>(keyHandle) 
 		, name.c_str()
-		, FST_UNKNOWN
+		, FST_STRING
 		, 0
 	};
 	return g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_GET, 0, &fsi)
@@ -138,6 +138,7 @@ __int64 nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, _
 
 bool nf::PluginSettings::FarEnum(tkey_handle keyHandle, FarSettingsEnum& fse) {
 	fse.StructSize = sizeof(FarSettingsEnum);
+	fse.Root = (size_t)(keyHandle);
 	return 0 != g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_ENUM, 0, &fse);
 }	
 

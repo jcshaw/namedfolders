@@ -22,45 +22,13 @@ namespace nf {
 		return sc;
 	}
 
-	namespace Shims {
-		/// create items for shortucts or subcatalogs sequences
-		template<class T> 
-		inline T create_sequence_item(PluginSettings::tkey_handle key, wchar_t const* name);
-
-		template<> 
-		inline nf::shortcuts_sequence_item create_sequence_item(PluginSettings::tkey_handle key, wchar_t const* name) {
-			tstring dest;
-			if (! PluginSettings::FarGet(key, name, dest)) {
-				dest.clear();
-			}
-			return std::make_pair(name, dest);
-		}
-		template<> 
-		inline nf::catalogs_sequence_item create_sequence_item(PluginSettings::tkey_handle key, wchar_t const* name) {
-			return name;
-		}
-
-		/// @returns FST_STRING - for shortcuts_sequence_item,  FST_SUBKEY - for catalogs_sequence_item
-		template<class T> 
-		inline FARSETTINGSTYPES get_default_FARSETTINGSTYPES(T*);
-
-		template<> 
-		inline FARSETTINGSTYPES get_default_FARSETTINGSTYPES(nf::shortcuts_sequence_item*) {
-			return FST_STRING;
-		}
-		template<> 
-		inline FARSETTINGSTYPES get_default_FARSETTINGSTYPES(nf::catalogs_sequence_item*) {
-			return FST_SUBKEY;
-		}
-	}
-
 	/// Sequence of shortcuts / sequence of subcatalogs
 	template <class T>
 	class SequenceSettings {
 		std::list<T> _Items;
 	public:
 		SequenceSettings(PluginSettings::tkey_handle key) {
-			load_items(key, nf::Shims::get_default_FARSETTINGSTYPES((T*)nullptr));
+			load_items(key, get_default_FARSETTINGSTYPES((T*)nullptr));
 		}
 
 		/// by default we use SequenceShortcuts for shortcuts and SequenceItems for subcatalogs
@@ -79,11 +47,34 @@ namespace nf {
 			if (PluginSettings::FarEnum(key, fse)) {
 				for (size_t i = 0; i < fse.Count; ++i) {
 					if (fse.Items[i].Type == fst) {
-						_Items.push_back(nf::Shims::create_sequence_item<T>(key, fse.Items[i].Name));
+						_Items.push_back(create_sequence_item<T>(key, fse.Items[i]));
 					}
 				}
 			}
 		}
+	private:
+		/// create items for shortucts or subcatalogs sequences
+		template<class T> T create_sequence_item(PluginSettings::tkey_handle key, FarSettingsName const& fsn);
+		template<> nf::shortcuts_sequence_item create_sequence_item(PluginSettings::tkey_handle key, FarSettingsName const& fsn) {
+			tstring dest;
+			if (! PluginSettings::FarGet(key, fsn.Name, dest)) {
+				dest.clear();
+			}
+			return std::make_pair(fsn.Name, dest);
+		}
+		template<> nf::catalogs_sequence_item create_sequence_item(PluginSettings::tkey_handle key, FarSettingsName const& fsn) {
+			return fsn.Name;
+		}
+
+		/// @returns FST_STRING - for shortcuts_sequence_item,  FST_SUBKEY - for catalogs_sequence_item
+		template<class T> FARSETTINGSTYPES get_default_FARSETTINGSTYPES(T*);
+		template<> FARSETTINGSTYPES get_default_FARSETTINGSTYPES(nf::shortcuts_sequence_item*) {
+			return FST_STRING;
+		}
+		template<> FARSETTINGSTYPES get_default_FARSETTINGSTYPES(nf::catalogs_sequence_item*) {
+			return FST_SUBKEY;
+		}
+
 	};
 
 	/// sequence of shortcuts with values
