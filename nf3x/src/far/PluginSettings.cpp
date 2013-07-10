@@ -23,19 +23,38 @@ namespace {
 		}
 		return fsc.Handle;
 	}
+
+	/// Похоже объект настроек плагина должен быть глобальным. Если создавать экземпляр на уровне каталога, то шоткаты не создаются.
+	class SingleHandler {
+		HANDLE _h;
+	 
+		SingleHandler() 
+			: _h(open_handle())
+		{
+
+		}
+	public:
+		~SingleHandler() {
+			g_PluginInfo.SettingsControl(_h, SCTL_FREE, 0, 0);
+		}
+
+		static HANDLE getHandle() {
+			static SingleHandler h;
+			return h._h;
+		}
+	};
 }
+
+
+
 nf::PluginSettings::PluginSettings() 
-	: _Handle(open_handle())
+	: _Handle(SingleHandler::getHandle())
 {
+
 }
 
 nf::PluginSettings::~PluginSettings() {
-	g_PluginInfo.SettingsControl(_Handle, SCTL_FREE, 0, 0);
-}
-
-nf::PluginSettings::tsettings_handle nf::PluginSettings::getHandle() {
-	static PluginSettings s;
-	return s._Handle;
+	
 }
 
 
@@ -45,7 +64,7 @@ nf::PluginSettings::tsettings_handle nf::PluginSettings::FarOpenKey(tkey_handle 
 		, reinterpret_cast<size_t>(keyHandle) 
 		, keyName.c_str()
 	};
-	return (tkey_handle)g_PluginInfo.SettingsControl(PluginSettings::getHandle()
+	return (tkey_handle)g_PluginInfo.SettingsControl(_Handle
 		, SCTL_OPENSUBKEY
 		, 0
 		, &fsv
@@ -59,7 +78,7 @@ nf::PluginSettings::tsettings_handle nf::PluginSettings::FarCreateKey(tkey_handl
 		, reinterpret_cast<size_t>(keyHandle) 
 		, keyName.c_str()
 	};
-	return (tkey_handle)g_PluginInfo.SettingsControl(PluginSettings::getHandle()
+	return (tkey_handle)g_PluginInfo.SettingsControl(_Handle
 		, SCTL_CREATESUBKEY
 		, 0
 		, &fsv
@@ -67,16 +86,24 @@ nf::PluginSettings::tsettings_handle nf::PluginSettings::FarCreateKey(tkey_handl
 }
 
 bool nf::PluginSettings::FarDeleteKey(tkey_handle keyHandle, tstring const& keyName) {
+	auto key = FarOpenKey(keyHandle, keyName);
+	return FarDeleteKey(key);
+}
+
+bool nf::PluginSettings::FarDeleteKey(tkey_handle keyHandle) {
+	//из whatsnew: для SCTL_DELETE если FarSettingsValue.Value==NULL то удаляется ключ FarSettingsValue.Root.
 	FarSettingsValue fsv = {
 		sizeof(FarSettingsValue)
 		, reinterpret_cast<size_t>(keyHandle) 
-		, keyName.c_str()
+		, nullptr 
 	};
-	return 0 != g_PluginInfo.SettingsControl(PluginSettings::getHandle()
+	auto ret = g_PluginInfo.SettingsControl(_Handle
 		, SCTL_DELETE
 		, 0
 		, &fsv
-	);
+		);
+	return ret != 0;
+
 }
 
 bool nf::PluginSettings::FarSet(tkey_handle keyHandle, tstring const& name, tstring const& strValue) {
@@ -88,7 +115,7 @@ bool nf::PluginSettings::FarSet(tkey_handle keyHandle, tstring const& name, tstr
 		, 0
 	};
 	fsi.String = strValue.c_str();
-	return 0 != g_PluginInfo.SettingsControl(PluginSettings::getHandle()
+	return 0 != g_PluginInfo.SettingsControl(_Handle
 		, SCTL_SET
 		, 0
 		, &fsi
@@ -102,7 +129,7 @@ bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, tstr
 		, FST_STRING
 		, 0
 	};
-	if (g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_GET, 0, &fsi)) {
+	if (g_PluginInfo.SettingsControl(_Handle, SCTL_GET, 0, &fsi)) {
 		dest = fsi.String;
 		return true;
 	} else {
@@ -117,7 +144,7 @@ bool nf::PluginSettings::FarSet(tkey_handle keyHandle, tstring const& name, __in
 		, FST_STRING
 		, number
 	};
-	return 0 != g_PluginInfo.SettingsControl(PluginSettings::getHandle()
+	return 0 != g_PluginInfo.SettingsControl(_Handle
 		, SCTL_SET
 		, 0
 		, &fsi
@@ -131,7 +158,7 @@ __int64 nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, _
 		, FST_STRING
 		, 0
 	};
-	return g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_GET, 0, &fsi)
+	return g_PluginInfo.SettingsControl(_Handle, SCTL_GET, 0, &fsi)
 		? fsi.Number
 		: 0;
 }
@@ -139,7 +166,7 @@ __int64 nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, _
 bool nf::PluginSettings::FarEnum(tkey_handle keyHandle, FarSettingsEnum& fse) {
 	fse.StructSize = sizeof(FarSettingsEnum);
 	fse.Root = reinterpret_cast<size_t>(keyHandle);
-	return 0 != g_PluginInfo.SettingsControl(PluginSettings::getHandle(), SCTL_ENUM, 0, &fse);
+	return 0 != g_PluginInfo.SettingsControl(_Handle, SCTL_ENUM, 0, &fse);
 }	
 
 
@@ -202,3 +229,4 @@ bool nf::PluginSettings::FarDeleteLastKey(tkey_handle keyHandle, std::list<tstri
 	}
 	return false;
 }
+

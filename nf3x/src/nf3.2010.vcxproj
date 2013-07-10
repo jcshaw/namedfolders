@@ -298,7 +298,6 @@
     <ClCompile Include="dialogs\DialogEditPattern.cpp" />
     <ClCompile Include="dialogs\DialogEditShortcut.cpp" />
     <ClCompile Include="dialogs\DialogMove.cpp" />
-    <ClCompile Include="utilites\registry_remover.cpp" />
     <ClCompile Include="utilites\stlcatalogs.cpp" />
     <ClCompile Include="main\header.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -362,7 +361,6 @@
     <ClInclude Include="dialogs\DialogMove.h" />
     <ClInclude Include="dialogs\dialogsT.h" />
     <ClInclude Include="utilites\Registry.h" />
-    <ClInclude Include="utilites\registry_remover.h" />
     <ClInclude Include="utilites\regnotify.h" />
     <ClInclude Include="utilites\stlcatalogs.h" />
     <ClInclude Include="main\header.h" />

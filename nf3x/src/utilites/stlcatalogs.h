@@ -20,7 +20,7 @@ namespace sc {
 /// NF 4.x stores data using standard FAR settings (sqllite).
 /// So, Catalog is wrapper around HANDLE received through FAR3::SettingsControl 
 class CCatalog {	
-	typedef enum tregs_enum	{REG_STATIC_KEYS
+	typedef enum tspec_folders	{REG_STATIC_KEYS
 		, REG_TEMP_KEYS
 		, REG_SUB_CATALOGS
 		, REG_PROPERTIES
@@ -34,22 +34,23 @@ public:
 	/// @return full path to catalog, i.e. "a/b/c"
 	tstring getCatalogPath() const;
 	inline size_t GetNumberSubcatalogs() const {
-		return get_sequence<tstring>(GetKeyName(REG_SUB_CATALOGS))->getItems().size();			
+		return get_sequence<tstring>(GetSpecFolderName(REG_SUB_CATALOGS))->getItems().size();			
 	}
 	inline size_t GetNumberShortcuts() const {
-		return get_sequence<tstring>(GetKeyName(REG_STATIC_KEYS))->getItems().size(); 
+		return get_sequence<tstring>(GetSpecFolderName(REG_STATIC_KEYS))->getItems().size(); 
 	}
 	PluginSettings::tkey_handle get_key_handle() const {
 		return _Key;
 	}
+	bool deleteThisCatalog();
 public:	
 	//TODO: c11: use unique_ptr instead of shared ptr
 	inline boost::shared_ptr<nf::SequenceShortcuts> GetSequenceShortcuts(bool bTemporary) {
-		return get_sequence<nf::shortcuts_sequence_item>(GetKeyName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS)); 
+		return get_sequence<nf::shortcuts_sequence_item>(GetSpecFolderName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS)); 
 	}
 	//TODO: c11: use unique_ptr instead of shared ptr
 	inline boost::shared_ptr<nf::SequenceItems> GetSequenceSubcatalogs() {
-		return get_sequence<nf::catalogs_sequence_item>(GetKeyName(REG_SUB_CATALOGS)); 
+		return get_sequence<nf::catalogs_sequence_item>(GetSpecFolderName(REG_SUB_CATALOGS)); 
 	}
 public: 
 	bool IsSubcatalogExist(tstring const& subCatalog);
@@ -74,19 +75,27 @@ public:
 	bool GetProperty(tstring const& propertyName, tstring& destValue) {
 		return get_value(REG_PROPERTIES, propertyName, destValue);
 	}
+public:
+	/// delete key and its children
+	static bool eraseKey(tstring const &keyPath);
+	/// move content between keys
+	static bool moveKey(tstring const &srcPath, tstring const &targetPath);
+	/// copy content from key to key
+	static bool copyKey(tstring const &srcPath, tstring const &targetPath);
+
 private: 
 	template<class T>
 	inline boost::shared_ptr<nf::SequenceSettings<T>> get_sequence(wchar_t const* subkey) const { 
-		auto sk = PluginSettings::FarOpenKey(_Key, subkey);
+		auto sk = _PS->FarOpenKey(_Key, subkey);
 		if (sk == 0) {
-			sk = PluginSettings::FarCreateKey(_Key, subkey);
+			sk = _PS->FarCreateKey(_Key, subkey);
 		} 
-		return boost::shared_ptr<nf::SequenceSettings<T>>(new nf::SequenceSettings<T>(sk));
+		return boost::shared_ptr<nf::SequenceSettings<T>>(new nf::SequenceSettings<T>(_PS.get(), sk));
 	}
-	static wchar_t const* GetKeyName(tregs_enum Index);
-	bool set_value(tregs_enum regKey, tstring const& srcName, tstring const& srcValue);
-	bool delete_value(tregs_enum regKey, tstring const& srcName);
-	bool get_value(tregs_enum regKey, tstring const& srcName, tstring& destValue);
+	static wchar_t const* GetSpecFolderName(tspec_folders Index);
+	bool set_value(tspec_folders specFolder, tstring const& srcName, tstring const& srcValue);
+	bool delete_value(tspec_folders specFolder, tstring const& srcName);
+	bool get_value(tspec_folders specFolder, tstring const& srcName, tstring& destValue);
 
 	/// a/b/c -> "Catalogs/a/Catalogs/b/Catalogs/c"
 	std::list<tstring> prepare_full_path(std::list<tstring> src);
@@ -96,6 +105,7 @@ private: //members
 	/// contains "a", "b", "c" for catalog "a/b/c"
 	std::list<tstring> _CatalogPath;
 	PluginSettings::tsettings_handle _Key;
+	boost::shared_ptr<PluginSettings> _PS;
 };
 } //sc
 } //nf

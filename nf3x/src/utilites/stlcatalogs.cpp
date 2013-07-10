@@ -35,7 +35,8 @@ namespace {
 }
 
 nf::sc::CCatalog::CCatalog() 
-: _Key(0)
+: _PS(new nf::PluginSettings())
+, _Key(0)
 {
 
 }
@@ -44,7 +45,9 @@ nf::sc::CCatalog::~CCatalog() {
 	
 }
 
-nf::sc::CCatalog::CCatalog(tstring const& subCatalog, CCatalog const *pParent, bool bCreateIfNotExists) {
+nf::sc::CCatalog::CCatalog(tstring const& subCatalog, CCatalog const *pParent, bool bCreateIfNotExists) 
+: _PS(new nf::PluginSettings())
+{
 	nf::tlist_strings addons;
 	add_to_path(addons, subCatalog);
 
@@ -54,16 +57,16 @@ nf::sc::CCatalog::CCatalog(tstring const& subCatalog, CCatalog const *pParent, b
 	}	
 
 	auto full_path = prepare_full_path(addons);
-	_Key = PluginSettings::FarOpenKey(pParent == nullptr ? 0 : pParent->get_key_handle(), full_path);
-	if (PluginSettings::isInvalidHandle(_Key) && bCreateIfNotExists) {
-		_Key = PluginSettings::FarCreateKey(pParent == nullptr ? 0 : pParent->get_key_handle(), full_path);
+	_Key = _PS->FarOpenKey(pParent == nullptr ? 0 : pParent->get_key_handle(), full_path);
+	if (_PS->isInvalidHandle(_Key) && bCreateIfNotExists) {
+		_Key = _PS->FarCreateKey(pParent == nullptr ? 0 : pParent->get_key_handle(), full_path);
 	}
 }
 
 /// a/b/c -> "Catalogs/a/Catalogs/b/Catalogs/c"
 std::list<tstring> nf::sc::CCatalog::prepare_full_path(std::list<tstring> src) {
 	std::list<tstring> dest;
-	auto const folder = GetKeyName(REG_SUB_CATALOGS);
+	auto const folder = GetSpecFolderName(REG_SUB_CATALOGS);
 	BOOST_FOREACH(auto const& a, src) {
 		dest.push_back(folder);
 		dest.push_back(a);
@@ -79,24 +82,24 @@ nf::sc::CCatalog::CCatalog(CCatalog const &catalog)
 }
 
 bool nf::sc::CCatalog::IsSubcatalogExist(tstring const& subCatalog) {
-	auto subcatalogs_key = PluginSettings::FarOpenKey(_Key, GetKeyName(REG_SUB_CATALOGS));
-	if (PluginSettings::isInvalidHandle(subcatalogs_key)) {
+	auto subcatalogs_key = _PS->FarOpenKey(_Key, GetSpecFolderName(REG_SUB_CATALOGS));
+	if (_PS->isInvalidHandle(subcatalogs_key)) {
 		return false;
 	}
-	return ! PluginSettings::isInvalidHandle(PluginSettings::FarOpenKey(subcatalogs_key, subCatalog));
+	return ! _PS->isInvalidHandle(_PS->FarOpenKey(subcatalogs_key, subCatalog));
 }
 
 bool nf::sc::CCatalog::InsertSubcatalog(tstring const& name) {
 	if (IsSubcatalogExist(name)) {
 		return true;
 	}
-	auto subcatalogs_key = PluginSettings::FarCreateKey(_Key, GetKeyName(REG_SUB_CATALOGS));
-	return ! PluginSettings::isInvalidHandle(PluginSettings::FarCreateKey(subcatalogs_key, name));
+	auto subcatalogs_key = _PS->FarCreateKey(_Key, GetSpecFolderName(REG_SUB_CATALOGS));
+	return ! _PS->isInvalidHandle(_PS->FarCreateKey(subcatalogs_key, name));
 }
 
 bool nf::sc::CCatalog::DeleteSubcatalog(tstring const& name) {
-	auto subcatalogs_key = PluginSettings::FarOpenKey(_Key, GetKeyName(REG_SUB_CATALOGS));
-	return PluginSettings::FarDeleteKey(_Key, name);
+	auto subcatalogs_key = _PS->FarOpenKey(_Key, GetSpecFolderName(REG_SUB_CATALOGS));
+	return _PS->FarDeleteKey(subcatalogs_key, name);
 }
 
 bool nf::sc::CCatalog::GetShortcutInfo(tstring const& shName, bool bTemporary, tstring &destValue) {	
@@ -106,36 +109,37 @@ bool nf::sc::CCatalog::GetShortcutInfo(tstring const& shName, bool bTemporary, t
 		return true;
 	} else {
 		return get_value(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS, shName, destValue);
-	}
+	} 
 }
 
-wchar_t const* nf::sc::CCatalog::GetKeyName(tregs_enum Index) {
+wchar_t const* nf::sc::CCatalog::GetSpecFolderName(tspec_folders Index) {
 	static wchar_t const* regs[] = {L"Values", L"TempValues", L"Catalogs", L"Properties"};
 	return regs[static_cast<int>(Index)];
 };
 
-bool nf::sc::CCatalog::set_value(tregs_enum regKey, tstring const& name, tstring const& keyValue) {
-	auto key = PluginSettings::FarOpenKey(_Key, GetKeyName(regKey));
-	if (PluginSettings::isInvalidHandle(key)) {
-		return false;
+bool nf::sc::CCatalog::set_value(tspec_folders specFolder, tstring const& name, tstring const& keyValue) {
+	auto folder = GetSpecFolderName(specFolder);
+	auto handle_folder = _PS->FarOpenKey(_Key, folder);
+	if (_PS->isInvalidHandle(handle_folder)) {
+		handle_folder = _PS->FarCreateKey(_Key, folder);
 	}
-	return PluginSettings::FarSet(key, name, keyValue);
+	return _PS->FarSet(handle_folder, name, keyValue);
 }
 
-bool nf::sc::CCatalog::delete_value(tregs_enum regKey, tstring const& srcName) {
-	auto key = PluginSettings::FarOpenKey(_Key, GetKeyName(regKey));
-	if (PluginSettings::isInvalidHandle(key)) {
+bool nf::sc::CCatalog::delete_value(tspec_folders specFolder, tstring const& srcName) {
+	auto key = _PS->FarOpenKey(_Key, GetSpecFolderName(specFolder));
+	if (_PS->isInvalidHandle(key)) {
 		return false;
-	}
-	return PluginSettings::FarDeleteKey(key, srcName);
+	}	
+	return _PS->FarDeleteKey(key, srcName);
 }
 
-bool nf::sc::CCatalog::get_value(tregs_enum regKey, tstring const& name, tstring& destValue) {
-	auto key = PluginSettings::FarOpenKey(_Key, GetKeyName(regKey));
-	if (PluginSettings::isInvalidHandle(key)) {
+bool nf::sc::CCatalog::get_value(tspec_folders specFolder, tstring const& name, tstring& destValue) {
+	auto key = _PS->FarOpenKey(_Key, GetSpecFolderName(specFolder));
+	if (_PS->isInvalidHandle(key)) {
 		return false;
 	}
-	return PluginSettings::FarGet(key, name, destValue);
+	return _PS->FarGet(key, name, destValue);
 }
 
 tstring nf::sc::CCatalog::getCatalogPath() const {
@@ -156,4 +160,27 @@ tstring nf::sc::CCatalog::getCatalogPath() const {
 	}
 
 	return ss;
+}
+
+bool nf::sc::CCatalog::eraseKey(tstring const &keyPath) {
+	CCatalog c(keyPath);
+	return c.deleteThisCatalog();
+// 	auto kvp = Utils::DividePathFilename(keyPath, SLASH_CATS_CHAR, true);
+// 	return c.DeleteSubcatalog(kvp.second);
+}
+
+bool nf::sc::CCatalog::moveKey(tstring const &srcPath, tstring const &targetPath) {
+	if (copyKey(srcPath, targetPath)) {
+		return eraseKey(srcPath);
+	} else {
+		return false;
+	}
+}
+
+bool nf::sc::CCatalog::copyKey(tstring const &srcPath, tstring const &targetPath) {
+	return false; //!TODO
+}
+
+bool nf::sc::CCatalog::deleteThisCatalog() {
+	return _PS->FarDeleteKey(_Key);
 }
