@@ -42,7 +42,7 @@ CDialogMove::~CDialogMove(void)
 UINT CDialogMove::ShowModal()
 {
 	//вызываем диалог редактированик имени каталога
-	int nChoosedItem;
+	intptr_t nChoosedItem;
 	
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT, m_DestinationCatalog.c_str());
 	//GetDialogItemsRef()[ID_EDIT].Focus = 1; //!TODO

@@ -260,7 +260,7 @@ nf::Menu::CMenuDialog::CMenuDialog(CMenu &srcMenu, tlist_menu_items &listItemsRe
 	sort_items_list();
 }
 
-int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem) {
+int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, intptr_t& BreakCode, intptr_t &nSelectedItem) {
 	autobuffer_wrapper<FarKey> buf;
 	size_t num_custom_break_codes = 0;
 	fill_menu_break_keys_buf(m_Menu.GetBreakKeys(), buf, num_custom_break_codes);
@@ -297,28 +297,28 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 		if (nSelectedItem >= 0) return true;	//enter
 	}
 	m_bFilterFullUpdateMode = true;
-	if (m_pBckgActionMaker != NULL && (VK_BACK != buf[BreakCode].VirtualKeyCode) ) {
+	if (m_pBckgActionMaker != NULL && (VK_BACK != buf[static_cast<unsigned int>(BreakCode)].VirtualKeyCode) ) {
 		tvariant_value dest;
 		if (get_selected_item(nSelectedItem, dest)) {
-			if ((*m_pBckgActionMaker)(BreakCode, dest)) return true; //action was made; continue work without closing the menu
+			if ((*m_pBckgActionMaker)(static_cast<unsigned int>(BreakCode), dest)) return true; //action was made; continue work without closing the menu
 		}
 	}
 
 	if (BreakCode < static_cast<int>(num_custom_break_codes)) return true; //нажата заданная в m_Menu.GetBreakKeys клавиша
-	if (VK_BACK == buf[BreakCode].VirtualKeyCode) {	//удаляем последний символ фильтра
+	if (VK_BACK == buf[static_cast<unsigned int>(BreakCode)].VirtualKeyCode) {	//удаляем последний символ фильтра
 		if (m_Filter.size()) m_Filter.erase(m_Filter.size()-1, 1);
 	} else {
 		wchar_t ch; //!DO: русские буквы так просто уже не заменить английскими в фильтре, TODO
-		if (decode_additional_character(buf[BreakCode], ch)) {
+		if (decode_additional_character(buf[static_cast<unsigned int>(BreakCode)], ch)) {
 			m_Filter += ch;
-		} else if (buf[BreakCode].ControlKeyState == SHIFT_PRESSED) {	//russian letter
+		} else if (buf[static_cast<unsigned int>(BreakCode)].ControlKeyState == SHIFT_PRESSED) {	//russian letter
 			wchar_t ch[2]; 
-			ch[0] = static_cast<wchar_t>(buf[BreakCode].VirtualKeyCode);
+			ch[0] = static_cast<wchar_t>(buf[static_cast<unsigned int>(BreakCode)].VirtualKeyCode);
 			ch[1] = 0;
 			wchar_t* ptransformed_string = g_FSF.XLat(&ch[0], 0, 1, 0); //!TODO: if xlat macros is not activated then Xlat won't work properly
 			m_Filter += ptransformed_string;	
 		} else { //english letter
-			m_Filter += buf[BreakCode].VirtualKeyCode;
+			m_Filter += buf[static_cast<unsigned int>(BreakCode)].VirtualKeyCode;
 		}
 		m_bFilterFullUpdateMode = false;			
 	}
@@ -346,8 +346,8 @@ bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &destValue, int &DestRetCode
 		sort_items_list();
 		load_items(menu_items, menu_buffers);
 
-		int break_code = 0;
-		int nselected_item = 0;
+		intptr_t break_code = 0;
+		intptr_t nselected_item = 0;
 		if (! show_menu(menu_items, break_code, nselected_item)) continue;	//filter key is pressed
 
 		if (-1 == break_code && -1 == nselected_item) return false;	//user has canceled menu
@@ -365,7 +365,7 @@ bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &destValue, int &DestRetCode
 	};
 }
 
-bool nf::Menu::CMenuDialog::get_selected_item(int nselectedItem, tvariant_value& destValue) {
+bool nf::Menu::CMenuDialog::get_selected_item(intptr_t nselectedItem, tvariant_value& destValue) {
 	tvariant_value const *pvalue = NULL;  //std::advance(p, nselected_item) is not suitable because some items can be invisible
 	BOOST_FOREACH(tmenu_item const& mi, m_List) {
 		if (mi.first == nselectedItem) {

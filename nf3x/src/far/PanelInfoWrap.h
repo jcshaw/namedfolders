@@ -19,7 +19,7 @@ public:
 	}
 
 	tstring GetPanelCurDir(bool bActivePanel) {
-		int buffer_size = g_PluginInfo.PanelControl( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE), FCTL_GETPANELDIRECTORY, 0, 0); 
+		auto buffer_size = g_PluginInfo.PanelControl( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE), FCTL_GETPANELDIRECTORY, 0, 0); 
 		nf::tautobuffer_char buffer(buffer_size);
 		if (! g_PluginInfo.PanelControl( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
 			, FCTL_GETPANELDIRECTORY
@@ -33,7 +33,7 @@ public:
 	}
 
 	tstring GetPanelActiveFileName(bool bActivePanel) {
-		int buffer_size = g_PluginInfo.PanelControl( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE), FCTL_GETCURRENTPANELITEM, 0, 0); 
+		auto  buffer_size = g_PluginInfo.PanelControl( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE), FCTL_GETCURRENTPANELITEM, 0, 0); 
 		nf::tautobuffer_char buffer(buffer_size);
 		FarGetPluginPanelItem fgppi = {sizeof(FarGetPluginPanelItem), buffer_size, reinterpret_cast<PluginPanelItem*>(&buffer[0])};
 

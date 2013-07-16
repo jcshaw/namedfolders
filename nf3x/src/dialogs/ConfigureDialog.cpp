@@ -100,7 +100,7 @@ UINT CConfigureDialog::ShowModal()
 	dde_main_dialog(true);
 
 //вызываем диалог настроек
-	int nChoosedItem;
+	intptr_t nChoosedItem;
 	while (true) {
 		if (! Execute(nChoosedItem)) break;
 		switch (nChoosedItem) {

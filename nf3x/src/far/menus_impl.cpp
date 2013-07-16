@@ -28,14 +28,14 @@ const struct FarKey nf::Menu::CMenuApplications::OPEN_APPLICATION_IN_BACKGROUND 
 const struct FarKey nf::Menu::CMenuApplications::OPEN_PATH_IN_EXPLORER_IN_BACKGROUND = {VK_RETURN, LEFT_CTRL_PRESSED | SHIFT_PRESSED};
 
 namespace {
-	void switch_mode(nf::tsetting_flags flag, int modeValue) {
-		CSettings::GetInstance().SetValue(flag, modeValue);	
+	void switch_mode(nf::tsetting_flags flag, intptr_t modeValue) {
+		CSettings::GetInstance().SetValue(flag, static_cast<DWORD>(modeValue));	
 		CSettings::GetInstance().SaveSettings();
 	}
 }
 
 // actions
-int CMenuShortcuts::MakeAction(int breakCode) {
+int CMenuShortcuts::MakeAction(intptr_t breakCode) {
 	switch (breakCode) {
 	case 0: return -MS_COMMAND_DELETE; //Del - remove selected shortcut
 	case 1: return -MS_COMMAND_EDIT; //F4 - edit selected shortcut
@@ -52,7 +52,7 @@ int CMenuShortcuts::MakeAction(int breakCode) {
 	return 0;
 }
 
-int CMenuApplications::MakeAction(int breakCode) {
+int CMenuApplications::MakeAction(intptr_t breakCode) {
 	switch(breakCode) {
 	case 0: return -CMD_OPEN_PATH_IN_FAR; 
 	case 1: return -CMD_OPEN_PATH_IN_EXPLORER;
@@ -80,7 +80,7 @@ int CMenuApplications::MakeAction(int breakCode) {
 	return 0;	
 }
 
-int CMenuEnvironmentVariables::MakeAction(int breakCode) {	
+int CMenuEnvironmentVariables::MakeAction(intptr_t breakCode) {	
 	switch(breakCode) {
 	case 0: case 1: //view mode
 		switch_mode(nf::ST_SELECT_SH_MENU_MODE_EV, breakCode + 1);

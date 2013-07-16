@@ -117,7 +117,7 @@ void WINAPI GetOpenPanelInfoW(struct OpenPanelInfo *pInfo) {
 	}
 }
 
-int WINAPI GetFindDataW(struct GetFindDataInfo *pInfo) {
+intptr_t WINAPI GetFindDataW(struct GetFindDataInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(GetFindDataInfo))) {
 		return FALSE;
 	}
@@ -143,7 +143,7 @@ void WINAPI FreeFindDataW(const struct FreeFindDataInfo *pInfo) {
 	}
 }
 
-int WINAPI SetDirectoryW(const struct SetDirectoryInfo *pInfo) {
+intptr_t WINAPI SetDirectoryW(const struct SetDirectoryInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(SetDirectoryInfo))) {
 		return 0;
 	}
@@ -178,7 +178,7 @@ intptr_t WINAPI ProcessPanelInputW(const struct ProcessPanelInputInfo *pInfo) {
 	}
 }
 
-int WINAPI ConfigureW(const struct ConfigureInfo *pInfo) {
+intptr_t WINAPI ConfigureW(const struct ConfigureInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(ConfigureInfo))) {
 		return 0;
 	}
@@ -190,7 +190,7 @@ int WINAPI ConfigureW(const struct ConfigureInfo *pInfo) {
 	}
 }
 
-int WINAPI MakeDirectoryW(struct MakeDirectoryInfo *pInfo) {
+intptr_t WINAPI MakeDirectoryW(struct MakeDirectoryInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(MakeDirectoryInfo))) {
 		return 0;
 	}
@@ -202,7 +202,7 @@ int WINAPI MakeDirectoryW(struct MakeDirectoryInfo *pInfo) {
 	}
 }
 
-int WINAPI PutFilesW(const struct PutFilesInfo *pInfo) {
+intptr_t WINAPI PutFilesW(const struct PutFilesInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(PutFilesInfo))) {
 		return 0;
 	}
@@ -214,7 +214,7 @@ int WINAPI PutFilesW(const struct PutFilesInfo *pInfo) {
 	}
 }
 
-int WINAPI ProcessPanelEventW(const struct ProcessPanelEventInfo *pInfo) {
+intptr_t WINAPI ProcessPanelEventW(const struct ProcessPanelEventInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(ProcessPanelEventInfo))) {
 		return 0;
 	}
@@ -226,7 +226,7 @@ int WINAPI ProcessPanelEventW(const struct ProcessPanelEventInfo *pInfo) {
 	}
 }
 
-int WINAPI ProcessDialogEventW(const struct ProcessDialogEventInfo *pInfo) {
+intptr_t WINAPI ProcessDialogEventW(const struct ProcessDialogEventInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(ProcessDialogEventInfo))) {
 		return 0;
 	}

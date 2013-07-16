@@ -24,7 +24,7 @@ CDialogApplyCommand::~CDialogApplyCommand(void)
 }
 
 UINT CDialogApplyCommand::ShowModal() {
-	int nChoosedItem;
+	intptr_t nChoosedItem;
 
 	if (Execute(nChoosedItem)) {
 		if (nChoosedItem != ID_CANCEL) {	

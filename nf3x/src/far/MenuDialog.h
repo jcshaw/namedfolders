@@ -59,10 +59,10 @@ namespace Menu {
 		std::pair<size_t, size_t> get_column_widths(bool bOnlyVisibleItems);
 		void set_items_visibility(tstring const& Filter, int Level, std::pair<size_t, size_t> maxSizes);
 		void load_items(tlist_far_menu_items &destMenuItems, tlist_buffers &destMenuBuffers); 
-		int show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem);
+		int show_menu(tlist_far_menu_items const& MenuItems, intptr_t& BreakCode, intptr_t &nSelectedItem);
 		void sort_items_list();
 	private:
-		bool get_selected_item(int nselectedItem, tvariant_value& destValue);
+		bool get_selected_item(intptr_t nselectedItem, tvariant_value& destValue);
 		CMenu &m_Menu;
 		tbackground_action_maker* m_pBckgActionMaker;
 		tlist_menu_items &m_List;

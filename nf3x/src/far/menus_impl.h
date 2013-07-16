@@ -46,7 +46,7 @@ namespace Menu {
 		int GetCurrentSortMode() {
 			return m_SortMenuMode != 0 ? nf::CSettings::GetInstance().GetValue(m_SortMenuMode) : 0;
 		}
-		virtual int MakeAction(int BreakCode) {
+		virtual int MakeAction(intptr_t BreakCode) {
 			return 0;
 		}
 	};
@@ -79,7 +79,7 @@ namespace Menu {
 			};
 			return &shortcuts_break_keys[0];
 		}
-		virtual int MakeAction(int BreakCode);
+		virtual int MakeAction(intptr_t BreakCode);
 	};
 
 	class CMenuApplications : public CMenu {
@@ -103,7 +103,7 @@ namespace Menu {
 			, CMD_SWITCH_IGNORE_MODE_ONOFF
 		};
 		enum { MM_PATH, MM_CAT_PATH, MM_PATH_CAT };
-		virtual int MakeAction(int BreakCode);
+		virtual int MakeAction(intptr_t BreakCode);
 	public:
 		virtual FarKey* GetBreakKeys() {
 			return CMenuApplications::GetTotalListBreakKeys();
@@ -137,7 +137,7 @@ namespace Menu {
 			, NUMBER_MENU_MODES
 		};	
 	public:
-		virtual int MakeAction(int BreakCode);
+		virtual int MakeAction(intptr_t BreakCode);
 		virtual FarKey* GetBreakKeys() {
 			static FarKey env_var_break_keys[] = {
 				{VK_F5, 0}

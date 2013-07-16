@@ -44,8 +44,8 @@ void nf::Patterns::EditPatterns(nf::Patterns::CommandsManager &cm)
 		cm.GetListRegisteredCommands(list);
 		::load_list_patterns_to_menu(cm, list, menu_items, mi_buffers);
 
-		int selected_key;
-		int nSelectedItem = g_PluginInfo.Menu(&nf::NF_PLUGIN_GUID	//!TODO: в этом меню фильтр сейчас не действует...
+		intptr_t selected_key;
+		intptr_t nSelectedItem = g_PluginInfo.Menu(&nf::NF_PLUGIN_GUID	//!TODO: в этом меню фильтр сейчас не действует...
 			, &nf::NF_DIALOG_EDIT_PATTERN
 			, -1
 			, -1

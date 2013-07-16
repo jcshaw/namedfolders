@@ -39,7 +39,7 @@ UINT CDialogEditShortcut::ShowModal() {
 
 	//GetDialogItemsRef()[ID_EDIT_SHORTCUT].Focus = 1; //!TODO
 
-	int nChoosedItem;
+	intptr_t nChoosedItem;
 	if (Execute(nChoosedItem))
 		if (nChoosedItem != ID_CANCEL)
 		{	//редактируем имя псевдонима

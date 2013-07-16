@@ -37,7 +37,7 @@ UINT DialogEditPattern::ShowModal() {
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_PATTERN, m_Pattern.c_str());
 	//GetDialogItemsRef()[ID_EDIT_PREFIX].Focus = 1; //!TODO
 
-	int nChoosedItem;
+	intptr_t nChoosedItem;
 	if (Execute(nChoosedItem))
 		if (nChoosedItem != ID_CANCEL)
 		{	//редактируем имя каталога

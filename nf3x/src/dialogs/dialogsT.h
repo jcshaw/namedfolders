@@ -131,7 +131,7 @@ public:
 			g_PluginInfo.DialogFree(m_DialogHandle);
 		}
 	}
-	bool Execute(int &nChoosenItem) {
+	bool Execute(intptr_t &nChoosenItem) {
 		if (m_DialogHandle == 0) {
 			g_PluginInfo.DialogFree(m_DialogHandle);
 		}

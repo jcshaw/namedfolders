@@ -67,7 +67,7 @@ UINT CDialogEditCatalog::ShowModal() {
 	GetDialogItemsRef()[ID_ADD_TO_WIN7_LIBRARY_BY_DEFAULT].Selected = m_Properties.flag_add_to_win7_lib_by_default ? 1 : 0;
 	//GetDialogItemsRef()[ID_EDIT_CATALOG].Focus = 1; //!TODO
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_WIN7_LIBRARY_NAME, m_Properties.default_win7_lib.c_str());
-	int nChoosedItem;
+	intptr_t nChoosedItem;
 	if (Execute(nChoosedItem))
 		if (nChoosedItem != ID_CANCEL) {
 			m_Properties.show_in_disk_menu = this->IsDialogItemSelected(ID_SHOW_IN_DISKMENU);
