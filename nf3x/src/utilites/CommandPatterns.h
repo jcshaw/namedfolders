@@ -4,8 +4,8 @@
 #include <vector>
 #include <list>
 #include "header.h"
-#include "Registry.h"
 #include "strings_utils.h"
+#include "PluginSettings.h"
 
 namespace nf {
 namespace Patterns {
@@ -18,9 +18,9 @@ typedef tlist_pairs_strings tlist_command_patterns;
 // Рекурсивная раскрутка команды
 /************************************************************************/
 class CommandsManager {
-	nf::CRegistry m_Key;
+	nf::PluginSettings::tsettings_handle _hSettingsKey;
 public:
-	explicit CommandsManager(tstring const& RegKey);
+	explicit CommandsManager();
 	~CommandsManager();
 
 	bool SetCommand(tstring const& Prefix, tstring const& Pattern);

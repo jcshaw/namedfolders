@@ -74,7 +74,7 @@ namespace nf {
 	public: //вернуть значение требуемого флага настройки
 		DWORD GetValue(tsetting_flags fg) const;	
 		tstring const& GetValue(tsetting_strings fg) const;
-		tstring const& get_NamedFolders_reg_key() const { return m_nf_reg_key;}
+		//tstring const& get_NamedFolders_reg_key() const { return m_nf_reg_key;}
 	public: //задать значение требуемого флага настройки (в промежуточном массиве)
 		void SetValue(tsetting_flags fg, DWORD Value);	
 		void SetValue(tsetting_strings fg, tstring Value);
@@ -86,6 +86,4 @@ namespace nf {
 		tstring m_FullListPrefixes;
 	};
 
-	inline tstring GetRegistryKeyForCommandPatterns() {
-		return CSettings::GetInstance().get_NamedFolders_reg_key() + tstring(L"\\CommandPatterns");
-	}};
+}

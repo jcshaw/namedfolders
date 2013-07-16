@@ -45,12 +45,12 @@ public:
 	bool deleteThisCatalog();
 public:	
 	//TODO: c11: use unique_ptr instead of shared ptr
-	inline boost::shared_ptr<nf::SequenceShortcuts> GetSequenceShortcuts(bool bTemporary) {
-		return get_sequence<nf::shortcuts_sequence_item>(GetSpecFolderName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS)); 
+	inline boost::shared_ptr<nf::SequenceValues> GetSequenceShortcuts(bool bTemporary) {
+		return get_sequence<nf::titem_sequence_values>(GetSpecFolderName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS)); 
 	}
 	//TODO: c11: use unique_ptr instead of shared ptr
-	inline boost::shared_ptr<nf::SequenceItems> GetSequenceSubcatalogs() {
-		return get_sequence<nf::catalogs_sequence_item>(GetSpecFolderName(REG_SUB_CATALOGS)); 
+	inline boost::shared_ptr<nf::SequenceCatalogs> GetSequenceSubcatalogs() {
+		return get_sequence<nf::titem_sequence_catalogs>(GetSpecFolderName(REG_SUB_CATALOGS)); 
 	}
 public: 
 	bool IsSubcatalogExist(tstring const& subCatalog);
@@ -86,11 +86,11 @@ public:
 private: 
 	template<class T>
 	inline boost::shared_ptr<nf::SequenceSettings<T>> get_sequence(wchar_t const* subkey) const { 
-		auto sk = _PS->FarOpenKey(_Key, subkey);
+		auto sk = nf::PluginSettings::FarOpenKey(_Key, subkey);
 		if (sk == 0) {
-			sk = _PS->FarCreateKey(_Key, subkey);
+			sk = nf::PluginSettings::FarCreateKey(_Key, subkey);
 		} 
-		return boost::shared_ptr<nf::SequenceSettings<T>>(new nf::SequenceSettings<T>(_PS.get(), sk));
+		return boost::shared_ptr<nf::SequenceSettings<T>>(new nf::SequenceSettings<T>(sk));
 	}
 	static wchar_t const* GetSpecFolderName(tspec_folders Index);
 	bool set_value(tspec_folders specFolder, tstring const& srcName, tstring const& srcValue);
@@ -105,7 +105,6 @@ private: //members
 	/// contains "a", "b", "c" for catalog "a/b/c"
 	std::list<tstring> _CatalogPath;
 	PluginSettings::tsettings_handle _Key;
-	boost::shared_ptr<PluginSettings> _PS;
 };
 } //sc
 } //nf

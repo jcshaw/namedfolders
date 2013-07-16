@@ -360,8 +360,6 @@
     <ClInclude Include="dialogs\DialogEditShortcut.h" />
     <ClInclude Include="dialogs\DialogMove.h" />
     <ClInclude Include="dialogs\dialogsT.h" />
-    <ClInclude Include="utilites\Registry.h" />
-    <ClInclude Include="utilites\regnotify.h" />
     <ClInclude Include="utilites\stlcatalogs.h" />
     <ClInclude Include="main\header.h" />
     <ClInclude Include="resource.h" />

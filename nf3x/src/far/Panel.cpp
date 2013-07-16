@@ -68,7 +68,6 @@ namespace {
 
 CPanel::CPanel(tstring catalog)
 : m_PanelTitle(catalog)
-, m_RegNotify(CSettings::GetInstance().get_NamedFolders_reg_key().c_str())
 , m_PreviousDir(CPanelInfoWrap(INVALID_HANDLE_VALUE).GetPanelCurDir(true))
 	//get_hPlugin().GetPanelInfo(true).CurDir;
 	//get_hPlugin не подходит, т.к. экземпл€р панели еще не создан
@@ -353,16 +352,17 @@ int CPanel::ProcessEvent(const struct ProcessPanelEventInfo *pInfo) {
 		}
 		bexclude_double = true;
 	} else if (FE_IDLE == pInfo->Event) {
-		if (m_RegNotify.Check()) {
-			//обновл€ем, если панель плагина не активна... ???
-			PanelInfo const& pi = get_hPlugin().GetPanelInfo(true);
-			if ((pi.Flags & PFLAGS_PLUGIN) != 0) {
-				CPanelUpdater pu(this, pi.CurrentItem);
-				pu.UpdateActivePanel();
-				pu.UpdateInactivePanel();
-			}
-			m_RegNotify.Start();
-		};
+//!TODO:FAR3: is it possible to know about changes in panel content?
+// 		if (m_RegNotify.Check()) {
+// 			//обновл€ем, если панель плагина не активна... ???
+// 			PanelInfo const& pi = get_hPlugin().GetPanelInfo(true);
+// 			if ((pi.Flags & PFLAGS_PLUGIN) != 0) {
+// 				CPanelUpdater pu(this, pi.CurrentItem);
+// 				pu.UpdateActivePanel();
+// 				pu.UpdateInactivePanel();
+// 			}
+// 			m_RegNotify.Start();
+//		};
 	}
 
 	return FALSE;

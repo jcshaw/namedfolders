@@ -20,7 +20,6 @@
 #include "menu2.h"
 #include "menus_impl.h"
 #include "menu_header.h"
-#include "registry.h"
 #include "executor.h"
 #include "panel_functions.h"
 #include "PathsFinder.h"

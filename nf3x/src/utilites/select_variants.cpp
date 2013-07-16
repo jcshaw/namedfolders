@@ -28,7 +28,7 @@
 using namespace nf;
 
 namespace {
-	int append_if_equal_to_pattern(nf::shortcuts_sequence_item const& sv
+	int append_if_equal_to_pattern(nf::titem_sequence_values const& sv
 		, nf::tshortcuts_list &DestList
 		, tstring const& Catalog
 		, tstring const& srcPattern
@@ -43,7 +43,7 @@ namespace {
 	inline bool is_match(tstring const &Value, tstring const& valuePattern) {
 		return nf::Parser::IsTokenMatchedToPattern(Value, valuePattern.c_str(), false);
 	}
-	int append_if_equal_paths(nf::shortcuts_sequence_item const& sv
+	int append_if_equal_paths(nf::titem_sequence_values const& sv
 		, nf::tshortcuts_list& DestList
 		, tstring const& Catalog
 		, tstring const& valuePattern
@@ -59,7 +59,7 @@ namespace {
 		return 0;
 	}
 
-	int select_shortcuts(boost::function<int (shortcuts_sequence_item, bool, tstring)> &Func
+	int select_shortcuts(boost::function<int (titem_sequence_values, bool, tstring)> &Func
 		, bool bSearchInSubcatalogs
 		, tstring Catalog)
 	{
@@ -98,7 +98,7 @@ namespace {
 		, tstring Catalog
 		, bool bSearchByPath)
 	{
-		boost::function<int (shortcuts_sequence_item, bool, tstring)> f 
+		boost::function<int (titem_sequence_values, bool, tstring)> f 
 			= boost::bind( (bSearchByPath ? append_if_equal_paths : append_if_equal_to_pattern)
 				, _1,  boost::ref(destList),  _3,  boost::ref(shPattern), _2);
 

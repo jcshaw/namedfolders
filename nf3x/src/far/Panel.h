@@ -8,7 +8,6 @@
 #include <boost/utility.hpp>
 //#include "far2/plugin.hpp"
 #include "kernel.h"
-#include "regnotify.h"
 #include "PanelInfoWrap.h"
 #include "lang.h"
 #include "settings.h"
@@ -55,8 +54,6 @@ private:
 
 	tstring const m_PreviousDir;	//директория, открытая на панели плагина до открытия панели
 	tmap_panelitems m_FindCache;	//при поиске выделям память для хранения содержимого всех каталогов
-
-	CRegNotify m_RegNotify;
 
 	int go_to_up_folder(OPERATION_MODES OpMode);
 	void read_list_panelitems(DWORD flags);

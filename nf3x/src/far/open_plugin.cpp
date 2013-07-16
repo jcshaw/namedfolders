@@ -73,7 +73,7 @@ HANDLE nf::OpenFromPluginsMenu() {
 			}
 		} break;
 	case 2: { //edit list of patterns
-			nf::Patterns::CommandsManager cm(nf::GetRegistryKeyForCommandPatterns());
+			nf::Patterns::CommandsManager cm;
 			nf::Patterns::EditPatterns(cm);
 		} break;
 	};
@@ -84,7 +84,7 @@ HANDLE nf::OpenFromPluginsMenu() {
 namespace {
 	inline tstring pattern_to_command(tstring const& srcCommand) {
 		//decode srcCommand using patterns 
-		nf::Patterns::CommandsManager cm(nf::GetRegistryKeyForCommandPatterns());
+		nf::Patterns::CommandsManager cm;
 		tstring prefix = nf::Parser::ExtractPrefix(srcCommand);
 		if (! cm.CheckIfPrefixIsFree(prefix)) {	//there is pattern srcCommand for the prefix 
 			tstring dest;
