@@ -92,7 +92,11 @@ nf::PluginSettings::tsettings_handle nf::PluginSettings::FarCreateKey(tkey_handl
 
 bool nf::PluginSettings::FarDeleteKey(tkey_handle keyHandle, tstring const& keyName) {
 	auto key = FarOpenKey(keyHandle, keyName);
-	return FarDeleteKey(key);
+	if (! nf::PluginSettings::isInvalidHandle(key)) {
+		return FarDeleteKey(key);
+	} else {
+		return false;
+	}
 }
 
 bool nf::PluginSettings::FarDeleteKey(tkey_handle keyHandle) {
@@ -251,5 +255,60 @@ bool nf::PluginSettings::FarDeleteValue(tkey_handle keyHandle, tstring const& va
 		, &fsv
 		);
 	return ret != 0;
+}
+
+namespace {
+	bool copy_key(nf::PluginSettings::tkey_handle hSrc, nf::PluginSettings::tkey_handle hDest) {
+		bool bret = true;
+		FarSettingsEnum fse;
+		fse.StructSize = sizeof(FarSettingsEnum);
+		fse.Root = reinterpret_cast<size_t>(hSrc);
+		if (0 == g_PluginInfo.SettingsControl(nf::PluginSettings::getRootHandle(), SCTL_ENUM, 0, &fse)) {
+			return false;
+		}
+		for (size_t i = 0; i < fse.Count; ++i) {
+			switch (fse.Items[i].Type) {
+			case FST_SUBKEY: {
+				auto hdest_subkey = nf::PluginSettings::FarCreateKey(hDest, fse.Items[i].Name);
+				if (! nf::PluginSettings::isInvalidHandle(hdest_subkey)) {
+					auto hsrc_subkey = nf::PluginSettings::FarOpenKey(hSrc, fse.Items[i].Name);
+					if (! nf::PluginSettings::isInvalidHandle(hsrc_subkey)) {
+						bret &= copy_key(hsrc_subkey, hdest_subkey);
+					}
+				}
+							 } break;
+			case FST_QWORD: 
+				assert(false); //this type is not used in NF
+				break;
+			case FST_STRING: {
+				tstring svalue;
+				if (nf::PluginSettings::FarGet(hSrc, fse.Items[i].Name, svalue)) {
+					nf::PluginSettings::FarSet(hDest, fse.Items[i].Name, svalue);
+				} else {
+					bret = false;
+				}
+							 } break;
+			case FST_DATA: 
+				assert(false); //this type is not used in NF
+				break;
+			}
+		}
+
+		return bret;
+	}
+}
+
+bool nf::PluginSettings::CopyKey(nf::tlist_strings const& src, nf::tlist_strings const& dest) {
+	auto hsrc = FarOpenKey(0, src);
+	if (isInvalidHandle(hsrc)) {
+		return false;
+	}
+
+	auto hdest = FarCreateKey(0, dest);
+	if (isInvalidHandle(hdest)) {
+		return false;
+	}
+
+	return copy_key(hsrc, hdest);
 }
 

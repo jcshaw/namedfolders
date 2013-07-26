@@ -98,7 +98,7 @@ private:
 	bool get_value(tspec_folders specFolder, tstring const& srcName, tstring& destValue);
 
 	/// a/b/c -> "Catalogs/a/Catalogs/b/Catalogs/c"
-	std::list<tstring> prepare_full_path(std::list<tstring> src);
+	static std::list<tstring> prepare_full_path(std::list<tstring> const& src);
 private: //members
 	boost::shared_ptr<FarSettingsItem> _pFSI;
 

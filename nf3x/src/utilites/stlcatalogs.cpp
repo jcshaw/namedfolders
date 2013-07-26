@@ -60,7 +60,7 @@ nf::sc::CCatalog::CCatalog(tstring const& subCatalog, CCatalog const *pParent, b
 }
 
 /// a/b/c -> "Catalogs/a/Catalogs/b/Catalogs/c"
-std::list<tstring> nf::sc::CCatalog::prepare_full_path(std::list<tstring> src) {
+std::list<tstring> nf::sc::CCatalog::prepare_full_path(std::list<tstring> const& src) {
 	std::list<tstring> dest;
 	auto const folder = GetSpecFolderName(REG_SUB_CATALOGS);
 	BOOST_FOREACH(auto const& a, src) {
@@ -127,7 +127,7 @@ bool nf::sc::CCatalog::delete_value(tspec_folders specFolder, tstring const& src
 	if (nf::PluginSettings::isInvalidHandle(key)) {
 		return false;
 	}	
-	return nf::PluginSettings::FarDeleteKey(key, srcName);
+	return nf::PluginSettings::FarDeleteValue(key, srcName);
 }
 
 bool nf::sc::CCatalog::get_value(tspec_folders specFolder, tstring const& name, tstring& destValue) {
@@ -148,8 +148,9 @@ tstring nf::sc::CCatalog::getCatalogPath() const {
 	tstring ss; //avoid stringstream because paths are short 
 	bool first = true;
 	BOOST_FOREACH(tstring const& item, _CatalogPath) {
-		if (first) {
+		if (! first) {
 			ss += SLASH_CATS;
+		} else {
 			first = false;
 		}
 		ss  += item;
@@ -161,8 +162,6 @@ tstring nf::sc::CCatalog::getCatalogPath() const {
 bool nf::sc::CCatalog::eraseKey(tstring const &keyPath) {
 	CCatalog c(keyPath);
 	return c.deleteThisCatalog();
-// 	auto kvp = Utils::DividePathFilename(keyPath, SLASH_CATS_CHAR, true);
-// 	return c.DeleteSubcatalog(kvp.second);
 }
 
 bool nf::sc::CCatalog::moveKey(tstring const &srcPath, tstring const &targetPath) {
@@ -173,8 +172,50 @@ bool nf::sc::CCatalog::moveKey(tstring const &srcPath, tstring const &targetPath
 	}
 }
 
+namespace {
+	tstring get_last_list_item(nf::tlist_strings const& list) {
+		if (list.empty()) {
+			return tstring();
+		}
+		auto last = list.end();
+		--last;
+		return *last;
+	}
+}
+
 bool nf::sc::CCatalog::copyKey(tstring const &srcPath, tstring const &targetPath) {
-	return false; //!TODO
+	nf::tlist_strings src;
+	add_to_path(src, srcPath);
+
+	nf::tlist_strings dest;
+	add_to_path(dest, targetPath);
+
+	if (src.empty()) {
+		return false;
+	}
+	if (targetPath.size() > srcPath.size()) {
+		tstring part_target_path(targetPath, 0, srcPath.size());
+		if (0 == lstrcmpi(part_target_path.c_str(), srcPath.c_str())) {
+			return false; //it's not possible to copy "aa/bb/cc" to "aa/bb/cc/xx"
+		}
+	}
+
+	auto src_last_folder = get_last_list_item(src);
+	auto dest_last_folder = get_last_list_item(dest);
+	bool dest_subcatalog_exists = 
+		! src_last_folder.empty() 
+		&& ! dest_last_folder.empty()
+		&& 0 == lstrcmpi(src_last_folder.c_str(), dest_last_folder.c_str());
+
+	auto src_full = prepare_full_path(src);
+	auto dest_full = prepare_full_path(dest);
+
+	if (! dest_subcatalog_exists) {
+		dest_full.push_back(GetSpecFolderName(REG_SUB_CATALOGS));
+		dest_full.push_back(src_last_folder);
+	}
+	
+	return nf::PluginSettings::CopyKey(src_full, dest_full);
 }
 
 bool nf::sc::CCatalog::deleteThisCatalog() {

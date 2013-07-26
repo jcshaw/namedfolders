@@ -42,7 +42,11 @@ namespace nf {
 		static bool isInvalidHandle(tsettings_handle const& h) {
 			return h == 0;
 		}
-
+		/// Make copy of source catalog into target path
+		/// @param src - source path, i.e. a/Catalogs/c
+		/// @param dest - target path, i.e. a/Catalogs/b/Catalogs
+		/// @returns true if /a/Catalogs/b/Catalogs/c is successfully created
+		static bool CopyKey(nf::tlist_strings const& src, nf::tlist_strings const& dest);
 	};
 
 }
