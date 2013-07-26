@@ -77,7 +77,7 @@ CConfigureDialog::CConfigureDialog()
 
 	//загружаем текущие настройки - они нужны, чтобы определить текущий Asterix mode и инициализировать комбобокс
 	CSettings::GetInstance().ReloadSettings();
-	dde_registry(false);
+	dde_settings_db(false);
 
 	for (unsigned int i = 0; i < NUM_MAIN_STR_SETTINGS; ++i) {
 		if (ID_EDIT_ASTERIXMODE == main_str_settings[i].control_id) {
@@ -109,7 +109,7 @@ UINT CConfigureDialog::ShowModal()
 		case ID_OK: 
 		{	//записываем настройки
 			dde_main_dialog(false);
-			dde_registry(true);
+			dde_settings_db(true);
 			CSettings::GetInstance().SaveSettings();
 			return 0;
 		} break;
@@ -120,9 +120,9 @@ UINT CConfigureDialog::ShowModal()
 	return 0;
 }
 
-void CConfigureDialog::dde_registry(bool bSaveToRegistry)
+void CConfigureDialog::dde_settings_db(bool bSaveToSettingsDB)
 {
-	if (bSaveToRegistry) {
+	if (bSaveToSettingsDB) {
 		for (int i = 0; i < NUM_MAIN_DW_SETTINGS; ++i) {
 			CSettings::GetInstance().SetValue(main_dw_settings[i].settings_id, m_dwParams[main_dw_settings[i].settings_id]);
 		}

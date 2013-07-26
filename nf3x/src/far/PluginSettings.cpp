@@ -150,7 +150,7 @@ bool nf::PluginSettings::FarSet(tkey_handle keyHandle, tstring const& name, __in
 		sizeof(FarSettingsItem)
 		, reinterpret_cast<size_t>(keyHandle) 
 		, name.c_str()
-		, FST_STRING
+		, FST_QWORD
 		, number
 	};
 	return 0 != g_PluginInfo.SettingsControl(getRootHandle()
@@ -164,7 +164,7 @@ bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, __in
 		sizeof(FarSettingsItem)
 		, reinterpret_cast<size_t>(keyHandle) 
 		, name.c_str()
-		, FST_STRING
+		, FST_QWORD
 		, 0
 	};
 	if (g_PluginInfo.SettingsControl(getRootHandle(), SCTL_GET, 0, &fsi)) {
