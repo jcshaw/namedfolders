@@ -71,7 +71,7 @@ UINT nf::Confirmations::AskToGoToNearest(HANDLE hPlugin, tstring const& srcDir, 
 
 nf::Confirmations::tconfirm_delete_result 
 nf::Confirmations::Private::ask_for_delete_general(tstring const& srcTitle, int Msg0, int Msg1, bool bSeveral) {	
-	const unsigned int number_buttons = bSeveral ? 4 : 2;
+	const intptr_t number_buttons = bSeveral ? 4 : 2;
 	const wchar_t* Msg[7];	
 	Msg[0] = GetMsg(Msg0);
 	Msg[1] = GetMsg(Msg1);
@@ -85,7 +85,7 @@ nf::Confirmations::Private::ask_for_delete_general(tstring const& srcTitle, int 
 		Msg[4] = GetMsg(lg::MSG_CANCEL);	
 	}
 
-	int code = g_PluginInfo.Message(&nf::NF_PLUGIN_GUID
+	intptr_t code = g_PluginInfo.Message(&nf::NF_PLUGIN_GUID
 		, &NF_CONFIRMATION_MESSAGE_GUID
 		, FMSG_WARNING 
 		, 0

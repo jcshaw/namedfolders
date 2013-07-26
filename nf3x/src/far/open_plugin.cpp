@@ -37,7 +37,7 @@ HANDLE nf::OpenFromPluginsMenu() {
 		MenuItems[i].Text = &(*menu_buffers[i])[0];	
 	}
 
-	int nSelectedItem = g_PluginInfo.Menu(&nf::NF_PLUGIN_GUID
+	intptr_t nSelectedItem = g_PluginInfo.Menu(&nf::NF_PLUGIN_GUID
 		, &nf::NF_PLUGINSMENU_GUID
 		, -1
 		, -1
@@ -49,7 +49,7 @@ HANDLE nf::OpenFromPluginsMenu() {
 		, 0
 		, 0
 		, &MenuItems[0]
-		, static_cast<int>(MenuItems.size())
+		, MenuItems.size()
 	);
 
 	if (-1 == nSelectedItem) return INVALID_HANDLE_VALUE;	//user has canceled menu

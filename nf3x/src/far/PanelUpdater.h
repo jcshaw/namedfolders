@@ -17,7 +17,7 @@ namespace Panel {
 
 class CPanelUpdater {
 public:
-	CPanelUpdater(CPanel* const p, ULONG nCurrentItem = 0, OPERATION_MODES OpMode = 0) 
+	CPanelUpdater(CPanel* const p, size_t nCurrentItem = 0, OPERATION_MODES OpMode = 0) 
 		: m_nCurrentItem(nCurrentItem)
 		, m_pPanel(p)
 		, m_OpMode(OpMode) //mode of update panel
@@ -37,7 +37,7 @@ public:
 			if (m_pif.get()) {
 				m_nCurrentItem = (*m_pif)();	//ищем элемент по имени, указанному ранее
 			}
-			int nTopPanelItem = (static_cast<LONG>(m_nCurrentItem) > 
+			size_t nTopPanelItem = (static_cast<LONG>(m_nCurrentItem) > 
 				m_hPlugin.GetPanelInfo(true).PanelRect.bottom)
 				? m_nCurrentItem 
 				: 0;
@@ -48,7 +48,7 @@ public:
 		m_hPlugin.UpdateAndRedraw(false, m_hPlugin.GetPanelInfo(false).CurrentItem, 0);
 	}
 private:
-	ULONG m_nCurrentItem;
+	size_t m_nCurrentItem;
 	CPanel* const m_pPanel;
 	OPERATION_MODES m_OpMode;
 	boost::scoped_ptr<CPanelItemFinder> m_pif;

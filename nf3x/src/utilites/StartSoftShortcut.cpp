@@ -32,14 +32,14 @@ using namespace nf;
 using namespace Start;
 
 namespace {
-	class helper {
+	class buffer_wrapper {
 		nf::Search::MaskMatcher m_MaskSh;
 		nf::Search::MaskMatcher m_MaskCatalogs;
 		tstring m_RootPath;
 		nf::tshortcuts_list m_Data;
 		int m_bTemporaryValue;	//по значению Temporary различаем пути, к которым принадлежат €рлыки	
 	public:
-		helper(tstring const& srcRootPath, nf::Search::MaskMatcher& mmSh, int bTemporaryValue) 
+		buffer_wrapper(tstring const& srcRootPath, nf::Search::MaskMatcher& mmSh, int bTemporaryValue) 
 			: m_RootPath(srcRootPath)
 			, m_MaskSh(mmSh)
 			, m_MaskCatalogs(L"*", ASTERIX_MODE_BOTH)
@@ -77,7 +77,7 @@ namespace {
 }
 
 void Start::LoadShortcuts(tstring const& srcRootPath, nf::Search::MaskMatcher& mmSh, int bTemporaryValue, nf::tshortcuts_list& destData) {
-	helper h(srcRootPath, mmSh, bTemporaryValue);
+	buffer_wrapper h(srcRootPath, mmSh, bTemporaryValue);
 	h.LoadSubCatalogs(L"");
 	/*if (h.IsDirMatchedToPattern(L"")) */h.LoadShortcuts(L"");
 	BOOST_FOREACH(nf::tshortcut_info const& item, h.GetResults()) {

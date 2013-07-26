@@ -198,7 +198,7 @@ bool nf::Panel::EditCatalog(CPanel* pPanel, tstring const& catalogName) {
 
 void nf::Panel::SaveSetup(CPanel* pPanel) {
 	//запоминаем состояние панели
-	int ViewMode = pPanel->get_hPlugin().GetPanelInfo(true).ViewMode;
+	intptr_t view_mode = pPanel->get_hPlugin().GetPanelInfo(true).ViewMode;
 	const wchar_t *Msg = GetMsg(lg::MSG_SAVE_SETUP_MESSAGE);      
 
 	if (g_PluginInfo.Message(&nf::NF_PLUGIN_GUID
@@ -208,7 +208,7 @@ void nf::Panel::SaveSetup(CPanel* pPanel) {
 		, (wchar_t const * const*) Msg
 		, 0, 0) == 0) 
 	{
-		CSettings::GetInstance().SetValue(nf::ST_PANEL_MODE, ViewMode);	
+		CSettings::GetInstance().SetValue(nf::ST_PANEL_MODE, view_mode);	
 		CSettings::GetInstance().SaveSettings();
 	}
 }

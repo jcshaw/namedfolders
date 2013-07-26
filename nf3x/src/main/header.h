@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 #include <list>
-#include "enforce.h"
 
 #pragma warning(disable: 4244 4267)
 //используется библиотека BOOST
