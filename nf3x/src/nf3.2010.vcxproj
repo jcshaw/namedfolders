@@ -89,10 +89,10 @@
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\libs\stlsoft-1.9.116\include;c:\libs\boost\include\boost-1_53;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\libs\stlsoft-1.9.116\include;c:\libs\boost\include\boost-1_53;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">c:\libs\stlsoft-1.9.116\include;c:\libs\boost\include\boost-1_53;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\libs\stlsoft-1.9.116\include;c:\libs\boost\include\boost-1_53;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\libs\stlsoft-1.9.116\include;c:\libs\boost\include\boost-1_54;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\libs\stlsoft-1.9.116\include;c:\libs\boost\include\boost-1_54;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">c:\libs\stlsoft-1.9.116\include;c:\libs\boost\include\boost-1_54;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\libs\stlsoft-1.9.116\include;c:\libs\boost\include\boost-1_54;$(IncludePath)</IncludePath>
     <RunCodeAnalysis Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</RunCodeAnalysis>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\libs\boost\lib;$(LibraryPath)</LibraryPath>
     <CodeAnalysisIgnoreGeneratedCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CodeAnalysisIgnoreGeneratedCode>
@@ -164,10 +164,10 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll"</Command>
+      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "C:\Program Files\Far Manager\Plugins\NamedFolders\NamedFolders.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll"</Message>
+      <Message>copy /b "$(OutDir)\$(ProjectName).dll" "C:\Program Files\Far Manager\Plugins\NamedFolders\NamedFolders.dll"</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -99,6 +99,7 @@ private:
 
 	/// a/b/c -> "Catalogs/a/Catalogs/b/Catalogs/c"
 	static std::list<tstring> prepare_full_path(std::list<tstring> const& src);
+	static bool copy_or_rename(tstring const &srcPath, tstring const &targetPath, bool renameEnabled);
 private: //members
 	boost::shared_ptr<FarSettingsItem> _pFSI;
 

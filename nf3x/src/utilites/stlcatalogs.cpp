@@ -165,7 +165,7 @@ bool nf::sc::CCatalog::eraseKey(tstring const &keyPath) {
 }
 
 bool nf::sc::CCatalog::moveKey(tstring const &srcPath, tstring const &targetPath) {
-	if (copyKey(srcPath, targetPath)) {
+	if (copy_or_rename(srcPath, targetPath, true)) {
 		return eraseKey(srcPath);
 	} else {
 		return false;
@@ -184,6 +184,10 @@ namespace {
 }
 
 bool nf::sc::CCatalog::copyKey(tstring const &srcPath, tstring const &targetPath) {
+	return copy_or_rename(srcPath, targetPath, false);
+}
+
+bool nf::sc::CCatalog::copy_or_rename(tstring const &srcPath, tstring const &targetPath, bool renameEnabled) {
 	nf::tlist_strings src;
 	add_to_path(src, srcPath);
 
@@ -195,10 +199,25 @@ bool nf::sc::CCatalog::copyKey(tstring const &srcPath, tstring const &targetPath
 	}
 	if (targetPath.size() > srcPath.size()) {
 		tstring part_target_path(targetPath, 0, srcPath.size());
+		part_target_path += L"/"; //to avoid problem with renaming "bb" to "bb2"
 		if (0 == lstrcmpi(part_target_path.c_str(), srcPath.c_str())) {
 			return false; //it's not possible to copy "aa/bb/cc" to "aa/bb/cc/xx"
 		}
+	} 
+
+	bool rename = false;
+	if (renameEnabled && src.size() == dest.size()) {
+		auto ps = src.begin();
+		auto pd = dest.begin();
+		size_t n = src.size();
+		while (ps != src.end() && pd != dest.end() && *ps == *pd) {
+			++ps;
+			++pd;
+			--n;
+		}
+		rename = n == 1; // renaming: a/b/c -> a/b/c2
 	}
+
 
 	auto src_last_folder = get_last_list_item(src);
 	auto dest_last_folder = get_last_list_item(dest);
@@ -210,7 +229,7 @@ bool nf::sc::CCatalog::copyKey(tstring const &srcPath, tstring const &targetPath
 	auto src_full = prepare_full_path(src);
 	auto dest_full = prepare_full_path(dest);
 
-	if (! dest_subcatalog_exists) {
+	if (! dest_subcatalog_exists && ! rename) {
 		dest_full.push_back(GetSpecFolderName(REG_SUB_CATALOGS));
 		dest_full.push_back(src_last_folder);
 	}
