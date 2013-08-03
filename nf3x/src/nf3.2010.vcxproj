@@ -218,7 +218,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <Optimization>Full</Optimization>
+      <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
@@ -257,10 +257,10 @@
       <AdditionalDependencies>LIBCPMT.lib;LIBCMT.lib;kernel32.lib;uuid.lib;user32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;shlwapi.lib;comsupp.lib;libboost_regex-vc100-mt-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll"</Command>
+      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "C:\Program Files\Far Manager\Plugins\NamedFolders\NamedFolders.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files\Far2\Plugins\NamedFolders\NamedFolders.dll"</Message>
+      <Message>copy /b "$(OutDir)\$(ProjectName).dll" "C:\Program Files\Far Manager\Plugins\NamedFolders\NamedFolders.dll"</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

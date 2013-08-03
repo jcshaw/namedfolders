@@ -8,9 +8,14 @@ class CPanelInfoWrap {
 	HANDLE m_hPlugin;
 	PanelInfo m_Pi;
 public:
-	CPanelInfoWrap(HANDLE hPlugin) : m_hPlugin(hPlugin) {}
+	CPanelInfoWrap(HANDLE hPlugin) 
+		: m_hPlugin(hPlugin) 
+	{
+	}
 
 	PanelInfo const& GetPanelInfo(bool bActivePanel) {
+		memset(&m_Pi, 0, sizeof(m_Pi));
+		m_Pi.StructSize = sizeof(PanelInfo);
 		g_PluginInfo.PanelControl( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
 			, FCTL_GETPANELINFO
 			, 0
@@ -21,14 +26,19 @@ public:
 	tstring GetPanelCurDir(bool bActivePanel) {
 		auto buffer_size = g_PluginInfo.PanelControl( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE), FCTL_GETPANELDIRECTORY, 0, 0); 
 		nf::tautobuffer_char buffer(buffer_size);
-		if (! g_PluginInfo.PanelControl( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
+		buffer.resize(buffer_size);
+		FarPanelDirectory* pfpd = reinterpret_cast<FarPanelDirectory*>(&buffer[0]);
+		pfpd->StructSize = sizeof(FarPanelDirectory);
+		
+		auto ret = g_PluginInfo.PanelControl( (bActivePanel ? PANEL_ACTIVE : PANEL_PASSIVE)
 			, FCTL_GETPANELDIRECTORY
 			, buffer_size
 			, reinterpret_cast<void*>(&buffer[0])
-		)) {
+		); 
+
+		if (! ret) {
 			return L"";
 		}
-		FarPanelDirectory* pfpd = reinterpret_cast<FarPanelDirectory*>(&buffer[0]);
 		return pfpd->Name;
 	}
 
