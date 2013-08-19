@@ -160,6 +160,7 @@ public: //get modified data from dialog after dialog closing
 	tstring GetDialogItemValue(int dialogItemId) {
 		assert(m_DialogHandle != 0);
 		FarDialogItemData fdi;
+		fdi.StructSize = sizeof(fdi);
 		fdi.PtrLength = g_PluginInfo.SendDlgMessage(m_DialogHandle, DM_GETTEXT, dialogItemId, 0);
 		nf::tautobuffer_char buffer(static_cast<nf::tautobuffer_char::size_type>(fdi.PtrLength) + 1);		
 		fdi.PtrData = &buffer[0];

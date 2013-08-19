@@ -2,6 +2,7 @@
 #include "PluginSettings.h"
 
 #include <boost/foreach.hpp>
+#include "CatalogSequences.h"
 
 extern struct PluginStartupInfo g_PluginInfo; 
 
@@ -62,12 +63,26 @@ nf::PluginSettings::~PluginSettings() {
 	
 }
 
+namespace {
+	tstring to_lowcase(tstring const& src) {
+		nf::tautobuffer_char buffer(src.size() + 1);
+		lstrcpy(&buffer[0], src.c_str());
+		g_PluginInfo.FSF->LStrlwr(&buffer[0]);
+		return &buffer[0];
+	}
+}
+
 
 nf::PluginSettings::tsettings_handle nf::PluginSettings::FarOpenKey(tkey_handle keyHandle, tstring const& keyName) {
+	tstring key_name;
+	if (! ic_search_key_name(keyHandle, keyName, key_name)) {
+		return 0;
+	}
+
 	FarSettingsValue fsv = {
 		sizeof(FarSettingsValue)
 		, reinterpret_cast<size_t>(keyHandle) 
-		, keyName.c_str()
+		, key_name.c_str()
 	};
 	return (tkey_handle)g_PluginInfo.SettingsControl(getRootHandle()
 		, SCTL_OPENSUBKEY
@@ -78,6 +93,11 @@ nf::PluginSettings::tsettings_handle nf::PluginSettings::FarOpenKey(tkey_handle 
 
 
 nf::PluginSettings::tsettings_handle nf::PluginSettings::FarCreateKey(tkey_handle keyHandle, tstring const& keyName) {
+	tstring key_name;
+	if (! ic_search_key_name(keyHandle, keyName, key_name)) {
+		key_name = keyName;
+	}
+
 	FarSettingsValue fsv = {
 		sizeof(FarSettingsValue)
 		, reinterpret_cast<size_t>(keyHandle) 
@@ -178,7 +198,8 @@ bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, __in
 bool nf::PluginSettings::FarEnum(tkey_handle keyHandle, FarSettingsEnum& fse) {
 	fse.StructSize = sizeof(FarSettingsEnum);
 	fse.Root = reinterpret_cast<size_t>(keyHandle);
-	return 0 != g_PluginInfo.SettingsControl(getRootHandle(), SCTL_ENUM, 0, &fse);
+	auto code = g_PluginInfo.SettingsControl(getRootHandle(), SCTL_ENUM, 0, &fse);
+	return 0 != code;
 }	
 
 
@@ -310,5 +331,16 @@ bool nf::PluginSettings::CopyKey(nf::tlist_strings const& src, nf::tlist_strings
 	}
 
 	return copy_key(hsrc, hdest);
+}
+
+bool nf::PluginSettings::ic_search_key_name(tkey_handle keyHandle, tstring const& keyName, tstring& destKeyName) {
+	nf::SequenceCatalogs sc(keyHandle);
+	BOOST_FOREACH(tstring const& name, sc.getItems()) {
+		if (0 == g_PluginInfo.FSF->LStricmp(name.c_str(), keyName.c_str())) {
+			destKeyName = name;
+			return true;
+		}
+	}
+	return false;
 }
 

@@ -208,7 +208,7 @@ void nf::Panel::SaveSetup(CPanel* pPanel) {
 		, (wchar_t const * const*) Msg
 		, 0, 0) == 0) 
 	{
-		CSettings::GetInstance().SetValue(nf::ST_PANEL_MODE, view_mode);	
+		CSettings::GetInstance().SetValue(nf::ST_PANEL_MODE, static_cast<DWORD>(view_mode));	
 		CSettings::GetInstance().SaveSettings();
 	}
 }

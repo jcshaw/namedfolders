@@ -209,7 +209,7 @@
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll"</Command>
+      <Command>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files (x86)\Far Manager\Plugins\NamedFolders\NamedFolders.dll"</Command>
       <Message>copy /b "$(OutDir)\$(ProjectName).dll" "c:\Program Files (x86)\Far2\Plugins\NamedFolders\NamedFolders.dll"</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -218,7 +218,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
@@ -241,7 +241,7 @@
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>$(ProjectName).def</ModuleDefinitionFile>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)nf3.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>

@@ -30,6 +30,7 @@ void nf::DialogsCompletion::OpenFromDialog(HANDLE hDlg) {
 	if (! g_PluginInfo.SendDlgMessage(hDlg, DM_GETEDITPOSITION, focused_item, reinterpret_cast<void*>(&esp))) return; //this is not text field
 
 	FarDialogItemData fdi;
+	fdi.StructSize = sizeof(fdi);
 	fdi.PtrLength = static_cast<size_t>(g_PluginInfo.SendDlgMessage(hDlg, DM_GETTEXT, focused_item, 0));
 	nf::tautobuffer_char buffer(fdi.PtrLength + 1);
 	fdi.PtrData = &buffer[0];

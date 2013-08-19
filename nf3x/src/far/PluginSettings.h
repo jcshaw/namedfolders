@@ -47,6 +47,10 @@ namespace nf {
 		/// @param dest - target path, i.e. a/Catalogs/b/Catalogs
 		/// @returns true if /a/Catalogs/b/Catalogs/c is successfully created
 		static bool CopyKey(nf::tlist_strings const& src, nf::tlist_strings const& dest);
+	private:
+		/// try to find subkey of keyHandle with name equals to keyName 
+		/// main difference from FarOpenKey is that the search is case insensitive
+		static bool ic_search_key_name(tkey_handle keyHandle, tstring const& keyName, tstring& destKeyName);
 	};
 
 }
