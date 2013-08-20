@@ -90,6 +90,7 @@ public:
 
 	void UpdateAndRedraw(bool bActivePanel, size_t nCurrentItem = 0, size_t nTopPanelItem = 0) {
 		PanelRedrawInfo pri; 
+		pri.StructSize = sizeof(PanelRedrawInfo);
 		pri.CurrentItem = nCurrentItem;
 		pri.TopPanelItem = nTopPanelItem; 
 		UpdatePanel(bActivePanel);
