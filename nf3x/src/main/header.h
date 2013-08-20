@@ -187,6 +187,7 @@ namespace nf {
 	typedef std::list<nf::tcatalog_info> tcatalogs_list;
 
 	typedef stlsoft::auto_buffer<wchar_t> tautobuffer_char;
+
 // 	typedef stlsoft::auto_buffer<BYTE> tautobuffer_byte;
 // 	typedef boost::auto_buffer<wchar_t> tautobuffer_char;
 // 	typedef boost::auto_buffer<BYTE> tautobuffer_byte;
