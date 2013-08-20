@@ -11,6 +11,7 @@ namespace nf {
 		typedef HANDLE tsettings_handle;
 		typedef HANDLE tkey_handle;
 		static tsettings_handle getRootHandle();
+		static void closeRootHandle();
 	public:
 		static tsettings_handle FarOpenKey(tkey_handle keyHandle, tstring const& keyName);
 		static tsettings_handle FarCreateKey(tkey_handle keyHandle, tstring const& keyName);

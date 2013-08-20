@@ -15,6 +15,8 @@
 #include "open_plugin.h"
 #include "DiskMenuHelper.h"
 #include "dialogs_completion.h"
+#include "PluginSettings.h"
+#include "ScopeGuard.h"
 
 struct PluginStartupInfo g_PluginInfo; 
 struct FarStandardFunctions g_FSF;
@@ -69,6 +71,8 @@ void WINAPI GetPluginInfoW(struct PluginInfo *pInfo) {
 }
 
 HANDLE WINAPI  OpenW(const struct OpenInfo *pInfo) {
+	auto cleanup = Ext::MakeGuard(&nf::PluginSettings::closeRootHandle);
+
 	if (! (pInfo->StructSize >= sizeof(OpenInfo))) {
 		return 0;
 	}
@@ -107,6 +111,8 @@ HANDLE WINAPI  OpenW(const struct OpenInfo *pInfo) {
 }
 
 void WINAPI GetOpenPanelInfoW(struct OpenPanelInfo *pInfo) {
+	auto cleanup = Ext::MakeGuard(&nf::PluginSettings::closeRootHandle);
+
 	if (! (pInfo->StructSize >= sizeof(OpenPanelInfo))) {
 		return;
 	}
@@ -156,6 +162,8 @@ intptr_t WINAPI SetDirectoryW(const struct SetDirectoryInfo *pInfo) {
 }
 
 void WINAPI ClosePanelW(const struct ClosePanelInfo *pInfo) {
+	auto cleanup = Ext::MakeGuard(&nf::PluginSettings::closeRootHandle);
+
 	if (! (pInfo->StructSize >= sizeof(ClosePanelInfo))) {
 		return;
 	}
@@ -179,6 +187,8 @@ intptr_t WINAPI ProcessPanelInputW(const struct ProcessPanelInputInfo *pInfo) {
 }
 
 intptr_t WINAPI ConfigureW(const struct ConfigureInfo *pInfo) {
+	auto cleanup = Ext::MakeGuard(&nf::PluginSettings::closeRootHandle);
+
 	if (! (pInfo->StructSize >= sizeof(ConfigureInfo))) {
 		return 0;
 	}
@@ -203,6 +213,8 @@ intptr_t WINAPI MakeDirectoryW(struct MakeDirectoryInfo *pInfo) {
 }
 
 intptr_t WINAPI PutFilesW(const struct PutFilesInfo *pInfo) {
+	auto cleanup = Ext::MakeGuard(&nf::PluginSettings::closeRootHandle);
+
 	if (! (pInfo->StructSize >= sizeof(PutFilesInfo))) {
 		return 0;
 	}

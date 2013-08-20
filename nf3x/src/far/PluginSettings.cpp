@@ -27,28 +27,42 @@ namespace {
 
 	/// Похоже объект настроек плагина должен быть глобальным. Если создавать экземпляр на уровне каталога, то шоткаты не создаются.
 	class SingleHandler {
-	public:
 		HANDLE _h;
-	 
-		SingleHandler() 
-			: _h(open_handle())
-		{
-
-		}
 	public:
+	 
+		SingleHandler() : _h(0) {}
 		~SingleHandler() {
-			g_PluginInfo.SettingsControl(_h, SCTL_FREE, 0, 0);
+			close();
 		}
 
-		static HANDLE getHandle() {
+		static SingleHandler& getInstance() {
 			static SingleHandler h;
-			return h._h;
+			return h;
+		}
+
+		HANDLE get() {
+			if (_h == 0) {
+				_h = open_handle();
+			}
+			return _h;
+		}
+
+		void close() {
+			if (_h != 0) {
+				g_PluginInfo.SettingsControl(_h, SCTL_FREE, 0, 0);
+				_h = 0;
+			}
 		}
 	};
 }
 
+void nf::PluginSettings::closeRootHandle() {
+	SingleHandler::getInstance().close();
+}
+
+
 nf::PluginSettings::tsettings_handle nf::PluginSettings::getRootHandle() {
-	return SingleHandler::getHandle();
+	return SingleHandler::getInstance().get();
 }
 
 
@@ -343,4 +357,5 @@ bool nf::PluginSettings::ic_search_key_name(tkey_handle keyHandle, tstring const
 	}
 	return false;
 }
+
 

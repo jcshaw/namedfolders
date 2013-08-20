@@ -311,6 +311,7 @@
     <ClCompile Include="utilites\x64.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="external\ScopeGuard.h" />
     <ClInclude Include="far3\far_utils2.h" />
     <ClInclude Include="far3\panel_types.h" />
     <ClInclude Include="far\CatalogSequences.h" />
