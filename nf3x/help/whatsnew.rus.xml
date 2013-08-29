@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
+<version product_name="Named Folders" version="4.0.0.284 beta 1" date="29.08.2013"> 
+<item type="!">NF 4.X работает только под FAR 3. В FAR 2.X можно использовать NF 3.X</item>
+<item type="!">Все ярлыки теперь хранятся не в реестре, а в sqlite.</item>
+<item type="!">База ярлыков NF теперь общая для Far x86 и Far x64.</item>
+<item type="*">Временные ярлыки упразднены и теперь работают как обычные ярлыки. Т.е. команды cd:+ и cd:: стали эквивалентны.</item>
+<item>Если на панели FAR открыто две панели NF, то при изменении данных на одной панели вторая автоматически НЕ обновляется.</item>
+</version>
+
 <version product_name="Named Folders" version="3.0.0.259 snapshot" date="10.04.2011"> 
 <item type="+">Реализована поддержка cd:shell:abc, где abc - имя known folder.</item>
 <item type="*">Команда cd: soft теперь выполняет запуск приложений из отдельного

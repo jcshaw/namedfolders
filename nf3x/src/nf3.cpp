@@ -112,13 +112,13 @@ HANDLE WINAPI  OpenW(const struct OpenInfo *pInfo) {
 
 void WINAPI GetOpenPanelInfoW(struct OpenPanelInfo *pInfo) {
 	auto cleanup = Ext::MakeGuard(&nf::PluginSettings::closeRootHandle);
+	pInfo->StructSize = sizeof(OpenPanelInfo);
 
-	if (! (pInfo->StructSize >= sizeof(OpenPanelInfo))) {
-		return;
-	}
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
-		p->GetOpenPanelInfo(pInfo);
+		if (pInfo->hPanel != INVALID_HANDLE_VALUE) {
+			nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
+			p->GetOpenPanelInfo(pInfo);
+		}
 	} catch (...) {
 	}
 }
@@ -142,9 +142,12 @@ void WINAPI FreeFindDataW(const struct FreeFindDataInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(FreeFindDataInfo))) {
 		return;
 	}
+
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
-		p->FreeFindData(pInfo);
+		if (pInfo->hPanel != INVALID_HANDLE_VALUE) {
+			nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
+			p->FreeFindData(pInfo);
+		}
 	} catch (...) {
 	}
 }
@@ -152,6 +155,9 @@ void WINAPI FreeFindDataW(const struct FreeFindDataInfo *pInfo) {
 intptr_t WINAPI SetDirectoryW(const struct SetDirectoryInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(SetDirectoryInfo))) {
 		return 0;
+	}
+	if (pInfo->hPanel == INVALID_HANDLE_VALUE) {
+		return FALSE;
 	}
 	try {
 		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
@@ -168,8 +174,10 @@ void WINAPI ClosePanelW(const struct ClosePanelInfo *pInfo) {
 		return;
 	}
 	try {
-		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
-		delete p;
+		if (pInfo->hPanel != INVALID_HANDLE_VALUE) {
+			nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
+			delete p;
+		}
 	} catch (...) {
 	}
 }
@@ -178,6 +186,10 @@ intptr_t WINAPI ProcessPanelInputW(const struct ProcessPanelInputInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(ProcessPanelInputInfo))) {
 		return 0;
 	}
+	if (pInfo->hPanel == INVALID_HANDLE_VALUE) {
+		return FALSE;
+	}
+
 	try {
 		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
 		return p->ProcessPanelInputW(pInfo->Rec);
@@ -204,6 +216,9 @@ intptr_t WINAPI MakeDirectoryW(struct MakeDirectoryInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(MakeDirectoryInfo))) {
 		return 0;
 	}
+	if (pInfo->hPanel == INVALID_HANDLE_VALUE) {
+		return FALSE;
+	}
 	try {
 		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
 		return p->MakeDirectory(pInfo);
@@ -218,6 +233,9 @@ intptr_t WINAPI PutFilesW(const struct PutFilesInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(PutFilesInfo))) {
 		return 0;
 	}
+	if (pInfo->hPanel == INVALID_HANDLE_VALUE) {
+		return FALSE;
+	}
 	try {
 		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);
 		return p->PutFiles(pInfo);
@@ -229,6 +247,9 @@ intptr_t WINAPI PutFilesW(const struct PutFilesInfo *pInfo) {
 intptr_t WINAPI ProcessPanelEventW(const struct ProcessPanelEventInfo *pInfo) {
 	if (! (pInfo->StructSize >= sizeof(ProcessPanelEventInfo))) {
 		return 0;
+	}
+	if (pInfo->hPanel == INVALID_HANDLE_VALUE) {
+		return FALSE;
 	}
 	try {
 		nf::Panel::CPanel *p = reinterpret_cast<nf::Panel::CPanel*>(pInfo->hPanel);

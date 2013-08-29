@@ -29,6 +29,8 @@ namespace Panel {
 		{ }
 		int operator()() {
 			PanelInfo pi;
+			pi.StructSize = sizeof(PanelInfo);
+
 			g_PluginInfo.PanelControl(PANEL_ACTIVE, FCTL_GETPANELINFO, 0, reinterpret_cast<void*>(&pi));
 			for (unsigned int i = 0; i < pi.ItemsNumber; ++i) {
 				nf::tautobuffer_byte buffer(g_PluginInfo.PanelControl(PANEL_ACTIVE, FCTL_GETPANELITEM, i, NULL));

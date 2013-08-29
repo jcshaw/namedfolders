@@ -134,7 +134,7 @@ F.e. #cd:--f c:\temp#, #cd:--df \\computer\abc#, etc. If path contains spaces, i
 <ss>Creation of catalogs and shortcuts</ss>
   #cd::name# - create constant shortcut in the root catalog;
   #cd::catalog/name# - create constant shortcut in the #catalog#;
-  #cd:+name# - create temporary shortcut (it will be deleted automatically after rebooting);
+  #cd:+name# - create temporary shortcut (it will be deleted automatically after rebooting - this feature doens't work in NF 4.X);
   #cd:::name# - create single shortcut for two directories (opened on active and inactive FAR panels);
   #cd::+name# - the same, but shortcut will be temporary;
   #cd::#, #cd:::#, #cd:+#, #cd::+# - create shortcut with the name equal to the name of currently opened directory.
@@ -296,7 +296,7 @@ started from "/".
   #Directory for active panel#  - directory to be opened on active FAR panel after shortcut execution.
 This directory can be local, network or directory on the another plugin. It can contain metacharaters, see section <link section="NamedFolderPaths">Named Folder Paths</link> for details.
   #Directory for inactive panel#- directory to be opened on inactive FAR panel after shortcut execution (optional parameter)
-  #Temporary# - this shortcut will be removed after computer restart.
+  #Temporary# - this shortcut will be removed after computer restart (this feature doesn't work in NF 4.X, so temporary shortcuts are equal to general shortcuts).
 </section>
 
 <section title="DialogMove">

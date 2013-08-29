@@ -9,6 +9,15 @@
 
 
 ----------------------------------------------------------------------------
+Version 4.0.0.284 beta 1 [29.08.2013]
+----------------------------------------------------------------------------
+[!] NF 4.X works under FAR 3 only. For FAR 2 please use NF 3.X.
+[!] All shortcuts are stored in sqlite now, Windows registry is not used anymore.
+[!] Both x86 and x64 versions of NF are used same shortcuts database.
+[*] Temporary shortucts work as general shorcuts. I.e. commands cd:+ è cd:: are equal.
+[] If two NF panels are opened at the same time and you change data on one panel, then data on another panel is NOT updated automatically. Custom update is required.
+
+----------------------------------------------------------------------------
 Version 3.0.0.259 snapshot [10.04.2011]
 ----------------------------------------------------------------------------
 [+] Now, it's possible to execute known folders directly from command

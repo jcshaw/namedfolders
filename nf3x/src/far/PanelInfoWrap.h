@@ -1,7 +1,6 @@
 #pragma once
 
-//#include "far2/plugin.hpp"
-//#include "far2/farkeys.hpp"
+#include <boost/lexical_cast.hpp>
 
 //обертка вокруг Far.PanelInfo
 class CPanelInfoWrap {
