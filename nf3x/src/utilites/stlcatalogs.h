@@ -5,107 +5,107 @@
 * e-mail: dvpublic0@gmail.com
 */
 #pragma once
-#include "stlsoft_def.h"
+#include "main/header.h"
 #include "Kernel.h"
 #include "strings_utils.h"
 #include "settings.h"
 #include "registry_functions.h"
+#include <boost/shared_ptr.hpp>
+#include "CatalogSequences.h"
 
-//работа с каталогами в стиле stl
 namespace nf {
 namespace sc {
 
-typedef WinSTL::reg_value_sequence_t shortcuts_sequence;
-typedef WinSTL::reg_key_sequence_t subcatalogs_sequence;
-
-template<class V>
-class sequence_item {
-	V m_value;
-public:
-	sequence_item(){}
-
-	sequence_item(V const &value) : m_value(value){}
-	sequence_item(sequence_item<V> const& s) : m_value(s.m_value) {}
-
-	sequence_item& operator=(V const& value)	{m_value = value;}
-	tstring GetValue() const { return m_value.value_sz().c_str();}	//!TODO: действительна только для V = winstl::reg_value_t 
-	tstring GetName() const { return m_value.name().c_str();}
-};
-typedef sequence_item<WinSTL::reg_value_t> shortcuts_sequence_item;
-typedef sequence_item<WinSTL::reg_key_t> catalogs_sequence_item;
-		
-class CCatalog {
-	typedef WinSTL::reg_key_t basic_class;
-	typedef enum tregs_enum	{REG_STATIC_KEYS
+/// Catalog of Named Folders
+/// NF 4.x stores data using standard FAR settings (sqllite).
+/// So, Catalog is wrapper around HANDLE received through FAR3::SettingsControl 
+class CCatalog {	
+	typedef enum tspec_folders	{REG_STATIC_KEYS
 		, REG_TEMP_KEYS
 		, REG_SUB_CATALOGS
-		, REG_B_SUB_CATALOGS_B
 		, REG_PROPERTIES
 	};
 public:
 	CCatalog(); //default - root NF-catalog
 	CCatalog(CCatalog const &catalog); 
-	CCatalog(tstring SubCatalog, CCatalog const *pParent = 0, bool bCreateIfNotExists = true); //constructor for subcatalog of catalog
-
-//конструктор для создания обертки вокруг итератора последовательности каталогов
-	CCatalog(sc::catalogs_sequence_item &c, CCatalog const *pParent);
+	CCatalog(tstring const& subCatalog, CCatalog const *pParent = 0, bool bCreateIfNotExists = true); //constructor for subcatalog of catalog
+	~CCatalog();
 public:
-	inline tstring const& CatalogPath() const {//путь к каталогу относительно корневого каталога	
-		return m_CatalogPath; }
-	inline tstring GetCatalogRegkey() const {
-		return get_catalog_regkey(m_CatalogPath); }
+	/// @return full path to catalog, i.e. "a/b/c"
+	tstring getCatalogPath() const;
 	inline size_t GetNumberSubcatalogs() const {
-		return get_number_keys<WinSTL::reg_key_sequence_t>(GetKeyName(REG_SUB_CATALOGS)); }
+		return get_sequence<tstring>(GetSpecFolderName(REG_SUB_CATALOGS))->getItems().size();			
+	}
 	inline size_t GetNumberShortcuts() const {
-		return get_number_keys<WinSTL::reg_value_sequence_t>(GetKeyName(REG_STATIC_KEYS)); }
+		return get_sequence<tstring>(GetSpecFolderName(REG_STATIC_KEYS))->getItems().size(); 
+	}
+	PluginSettings::tkey_handle get_key_handle() const {
+		return _Key;
+	}
+	bool deleteThisCatalog();
 public:	
-	inline basic_class GetSequenceShortcuts(bool bTemporary) {
-		return get_sequence(GetKeyName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS)); }
-	inline basic_class GetSequenceSubcatalogs() {
-		return get_sequence(GetKeyName(REG_SUB_CATALOGS)); }
-	inline basic_class GetSequenceProperties() {
-		return get_sequence(GetKeyName(REG_PROPERTIES)); }
+	//TODO: c11: use unique_ptr instead of shared ptr
+	inline boost::shared_ptr<nf::SequenceValues> GetSequenceShortcuts(bool bTemporary) {
+		return get_sequence<nf::titem_sequence_values>(GetSpecFolderName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS)); 
+	}
+	//TODO: c11: use unique_ptr instead of shared ptr
+	inline boost::shared_ptr<nf::SequenceCatalogs> GetSequenceSubcatalogs() {
+		return get_sequence<nf::titem_sequence_catalogs>(GetSpecFolderName(REG_SUB_CATALOGS)); 
+	}
 public: 
 	bool IsSubcatalogExist(tstring const& subCatalog);
 	bool InsertSubcatalog(tstring const& Name); 
 	bool DeleteSubcatalog(tstring const& Name);
 
 	bool SetShortcut(tstring const& Name, tstring const& Value, bool bTemporary) {
-		return set_key((bTemporary) ? REG_TEMP_KEYS : REG_STATIC_KEYS, Name, Value); }
+		return set_value((bTemporary) ? REG_TEMP_KEYS : REG_STATIC_KEYS, Name, Value); 
+	}
 	bool DeleteShortcut(tstring const& Name, bool bTemporary) {
-		return delete_key((bTemporary) ? REG_TEMP_KEYS : REG_STATIC_KEYS, Name); }
+		return delete_value((bTemporary) ? REG_TEMP_KEYS : REG_STATIC_KEYS, Name); 
+	}
 	bool GetShortcutInfo(tstring const& Name, bool bTemporary, tstring &Value);
 
+public:
 	bool SetProperty(tstring const& propertyName, tstring const& propertyValue) {
-		return set_key(REG_PROPERTIES, propertyName, propertyValue); }
+		return set_value(REG_PROPERTIES, propertyName, propertyValue); 
+	}
 	bool DeleteProperty(tstring const& propertyName) {
-		return delete_key(REG_PROPERTIES, propertyName); }
+		return delete_value(REG_PROPERTIES, propertyName); 
+	}
 	bool GetProperty(tstring const& propertyName, tstring& destValue) {
-		return get_key_value(REG_PROPERTIES, propertyName, destValue);}
+		return get_value(REG_PROPERTIES, propertyName, destValue);
+	}
+public:
+	/// delete key and its children
+	static bool eraseKey(tstring const &keyPath);
+	/// move content between keys
+	static bool moveKey(tstring const &srcPath, tstring const &targetPath);
+	/// copy content from key to key
+	static bool copyKey(tstring const &srcPath, tstring const &targetPath);
+
 private: 
-	inline basic_class get_sequence(wchar_t const* subkey) { 
-		return m_key.has_sub_key(subkey)
-			? basic_class(m_key.get_key_handle(), subkey)
-			: m_key.create_sub_key(subkey);
-	}
 	template<class T>
-	inline size_t get_number_keys(wchar_t const* skey) const {
-		if (! nf::Registry::IsSubkeyExist(m_key.get_key_handle(), skey)) return 0;
-		WinSTL::reg_key_t c(m_key.get_key_handle(), skey);
-		return T(c).size();
+	inline boost::shared_ptr<nf::SequenceSettings<T>> get_sequence(wchar_t const* subkey) const { 
+		auto sk = nf::PluginSettings::FarOpenKey(_Key, subkey);
+		if (sk == 0) {
+			sk = nf::PluginSettings::FarCreateKey(_Key, subkey);
+		} 
+		return boost::shared_ptr<nf::SequenceSettings<T>>(new nf::SequenceSettings<T>(sk));
 	}
-	tstring get_combined_path(wchar_t const* catalog, CCatalog const *parent = 0); //получить полный путь к каталогу относительно корневого пути
-	tstring get_catalog_regkey(tstring catalogName) const;
-	inline static tstring const& get_far_reg_key() { 
-		return nf::CSettings::GetInstance().get_NamedFolders_reg_key();
-	}
-	static wchar_t const* GetKeyName(tregs_enum Index);
-	bool set_key(tregs_enum regKey, tstring const& srcName, tstring const& srcValue);
-	bool delete_key(tregs_enum regKey, tstring const& srcName);
-	bool get_key_value(tregs_enum regKey, tstring const& srcName, tstring& destValue);
+	static wchar_t const* GetSpecFolderName(tspec_folders Index);
+	bool set_value(tspec_folders specFolder, tstring const& srcName, tstring const& srcValue);
+	bool delete_value(tspec_folders specFolder, tstring const& srcName);
+	bool get_value(tspec_folders specFolder, tstring const& srcName, tstring& destValue);
+
+	/// a/b/c -> "Catalogs/a/Catalogs/b/Catalogs/c"
+	static std::list<tstring> prepare_full_path(std::list<tstring> const& src);
+	static bool copy_or_rename(tstring const &srcPath, tstring const &targetPath, bool renameEnabled);
 private: //members
-	basic_class m_key;
-	tstring m_CatalogPath;
+	boost::shared_ptr<FarSettingsItem> _pFSI;
+
+	/// contains "a", "b", "c" for catalog "a/b/c"
+	std::list<tstring> _CatalogPath;
+	PluginSettings::tsettings_handle _Key;
 };
 } //sc
 } //nf

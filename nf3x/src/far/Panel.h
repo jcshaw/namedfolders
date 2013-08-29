@@ -6,9 +6,8 @@
 #pragma once
 #include <vector>
 #include <boost/utility.hpp>
-#include "plugin.hpp"
+//#include "far2/plugin.hpp"
 #include "kernel.h"
-#include "regnotify.h"
 #include "PanelInfoWrap.h"
 #include "lang.h"
 #include "settings.h"
@@ -27,14 +26,14 @@ public:
 	CPanel(tstring catalog = L"");
 	~CPanel(void);
 
-	void GetOpenPluginInfo(struct OpenPluginInfo *Info);
-	int GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpMode);	
-	void FreeFindData(struct PluginPanelItem *PanelItem, int ItemsNumber);
-	int SetDirectory(const wchar_t *Dir, int OpMode);
-	int PutFiles(struct PluginPanelItem *PanelItem, int ItemsNumber, int Move, int OpMode);
-	int ProcessKey(int Key, unsigned int ControlState);
-	int MakeDirectory (wchar_t *Name, int OpMode);
-	int ProcessEvent(int Event, void *Param);
+	void GetOpenPanelInfo(struct OpenPanelInfo *Info);
+	int GetFindData(struct GetFindDataInfo *pInfo);
+	void FreeFindData(const struct FreeFindDataInfo *pInfo);
+	int SetDirectory(const struct SetDirectoryInfo *pInfo);
+	int PutFiles(const struct PutFilesInfo *pInfo);
+	int ProcessPanelInputW(INPUT_RECORD const& inputRecord);
+	int MakeDirectory (struct MakeDirectoryInfo *pInfo);
+	int ProcessEvent(const struct ProcessPanelEventInfo *pInfo);
 	void UpdateListItems(DWORD flags = FG_ALL);
 public:
 	CPanelInfoWrap get_hPlugin() {
@@ -56,9 +55,7 @@ private:
 	tstring const m_PreviousDir;	//директория, открытая на панели плагина до открытия панели
 	tmap_panelitems m_FindCache;	//при поиске выделям память для хранения содержимого всех каталогов
 
-	CRegNotify m_RegNotify;
-
-	int go_to_up_folder(int OpMode);
+	int go_to_up_folder(OPERATION_MODES OpMode);
 	void read_list_panelitems(DWORD flags);
 };
 } //Panel

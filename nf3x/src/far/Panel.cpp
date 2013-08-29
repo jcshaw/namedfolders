@@ -21,6 +21,8 @@
 #include "Parser.h"
 #include "catalog_names.h"
 
+#include "far/CatalogSequences.h"
+
 using namespace nf;
 using namespace Panel;
 namespace {
@@ -66,7 +68,6 @@ namespace {
 
 CPanel::CPanel(tstring catalog)
 : m_PanelTitle(catalog)
-, m_RegNotify(CSettings::GetInstance().get_NamedFolders_reg_key().c_str())
 , m_PreviousDir(CPanelInfoWrap(INVALID_HANDLE_VALUE).GetPanelCurDir(true))
 	//get_hPlugin().GetPanelInfo(true).CurDir;
 	//get_hPlugin не подходит, т.к. экземпл€р панели еще не создан
@@ -84,17 +85,32 @@ CPanel::~CPanel(void)
 	}
 }
 
+namespace {
+	void set_keybar_label(KeyBarTitles &kb, int index, wchar_t const* pMsg) {
+		// 	KeyBar.Titles[3-1] = L"";
+		// 	KeyBar.Titles[5-1] = (wchar_t*)nf::GetMsg(lg::F5);
+		// 	KeyBar.Titles[6-1] = (wchar_t*)nf::GetMsg(lg::F6);
+		// 	KeyBar.Titles[8-1] = (wchar_t*)nf::GetMsg(lg::F8);
+		// 	KeyBar.Titles[7-1] = (wchar_t*)nf::GetMsg(lg::F7);
+		memset(&kb.Labels[index], 0, sizeof(KeyBarLabel));
+		if (pMsg != nullptr) {
+			kb.Labels[index].Text = pMsg;
+		}
+	}
+}
 
-void CPanel::GetOpenPluginInfo(struct OpenPluginInfo *pi)
-{
+
+void CPanel::GetOpenPanelInfo(struct OpenPanelInfo *pi) {
+	memset(pi, 0, sizeof(OpenPanelInfo));
 	pi->StructSize = sizeof(*pi);
-	pi->Flags = OPIF_USEFILTER 
-		| OPIF_ADDDOTS 
+	pi->Flags = OPIF_ADDDOTS 
+		//OPIF_USEFILTER  // = !OPIF_DISABLEFILTER
 		| OPIF_SHOWNAMESONLY 
 		| OPIF_SHOWRIGHTALIGNNAMES
 		| OPIF_RAWSELECTION
 		| OPIF_SHOWPRESERVECASE
-		| OPIF_USEHIGHLIGHTING;
+		//| OPIF_USEHIGHLIGHTING //OPIF_DISABLEHIGHLIGHTING
+		;
 	pi->HostFile = 0;
 	pi->CurDir = const_cast<wchar_t*>(m_CurrentCatalog.c_str());
 	pi->Format = (wchar_t*)nf::GetMsg(lg::NAMEDFOLDERS);
@@ -113,11 +129,9 @@ void CPanel::GetOpenPluginInfo(struct OpenPluginInfo *pi)
 	const int NUM_PANEL_MODES = 10;
 	static struct PanelMode PanelModesArray[NUM_PANEL_MODES];
 	PanelMode& panel_mode = PanelModesArray[panel_mode_id];
+	memset(&panel_mode, 0, sizeof(PanelMode) );
 	panel_mode.ColumnTypes = NULL;
-	panel_mode.ColumnWidths = NULL; //"8,0";
-	panel_mode.FullScreen = FALSE;
-	panel_mode.Reserved[0] = 0;
-	panel_mode.Reserved[1] = 0;
+	panel_mode.ColumnWidths = NULL; //"8,0";	
 
 	static wchar_t *ColumnTitles[3] = {
 		(wchar_t*)nf::GetMsg(lg::NF_PANEL_NAME),
@@ -144,31 +158,31 @@ void CPanel::GetOpenPluginInfo(struct OpenPluginInfo *pi)
 	PanelModesArray[8].ColumnWidths = &buf_widths[0];
 
 	PanelModesArray[8].ColumnTitles = &ColumnTitles[0];
-	PanelModesArray[8].FullScreen=FALSE;
 
 	pi->PanelModesArray = PanelModesArray;
 	pi->PanelModesNumber = NUM_PANEL_MODES;
 	pi->StartPanelMode='0' + panel_mode_id;
 
-	static struct KeyBarTitles KeyBar;
-	memset(&KeyBar, 0, sizeof(KeyBar));
-	KeyBar.Titles[3-1] = L"";
-	KeyBar.Titles[5-1] = (wchar_t*)nf::GetMsg(lg::F5);
-	KeyBar.Titles[6-1] = (wchar_t*)nf::GetMsg(lg::F6);
-	KeyBar.Titles[8-1] = (wchar_t*)nf::GetMsg(lg::F8);
-	KeyBar.Titles[7-1] = (wchar_t*)nf::GetMsg(lg::F7);
-	pi->KeyBar = &KeyBar;
+	
+// 	static struct KeyBarTitles kb; 
+// 	memset(&kb, 0, sizeof(KeyBarTitles));
+// 	set_keybar_label(kb, 3-1, nullptr);
+// 	set_keybar_label(kb, 5-1, (wchar_t*)nf::GetMsg(lg::F5));
+// 	set_keybar_label(kb, 6-1, (wchar_t*)nf::GetMsg(lg::F6));
+// 	set_keybar_label(kb, 7-1, (wchar_t*)nf::GetMsg(lg::F7));
+// 	set_keybar_label(kb, 8-1, (wchar_t*)nf::GetMsg(lg::F8));
+	pi->KeyBar = 0;//!todo &kb;
 }
 
 
-int CPanel::SetDirectory(const wchar_t *Dir, int OpMode)
+int CPanel::SetDirectory(const struct SetDirectoryInfo *pInfo)
 {	//открыть указанную директорию - перейти в директорию, на которую указывает €рлычок
 	//на активной панели
-	CPanelUpdater pu(this, 0, OpMode);
-	tstring sdir = Utils::ReplaceStringAll(Dir, SLASH_DIRS, SLASH_CATS);
+	CPanelUpdater pu(this, 0, pInfo->OpMode);
+	tstring sdir = Utils::ReplaceStringAll(pInfo->Dir, SLASH_DIRS, SLASH_CATS);
 
 	if (tstring(LEVEL_UP_TWO_POINTS) == sdir || sdir == SLASH_CATS) {
-		return go_to_up_folder(OpMode);
+		return go_to_up_folder(pInfo->OpMode);
 	} else {
 		pu.SetCursorOnItem(m_CurrentCatalog, FG_CATALOGS);
 		if (sdir != SLASH_CATS) { //bug #39
@@ -180,29 +194,38 @@ int CPanel::SetDirectory(const wchar_t *Dir, int OpMode)
 	return TRUE;
 }
 
-int CPanel::ProcessKey(int Key, unsigned int ControlState) {	
-	switch(Key) {	//let's FAR handle cursor movements 
-		case VK_LEFT: case VK_UP: case VK_RIGHT: case VK_DOWN: return FALSE;
+int CPanel::ProcessPanelInputW(INPUT_RECORD const& inputRecord) {	
+	if (inputRecord.EventType != KEY_EVENT) {
+		return 0;
+	}
+	KEY_EVENT_RECORD const& ker = inputRecord.Event.KeyEvent;
+
+	switch(ker.wVirtualKeyCode) {	//let's FAR handle cursor movements 
+		case VK_LEFT: 
+		case VK_UP: 
+		case VK_RIGHT: 
+		case VK_DOWN: 
+			return FALSE;
 	};
 	PanelInfo const& pi = get_hPlugin().GetPanelInfo(true); 
 
-	switch (Key) {
+	switch (ker.wVirtualKeyCode) {
 	case VK_RETURN:
 	case VK_LBUTTON: //open
-		return OpenSelectedItem(this, ControlState, pi);
-	case VK_PRIOR:	//go to up level - Ctrp + PgUp = BACKSPACE 
-		if (PKF_CONTROL == ControlState) { 
+		return OpenSelectedItem(this, ker.dwControlKeyState, pi);
+	case VK_PRIOR:	//go to up level - Ctrp + PgUp = BACKSPACE 		
+		if (LEFT_CTRL_PRESSED == ker.dwControlKeyState) { 
 			return go_to_up_folder(0);
 		}
 		return FALSE;
 	case VK_DELETE:  //delete
-		if (PKF_SHIFT != ControlState) return FALSE; 
+		if (SHIFT_PRESSED != ker.dwControlKeyState) return FALSE; 
 		//no break here!
 	case VK_F8:  
 		DeleteSelectedCatalogsAndShortcuts(this, pi);
 		return TRUE;
 	case 'R': //Ctrl + R update state
-		if ((ControlState & PKF_CONTROL) == 0) return FALSE; 
+		if ((ker.dwControlKeyState & LEFT_CTRL_PRESSED) == 0) return FALSE; 
 		UpdateCursorPositionOnFarPanel(this, pi);
 		return TRUE;
 	case VK_F5:	 //copy
@@ -210,11 +233,11 @@ int CPanel::ProcessKey(int Key, unsigned int ControlState) {
 		return TRUE;
 	case VK_F6: //move
 		if (pi.SelectedItemsNumber) {
-			MoveItems(this, pi, (PKF_SHIFT != ControlState) != 0 ? ID_CM_MOVE : ID_CM_RENAME);	// исключаем ".."
+			MoveItems(this, pi, (SHIFT_PRESSED != ker.dwControlKeyState) != 0 ? ID_CM_MOVE : ID_CM_RENAME);	// исключаем ".."
 		}
 		return TRUE;
 	case VK_F4: //edit/create shortcut name
-		if (PKF_SHIFT == ControlState) {
+		if (SHIFT_PRESSED == ker.dwControlKeyState) {
 			InsertShortcut(this, pi);
 		} else if (IsSelectedItemIsCatalog(this, pi)) {
 			if (pi.SelectedItemsNumber) { // исключаем ".."
@@ -226,7 +249,7 @@ int CPanel::ProcessKey(int Key, unsigned int ControlState) {
 		}
 		return TRUE;
 	case VK_F9: //save settings by F9
-		if (PKF_SHIFT == ControlState) {
+		if (SHIFT_PRESSED == ker.dwControlKeyState) {
 			SaveSetup(this);
 			return TRUE;
 		} 
@@ -241,7 +264,7 @@ int CPanel::ProcessKey(int Key, unsigned int ControlState) {
 	return TRUE;
 }
 
-int CPanel::MakeDirectory (wchar_t *Name, int OpMode)
+int CPanel::MakeDirectory(struct MakeDirectoryInfo *pInfo)
 {	//создать новый каталог
 	CPanelUpdater pu(this);
 	nf::tcatalog_info c;
@@ -255,51 +278,48 @@ int CPanel::MakeDirectory (wchar_t *Name, int OpMode)
 	return TRUE;
 }
 
-int CPanel::PutFiles(struct PluginPanelItem *PanelItem
-					 , int ItemsNumber
-					 , int Move
-					 , int OpMode) {	
+int CPanel::PutFiles(const struct PutFilesInfo *pInfo) {	
 	//create shortcuts for all directories that are being placed on the panel 
-	if (OpMode & OPM_SILENT) return FALSE;
+	if (pInfo->OpMode & OPM_SILENT) return FALSE;
 
-	for (int i = 0; i < ItemsNumber; ++i) {
+	for (unsigned int i = 0; i < pInfo->ItemsNumber; ++i) {
 		tstring cur_dir = get_hPlugin().GetPanelCurDir(true);	
-		if (PanelItem[i].FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-			nf::tshortcut_info sht = nf::MakeShortcut(m_CurrentCatalog, PanelItem[i].FindData.lpwszFileName, false);
+		if (pInfo->PanelItem[i].FileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+			nf::tshortcut_info sht = nf::MakeShortcut(m_CurrentCatalog, pInfo->PanelItem[i].FileName, false);
 			if (sht.shortcut == LEVEL_UP_TWO_POINTS) continue;
 			tstring value = Utils::CombinePath(cur_dir, sht.shortcut, SLASH_DIRS);
 			InsertShortcut(this, get_hPlugin().GetPanelInfo(false), sht, value);
 		};
 	}
 
-	CPanelUpdater pu(this, 0, OpMode);
+	CPanelUpdater pu(this, 0, pInfo->OpMode);
 	pu.UpdateActivePanel();
 
 	return TRUE;
 }
 
-int CPanel::GetFindData(PluginPanelItem **pPanelItem, int *pItemsNumber, int OpMode) {	
+int CPanel::GetFindData(struct GetFindDataInfo *pInfo) {	
 	static struct PanelInfo PInfo;
-	if (OpMode & OPM_FIND)
+	if (pInfo->OpMode & OPM_FIND)
 	{	//выдел€ем пам€ть только при поиске (т.е. требуетс€ одновременно 
 		//загружать в пам€ть содержимое всех каталогов)
 		tpanelitems* pm = new tpanelitems();	//очистка пам€ти в FreeFindData
 		*pm = m_PanelItems; //copy(!) all items
 		if (! pm->first.empty()) {
 			m_FindCache.push_back(std::make_pair(&(pm->first)[0], pm));
-			*pPanelItem = &(pm->first)[0];
-			*pItemsNumber = static_cast<int>(pm->first.size());
+			pInfo->PanelItem = &(pm->first)[0];
+			pInfo->ItemsNumber = static_cast<int>(pm->first.size());
 		} else {
-			*pPanelItem = 0;
-			*pItemsNumber = 0;
+			pInfo->PanelItem = 0;
+			pInfo->ItemsNumber = 0;
 			delete pm;
 			return FALSE;
 		}
 	} else {
-		*pPanelItem = m_PanelItems.first.size() == 0 
+		pInfo->PanelItem = m_PanelItems.first.size() == 0 
 			? 0
 			: &m_PanelItems.first[0];
-		*pItemsNumber = static_cast<int>(m_PanelItems.first.size());
+		pInfo->ItemsNumber = static_cast<int>(m_PanelItems.first.size());
 	}
 	return TRUE;
 }
@@ -309,9 +329,9 @@ namespace {
 		return item.first == panelItem;
 	}
 }
-void CPanel::FreeFindData(struct PluginPanelItem *PanelItem, int ItemsNumber) {	
+void CPanel::FreeFindData(const struct FreeFindDataInfo *pInfo) {	
 	tmap_panelitems::iterator p = std::find_if(m_FindCache.begin(), m_FindCache.end()
-		, boost::bind(&equal_panel_item, _1,  PanelItem) );
+		, boost::bind(&equal_panel_item, _1,  pInfo->PanelItem) );
 	if (p != m_FindCache.end()) {
 		tpanelitems *pm = p->second;
 		m_FindCache.erase(p);
@@ -319,29 +339,30 @@ void CPanel::FreeFindData(struct PluginPanelItem *PanelItem, int ItemsNumber) {
 	}
 }
 
-int CPanel::ProcessEvent(int Event, void *Param) {
+int CPanel::ProcessEvent(const struct ProcessPanelEventInfo *pInfo) {
 	//при смене панели событие FE_CHANGEVIEWMODE посылаетс€ два раза подр€д
 	//почему - не €сно; обходим
 	static bool bexclude_double = false;
-	if (FE_CHANGEVIEWMODE != Event) bexclude_double = false;
+	if (FE_CHANGEVIEWMODE != pInfo->Event) bexclude_double = false;
 	
-	if (FE_CHANGEVIEWMODE == Event) {
+	if (FE_CHANGEVIEWMODE == pInfo->Event) {
 		if (! bexclude_double) {
 			CPanelUpdater pu(this, 0);
 			pu.UpdateActivePanel();
 		}
 		bexclude_double = true;
-	} else if (FE_IDLE == Event) {
-		if (m_RegNotify.Check()) {
-			//обновл€ем, если панель плагина не активна... ???
-			PanelInfo const& pi = get_hPlugin().GetPanelInfo(true);
-			if (pi.Plugin) {
-				CPanelUpdater pu(this, pi.CurrentItem);
-				pu.UpdateActivePanel();
-				pu.UpdateInactivePanel();
-			}
-			m_RegNotify.Start();
-		};
+	} else if (FE_IDLE == pInfo->Event) {
+//!TODO:FAR3: is it possible to know about changes in panel content?
+// 		if (m_RegNotify.Check()) {
+// 			//обновл€ем, если панель плагина не активна... ???
+// 			PanelInfo const& pi = get_hPlugin().GetPanelInfo(true);
+// 			if ((pi.Flags & PFLAGS_PLUGIN) != 0) {
+// 				CPanelUpdater pu(this, pi.CurrentItem);
+// 				pu.UpdateActivePanel();
+// 				pu.UpdateInactivePanel();
+// 			}
+// 			m_RegNotify.Start();
+//		};
 	}
 
 	return FALSE;
@@ -359,9 +380,9 @@ void set_panel_item(PluginPanelItem& item
 	item.Description = folder.empty() ? 0 : folder.c_str();
 	item.Flags = 0;
 	itemBuffer.reset(Utils::Str2Buffer(name));
-	item.FindData.lpwszFileName = &(*itemBuffer)[0];
-	item.FindData.dwFileAttributes =  (bIsHidden) ? FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM : 0;
-	if (bIsDirectory) item.FindData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
+	item.FileName = &(*itemBuffer)[0];
+	item.FileAttributes =  (bIsHidden) ? FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM : 0;
+	if (bIsDirectory) item.FileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
 	item.Owner = NULL;
 	static wchar_t const* AddColumns[NUMBER_STATES] = {
 		nf::GetMsg(lg::STATE_UNKNOWN)
@@ -379,23 +400,23 @@ void CPanel::read_list_panelitems(DWORD flags) {
 	sc::CCatalog c(m_CurrentCatalog);
 	if (flags & FG_CATALOGS) { //load list of NF-catalogs
 		m_ListCatalogs.clear();
-		sc::subcatalogs_sequence cseq(c.GetSequenceSubcatalogs());
-		m_ListCatalogs.reserve(cseq.size());
-		BOOST_FOREACH(sc::catalogs_sequence_item const& csi, cseq) {
-			m_ListCatalogs.push_back(csi.GetName());
+		auto cseq = c.GetSequenceSubcatalogs();
+		m_ListCatalogs.reserve(cseq->getItems().size());
+		BOOST_FOREACH(auto const& csi, cseq->getItems()) {
+			m_ListCatalogs.push_back(nf::get_catalog_item_name(csi));
 		}
 	}
 	if (flags & FG_SHORTCUTS) { //load list of temporal and not-temporal shortcuts
 		m_ListShortcuts.clear();
-		sc::shortcuts_sequence seq_shtemp(c.GetSequenceShortcuts(true));
-		sc::shortcuts_sequence seq_sh(c.GetSequenceShortcuts(false));
-		//m_ListShortcuts.reserve(seq_shtemp.size() + seq_sh.size());
-		BOOST_FOREACH(sc::shortcuts_sequence_item si, seq_shtemp) { //temporal shortcuts
-			m_ListShortcuts.push_back(std::make_pair(si.GetName(), si.GetValue()));
+		auto seq_shtemp = c.GetSequenceShortcuts(true);
+		auto seq_sh = c.GetSequenceShortcuts(false);
+		
+		BOOST_FOREACH(auto const& si, seq_shtemp->getItems()) { //temporal shortcuts
+			m_ListShortcuts.push_back(std::make_pair(nf::get_ssi_name(si), nf::get_ssi_value(si)));
 		}
-		m_NumberTemporaryShortcuts = static_cast<int>(seq_shtemp.size());
-		BOOST_FOREACH(sc::shortcuts_sequence_item const& si, seq_sh) { //not-temporal shortcuts
-			m_ListShortcuts.push_back(std::make_pair(si.GetName(), si.GetValue()));
+		m_NumberTemporaryShortcuts = static_cast<int>(seq_shtemp->getItems().size());
+		BOOST_FOREACH(auto const& si, seq_sh->getItems()) { //not-temporal shortcuts
+			m_ListShortcuts.push_back(std::make_pair(nf::get_ssi_name(si), nf::get_ssi_value(si)));
 		}
 	}
 }
@@ -438,7 +459,7 @@ void CPanel::UpdateListItems(DWORD flags) {
 	}
 }
 
-int CPanel::go_to_up_folder(int OpMode) {
+int CPanel::go_to_up_folder(OPERATION_MODES OpMode) {
 	if (m_CurrentCatalog.empty()) {
 		if (OpMode & OPM_FIND) return FALSE;
 		get_hPlugin().ClosePlugin(m_PreviousDir);

@@ -11,22 +11,22 @@
 //http://www.stlsoft.com
 #define _WINSTL_REG_STRING_USE_STD_STRING
 #include <winstl/filesystem/findfile_sequence.hpp>
-#include <winstl/registry/reg_key_sequence.hpp>
-#include <winstl/registry/reg_traits.hpp>
-#include <winstl/registry/reg_key_sequence.hpp>
+// #include <winstl/registry/reg_key_sequence.hpp>
+// #include <winstl/registry/reg_traits.hpp>
+// #include <winstl/registry/reg_key_sequence.hpp>
 #include <winstl/registry/reg_value_sequence.hpp>
-#include <winstl/registry/reg_value.hpp>
+// #include <winstl/registry/reg_value.hpp>
 #include <winstl/registry/reg_key.hpp>
 #include <winstl/filesystem/findvolume_sequence.hpp>
 #pragma warning(default: 4267 4290)
 
 namespace WinSTL {
 	typedef winstl::findfile_sequence_w findfile_sequence_t;
-	typedef winstl::findvolume_sequence_w findvolume_sequence_t;
-	typedef winstl::reg_key_sequence_w reg_key_sequence_t;
+	//typedef winstl::findvolume_sequence_w findvolume_sequence_t;
+	//typedef winstl::reg_key_sequence_w reg_key_sequence_t;
 	typedef winstl::reg_key_w reg_key_t;
 	typedef winstl::reg_value_sequence_w  reg_value_sequence_t;
-	typedef winstl::reg_value_w reg_value_t;
+	//typedef winstl::reg_value_w reg_value_t;
 }
 
 #include <boost/foreach.hpp>

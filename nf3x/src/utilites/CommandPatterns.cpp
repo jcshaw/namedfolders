@@ -6,6 +6,7 @@ using namespace Patterns;
 
 #include "stlsoft_def.h"
 #include "parser.h"
+#include "CatalogSequences.h"
 
 #pragma warning(disable: 4244 4267)
 #include <boost/bind.hpp>
@@ -282,11 +283,15 @@ namespace {
 	inline bool equal_prefixes(tcommand_pattern &p, tstring const& Prefix) {
 		return p.first == Prefix;
 	}
+
+	wchar_t const* ROOT_COMMAND_PATTERNS_KEY = L"CommandPatterns";
 }
 
-CommandsManager::CommandsManager(tstring const& RegKey)
-: m_Key(HKEY_CURRENT_USER, RegKey.c_str(), true, true)
-{
+CommandsManager::CommandsManager() {
+	_hSettingsKey = nf::PluginSettings::FarOpenKey(0, ROOT_COMMAND_PATTERNS_KEY);
+	if (nf::PluginSettings::isInvalidHandle(_hSettingsKey)) {
+		_hSettingsKey = nf::PluginSettings::FarCreateKey(0, ROOT_COMMAND_PATTERNS_KEY);
+	}
 }
 
 CommandsManager::~CommandsManager()
@@ -296,18 +301,18 @@ CommandsManager::~CommandsManager()
 
 bool CommandsManager::SetCommand(tstring const& Prefix, tstring const& Pattern) {
 	assert(is_prefix_valid(Prefix));
-	return m_Key.SetValue(Prefix.c_str(), Pattern.c_str());
+	return nf::PluginSettings::FarSet(_hSettingsKey, Prefix.c_str(), Pattern.c_str());
 }
 
 bool CommandsManager::CheckIfPrefixIsFree(tstring const& Prefix) {
 	assert(is_prefix_valid(Prefix));
 	tstring dummy;
-	return ! m_Key.GetValue(Prefix.c_str(), dummy);
+	return nf::PluginSettings::FarGet(_hSettingsKey, Prefix.c_str(), dummy);
 }
 
 bool CommandsManager::RemoveCommand(tstring const& Prefix) {
 	assert(is_prefix_valid(Prefix));
-	return m_Key.DeleteValue(Prefix.c_str());
+	return nf::PluginSettings::FarDeleteValue(_hSettingsKey, Prefix.c_str());
 }
 
 bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd, tstring &DestCmd) const {
@@ -357,21 +362,32 @@ bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd, tstring
 
 void CommandsManager::GetListRegisteredCommands(tlist_pairs_strings &ListPatterns) const {
 	assert(ListPatterns.empty());
-	WinSTL::reg_key_t key(static_cast<HKEY>(m_Key), L"");
-	WinSTL::reg_value_sequence_t seq(key);
-	BOOST_FOREACH(WinSTL::reg_value_sequence_t::value_type const& value, seq) {
-		ListPatterns.push_back(std::make_pair(value.name(), value.value_sz())); 
+
+	nf::SequenceValues sv(_hSettingsKey);
+	BOOST_FOREACH(auto const& kvp, sv.getItems()) {
+		ListPatterns.push_back(std::make_pair(kvp.first, kvp.second)); 
 	}
+
+
+// 	WinSTL::reg_key_t key(static_cast<HKEY>(m_Key), L"");
+// 	WinSTL::reg_value_sequence_t seq(key);
+// 	BOOST_FOREACH(WinSTL::reg_value_sequence_t::value_type const& value, seq) {
+// 		ListPatterns.push_back(std::make_pair(value.name(), value.value_sz())); 
+// 	}
 }
 
 tstring CommandsManager::GetListCommandPrefixes() const
 {	//get total list of prefixes registered for template commands 
+	nf::SequenceValues sv(_hSettingsKey);
 	tstring list_prefixes;
-	list_prefixes.reserve(256);
-	WinSTL::reg_key_t key (static_cast<HKEY>(m_Key), L"");
-	WinSTL::reg_value_sequence_t seq(key);
-	BOOST_FOREACH(WinSTL::reg_value_sequence_t::value_type const& value, seq) {
-		list_prefixes += value.name();
+	list_prefixes.reserve(64);
+	BOOST_FOREACH(auto const& kvp, sv.getItems()) {
+		list_prefixes += kvp.first;
 	}
+// 	WinSTL::reg_key_t key (static_cast<HKEY>(m_Key), L"");
+// 	WinSTL::reg_value_sequence_t seq(key);
+// 	BOOST_FOREACH(WinSTL::reg_value_sequence_t::value_type const& value, seq) {
+// 		list_prefixes += value.name();
+// 	}
 	return list_prefixes;
 }

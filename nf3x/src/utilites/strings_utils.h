@@ -9,6 +9,7 @@
 #include <list>
 #include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
+//#include "far2/plugin.hpp"
 
 namespace Utils {
 	struct CmpStringLessCI

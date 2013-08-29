@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 #include <list>
-#include "enforce.h"
 
 #pragma warning(disable: 4244 4267)
 //используется библиотека BOOST
@@ -188,6 +187,7 @@ namespace nf {
 	typedef std::list<nf::tcatalog_info> tcatalogs_list;
 
 	typedef stlsoft::auto_buffer<wchar_t> tautobuffer_char;
+
 // 	typedef stlsoft::auto_buffer<BYTE> tautobuffer_byte;
 // 	typedef boost::auto_buffer<wchar_t> tautobuffer_char;
 // 	typedef boost::auto_buffer<BYTE> tautobuffer_byte;
@@ -202,4 +202,26 @@ namespace nf {
 		, ASTERIX_MODE_POSTFIX = 1 //c -> c*
 		, ASTERIX_MODE_AS_IS = 2 //c -> c
 	} tasterix_mode;
+
+
+	/// GUID плагина Named Folders (требуется в FAR3)
+	/// {C6A35DB8-6846-449E-A1DC-2FC152ED4B0B}
+	extern const GUID NF_PLUGIN_GUID;
+	/// {B90A8402-14F7-4382-9275-C79824DD8A24}
+	extern const GUID NF_DISKMENU_GUID;
+
+	// {FE4E3C90-3590-4F76-9D05-D30FA3338F9E}
+	extern const GUID NF_PLUGINSMENU_GUID;
+
+	// {F30CBBA9-397A-4BF9-81FB-3154B8FBCD90}
+	extern const GUID NF_CONFIGMENU_GUID;
+
+	extern const GUID NF_DIALOG_CONFIGURE;
+	extern const GUID NF_DIALOG_APPLY_COMMAND;
+	extern const GUID NF_DIALOG_EDIT_CATALOG;
+	extern const GUID NF_DIALOG_EDIT_PATTERN;
+	extern const GUID NF_DIALOG_EDIT_SHORTCUT;
+	extern const GUID NF_DIALOG_MOVE;
+
+	extern const GUID NF_MESSAGE_SAFE_PANEL_STATE;
 }

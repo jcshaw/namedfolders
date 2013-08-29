@@ -26,13 +26,15 @@
 #define _STLP_VENDOR_TERMINATE_STD
 #endif
 
+#include "plugin.hpp" 
+
+
 #pragma warning (disable: 4290) //C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 
-#include "plugin.hpp" // этот файл хочет 1-byte alignment
-#include "farkeys.hpp"
 #include <windows.h>
 #include <wtypes.h>
 #include <WinDef.h>
 #include "header.h"
+#include "far_utils.h" //!TODO: remove
 
 #include <crtdbg.h>

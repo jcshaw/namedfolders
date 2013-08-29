@@ -15,6 +15,7 @@
 #include <list>
 #include <shlwapi.h>
 
+#include <boost/foreach.hpp>
 #include "executor.h"
 #include "Kernel.h"
 #include "stlcatalogs.h"
@@ -54,7 +55,7 @@ void nf::Selectors::GetPath(HANDLE hPlugin, tstring const &srcValue, tstring con
 	if (! local_path.empty()) {	//учитываем локальный путь относительно каждой найденной директории	
 		nf::tlist_strings list_paths;
 		nf::Search::CSearchEngine ssp(whatToSearch, true);
-		BOOST_FOREACH(tstring const& path, destListPaths) {
+		BOOST_FOREACH(auto const& path, destListPaths) {
 			nf::Search::SearchByPattern(local_path.c_str(), path, ssp
 				, Parser::GetCurrentAsterixMode()
 				, list_paths);

@@ -6,7 +6,7 @@
 #pragma once
 #include <vector>
 
-#include "plugin.hpp"
+//#include "far2/plugin.hpp"
 #include "PanelInfoWrap.h"
 
 namespace nf {
@@ -29,20 +29,25 @@ namespace Panel {
 		{ }
 		int operator()() {
 			PanelInfo pi;
-			g_PluginInfo.Control(PANEL_ACTIVE, FCTL_GETPANELINFO, 0, reinterpret_cast<LONG_PTR>(&pi));
-			for (int i = 0; i < pi.ItemsNumber; ++i) {
-				nf::tautobuffer_byte buffer(g_PluginInfo.Control(PANEL_ACTIVE, FCTL_GETPANELITEM, i, NULL));
-				PluginPanelItem *ppi = reinterpret_cast<PluginPanelItem*>(&buffer[0]);
-				g_PluginInfo.Control(PANEL_ACTIVE, FCTL_GETPANELITEM, i, reinterpret_cast<LONG_PTR>(&buffer[0]));
+			pi.StructSize = sizeof(PanelInfo);
 
-				tstring s = tstring(ppi->FindData.lpwszFileName);
-				if (m_ItemName == s) {
-					bool bIsCatalog = (ppi->FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0; 
-					if (((m_ItemsType & FG_CATALOGS) && bIsCatalog) || 
-						((m_ItemsType & FG_SHORTCUTS) && (!bIsCatalog))) {
-							return i;
+			g_PluginInfo.PanelControl(PANEL_ACTIVE, FCTL_GETPANELINFO, 0, reinterpret_cast<void*>(&pi));
+			for (unsigned int i = 0; i < pi.ItemsNumber; ++i) {
+				nf::tautobuffer_byte buffer(g_PluginInfo.PanelControl(PANEL_ACTIVE, FCTL_GETPANELITEM, i, NULL));
+				PluginPanelItem *ppi = reinterpret_cast<PluginPanelItem*>(&buffer[0]);
+				if (ppi != nullptr) {
+					FarGetPluginPanelItem fgppi = {sizeof(FarGetPluginPanelItem), buffer.size(), ppi};
+					g_PluginInfo.PanelControl(PANEL_ACTIVE, FCTL_GETPANELITEM, i, &fgppi);
+					tstring s = ppi->FileName;
+					if (m_ItemName == s) {
+						bool bIsCatalog = (ppi->FileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0; 
+						if (((m_ItemsType & FG_CATALOGS) && bIsCatalog) || 
+							((m_ItemsType & FG_SHORTCUTS) && (!bIsCatalog))) {
+								return i;
+						}
 					}
 				}
+
 			}
 			return 0;		
 		}

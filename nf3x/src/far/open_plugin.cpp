@@ -33,13 +33,12 @@ HANDLE nf::OpenFromPluginsMenu() {
 	tlist_buffers menu_buffers(NUM_ITEMS);
 	for (unsigned int i = 0; i < NUM_ITEMS; ++i) {
 		menu_buffers[i].reset(Utils::Str2Buffer(GetMsg(PLUGINSMENU_ITEMS[i])));
+		memset(&MenuItems[i], 0, sizeof(FarMenuItem));
 		MenuItems[i].Text = &(*menu_buffers[i])[0];	
-		MenuItems[i].Selected = 0;
-		MenuItems[i].Checked = 0;
-		MenuItems[i].Separator = 0;
 	}
 
-	int nSelectedItem = g_PluginInfo.Menu(g_PluginInfo.ModuleNumber
+	intptr_t nSelectedItem = g_PluginInfo.Menu(&nf::NF_PLUGIN_GUID
+		, &nf::NF_PLUGINSMENU_GUID
 		, -1
 		, -1
 		, 0	//max count of visible items - regulated by FAR
@@ -50,7 +49,7 @@ HANDLE nf::OpenFromPluginsMenu() {
 		, 0
 		, 0
 		, &MenuItems[0]
-		, static_cast<int>(MenuItems.size())
+		, MenuItems.size()
 	);
 
 	if (-1 == nSelectedItem) return INVALID_HANDLE_VALUE;	//user has canceled menu
@@ -74,7 +73,7 @@ HANDLE nf::OpenFromPluginsMenu() {
 			}
 		} break;
 	case 2: { //edit list of patterns
-			nf::Patterns::CommandsManager cm(nf::GetRegistryKeyForCommandPatterns());
+			nf::Patterns::CommandsManager cm;
 			nf::Patterns::EditPatterns(cm);
 		} break;
 	};
@@ -85,7 +84,7 @@ HANDLE nf::OpenFromPluginsMenu() {
 namespace {
 	inline tstring pattern_to_command(tstring const& srcCommand) {
 		//decode srcCommand using patterns 
-		nf::Patterns::CommandsManager cm(nf::GetRegistryKeyForCommandPatterns());
+		nf::Patterns::CommandsManager cm;
 		tstring prefix = nf::Parser::ExtractPrefix(srcCommand);
 		if (! cm.CheckIfPrefixIsFree(prefix)) {	//there is pattern srcCommand for the prefix 
 			tstring dest;
@@ -122,7 +121,7 @@ std::pair<HANDLE, bool> nf::OpenFromCommandLine(wchar_t const* pSrcCmd) {
 			break;
 		}
 	default:
-		return std::make_pair(INVALID_HANDLE_VALUE, nf::ExecuteCommand(cmd, false));
+		return std::make_pair(nullptr, nf::ExecuteCommand(cmd, false));
 	};
-	return std::make_pair(INVALID_HANDLE_VALUE, false);
+	return std::make_pair(nullptr, false);
 } //OpenFromCommandLine

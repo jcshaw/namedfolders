@@ -10,7 +10,7 @@
 #include "header.h"
 
 namespace nf {
-int FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath);
+size_t FarCmpName(const wchar_t *Pattern, const wchar_t *String, int SkipPath);
 
 void CloseAndStartAnotherPlugin(HANDLE hPlugin, tstring const& Command, bool bActivePanel, bool bOpenBoth);
 

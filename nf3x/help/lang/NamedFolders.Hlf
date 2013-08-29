@@ -2,8 +2,8 @@
 .PluginContents=Named Folders
 @Contents
 $^#Plugin for FAR "Named Folders".#
-$^#Version 3.0.1 snapshot, April 2011#
-$^#Copyright (c) 2002-2011 by Victor Derevyanko#
+$^#Version 4.0 beta 1 for FAR 3, April 2013#
+$^#Copyright (c) 2002-2013 by Victor Derevyanko#
 .
   Program-Plugin #Named Folders# for #Far#.
 
@@ -141,7 +141,7 @@ F.e. #cd:--f c:\temp#, #cd:--df \\computer\abc#, etc. If path contains spaces, i
 
   #cd::name# - create constant shortcut in the root catalog;
   #cd::catalog/name# - create constant shortcut in the #catalog#;
-  #cd:+name# - create temporary shortcut (it will be deleted automatically after rebooting);
+  #cd:+name# - create temporary shortcut (it will be deleted automatically after rebooting - this feature doens't work in NF 4.X);
   #cd:::name# - create single shortcut for two directories (opened on active and inactive FAR panels);
   #cd::+name# - the same, but shortcut will be temporary;
   #cd::#, #cd:::#, #cd:+#, #cd::+# - create shortcut with the name equal to the name of currently opened directory.
@@ -314,7 +314,7 @@ $^#Edit shortcut#
   #Directory for active panel#  - directory to be opened on active FAR panel after shortcut execution.
 This directory can be local, network or directory on the another plugin. It can contain metacharaters, see section ~Named Folder Paths~@NamedFolderPaths@ for details.
   #Directory for inactive panel#- directory to be opened on inactive FAR panel after shortcut execution (optional parameter)
-  #Temporary# - this shortcut will be removed after computer restart.
+  #Temporary# - this shortcut will be removed after computer restart (this feature doesn't work in NF 4.X, so temporary shortcuts are equal to general shortcuts).
 
 @DialogMove
 $^#Copy/move catalogs and shortcuts#
@@ -444,7 +444,7 @@ See reg file: "cc.reg"
 
 @Author
 $^#Far Named Folders - the plugin for Far Manager.#
-Copyright (c) 2002-2011 by Victor Derevyanko
+Copyright (c) 2002-2013 by Victor Derevyanko
 
   This program is FREEWARE.
    

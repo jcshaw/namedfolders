@@ -12,14 +12,14 @@ namespace
 }
 
 DialogEditPattern::DialogEditPattern(void)
-: dialogT(DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, HELP_TOPIC_ID)
+: dialogT(nf::NF_DIALOG_EDIT_PATTERN, DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, HELP_TOPIC_ID)
 , m_bCreateNewPattern(true)
 {
 	SetDialogItems();
 }
 
 DialogEditPattern::DialogEditPattern(tstring const& Prefix, tstring const& Pattern)
-: dialogT(DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, HELP_TOPIC_ID)
+: dialogT(nf::NF_DIALOG_EDIT_PATTERN, DIALOG_WIDTH, DIALOG_HEIGHT, g_PluginInfo, 10, HELP_TOPIC_ID)
 , m_bCreateNewPattern(false)
 , m_Prefix(Prefix)
 , m_Pattern(Pattern)
@@ -35,9 +35,9 @@ UINT DialogEditPattern::ShowModal() {
 	//вызываем диалог редактирования имени каталога
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_PREFIX, m_Prefix.c_str());
 	GetDialogItemsRef().SetFarDialogItemData(ID_EDIT_PATTERN, m_Pattern.c_str());
-	GetDialogItemsRef()[ID_EDIT_PREFIX].Focus = 1;
+	//GetDialogItemsRef()[ID_EDIT_PREFIX].Focus = 1; //!TODO
 
-	int nChoosedItem;
+	intptr_t nChoosedItem;
 	if (Execute(nChoosedItem))
 		if (nChoosedItem != ID_CANCEL)
 		{	//редактируем имя каталога
@@ -46,7 +46,7 @@ UINT DialogEditPattern::ShowModal() {
 
 			//префикс всегда должен заканчиваться двоеточием
 			//если пользователь забыл его указать - доставляем : автоматически
-			if (m_Prefix[m_Prefix.size()-1] != _T(':')) m_Prefix += L":";
+			if (m_Prefix[m_Prefix.size()-1] != L':') m_Prefix += L":";
 			return 1;
 		}
 

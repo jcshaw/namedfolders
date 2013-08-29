@@ -6,7 +6,7 @@
 #pragma once
 
 #include "header.h"
-#include "plugin.hpp"
+//#include "far2/plugin.hpp"
 #include "PanelInfoWrap.h"
 
 namespace nf {
@@ -37,13 +37,16 @@ namespace nf {
 		tstring GetSelectedCatalog(CPanel* pPanel, PanelInfo const&pi, int nSelectedItem = 0);
 		nf::tshortcut_info& GetSelectedShortcut(CPanel* pPanel, PanelInfo const &pi, nf::tshortcut_info& sh, int nSelectedItem = 0);
 
-		inline PluginPanelItem* allocate_PluginPanelItem(HANDLE hPlugin, int Command, int nSelectedItem) {
-			PluginPanelItem* ppi = reinterpret_cast<PluginPanelItem*>(malloc(g_PluginInfo.Control(hPlugin, Command, nSelectedItem, NULL)));
+		inline PluginPanelItem* allocate_PluginPanelItem(HANDLE hPlugin, FILE_CONTROL_COMMANDS Command, int nSelectedItem) {
+			FarGetPluginPanelItem fgpp;
+			fgpp.Size = g_PluginInfo.PanelControl(hPlugin, Command, nSelectedItem, nullptr);
+			fgpp.StructSize = sizeof(FarGetPluginPanelItem);
+			fgpp.Item = reinterpret_cast<PluginPanelItem*>(malloc(fgpp.Size));
 
-			g_PluginInfo.Control(hPlugin, Command, nSelectedItem, reinterpret_cast<LONG_PTR>(ppi));
-			return ppi;
+			g_PluginInfo.PanelControl(hPlugin, Command, nSelectedItem, reinterpret_cast<void*>(&fgpp));
+			return fgpp.Item;
 		}
-		inline PluginPanelItem* allocate_PluginPanelItem(CPanel const* pSrcPanel, int Command, int nSelectedItem) {
+		inline PluginPanelItem* allocate_PluginPanelItem(CPanel const* pSrcPanel, FILE_CONTROL_COMMANDS Command, int nSelectedItem) {
 			HANDLE hplugin = static_cast<HANDLE>(const_cast<CPanel*>(pSrcPanel));
 			return allocate_PluginPanelItem(hplugin, Command, nSelectedItem);
 		}

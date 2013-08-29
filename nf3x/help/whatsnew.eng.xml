@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
+<version product_name="Named Folders" version="4.0.0.284 beta 1" date="29.08.2013"> 
+<item type="!">NF 4.X works under FAR 3 only. For FAR 2 please use NF 3.X.</item>
+<item type="!">All shortcuts are stored in sqlite now, Windows registry is not used anymore.</item>
+<item type="!">Both x86 and x64 versions of NF are used same shortcuts database.</item>
+<item type="*">Temporary shortucts work as general shorcuts. I.e. commands cd:+ и cd:: are equal.</item>
+<item>If two NF panels are opened at the same time and you change data on one panel, then data on another panel is NOT updated automatically. Custom update is required.</item>
+</version>
+
 <version product_name="Named Folders" version="3.0.0.259 snapshot" date="10.04.2011"> 
 <item type="+">Now, it's possible to execute known folders directly from command
 line using "cd:shell:abc" comman (abc - is known folder name).</item>

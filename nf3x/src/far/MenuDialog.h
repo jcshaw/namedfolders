@@ -39,7 +39,7 @@ namespace Menu {
 			typedef tstring R;
 			typedef tenv_info V;		
 			inline static V Encode(R const& SrcValue) {	
-				return static_cast<tenv_info>(Utils::DivideString(SrcValue, _T('%'))); }
+				return static_cast<tenv_info>(Utils::DivideString(SrcValue, L'%')); }
 			inline static R Decode(V const& SrcValue) { 
 				return Utils::CombinePath(SrcValue.first, SrcValue.second, L"%");	} //!TODO
 		};
@@ -59,10 +59,10 @@ namespace Menu {
 		std::pair<size_t, size_t> get_column_widths(bool bOnlyVisibleItems);
 		void set_items_visibility(tstring const& Filter, int Level, std::pair<size_t, size_t> maxSizes);
 		void load_items(tlist_far_menu_items &destMenuItems, tlist_buffers &destMenuBuffers); 
-		int show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem);
+		int show_menu(tlist_far_menu_items const& MenuItems, intptr_t& BreakCode, intptr_t &nSelectedItem);
 		void sort_items_list();
 	private:
-		bool get_selected_item(int nselectedItem, tvariant_value& destValue);
+		bool get_selected_item(intptr_t nselectedItem, tvariant_value& destValue);
 		CMenu &m_Menu;
 		tbackground_action_maker* m_pBckgActionMaker;
 		tlist_menu_items &m_List;

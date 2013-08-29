@@ -6,7 +6,6 @@
 */
 #include "StdAfx.h"
 #include "settings.h"
-#include "Registry.h"
 #include <cassert>
 #include "Kernel.h"
 #include "CommandPatterns.h"
@@ -31,7 +30,7 @@ namespace
 	typedef struct tdefault_flag_value {
 		tsetting_flags flag;
 		BYTE default_value;	//ограничиваемся byte'ом, чтобы исключить лишний vector<DWORD>, и приминить уже используемый vector<BYTE>
-		wchar_t const *regkey;
+		wchar_t const *keyName;
 	} _default_flag_value;
 
 	tdefault_flag_value const default_flags_values [] = {
@@ -83,8 +82,7 @@ CSettings::CSettings()
 	assert(NUMBER_STRINGS == NUMBER_STRING_SETTINGS);
 	assert(NUMBER_FLAGS == NUMBER_FLAG_SETTINGS);
 
-	assert(g_PluginInfo.RootKey);
-	m_nf_reg_key = tstring(g_PluginInfo.RootKey);
+	m_nf_reg_key = L"Software\\Far3\\Plugins"; //!TODO: заменить на Settings API
 	m_nf_reg_key += L"\\NamedFolders";
 	ReloadSettings();
 }
@@ -104,7 +102,7 @@ tstring CSettings::GetPrimaryPluginPrefix() {
 
 tstring const& CSettings::GetListPrefixes() {
 	m_FullListPrefixes = CSettings::GetInstance().GetValue(nf::STS_PREFIXES).c_str();
-	nf::Patterns::CommandsManager cm(nf::GetRegistryKeyForCommandPatterns());
+	nf::Patterns::CommandsManager cm;
 	m_FullListPrefixes += cm.GetListCommandPrefixes();
 // 	if (tstring::npos == m_FullListPrefixes.find(L"st:")) { //!TODO: we need possibility to turn of a support of "st:" 
 // 		m_FullListPrefixes += L"st:";
@@ -114,20 +112,34 @@ tstring const& CSettings::GetListPrefixes() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-void CSettings::ReloadSettings()
-{	//загрузить настройки из реестра
-	CRegistry reg(HKEY_CURRENT_USER, m_nf_reg_key.c_str());
+namespace {
+	wchar_t const* ROOT_NF_SETTINGS_KEY = L"nf_settings";
+	nf::PluginSettings::tsettings_handle get_root_key() {
+		auto h = nf::PluginSettings::FarOpenKey(0, ROOT_NF_SETTINGS_KEY);
+		if (nf::PluginSettings::isInvalidHandle(h)) {
+			h = nf::PluginSettings::FarCreateKey(0, ROOT_NF_SETTINGS_KEY);
+		}
+		return h;
+	}
+}
+
+///загрузить настройки из реестра
+void CSettings::ReloadSettings() {	
+	auto hroot = get_root_key();
 	for (int i = 0; i < NUMBER_FLAGS; ++i) {
 		tdefault_flag_value const &d = default_flags_values[i];
 	//получаем значение из реестра
-		DWORD value;
-		if (reg.GetValue(d.regkey, value)) m_FV[d.flag] = static_cast<BYTE>(value);
-		else m_FV[d.flag] = d.default_value;	//присваиваем значение по-умолчанию
+		__int64 value;
+		if (nf::PluginSettings::FarGet(hroot, d.keyName, value)) {
+			m_FV[d.flag] = static_cast<BYTE>(value);
+		} else {
+			m_FV[d.flag] = d.default_value;	//присваиваем значение по-умолчанию
+		}
 	}
 	for (int i = 0; i < NUMBER_STRINGS; ++i) {
 		tdefault_string_value const &d = default_strings_values[i];
 		tstring value;
-		if (reg.GetValue(d.regkey, value)) {
+		if (nf::PluginSettings::FarGet(hroot, d.regkey, value)) {
 			m_SV[d.flag] = value;
 		} else {
 			m_SV[d.flag] = d.default_value;	
@@ -136,16 +148,16 @@ void CSettings::ReloadSettings()
 
 }
 
-void CSettings::SaveSettings()
-{
-	CRegistry reg(HKEY_CURRENT_USER, m_nf_reg_key.c_str());
+void CSettings::SaveSettings() {
+	auto hroot = get_root_key();
+
 	for (int i = 0; i < NUMBER_FLAGS; ++i) {
 		tdefault_flag_value const &d = default_flags_values[i];
-		reg.SetValue(d.regkey, m_FV[d.flag]);
+		PluginSettings::FarSet(hroot, d.keyName, m_FV[d.flag]);
 	}
 	for (int i = 0; i < NUMBER_STRINGS; ++i) {
 		tdefault_string_value const &d = default_strings_values[i];
-		reg.SetValue(d.regkey, m_SV[d.flag].c_str());
+		PluginSettings::FarSet(hroot, d.regkey, m_SV[d.flag].c_str());
 	}
 }
 

@@ -12,6 +12,7 @@
 #include <shlwapi.h>
 #include <boost/foreach.hpp>
 #include <boost/function.hpp>
+#include "stlsoft_def.h"
 
 #include "stlcatalogs.h"
 #include <algorithm>
@@ -22,17 +23,19 @@
 #include "searcherpaths.h"
 #include "PanelInfoWrap.h"
 
+#include "far/CatalogSequences.h"
+
 using namespace nf;
 
 namespace {
-	int append_if_equal_to_pattern(sc::shortcuts_sequence_item sv
+	int append_if_equal_to_pattern(nf::titem_sequence_values const& sv
 		, nf::tshortcuts_list &DestList
 		, tstring const& Catalog
 		, tstring const& srcPattern
 		, bool bIsTemporary)
 	{
-		if (nf::Parser::IsTokenMatchedToPattern(sv.GetName(), srcPattern)) {
-			DestList.push_back(nf::MakeShortcut(Catalog, sv.GetName(), bIsTemporary));
+		if (nf::Parser::IsTokenMatchedToPattern(nf::get_ssi_name(sv), srcPattern)) {
+			DestList.push_back(nf::MakeShortcut(Catalog, nf::get_ssi_name(sv), bIsTemporary));
 		}
 		return 0;
 	}
@@ -40,23 +43,23 @@ namespace {
 	inline bool is_match(tstring const &Value, tstring const& valuePattern) {
 		return nf::Parser::IsTokenMatchedToPattern(Value, valuePattern.c_str(), false);
 	}
-	int append_if_equal_paths(sc::shortcuts_sequence_item sv
+	int append_if_equal_paths(nf::titem_sequence_values const& sv
 		, nf::tshortcuts_list& DestList
 		, tstring const& Catalog
 		, tstring const& valuePattern
 		, bool bTemporary)
 	{
-		nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(sv.GetValue());
+		nf::tshortcut_value_parsed_pair vp = nf::DecodeValues(nf::get_ssi_value(sv));
 
 		if ( (vp.first.bValueEnabled && is_match(vp.first.value, valuePattern)) 
 			|| (vp.second.bValueEnabled && is_match(vp.second.value, valuePattern)) )
 		{
-			DestList.push_back(nf::MakeShortcut(Catalog, sv.GetName(), bTemporary));
+			DestList.push_back(nf::MakeShortcut(Catalog, nf::get_ssi_name(sv), bTemporary));
 		}
 		return 0;
 	}
 
-	int select_shortcuts(boost::function<int (sc::shortcuts_sequence_item, bool, tstring)> &Func
+	int select_shortcuts(boost::function<int (titem_sequence_values, bool, tstring)> &Func
 		, bool bSearchInSubcatalogs
 		, tstring Catalog)
 	{
@@ -64,18 +67,22 @@ namespace {
 		sc::CCatalog c(Catalog, 0, false);
 
 		//перебираем все постоянные псевдонимы
-		sc::shortcuts_sequence seq(c.GetSequenceShortcuts(false));
-		std::for_each(seq.begin(), seq.end(), boost::bind(Func, _1, false, Catalog));
+		auto seq = c.GetSequenceShortcuts(false);
+		BOOST_FOREACH(auto const& name, seq->getItems()) {
+			Func(name, false, Catalog);
+			//std::for_each(seq.begin(), seq.end(), boost::bind(Func, _1, false, Catalog));
+		}
 
 		//перебираем все временные псевдонимы
-		sc::shortcuts_sequence seq2(c.GetSequenceShortcuts(true));
-		std::for_each(seq2.begin(), seq2.end(), boost::bind(Func, _1, true, Catalog));
+		auto seq2 = c.GetSequenceShortcuts(true);
+		BOOST_FOREACH(auto const& item, seq2->getItems()) {
+			Func(item, true, Catalog);
+		}
 
 		if (bSearchInSubcatalogs) {	//look through all subcatalogs
-			sc::subcatalogs_sequence seqc(c.GetSequenceSubcatalogs());
-			BOOST_FOREACH(sc::subcatalogs_sequence::value_type const& cat, seqc) {
-				sc::catalogs_sequence_item cv(cat);
-				tstring subcatalog_name = cv.GetName();
+			auto seqc = c.GetSequenceSubcatalogs();
+			BOOST_FOREACH(auto const& item, seqc->getItems()) {
+				tstring subcatalog_name = get_catalog_item_name(item);
 				Utils::RemoveTrailingCharsOnPlace(subcatalog_name,  SLASH_CATS_CHAR);
 				tstring cat2 = Utils::CombinePath(Catalog, subcatalog_name, SLASH_CATS);
 				select_shortcuts(Func, bSearchInSubcatalogs, cat2);
@@ -91,7 +98,7 @@ namespace {
 		, tstring Catalog
 		, bool bSearchByPath)
 	{
-		boost::function<int (sc::shortcuts_sequence_item, bool, tstring)> f 
+		boost::function<int (titem_sequence_values, bool, tstring)> f 
 			= boost::bind( (bSearchByPath ? append_if_equal_paths : append_if_equal_to_pattern)
 				, _1,  boost::ref(destList),  _3,  boost::ref(shPattern), _2);
 
@@ -163,16 +170,15 @@ namespace {
 		smask.swap(*ListCatalogParts.begin());
 		ListCatalogParts.erase(ListCatalogParts.begin());
 
-		sc::subcatalogs_sequence f(c.GetSequenceSubcatalogs());
-		BOOST_FOREACH(sc::subcatalogs_sequence::value_type &t, f) {
-			sc::catalogs_sequence_item cv(t);
-			tstring catalog_name = cv.GetName().c_str();
+		auto f = c.GetSequenceSubcatalogs();
+		BOOST_FOREACH(auto const &t, f->getItems()) {
+			tstring catalog_name = nf::get_catalog_item_name(t);
 			if (! nf::Parser::IsTokenMatchedToPattern(catalog_name, smask)) continue;
 
 			//для каждого найденного совпадения осуществляем рекурсивный поиск для следующих элементов шаблона
-			sc::CCatalog subc(cv, &c);
+			sc::CCatalog subc(nf::get_catalog_item_name(t), &c);
 			if (ListCatalogParts.empty()) {
-				list.push_back(subc.CatalogPath()); //если это последний элемент шаблона - заносим найденную директорию в список
+				list.push_back(subc.getCatalogPath()); //если это последний элемент шаблона - заносим найденную директорию в список
 			} else {
 				search_catalogs(subc, ListCatalogParts, list); //рекурсивно ищем следующий элемент шаблона
 			}

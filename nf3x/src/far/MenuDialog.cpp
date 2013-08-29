@@ -8,19 +8,23 @@ using namespace Menu;
 using namespace Polices;
 
 namespace {
+	// {F53E66D6-3514-40C1-ABDD-2F74D2F92A85}
+	static const GUID NF_MENU_DIALOG_GUID = { 0xf53e66d6, 0x3514, 0x40c1, { 0xab, 0xdd, 0x2f, 0x74, 0xd2, 0xf9, 0x2a, 0x85 } };
+
+
 	enum {FIRST_COLUMN_MAX_WIDTH = 60, MAX_WIDTH = 256};
 
-	int additional_chars[] = { VK_OEM_PLUS
-		, VK_OEM_1
-		, MAKELONG(VK_OEM_1, PKF_SHIFT)
-		, MAKELONG(VK_OEM_COMMA, PKF_SHIFT) 
-		, VK_OEM_MINUS
-		, MAKELONG(VK_OEM_PERIOD, PKF_SHIFT)
-		, MAKELONG(VK_OEM_7, PKF_SHIFT)
-		, VK_OEM_4
-		, VK_OEM_6
-		, MAKELONG(VK_OEM_4, PKF_SHIFT)
-		, MAKELONG(VK_OEM_6, PKF_SHIFT)
+	FarKey additional_chars[] = { {VK_OEM_PLUS, 0}
+		, {VK_OEM_1, 0}
+		, {VK_OEM_1, SHIFT_PRESSED}
+		, {VK_OEM_COMMA, SHIFT_PRESSED}
+		, {VK_OEM_MINUS, 0}
+		, {VK_OEM_PERIOD, SHIFT_PRESSED}
+		, {VK_OEM_7, SHIFT_PRESSED}
+		, {VK_OEM_4, 0}
+		, {VK_OEM_6, 0}
+		, {VK_OEM_4, SHIFT_PRESSED}
+		, {VK_OEM_6, SHIFT_PRESSED}
 	};
 	const int number_additional_chars = sizeof(additional_chars)/sizeof(int);
 	wchar_t additional_chars_translation[number_additional_chars] = {L'+'
@@ -36,10 +40,10 @@ namespace {
 		, L'Ъ'
 	};
 
-	bool decode_additional_character(int KeyCode, wchar_t &Resulwchar_t) {
+	bool decode_additional_character(FarKey& keyCode, wchar_t &Resulwchar_t) {
 		const int len = sizeof(additional_chars);
 		for (int i = 0; i < number_additional_chars; ++i) {
-			if (additional_chars[i] == KeyCode) {
+			if (additional_chars[i].VirtualKeyCode == keyCode.VirtualKeyCode && additional_chars[i].ControlKeyState == keyCode.ControlKeyState) { 
 				Resulwchar_t = additional_chars_translation[i];
 				return true;
 			}
@@ -47,10 +51,15 @@ namespace {
 		return false;
 	}
 
-	void fill_menu_break_keys_buf(int* pBreakCodes, autobuffer_wrapper<int>& destBuf, size_t &destNumDefaultBreakKeys) {
-		int *p = pBreakCodes;
+	inline FarKey get_fk(WORD virtualKeyCode, DWORD controlKeyState) {
+		FarKey dest = {virtualKeyCode, controlKeyState};
+		return dest;
+	}
+
+	void fill_menu_break_keys_buf(FarKey* pBreakCodes, autobuffer_wrapper<FarKey>& destBuf, size_t &destNumDefaultBreakKeys) {
+		FarKey *p = &pBreakCodes[0];
 		destNumDefaultBreakKeys = 0;
-		while (0 != p && 0 != *p) {
+		while (p != nullptr && p->VirtualKeyCode != 0) {
 			++destNumDefaultBreakKeys;
 			++p;
 		}
@@ -61,27 +70,27 @@ namespace {
 			+ 1; // 0
 		destBuf.resize(static_cast<unsigned int>(count_items));
 
-		while (0 != pBreakCodes && 0 != *pBreakCodes) {
+		while (nullptr != pBreakCodes && 0 != pBreakCodes->VirtualKeyCode) {
 			destBuf.push_back(*pBreakCodes);
 			++pBreakCodes;
 		}
 
-		destBuf.push_back(VK_BACK); //стирание, 1 символ
-		destBuf.push_back(VK_SPACE); //пробел, 1 символ
-		destBuf.push_back(MAKELONG(VK_BACK, PKF_SHIFT)); //стирание, 1 символ
-		destBuf.push_back(MAKELONG(VK_SPACE, PKF_SHIFT)); //пробел, 1 символ
+		destBuf.push_back(get_fk(VK_BACK, 0)); //стирание, 1 символ
+		destBuf.push_back(get_fk(VK_SPACE, 0)); //пробел, 1 символ
+		destBuf.push_back(get_fk(VK_BACK, SHIFT_PRESSED)); //стирание, 1 символ
+		destBuf.push_back(get_fk(VK_SPACE, SHIFT_PRESSED)); //пробел, 1 символ
 
 		for (unsigned int i = L'A'; i <= L'Z'; ++i) {
-			destBuf.push_back(i);  //английские буквы
-			destBuf.push_back(MAKELONG(i, PKF_SHIFT));  //русские буквы (с шифтом)
+			destBuf.push_back(get_fk(i, 0));  //английские буквы
+			destBuf.push_back(get_fk(i, SHIFT_PRESSED));  //русские буквы (с шифтом)
 		}
 		for (unsigned int i = L'0'; i <= L'9'; ++i) {
-			destBuf.push_back(i);	 //цифры, 10 символов
+			destBuf.push_back(get_fk(i, 0));	 //цифры, 10 символов
 		}
 		for (unsigned int i = 0; i < number_additional_chars; ++i) {
 			destBuf.push_back(additional_chars[i]);
 		}
-		destBuf.push_back(0);
+		destBuf.push_back(get_fk(0, 0));
 	}
 
 //class to generate menu item strings
@@ -251,8 +260,8 @@ nf::Menu::CMenuDialog::CMenuDialog(CMenu &srcMenu, tlist_menu_items &listItemsRe
 	sort_items_list();
 }
 
-int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int& BreakCode, int &nSelectedItem) {
-	autobuffer_wrapper<int> buf;
+int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, intptr_t& BreakCode, intptr_t &nSelectedItem) {
+	autobuffer_wrapper<FarKey> buf;
 	size_t num_custom_break_codes = 0;
 	fill_menu_break_keys_buf(m_Menu.GetBreakKeys(), buf, num_custom_break_codes);
 
@@ -269,8 +278,8 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 		+ L"," +  Utils::itoa(static_cast<int>(m_Menu.GetCurrentSortMode()))  //visualization of sort mode
 		+ L")";
  
-	nSelectedItem = g_PluginInfo.Menu (
-		g_PluginInfo.ModuleNumber
+	nSelectedItem = g_PluginInfo.Menu(&nf::NF_PLUGIN_GUID
+		, &NF_MENU_DIALOG_GUID 
 		, -1
 		, -1
 		, 0	//макс кол-во видимых элементов
@@ -288,28 +297,28 @@ int nf::Menu::CMenuDialog::show_menu(tlist_far_menu_items const& MenuItems, int&
 		if (nSelectedItem >= 0) return true;	//enter
 	}
 	m_bFilterFullUpdateMode = true;
-	if (m_pBckgActionMaker != NULL && (VK_BACK != LOWORD(buf[BreakCode])) ) {
+	if (m_pBckgActionMaker != NULL && (VK_BACK != buf[static_cast<unsigned int>(BreakCode)].VirtualKeyCode) ) {
 		tvariant_value dest;
 		if (get_selected_item(nSelectedItem, dest)) {
-			if ((*m_pBckgActionMaker)(BreakCode, dest)) return true; //action was made; continue work without closing the menu
+			if ((*m_pBckgActionMaker)(static_cast<unsigned int>(BreakCode), dest)) return true; //action was made; continue work without closing the menu
 		}
 	}
 
 	if (BreakCode < static_cast<int>(num_custom_break_codes)) return true; //нажата заданная в m_Menu.GetBreakKeys клавиша
-	if (VK_BACK == LOWORD(buf[BreakCode])) {	//удаляем последний символ фильтра
+	if (VK_BACK == buf[static_cast<unsigned int>(BreakCode)].VirtualKeyCode) {	//удаляем последний символ фильтра
 		if (m_Filter.size()) m_Filter.erase(m_Filter.size()-1, 1);
 	} else {
 		wchar_t ch; //!DO: русские буквы так просто уже не заменить английскими в фильтре, TODO
-		if (decode_additional_character(buf[BreakCode], ch)) {
+		if (decode_additional_character(buf[static_cast<unsigned int>(BreakCode)], ch)) {
 			m_Filter += ch;
-		} else if (HIWORD(buf[BreakCode]) == PKF_SHIFT) {	//russian letter
+		} else if (buf[static_cast<unsigned int>(BreakCode)].ControlKeyState == SHIFT_PRESSED) {	//russian letter
 			wchar_t ch[2]; 
-			ch[0] = static_cast<wchar_t>(LOWORD(buf[BreakCode]));
+			ch[0] = static_cast<wchar_t>(buf[static_cast<unsigned int>(BreakCode)].VirtualKeyCode);
 			ch[1] = 0;
 			wchar_t* ptransformed_string = g_FSF.XLat(&ch[0], 0, 1, 0); //!TODO: if xlat macros is not activated then Xlat won't work properly
 			m_Filter += ptransformed_string;	
 		} else { //english letter
-			m_Filter += buf[BreakCode];
+			m_Filter += buf[static_cast<unsigned int>(BreakCode)].VirtualKeyCode;
 		}
 		m_bFilterFullUpdateMode = false;			
 	}
@@ -337,8 +346,8 @@ bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &destValue, int &DestRetCode
 		sort_items_list();
 		load_items(menu_items, menu_buffers);
 
-		int break_code = 0;
-		int nselected_item = 0;
+		intptr_t break_code = 0;
+		intptr_t nselected_item = 0;
 		if (! show_menu(menu_items, break_code, nselected_item)) continue;	//filter key is pressed
 
 		if (-1 == break_code && -1 == nselected_item) return false;	//user has canceled menu
@@ -356,7 +365,7 @@ bool nf::Menu::CMenuDialog::ShowMenu(tvariant_value &destValue, int &DestRetCode
 	};
 }
 
-bool nf::Menu::CMenuDialog::get_selected_item(int nselectedItem, tvariant_value& destValue) {
+bool nf::Menu::CMenuDialog::get_selected_item(intptr_t nselectedItem, tvariant_value& destValue) {
 	tvariant_value const *pvalue = NULL;  //std::advance(p, nselected_item) is not suitable because some items can be invisible
 	BOOST_FOREACH(tmenu_item const& mi, m_List) {
 		if (mi.first == nselectedItem) {

@@ -40,8 +40,7 @@ namespace nf {
 			BOOST_SCOPE_EXIT( (&ppi) ) {
 				deallocate_PluginPanelItem(ppi);
 			} BOOST_SCOPE_EXIT_END;
-				destSh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FindData.lpwszFileName
-				, ppi->FindData.dwFileAttributes && FILE_ATTRIBUTE_TEMPORARY);
+				destSh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FileName, ppi->FileAttributes && FILE_ATTRIBUTE_TEMPORARY);
 		}
 	}
 }
@@ -74,7 +73,7 @@ BOOL nf::Panel::MoveItems(CPanel* pPanel, PanelInfo const &pi, tcopy_mode copyMo
 		bool bSingleItem = pi.SelectedItemsNumber == 1;
 
 		bool bRet = false;
-		for (int i = 0; i < pi.SelectedItemsNumber; ++i) {
+		for (unsigned int i = 0; i < pi.SelectedItemsNumber; ++i) {
 			tstring new_path = dlg.GetItemName();
 
 			//!TODO: разобраться; добавлять слеш тут просто так нельзя, иначе нарушается работа ExpandCatalogPath
@@ -199,16 +198,17 @@ bool nf::Panel::EditCatalog(CPanel* pPanel, tstring const& catalogName) {
 
 void nf::Panel::SaveSetup(CPanel* pPanel) {
 	//запоминаем состояние панели
-	int ViewMode = pPanel->get_hPlugin().GetPanelInfo(true).ViewMode;
+	intptr_t view_mode = pPanel->get_hPlugin().GetPanelInfo(true).ViewMode;
 	const wchar_t *Msg = GetMsg(lg::MSG_SAVE_SETUP_MESSAGE);      
 
-	if (g_PluginInfo.Message(g_PluginInfo.ModuleNumber
+	if (g_PluginInfo.Message(&nf::NF_PLUGIN_GUID
+		, &nf::NF_MESSAGE_SAFE_PANEL_STATE
 		, FMSG_MB_OKCANCEL | FMSG_ALLINONE
 		, 0
 		, (wchar_t const * const*) Msg
 		, 0, 0) == 0) 
 	{
-		CSettings::GetInstance().SetValue(nf::ST_PANEL_MODE, ViewMode);	
+		CSettings::GetInstance().SetValue(nf::ST_PANEL_MODE, static_cast<DWORD>(view_mode));	
 		CSettings::GetInstance().SaveSettings();
 	}
 }
@@ -218,7 +218,7 @@ bool nf::Panel::IsSelectedItemIsCatalog(CPanel* pPanel, PanelInfo const &pi, int
 	BOOST_SCOPE_EXIT( (&ppi) ) {
 		deallocate_PluginPanelItem(ppi);
 	} BOOST_SCOPE_EXIT_END;
-	return (ppi->FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+	return (ppi->FileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
 tstring nf::Panel::GetSelectedCatalog(CPanel* pPanel, PanelInfo const&pi, int nSelectedItem) {
@@ -228,7 +228,7 @@ tstring nf::Panel::GetSelectedCatalog(CPanel* pPanel, PanelInfo const&pi, int nS
 	} BOOST_SCOPE_EXIT_END;
 
 	return Utils::CombinePath(pPanel->GetCurrentCatalog()
-		, tstring(ppi->FindData.lpwszFileName)
+		, tstring(ppi->FileName)
 		, SLASH_CATS);
 }
 
@@ -238,7 +238,7 @@ nf::tshortcut_info& nf::Panel::GetSelectedShortcut(CPanel* pPanel, PanelInfo con
 		deallocate_PluginPanelItem(ppi);
 	} BOOST_SCOPE_EXIT_END;
 
-	destSh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FindData.lpwszFileName, 0 != ppi->CRC32);
+	destSh = nf::MakeShortcut(pPanel->GetCurrentCatalog(), ppi->FileName, 0 != ppi->CRC32);
 	return destSh;
 }
 
@@ -249,7 +249,7 @@ void nf::Panel::DeleteSelectedCatalogsAndShortcuts(CPanel *pPanel, PanelInfo con
 	//составляем полный список выделенных псевдонимов и каталогов
 	nf::tshortcuts_list list_sh;
 	nf::tcatalogs_list list_c;
-	for (int i = 0; i < pi.SelectedItemsNumber; ++i) {
+	for (unsigned int i = 0; i < pi.SelectedItemsNumber; ++i) {
 		if (IsSelectedItemIsCatalog(pPanel, pi, i)) {
 			list_c.push_back(GetSelectedCatalog(pPanel, pi, i));
 		} else {
@@ -276,7 +276,7 @@ void nf::Panel::UpdateCursorPositionOnFarPanel(CPanel *pPanel, PanelInfo const& 
 
 int nf::Panel::OpenSelectedItem(CPanel *pPanel, unsigned int ControlState, PanelInfo const &pi) {
 	nf::tshortcut_info sh;
-	if (PKF_SHIFT == ControlState) {	//shift -> open explorer
+	if (SHIFT_PRESSED == ControlState) {	//shift -> open explorer
 		if (! IsSelectedItemIsCatalog(pPanel, pi)) {
 			nf::Commands::OpenShortcutInExplorer(pPanel->get_hPlugin(), GetSelectedShortcut(pPanel, pi, sh), tstring());
 			return TRUE;	
@@ -284,7 +284,7 @@ int nf::Panel::OpenSelectedItem(CPanel *pPanel, unsigned int ControlState, Panel
 	}
 	if (pi.SelectedItemsNumber != 0) {	 //avoid  ".."
 		if (! IsSelectedItemIsCatalog(pPanel, pi)) { //open selected directory in FAR
-			if (PKF_CONTROL != ControlState) {
+			if (LEFT_CTRL_PRESSED != ControlState) {
 				nf::Commands::OpenShortcut(pPanel->get_hPlugin(), GetSelectedShortcut(pPanel, pi, sh), tstring());
 				return TRUE;	//itsn't necessary to update active panel
 			} else {//на неактивной панели

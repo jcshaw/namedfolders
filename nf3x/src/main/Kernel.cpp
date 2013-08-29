@@ -11,16 +11,16 @@
 #include <memory>
 #include "stlsoft_def.h"
 #include "stlcatalogs.h"
-#include "registry_remover.h"
 #include "strings_utils.h"
 #include "CommandPatterns.h"
 #include "select_variants.h"
 #include "catalog_names.h"
+#include "stlcatalogs.h"
 
 using namespace nf;
 
+/// find all shortcuts that match to specified pattern
 size_t nf::Shell::SelectShortcuts(tstring shPattern, tstring srcCatalog, tshortcuts_list& destList) {
-//find all shortcuts that match to specified pattern
 	if (!shPattern.size()) shPattern = L"*";
 	Utils::RemoveTrailingCharsOnPlace(srcCatalog, SLASH_CATS_CHAR);
 	Shell::SelectShortcuts(srcCatalog, shPattern, destList, true);
@@ -28,7 +28,7 @@ size_t nf::Shell::SelectShortcuts(tstring shPattern, tstring srcCatalog, tshortc
 	return 0;
 }
 
-bool nf::Shell::InsertShortcut(nf::tshortcut_info const&sh, tstring const& srcValue, bool bOverride) {
+bool nf::Shell::InsertShortcut(nf::tshortcut_info const& sh, tstring const& srcValue, bool bOverride) {
 	tstring catalog_name = sh.catalog;
 	Utils::RemoveLeadingCharsOnPlace(catalog_name, SLASH_CATS_CHAR);
 	Utils::RemoveTrailingCharsOnPlace(catalog_name, SLASH_CATS_CHAR);
@@ -36,7 +36,9 @@ bool nf::Shell::InsertShortcut(nf::tshortcut_info const&sh, tstring const& srcVa
 	sc::CCatalog c(catalog_name);
 	if (! bOverride) {
 		tstring buf;
-		if (c.GetShortcutInfo(sh.shortcut, sh.bIsTemporary, buf)) return false; //the shortcut already exists
+		if (c.GetShortcutInfo(sh.shortcut, sh.bIsTemporary, buf)) {
+			return false; //the shortcut already exists
+		}
 	}
 
 	c.SetShortcut(sh.shortcut, srcValue, sh.bIsTemporary);
@@ -50,12 +52,12 @@ bool nf::Shell::DeleteShortcut(tshortcut_info const&sh) {
 	return true;
 }
 
-bool nf::Shell::ModifyShortcut(tshortcut_info const& from, tshortcut_info const& to, tstring* pnew_value) {	
+bool nf::Shell::ModifyShortcut(tshortcut_info const& from, tshortcut_info const& to, tstring* pNewValue) {	
 	tstring value;
-	if (! pnew_value) 	{
+	if (! pNewValue) 	{
 		Shell::GetShortcutValue(from, value);
 	} else {
-		value = *pnew_value;
+		value = *pNewValue;
 	}
 
 	Shell::DeleteShortcut(from);
@@ -73,26 +75,28 @@ bool nf::Shell::InsertCatalog(tstring const& srcCatalog, tstring const& subCatal
 	}
 }
 
+/// переместить каталог и все вложенные в него каталоги и псевдонимы
+/// в другой каталог; если последний не указан 
+/// удалить каталог и все вложенные в него каталоги и псевдонимы
 bool nf::Shell::Private::remove_catalog(tstring const& srcCatalog, tstring const* pTargetCatalog, bool bDeleteSource) {
-//переместить каталог и все вложенные в него каталоги и псевдонимы
-//в другой каталог; если последний не указан 
-//удалить каталог и все вложенные в него каталоги и псевдонимы
-	nf::registry_remover rr;
-
-	tstring src_key = sc::CCatalog(srcCatalog).GetCatalogRegkey();
-	if (! pTargetCatalog) return rr.Erase(src_key);
+	tstring src_key = sc::CCatalog(srcCatalog).getCatalogPath();
+	if (! pTargetCatalog) {
+		return nf::sc::CCatalog::eraseKey(src_key);
+	}
 
 	tstring target_catalog;
-	if (! Utils::ExpandCatalogPath(srcCatalog, *pTargetCatalog, target_catalog, false)) return false;
-
-	tstring target_key = sc::CCatalog(target_catalog).GetCatalogRegkey();
-	if (target_key == srcCatalog) return true; //nothing to do
-
-	if (bDeleteSource) {
-		return rr.Move(src_key, target_key);
-	} else {
-		return rr.Copy(src_key, target_key);
+	if (! Utils::ExpandCatalogPath(srcCatalog, *pTargetCatalog, target_catalog, false)) {
+		return false;
 	}
+
+	tstring target_key = sc::CCatalog(target_catalog).getCatalogPath();
+	if (target_key == srcCatalog) {
+		return true; //nothing to do
+	}
+
+	return bDeleteSource
+		? nf::sc::CCatalog::moveKey(src_key, target_key)
+		: nf::sc::CCatalog::copyKey(src_key, target_key);
 }
 
 bool nf::Shell::GetShortcutValue(tshortcut_info const& sh, tstring& value) {

@@ -12,11 +12,16 @@
 using namespace nf;
 using namespace nf::Confirmations;
 
+// {154B50EC-1A96-4D2A-9927-D19A3EEF718B}
+static const GUID NF_CONFIRMATION_MESSAGE_GUID = { 0x154b50ec, 0x1a96, 0x4d2a, { 0x99, 0x27, 0xd1, 0x9a, 0x3e, 0xef, 0x71, 0x8b } };
+
+
 namespace {
 	int call_menu(HANDLE hPlugin,  DWORD menuFlags, wchar_t const* const* menuStrings, unsigned int itemsNumber, unsigned int buttonsNumber, tsetting_flags confirmationFlag) {
 		if (confirmationFlag != 0 && CSettings::GetInstance().GetValue(confirmationFlag) == 0) return 1;	//confirmation is not required
 
-		if (g_PluginInfo.Message(g_PluginInfo.ModuleNumber
+		if (g_PluginInfo.Message(&nf::NF_PLUGIN_GUID
+			, &NF_CONFIRMATION_MESSAGE_GUID
 			, menuFlags
 			, 0
 			, menuStrings
@@ -66,7 +71,7 @@ UINT nf::Confirmations::AskToGoToNearest(HANDLE hPlugin, tstring const& srcDir, 
 
 nf::Confirmations::tconfirm_delete_result 
 nf::Confirmations::Private::ask_for_delete_general(tstring const& srcTitle, int Msg0, int Msg1, bool bSeveral) {	
-	const unsigned int number_buttons = bSeveral ? 4 : 2;
+	const intptr_t number_buttons = bSeveral ? 4 : 2;
 	const wchar_t* Msg[7];	
 	Msg[0] = GetMsg(Msg0);
 	Msg[1] = GetMsg(Msg1);
@@ -80,7 +85,8 @@ nf::Confirmations::Private::ask_for_delete_general(tstring const& srcTitle, int 
 		Msg[4] = GetMsg(lg::MSG_CANCEL);	
 	}
 
-	int code = g_PluginInfo.Message(g_PluginInfo.ModuleNumber
+	intptr_t code = g_PluginInfo.Message(&nf::NF_PLUGIN_GUID
+		, &NF_CONFIRMATION_MESSAGE_GUID
 		, FMSG_WARNING 
 		, 0
 		, &Msg[0]

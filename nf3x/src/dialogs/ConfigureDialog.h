@@ -130,7 +130,7 @@ public:
 		;
 	};
 private:
-	void dde_registry(bool bSaveToRegistry);
+	void dde_settings_db(bool bSaveToSettingsDB);
 	void dde_main_dialog(bool bSaveToControls);
 
 };

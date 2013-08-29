@@ -1,24 +1,24 @@
 Плагин FAR: Именованные Директории      
-Версия: 3.0.1 snapshot, Апрель 2011
+Версия: 4.0 beta 1 for FAR 3, Август 2013
 
 Плагин для быстрого доступа к локальным, сетевым и виртуальным 
 директориям в FAR. Командой "cd::abc" пользователь присваивает 
 открытой директории псевдоним "abc" и после этого может переходить 
 в эту директорию командой "cd:abc". 
 
-Copyright (c) 2002-2011 by Виктор Деревянко
+Copyright (c) 2002-2013 by Виктор Деревянко
 e-mail: dvpublic0@gmail.com
 www: http://code.google.com/p/namedfolders
 
 
 FAR Plugin: Named Folders        
-Version: 3.0.1 snapshot, April 2011
+Version: 4.0 beta 1 for FAR 3, April 2013
 
 This plugin can be used for fast access to local, net and virtual 
 directories in the FAR. Using "cd::abc" you set short name "abc" for 
 the directory, opened in the active FAR panel. Then you can jump 
 to this directory executing "cd:abc". 
 
-Copyright (c) 2002-2011 by Victor Derevyanko
+Copyright (c) 2002-2013 by Victor Derevyanko
 e-mail: dvpublic0@gmail.com
 www: http://code.google.com/p/namedfolders
