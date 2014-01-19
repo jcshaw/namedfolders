@@ -9,6 +9,7 @@
 #include <cassert>
 #include "Kernel.h"
 #include "CommandPatterns.h"
+#include "FarCatalog.h"
 
 using namespace nf;
 
@@ -114,23 +115,25 @@ tstring const& CSettings::GetListPrefixes() {
 
 namespace {
 	wchar_t const* ROOT_NF_SETTINGS_KEY = L"nf_settings";
-	nf::PluginSettings::tsettings_handle get_root_key() {
-		auto h = nf::PluginSettings::FarOpenKey(0, ROOT_NF_SETTINGS_KEY);
-		if (nf::PluginSettings::isInvalidHandle(h)) {
-			h = nf::PluginSettings::FarCreateKey(0, ROOT_NF_SETTINGS_KEY);
-		}
-		return h;
+	boost::shared_ptr<FarCatalog> get_root_key() {
+		boost::shared_ptr<FarCatalog> dest(new FarCatalog(ROOT_NF_SETTINGS_KEY, true));
+		return dest;
+// 		auto h = nf::PluginSettings::FarOpenKey(0, ROOT_NF_SETTINGS_KEY);
+// 		if (nf::PluginSettings::isInvalidHandle(h)) {
+// 			h = nf::PluginSettings::FarCreateKey(0, ROOT_NF_SETTINGS_KEY);
+// 		}
+// 		return h;
 	}
 }
 
 ///загрузить настройки из реестра
 void CSettings::ReloadSettings() {	
-	auto hroot = get_root_key();
+	boost::shared_ptr<FarCatalog> fc = get_root_key();
 	for (int i = 0; i < NUMBER_FLAGS; ++i) {
 		tdefault_flag_value const &d = default_flags_values[i];
 	//получаем значение из реестра
 		__int64 value;
-		if (nf::PluginSettings::FarGet(hroot, d.keyName, value)) {
+		if (fc->getValue(d.keyName, value)) {
 			m_FV[d.flag] = static_cast<BYTE>(value);
 		} else {
 			m_FV[d.flag] = d.default_value;	//присваиваем значение по-умолчанию
@@ -139,7 +142,7 @@ void CSettings::ReloadSettings() {
 	for (int i = 0; i < NUMBER_STRINGS; ++i) {
 		tdefault_string_value const &d = default_strings_values[i];
 		tstring value;
-		if (nf::PluginSettings::FarGet(hroot, d.regkey, value)) {
+		if (fc->getValue(d.regkey, value)) {
 			m_SV[d.flag] = value;
 		} else {
 			m_SV[d.flag] = d.default_value;	
@@ -149,15 +152,15 @@ void CSettings::ReloadSettings() {
 }
 
 void CSettings::SaveSettings() {
-	auto hroot = get_root_key();
+	boost::shared_ptr<FarCatalog> fc = get_root_key();
 
 	for (int i = 0; i < NUMBER_FLAGS; ++i) {
 		tdefault_flag_value const &d = default_flags_values[i];
-		PluginSettings::FarSet(hroot, d.keyName, m_FV[d.flag]);
+		fc->setValue(d.keyName, m_FV[d.flag]);
 	}
 	for (int i = 0; i < NUMBER_STRINGS; ++i) {
 		tdefault_string_value const &d = default_strings_values[i];
-		PluginSettings::FarSet(hroot, d.regkey, m_SV[d.flag].c_str());
+		fc->setValue(d.regkey, m_SV[d.flag].c_str());
 	}
 }
 

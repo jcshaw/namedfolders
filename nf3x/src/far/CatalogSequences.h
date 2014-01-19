@@ -27,42 +27,42 @@ namespace nf {
 	class SequenceSettings {
 		std::list<T> _Items;
 	public:
-		SequenceSettings(PluginSettings::tkey_handle key) {
-			load_items(key, get_default_FARSETTINGSTYPES((T*)nullptr));
+		SequenceSettings(nf::PluginSettings const& ps, PluginSettings::tkey_handle key) {
+			load_items(ps, key, get_default_FARSETTINGSTYPES((T*)nullptr));
 		}
 
 		/// by default we use SequenceShortcuts for shortcuts and SequenceItems for subcatalogs
 		/// SequenceShortcuts loads shortcuts values. Sometime, we don't need the values.
 		/// Then we can use this constructor, pass FST_STRING and get SequenceItems with shortcut names.
-		SequenceSettings(PluginSettings::tkey_handle key, FARSETTINGSTYPES fst) {
-			load_items(key, fst);
+		SequenceSettings(nf::PluginSettings const& ps, PluginSettings::tkey_handle key, FARSETTINGSTYPES fst) {
+			load_items(ps, key, fst);
 		}	
 
 		std::list<T> const& getItems() const {
 			return _Items;
 		}
 	private:
-		void load_items(PluginSettings::tkey_handle key, FARSETTINGSTYPES fst) {
+		void load_items(nf::PluginSettings const& ps, PluginSettings::tkey_handle key, FARSETTINGSTYPES fst) {
 			FarSettingsEnum fse;
-			if (nf::PluginSettings::FarEnum(key, fse)) {
+			if (ps.FarEnum(key, fse)) {
 				for (size_t i = 0; i < fse.Count; ++i) {
 					if (fse.Items[i].Type == fst) {
-						_Items.push_back(create_sequence_item<T>(key, fse.Items[i]));
+						_Items.push_back(create_sequence_item<T>(ps, key, fse.Items[i]));
 					}
 				}
 			}
 		}
 	private:
 		/// create items for shortucts or subcatalogs sequences
-		template<class T> T create_sequence_item(PluginSettings::tkey_handle key, FarSettingsName const& fsn);
-		template<> nf::titem_sequence_values create_sequence_item(PluginSettings::tkey_handle key, FarSettingsName const& fsn) {
+		template<class T> T create_sequence_item(nf::PluginSettings const& ps, PluginSettings::tkey_handle key, FarSettingsName const& fsn);
+		template<> nf::titem_sequence_values create_sequence_item(nf::PluginSettings const& ps, PluginSettings::tkey_handle key, FarSettingsName const& fsn) {
 			tstring dest;
-			if (! nf::PluginSettings::FarGet(key, fsn.Name, dest)) {
+			if (! ps.FarGet(key, fsn.Name, dest)) {
 				dest.clear();
 			}
 			return std::make_pair(fsn.Name, dest);
 		}
-		template<> nf::titem_sequence_catalogs create_sequence_item(PluginSettings::tkey_handle key, FarSettingsName const& fsn) {
+		template<> nf::titem_sequence_catalogs create_sequence_item(nf::PluginSettings const& ps, PluginSettings::tkey_handle key, FarSettingsName const& fsn) {
 			return fsn.Name;
 		}
 

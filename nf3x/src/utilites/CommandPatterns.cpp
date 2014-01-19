@@ -7,6 +7,7 @@ using namespace Patterns;
 #include "stlsoft_def.h"
 #include "parser.h"
 #include "CatalogSequences.h"
+#include "FarCatalog.h"
 
 #pragma warning(disable: 4244 4267)
 #include <boost/bind.hpp>
@@ -287,11 +288,9 @@ namespace {
 	wchar_t const* ROOT_COMMAND_PATTERNS_KEY = L"CommandPatterns";
 }
 
-CommandsManager::CommandsManager() {
-	_hSettingsKey = nf::PluginSettings::FarOpenKey(0, ROOT_COMMAND_PATTERNS_KEY);
-	if (nf::PluginSettings::isInvalidHandle(_hSettingsKey)) {
-		_hSettingsKey = nf::PluginSettings::FarCreateKey(0, ROOT_COMMAND_PATTERNS_KEY);
-	}
+CommandsManager::CommandsManager() 
+: _fc(new FarCatalog(ROOT_COMMAND_PATTERNS_KEY, true) )
+{
 }
 
 CommandsManager::~CommandsManager()
@@ -301,18 +300,18 @@ CommandsManager::~CommandsManager()
 
 bool CommandsManager::SetCommand(tstring const& Prefix, tstring const& Pattern) {
 	assert(is_prefix_valid(Prefix));
-	return nf::PluginSettings::FarSet(_hSettingsKey, Prefix.c_str(), Pattern.c_str());
+	return _fc->setValue(Prefix.c_str(), Pattern.c_str());
 }
 
 bool CommandsManager::CheckIfPrefixIsFree(tstring const& Prefix) {
 	assert(is_prefix_valid(Prefix));
 	tstring dummy;
-	return nf::PluginSettings::FarGet(_hSettingsKey, Prefix.c_str(), dummy);
+	return _fc->getValue(Prefix.c_str(), dummy);
 }
 
 bool CommandsManager::RemoveCommand(tstring const& Prefix) {
 	assert(is_prefix_valid(Prefix));
-	return nf::PluginSettings::FarDeleteValue(_hSettingsKey, Prefix.c_str());
+	return _fc->deleteValue(Prefix.c_str());
 }
 
 bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd, tstring &DestCmd) const {
@@ -362,8 +361,8 @@ bool CommandsManager::TransformCommandRecursively(tstring const &SrcCmd, tstring
 
 void CommandsManager::GetListRegisteredCommands(tlist_pairs_strings &ListPatterns) const {
 	assert(ListPatterns.empty());
-
-	nf::SequenceValues sv(_hSettingsKey);
+	nf::PluginSettings ps;
+	nf::SequenceValues sv(ps, _fc->openFarHandle(ps, true));
 	BOOST_FOREACH(auto const& kvp, sv.getItems()) {
 		ListPatterns.push_back(std::make_pair(kvp.first, kvp.second)); 
 	}
@@ -378,7 +377,8 @@ void CommandsManager::GetListRegisteredCommands(tlist_pairs_strings &ListPattern
 
 tstring CommandsManager::GetListCommandPrefixes() const
 {	//get total list of prefixes registered for template commands 
-	nf::SequenceValues sv(_hSettingsKey);
+	nf::PluginSettings ps;
+	nf::SequenceValues sv(ps, _fc->openFarHandle(ps, true));
 	tstring list_prefixes;
 	list_prefixes.reserve(64);
 	BOOST_FOREACH(auto const& kvp, sv.getItems()) {

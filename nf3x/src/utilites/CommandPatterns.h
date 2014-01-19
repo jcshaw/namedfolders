@@ -8,6 +8,7 @@
 #include "PluginSettings.h"
 
 namespace nf {
+	class FarCatalog;
 namespace Patterns {
 
 typedef std::pair<tstring, tstring> tcommand_pattern;
@@ -18,7 +19,7 @@ typedef tlist_pairs_strings tlist_command_patterns;
 // Рекурсивная раскрутка команды
 /************************************************************************/
 class CommandsManager {
-	nf::PluginSettings::tsettings_handle _hSettingsKey;
+	boost::shared_ptr<FarCatalog> _fc;
 public:
 	explicit CommandsManager();
 	~CommandsManager();

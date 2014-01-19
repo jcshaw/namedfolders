@@ -9,6 +9,7 @@
 #include <list>
 #include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 //#include "far2/plugin.hpp"
 
 namespace Utils {
@@ -135,5 +136,13 @@ namespace Private {
 	tstring replace_sequence_chars(tstring const& srcStr, wchar_t srcCh, tstring const& byString
 		, unsigned int minCount, unsigned int startFrom);
 }
+
+	inline void add_to_path(std::list<tstring> &path, tstring const& pathToAdd) {
+		nf::tlist_strings addons;
+		Utils::SplitStringByRegex(Utils::TrimChar(pathToAdd, SLASH_CATS_CHAR).c_str(), addons, SLASH_CATS);
+		BOOST_FOREACH(auto const& a, addons) {
+			path.push_back(a);
+		}
+	}	
 
 }//Utils

@@ -4,6 +4,8 @@
 #include <boost/foreach.hpp>
 #include "CatalogSequences.h"
 
+#include <FarCatalog.h>
+
 extern struct PluginStartupInfo g_PluginInfo; 
 
 #define _ENFORCER_WIDEN2(x) L ## x
@@ -11,70 +13,24 @@ extern struct PluginStartupInfo g_PluginInfo;
 #define _ENFORCER_WFILE _ENFORCER_WIDEN(__FILE__)
 #define _ENFORCER_WSTRINGIZE(x) _ENFORCER_WIDEN(STRINGIZE(x))
 
-namespace {
-	nf::PluginSettings::tsettings_handle open_handle() {
-		FarSettingsCreate fsc = {
-			sizeof (FarSettingsCreate)
-			, nf::NF_PLUGIN_GUID
-			, 0
-		};
-
-		if (! g_PluginInfo.SettingsControl(INVALID_HANDLE_VALUE, SCTL_CREATE, PSL_ROAMING, &fsc)) {
-			throw std::exception("SCTL_CREATE");
-		}
-		return fsc.Handle;
-	}
-
-	/// Похоже объект настроек плагина должен быть глобальным. Если создавать экземпляр на уровне каталога, то шоткаты не создаются.
-	class SingleHandler {
-		HANDLE _h;
-	public:
-	 
-		SingleHandler() : _h(0) {}
-		~SingleHandler() {
-			close();
-		}
-
-		static SingleHandler& getInstance() {
-			static SingleHandler h;
-			return h;
-		}
-
-		HANDLE get() {
-			if (_h == 0) {
-				_h = open_handle();
-			}
-			return _h;
-		}
-
-		void close() {
-			if (_h != 0) {
-				g_PluginInfo.SettingsControl(_h, SCTL_FREE, 0, 0);
-				_h = 0;
-			}
-		}
+nf::PluginSettings::PluginSettings()  {
+	FarSettingsCreate fsc = {
+		sizeof (FarSettingsCreate)
+		, nf::NF_PLUGIN_GUID
+		, 0
 	};
-}
 
-void nf::PluginSettings::closeRootHandle() {
-	SingleHandler::getInstance().close();
-}
-
-
-nf::PluginSettings::tsettings_handle nf::PluginSettings::getRootHandle() {
-	return SingleHandler::getInstance().get();
-}
-
-
-
-
-nf::PluginSettings::PluginSettings() 
-{
-
+	if (! g_PluginInfo.SettingsControl(INVALID_HANDLE_VALUE, SCTL_CREATE, PSL_ROAMING, &fsc)) {
+		throw std::exception("SCTL_CREATE");
+	}
+	_h = fsc.Handle;
 }
 
 nf::PluginSettings::~PluginSettings() {
-	
+	if (_h != 0) {
+		g_PluginInfo.SettingsControl(_h, SCTL_FREE, 0, 0);
+		_h = 0;
+	}	
 }
 
 namespace {
@@ -87,7 +43,7 @@ namespace {
 }
 
 
-nf::PluginSettings::tsettings_handle nf::PluginSettings::FarOpenKey(tkey_handle keyHandle, tstring const& keyName) {
+nf::PluginSettings::tsettings_handle nf::PluginSettings::FarOpenKey(tkey_handle keyHandle, tstring const& keyName) const {
 	tstring key_name;
 	if (! ic_search_key_name(keyHandle, keyName, key_name)) {
 		return 0;
@@ -98,7 +54,7 @@ nf::PluginSettings::tsettings_handle nf::PluginSettings::FarOpenKey(tkey_handle 
 		, reinterpret_cast<size_t>(keyHandle) 
 		, key_name.c_str()
 	};
-	return (tkey_handle)g_PluginInfo.SettingsControl(getRootHandle()
+	return (tkey_handle)g_PluginInfo.SettingsControl(_h
 		, SCTL_OPENSUBKEY
 		, 0
 		, &fsv
@@ -117,7 +73,7 @@ nf::PluginSettings::tsettings_handle nf::PluginSettings::FarCreateKey(tkey_handl
 		, reinterpret_cast<size_t>(keyHandle) 
 		, keyName.c_str()
 	};
-	return (tkey_handle)g_PluginInfo.SettingsControl(getRootHandle()
+	return (tkey_handle)g_PluginInfo.SettingsControl(_h
 		, SCTL_CREATESUBKEY
 		, 0
 		, &fsv
@@ -140,7 +96,7 @@ bool nf::PluginSettings::FarDeleteKey(tkey_handle keyHandle) {
 		, reinterpret_cast<size_t>(keyHandle) 
 		, nullptr 
 	};
-	auto ret = g_PluginInfo.SettingsControl(getRootHandle()
+	auto ret = g_PluginInfo.SettingsControl(_h
 		, SCTL_DELETE
 		, 0
 		, &fsv
@@ -158,13 +114,13 @@ bool nf::PluginSettings::FarSet(tkey_handle keyHandle, tstring const& name, tstr
 		, 0
 	};
 	fsi.String = strValue.c_str();
-	return 0 != g_PluginInfo.SettingsControl(getRootHandle()
+	return 0 != g_PluginInfo.SettingsControl(_h
 		, SCTL_SET
 		, 0
 		, &fsi
 	);
 }
-bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, tstring& dest) {
+bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, tstring& dest) const {
 	FarSettingsItem fsi = {
 		sizeof(FarSettingsItem)
 		, reinterpret_cast<size_t>(keyHandle) 
@@ -172,7 +128,7 @@ bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, tstr
 		, FST_STRING
 		, 0
 	};
-	if (g_PluginInfo.SettingsControl(getRootHandle(), SCTL_GET, 0, &fsi)) {
+	if (g_PluginInfo.SettingsControl(_h, SCTL_GET, 0, &fsi)) {
 		dest = fsi.String;
 		return true;
 	} else {
@@ -187,13 +143,13 @@ bool nf::PluginSettings::FarSet(tkey_handle keyHandle, tstring const& name, __in
 		, FST_QWORD
 		, number
 	};
-	return 0 != g_PluginInfo.SettingsControl(getRootHandle()
+	return 0 != g_PluginInfo.SettingsControl(_h
 		, SCTL_SET
 		, 0
 		, &fsi
 	);
 }
-bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, __int64& dest) {
+bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, __int64& dest) const {
 	FarSettingsItem fsi = {
 		sizeof(FarSettingsItem)
 		, reinterpret_cast<size_t>(keyHandle) 
@@ -201,7 +157,7 @@ bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, __in
 		, FST_QWORD
 		, 0
 	};
-	if (g_PluginInfo.SettingsControl(getRootHandle(), SCTL_GET, 0, &fsi)) {
+	if (g_PluginInfo.SettingsControl(_h, SCTL_GET, 0, &fsi)) {
 		dest = fsi.Number;
 		return true;
 	} else {
@@ -209,15 +165,15 @@ bool nf::PluginSettings::FarGet(tkey_handle keyHandle, tstring const& name, __in
 	}
 }
 
-bool nf::PluginSettings::FarEnum(tkey_handle keyHandle, FarSettingsEnum& fse) {
+bool nf::PluginSettings::FarEnum(tkey_handle keyHandle, FarSettingsEnum& fse) const {
 	fse.StructSize = sizeof(FarSettingsEnum);
 	fse.Root = reinterpret_cast<size_t>(keyHandle);
-	auto code = g_PluginInfo.SettingsControl(getRootHandle(), SCTL_ENUM, 0, &fse);
+	auto code = g_PluginInfo.SettingsControl(_h, SCTL_ENUM, 0, &fse);
 	return 0 != code;
 }	
 
 
-nf::PluginSettings::tsettings_handle nf::PluginSettings::FarOpenKey(tkey_handle keyHandle, std::list<tstring> const& keys) {
+nf::PluginSettings::tsettings_handle nf::PluginSettings::FarOpenKey(tkey_handle keyHandle, std::list<tstring> const& keys) const {
 	if (keys.empty()) {
 		return 0;
 	}
@@ -284,7 +240,7 @@ bool nf::PluginSettings::FarDeleteValue(tkey_handle keyHandle, tstring const& va
 		, reinterpret_cast<size_t>(keyHandle) 
 		, valueName.c_str()
 	};
-	auto ret = g_PluginInfo.SettingsControl(getRootHandle()
+	auto ret = g_PluginInfo.SettingsControl(_h
 		, SCTL_DELETE
 		, 0
 		, &fsv
@@ -292,63 +248,61 @@ bool nf::PluginSettings::FarDeleteValue(tkey_handle keyHandle, tstring const& va
 	return ret != 0;
 }
 
-namespace {
-	bool copy_key(nf::PluginSettings::tkey_handle hSrc, nf::PluginSettings::tkey_handle hDest) {
-		bool bret = true;
-		FarSettingsEnum fse;
-		fse.StructSize = sizeof(FarSettingsEnum);
-		fse.Root = reinterpret_cast<size_t>(hSrc);
-		if (0 == g_PluginInfo.SettingsControl(nf::PluginSettings::getRootHandle(), SCTL_ENUM, 0, &fse)) {
-			return false;
-		}
-		for (size_t i = 0; i < fse.Count; ++i) {
-			switch (fse.Items[i].Type) {
-			case FST_SUBKEY: {
-				auto hdest_subkey = nf::PluginSettings::FarCreateKey(hDest, fse.Items[i].Name);
-				if (! nf::PluginSettings::isInvalidHandle(hdest_subkey)) {
-					auto hsrc_subkey = nf::PluginSettings::FarOpenKey(hSrc, fse.Items[i].Name);
-					if (! nf::PluginSettings::isInvalidHandle(hsrc_subkey)) {
-						bret &= copy_key(hsrc_subkey, hdest_subkey);
-					}
-				}
-							 } break;
-			case FST_QWORD: 
-				assert(false); //this type is not used in NF
-				break;
-			case FST_STRING: {
-				tstring svalue;
-				if (nf::PluginSettings::FarGet(hSrc, fse.Items[i].Name, svalue)) {
-					nf::PluginSettings::FarSet(hDest, fse.Items[i].Name, svalue);
-				} else {
-					bret = false;
-				}
-							 } break;
-			case FST_DATA: 
-				assert(false); //this type is not used in NF
-				break;
-			}
-		}
-
-		return bret;
+bool nf::PluginSettings::copy_key(nf::PluginSettings::tkey_handle hSrc, nf::PluginSettings::tkey_handle hDest) {
+	bool bret = true;
+	FarSettingsEnum fse;
+	fse.StructSize = sizeof(FarSettingsEnum);
+	fse.Root = reinterpret_cast<size_t>(hSrc);
+	if (0 == g_PluginInfo.SettingsControl(_h, SCTL_ENUM, 0, &fse)) {
+		return false;
 	}
+	for (size_t i = 0; i < fse.Count; ++i) {
+		switch (fse.Items[i].Type) {
+		case FST_SUBKEY: {
+			auto hdest_subkey = nf::PluginSettings::FarCreateKey(hDest, fse.Items[i].Name);
+			if (! nf::PluginSettings::isInvalidHandle(hdest_subkey)) {
+				auto hsrc_subkey = nf::PluginSettings::FarOpenKey(hSrc, fse.Items[i].Name);
+				if (! nf::PluginSettings::isInvalidHandle(hsrc_subkey)) {
+					bret &= copy_key(hsrc_subkey, hdest_subkey);
+				}
+			}
+							} break;
+		case FST_QWORD: 
+			assert(false); //this type is not used in NF
+			break;
+		case FST_STRING: {
+			tstring svalue;
+			if (nf::PluginSettings::FarGet(hSrc, fse.Items[i].Name, svalue)) {
+				nf::PluginSettings::FarSet(hDest, fse.Items[i].Name, svalue);
+			} else {
+				bret = false;
+			}
+							} break;
+		case FST_DATA: 
+			assert(false); //this type is not used in NF
+			break;
+		}
+	}
+
+	return bret;
 }
 
 bool nf::PluginSettings::CopyKey(nf::tlist_strings const& src, nf::tlist_strings const& dest) {
-	auto hsrc = FarOpenKey(0, src);
-	if (isInvalidHandle(hsrc)) {
+	PluginSettings ps;
+	FarCatalog fc_src(src, false);
+	FarCatalog fc_dest(dest, false);
+
+	auto hsrc = fc_src.openFarHandle(ps, false);
+	auto hdest = fc_dest.openFarHandle(ps, true);
+	if (PluginSettings::isInvalidHandle(hsrc) || PluginSettings::isInvalidHandle(hdest)) {
 		return false;
 	}
 
-	auto hdest = FarCreateKey(0, dest);
-	if (isInvalidHandle(hdest)) {
-		return false;
-	}
-
-	return copy_key(hsrc, hdest);
+	return ps.copy_key(hsrc, hdest);
 }
 
-bool nf::PluginSettings::ic_search_key_name(tkey_handle keyHandle, tstring const& keyName, tstring& destKeyName) {
-	nf::SequenceCatalogs sc(keyHandle);
+bool nf::PluginSettings::ic_search_key_name(tkey_handle keyHandle, tstring const& keyName, tstring& destKeyName) const {
+	nf::SequenceCatalogs sc(*this, keyHandle);
 	BOOST_FOREACH(tstring const& name, sc.getItems()) {
 		if (0 == g_PluginInfo.FSF->LStricmp(name.c_str(), keyName.c_str())) {
 			destKeyName = name;

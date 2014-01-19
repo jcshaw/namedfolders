@@ -172,6 +172,13 @@ namespace nf {
 		, ID_MENU_CANCELED
 	};
 
+	typedef enum tspec_folders {
+		REG_STATIC_KEYS
+		, REG_TEMP_KEYS
+		, REG_SUB_CATALOGS
+		, REG_PROPERTIES
+	};
+
 	typedef struct tcatalog_properties {
 		bool show_in_disk_menu;
 		bool flag_add_to_win7_lib_by_default;
