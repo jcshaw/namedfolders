@@ -19,14 +19,15 @@
 #include "PluginSettings.h"
 #include "strings_utils.h"
 #include "FarCatalog.h"
+#include "FarSettingsKeyWrapper.h"
 
 extern struct PluginStartupInfo g_PluginInfo; 
 
 namespace {
 	template<class T>
-	inline boost::shared_ptr<nf::SequenceSettings<T>> get_sequence(nf::FarCatalog* pfc, wchar_t const* subkey) { 
+	inline boost::shared_ptr<nf::SequenceSettings<T>> get_sequence(nf::FarCatalog* pfc, nf::tspec_folders specFolder) { 
 		nf::PluginSettings ps;
-		boost::shared_ptr<nf::FarCatalog> fs = pfc->openSubKey(subkey, false);
+		boost::shared_ptr<nf::FarSettingsKeyWrapper> fs = pfc->openPlainSubKey(nf::FarCatalog::GetSpecFolderName(specFolder), false);
 		return boost::shared_ptr<nf::SequenceSettings<T>>(new nf::SequenceSettings<T>(ps, fs->openFarHandle(ps, true)));
 	}
 }
@@ -75,7 +76,9 @@ bool nf::sc::CCatalog::GetShortcutInfo(tstring const& shName, bool bTemporary, t
 		destValue = Utils::CombinePath(CPanelInfoWrap(INVALID_HANDLE_VALUE).GetPanelCurDir(true), subdirectory, SLASH_DIRS);
 		return true;
 	} else {
-		return _pFarCatalog->getValue(shName, destValue, REG_TEMP_KEYS);
+		if (! _pFarCatalog->getValue(shName, destValue, REG_STATIC_KEYS)) {
+			return _pFarCatalog->getValue(shName, destValue, REG_TEMP_KEYS);
+		}
 	} 
 }
 
@@ -195,19 +198,19 @@ std::list<tstring> nf::sc::CCatalog::generateInternalPath(std::list<tstring> con
 }
 
 size_t nf::sc::CCatalog::GetNumberSubcatalogs() const {
-	return get_sequence<tstring>(_pFarCatalog.get(), FarCatalog::GetSpecFolderName(REG_SUB_CATALOGS))->getItems().size();
+	return get_sequence<tstring>(_pFarCatalog.get(), REG_SUB_CATALOGS)->getItems().size();
 }
 
 size_t nf::sc::CCatalog::GetNumberShortcuts() const {
-	return get_sequence<tstring>(_pFarCatalog.get(), FarCatalog::GetSpecFolderName(REG_STATIC_KEYS))->getItems().size();
+	return get_sequence<tstring>(_pFarCatalog.get(), REG_STATIC_KEYS)->getItems().size();
 }
 
 boost::shared_ptr<nf::SequenceValues> nf::sc::CCatalog::GetSequenceShortcuts(bool bTemporary) {
-	return get_sequence<nf::titem_sequence_values>(_pFarCatalog.get(), FarCatalog::GetSpecFolderName(bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS));
+	return get_sequence<nf::titem_sequence_values>(_pFarCatalog.get(), bTemporary ? REG_TEMP_KEYS : REG_STATIC_KEYS);
 }
 
 boost::shared_ptr<nf::SequenceCatalogs> nf::sc::CCatalog::GetSequenceSubcatalogs() {
-	return get_sequence<nf::titem_sequence_catalogs>(_pFarCatalog.get(), FarCatalog::GetSpecFolderName(REG_SUB_CATALOGS));
+	return get_sequence<nf::titem_sequence_catalogs>(_pFarCatalog.get(), REG_SUB_CATALOGS);
 }
 
 bool nf::sc::CCatalog::SetShortcut(tstring const& name, tstring const& shValue, bool bTemporary) {
@@ -228,4 +231,8 @@ bool nf::sc::CCatalog::DeleteProperty(tstring const& propertyName) {
 
 bool nf::sc::CCatalog::GetProperty(tstring const& propertyName, tstring& destValue) {
 	return _pFarCatalog->getValue(propertyName, destValue, REG_PROPERTIES);
+}
+
+boost::shared_ptr<nf::FarCatalog> nf::sc::CCatalog::getFarCatalog() const {
+	return _pFarCatalog;
 }

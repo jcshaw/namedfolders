@@ -266,6 +266,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FarSettingsKeyWrapper.cpp" />
     <ClCompile Include="far\confirmations.cpp" />
     <ClCompile Include="far\FarCatalog.cpp" />
     <ClCompile Include="far\far_impl.cpp" />
@@ -317,6 +318,7 @@
     <ClInclude Include="external\ScopeGuard.h" />
     <ClInclude Include="far3\far_utils2.h" />
     <ClInclude Include="far3\panel_types.h" />
+    <ClInclude Include="FarSettingsKeyWrapper.h" />
     <ClInclude Include="far\CatalogSequences.h" />
     <ClInclude Include="far\confirmations.h" />
     <ClInclude Include="far\EnumSettings.h" />

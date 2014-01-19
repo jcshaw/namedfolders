@@ -9,7 +9,7 @@
 #include <cassert>
 #include "Kernel.h"
 #include "CommandPatterns.h"
-#include "FarCatalog.h"
+#include "FarSettingsKeyWrapper.h"
 
 using namespace nf;
 
@@ -115,8 +115,8 @@ tstring const& CSettings::GetListPrefixes() {
 
 namespace {
 	wchar_t const* ROOT_NF_SETTINGS_KEY = L"nf_settings";
-	boost::shared_ptr<FarCatalog> get_root_key() {
-		boost::shared_ptr<FarCatalog> dest(new FarCatalog(ROOT_NF_SETTINGS_KEY, true));
+	boost::shared_ptr<FarSettingsKeyWrapper> get_root_key() {
+		boost::shared_ptr<FarSettingsKeyWrapper> dest(new FarSettingsKeyWrapper(ROOT_NF_SETTINGS_KEY, true));
 		return dest;
 // 		auto h = nf::PluginSettings::FarOpenKey(0, ROOT_NF_SETTINGS_KEY);
 // 		if (nf::PluginSettings::isInvalidHandle(h)) {
@@ -128,7 +128,7 @@ namespace {
 
 ///загрузить настройки из реестра
 void CSettings::ReloadSettings() {	
-	boost::shared_ptr<FarCatalog> fc = get_root_key();
+	boost::shared_ptr<FarSettingsKeyWrapper> fc = get_root_key();
 	for (int i = 0; i < NUMBER_FLAGS; ++i) {
 		tdefault_flag_value const &d = default_flags_values[i];
 	//получаем значение из реестра
@@ -152,7 +152,7 @@ void CSettings::ReloadSettings() {
 }
 
 void CSettings::SaveSettings() {
-	boost::shared_ptr<FarCatalog> fc = get_root_key();
+	boost::shared_ptr<FarSettingsKeyWrapper> fc = get_root_key();
 
 	for (int i = 0; i < NUMBER_FLAGS; ++i) {
 		tdefault_flag_value const &d = default_flags_values[i];

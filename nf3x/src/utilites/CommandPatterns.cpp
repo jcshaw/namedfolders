@@ -7,7 +7,7 @@ using namespace Patterns;
 #include "stlsoft_def.h"
 #include "parser.h"
 #include "CatalogSequences.h"
-#include "FarCatalog.h"
+#include "FarSettingsKeyWrapper.h"
 
 #pragma warning(disable: 4244 4267)
 #include <boost/bind.hpp>
@@ -289,7 +289,7 @@ namespace {
 }
 
 CommandsManager::CommandsManager() 
-: _fc(new FarCatalog(ROOT_COMMAND_PATTERNS_KEY, true) )
+: _fc(new FarSettingsKeyWrapper(ROOT_COMMAND_PATTERNS_KEY, true) )
 {
 }
 
