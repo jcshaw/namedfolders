@@ -27,7 +27,7 @@ namespace {
 	template<class T>
 	inline boost::shared_ptr<nf::SequenceSettings<T>> get_sequence(nf::FarCatalog* pfc, nf::tspec_folders specFolder) { 
 		nf::PluginSettings ps;
-		boost::shared_ptr<nf::FarSettingsKeyWrapper> fs = pfc->openPlainSubKey(nf::FarCatalog::GetSpecFolderName(specFolder), false);
+		boost::shared_ptr<nf::FarSettingsKeyWrapper> fs = pfc->openPlainSubKey(nf::FarCatalog::GetSpecFolderName(specFolder));
 		return boost::shared_ptr<nf::SequenceSettings<T>>(new nf::SequenceSettings<T>(ps, fs->openFarHandle(ps, true)));
 	}
 }
@@ -76,9 +76,10 @@ bool nf::sc::CCatalog::GetShortcutInfo(tstring const& shName, bool bTemporary, t
 		destValue = Utils::CombinePath(CPanelInfoWrap(INVALID_HANDLE_VALUE).GetPanelCurDir(true), subdirectory, SLASH_DIRS);
 		return true;
 	} else {
-		if (! _pFarCatalog->getValue(shName, destValue, REG_STATIC_KEYS)) {
-			return _pFarCatalog->getValue(shName, destValue, REG_TEMP_KEYS);
+		if (_pFarCatalog->getValue(shName, destValue, REG_STATIC_KEYS)) {
+			return true;
 		}
+		return _pFarCatalog->getValue(shName, destValue, REG_TEMP_KEYS);
 	} 
 }
 

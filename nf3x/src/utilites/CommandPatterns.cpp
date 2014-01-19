@@ -289,7 +289,7 @@ namespace {
 }
 
 CommandsManager::CommandsManager() 
-: _fc(new FarSettingsKeyWrapper(ROOT_COMMAND_PATTERNS_KEY, true) )
+: _fc(new FarSettingsKeyWrapper(ROOT_COMMAND_PATTERNS_KEY) )
 {
 }
 

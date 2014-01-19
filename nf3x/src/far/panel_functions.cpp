@@ -63,6 +63,11 @@ BOOL nf::Panel::MoveItems(CPanel* pPanel, PanelInfo const &pi, tcopy_mode copyMo
 		: Utils::CombinePath(get_inactive_panel_current_catalog(pPanel), Utils::ExtractCatalogName(name), SLASH_CATS);
 	bool bPluginOpenedOnInactivePanel = ! default_path.empty();
 
+	//if we copy several items, default path should contain catalog name without shortuct name
+	if (bSeveralCatalogs) {
+		default_path = Utils::DividePathFilename(default_path, SLASH_CATS_CHAR, false).first + SLASH_CATS_CHAR;
+	}
+
 	nf::CDialogMove dlg(name.c_str()
 		, default_path
 		, bFirstItemIsCatalog

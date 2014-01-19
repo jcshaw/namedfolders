@@ -5,23 +5,13 @@
 #include "stlcatalogs.h"
 #include "strings_utils.h"
 
-nf::FarSettingsKeyWrapper::FarSettingsKeyWrapper(nf::tlist_strings const& path, bool bCreateIfNotExists) 
+nf::FarSettingsKeyWrapper::FarSettingsKeyWrapper(nf::tlist_strings const& path) 
 : _CatalogPath(path)
 {
-// 	nf::PluginSettings ps;
-// 	if (bCreateIfNotExists) {
-// 		openFarHandle(ps, bCreateIfNotExists);
-// 	}
 }
 
-nf::FarSettingsKeyWrapper::FarSettingsKeyWrapper(tstring const& path, bool bCreateIfNotExists) {
+nf::FarSettingsKeyWrapper::FarSettingsKeyWrapper(tstring const& path) {
 	Utils::add_to_path(_CatalogPath, path);
-
-// 	nf::PluginSettings ps;
-// 	if (bCreateIfNotExists) {
-// 		openFarHandle(ps, bCreateIfNotExists);
-// 	}
-
 }
 
 nf::FarSettingsKeyWrapper::FarSettingsKeyWrapper(FarSettingsKeyWrapper const& fc) 
@@ -30,16 +20,11 @@ nf::FarSettingsKeyWrapper::FarSettingsKeyWrapper(FarSettingsKeyWrapper const& fc
 
 }
 
-nf::FarSettingsKeyWrapper::FarSettingsKeyWrapper(FarSettingsKeyWrapper const* parent, tstring const& path, bool bCreateIfNotExists) {
+nf::FarSettingsKeyWrapper::FarSettingsKeyWrapper(FarSettingsKeyWrapper const* parent, tstring const& path) {
 	if (parent != nullptr) {
 		_CatalogPath = parent->_CatalogPath;
 	}
 	Utils::add_to_path(_CatalogPath, path);
-
-// 	nf::PluginSettings ps;
-// 	if (bCreateIfNotExists) {
-// 		openFarHandle(ps, bCreateIfNotExists);
-// 	}
 }
 
 nf::FarSettingsKeyWrapper::~FarSettingsKeyWrapper(void)

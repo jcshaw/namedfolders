@@ -7,9 +7,9 @@ namespace nf {
 class FarSettingsKeyWrapper
 {
 public:		
-	FarSettingsKeyWrapper(nf::tlist_strings const& path, bool bCreateIfNotExists);
-	FarSettingsKeyWrapper(tstring const& path, bool bCreateIfNotExists);
-	FarSettingsKeyWrapper(FarSettingsKeyWrapper const* parent, tstring const& path, bool bCreateIfNotExists);
+	FarSettingsKeyWrapper(nf::tlist_strings const& path);
+	FarSettingsKeyWrapper(tstring const& path);
+	FarSettingsKeyWrapper(FarSettingsKeyWrapper const* parent, tstring const& path);
 	FarSettingsKeyWrapper(FarSettingsKeyWrapper const& fc);
 	virtual ~FarSettingsKeyWrapper(void);
 

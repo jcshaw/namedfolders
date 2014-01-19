@@ -6,21 +6,24 @@
 #include "strings_utils.h"
 
 nf::FarCatalog::FarCatalog(nf::tlist_strings const& path, bool bCreateIfNotExists) 
-: FarSettingsKeyWrapper(path, bCreateIfNotExists)
+: FarSettingsKeyWrapper(path)
 , _InternalPath(nf::sc::CCatalog::generateInternalPath(getCatalogPath()))
 {
+	ensure_exists(bCreateIfNotExists);
 }
 
 nf::FarCatalog::FarCatalog(tstring const& path, bool bCreateIfNotExists) 
-: FarSettingsKeyWrapper(path, bCreateIfNotExists) 
+: FarSettingsKeyWrapper(path) 
 , _InternalPath(nf::sc::CCatalog::generateInternalPath(getCatalogPath()))
 {
+	ensure_exists(bCreateIfNotExists);
 }
 
 nf::FarCatalog::FarCatalog(FarCatalog const* parent, tstring const& path, bool bCreateIfNotExists) 
-: FarSettingsKeyWrapper(parent, path, bCreateIfNotExists)
+: FarSettingsKeyWrapper(parent, path)
 , _InternalPath(nf::sc::CCatalog::generateInternalPath(getCatalogPath()))
 {
+	ensure_exists(bCreateIfNotExists);
 }
 
 nf::FarCatalog::~FarCatalog(void)
@@ -85,6 +88,16 @@ boost::shared_ptr<nf::FarCatalog> nf::FarCatalog::openSubKey(tstring const& subK
 	return boost::shared_ptr<FarCatalog>(new FarCatalog(this, subKeyName, createIfNotExists) );
 }
 
-boost::shared_ptr<nf::FarSettingsKeyWrapper> nf::FarCatalog::openPlainSubKey(tstring const& subKeyName, bool createIfNotExists) {
-	return boost::shared_ptr<FarSettingsKeyWrapper>(new FarSettingsKeyWrapper(this, subKeyName, createIfNotExists) );
+boost::shared_ptr<nf::FarSettingsKeyWrapper> nf::FarCatalog::openPlainSubKey(tstring const& subKeyName) {
+	auto ipath = this->get_internal_path();
+	ipath.push_back(subKeyName);
+
+	return boost::shared_ptr<FarSettingsKeyWrapper>(new FarSettingsKeyWrapper(ipath) );
+}
+
+void nf::FarCatalog::ensure_exists(bool bCreateIfNotExists) {
+	if (bCreateIfNotExists) {
+		nf::PluginSettings ps;
+		openFarHandle(ps, bCreateIfNotExists);
+	}
 }

@@ -116,7 +116,7 @@ tstring const& CSettings::GetListPrefixes() {
 namespace {
 	wchar_t const* ROOT_NF_SETTINGS_KEY = L"nf_settings";
 	boost::shared_ptr<FarSettingsKeyWrapper> get_root_key() {
-		boost::shared_ptr<FarSettingsKeyWrapper> dest(new FarSettingsKeyWrapper(ROOT_NF_SETTINGS_KEY, true));
+		boost::shared_ptr<FarSettingsKeyWrapper> dest(new FarSettingsKeyWrapper(ROOT_NF_SETTINGS_KEY));
 		return dest;
 // 		auto h = nf::PluginSettings::FarOpenKey(0, ROOT_NF_SETTINGS_KEY);
 // 		if (nf::PluginSettings::isInvalidHandle(h)) {
