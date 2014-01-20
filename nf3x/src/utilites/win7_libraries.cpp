@@ -26,7 +26,9 @@
 namespace {
 	class function_loader {
 		typedef HRESULT (__stdcall t_SHCreateItemFromParsingName)(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv);
+		typedef HRESULT (__stdcall t_SHLoadLibraryFromItem)(IShellItem *psiLibrary, DWORD grfMode, REFIID riid, void **ppv);
 		t_SHCreateItemFromParsingName* m_pf;
+		t_SHLoadLibraryFromItem* m_pf2;
 		HINSTANCE m_hinstLib;
 	public:
 		function_loader() {
@@ -34,6 +36,7 @@ namespace {
 			m_hinstLib = ::LoadLibrary(TEXT("Shell32.dll")); 
 			if (m_hinstLib != NULL) { 
 				m_pf = (t_SHCreateItemFromParsingName*)::GetProcAddress(m_hinstLib, "SHCreateItemFromParsingName"); 
+				m_pf2 = (t_SHLoadLibraryFromItem*)::GetProcAddress(m_hinstLib, "SHLoadLibraryFromItem"); 
 			} 
 		}
 		~function_loader() {
@@ -42,6 +45,13 @@ namespace {
 		HRESULT SHCreateItemFromParsingName(PCWSTR pszPath, IBindCtx *pbc, REFIID riid, void **ppv) {			
 			if (m_pf != NULL) {
 				return m_pf(pszPath, pbc, riid, ppv);
+			} else {
+				return E_FAIL;
+			}
+		}
+		HRESULT SHLoadLibraryFromItem(IShellItem *psiLibrary, DWORD grfMode, REFIID riid, void **ppv) {
+			if (m_pf2 != NULL) {
+				return m_pf2(psiLibrary, grfMode, riid, ppv);
 			} else {
 				return E_FAIL;
 			}
@@ -58,7 +68,7 @@ namespace {
 			} BOOST_SCOPE_EXIT_END;
 
 			IShellLibrary *plib = NULL;
-			hr = SHLoadLibraryFromItem(psi_item, STGM_READWRITE, IID_PPV_ARGS(&plib));
+			hr = shell32.SHLoadLibraryFromItem(psi_item, STGM_READWRITE, IID_PPV_ARGS(&plib));
 			if (SUCCEEDED(hr)) {
 				BOOST_SCOPE_EXIT ((&plib)) {
 					plib->Release();
