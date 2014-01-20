@@ -96,13 +96,13 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">c:\libs\stlsoft-1.9.117\include;c:\libs\boost\include\boost-1_55;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">c:\libs\stlsoft-1.9.117\include;c:\libs\boost\include\boost-1_55;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">c:\libs\stlsoft-1.9.117\include;c:\libs\boost\include\boost-1_55;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\libs\stlsoft-1.9.117\include;c:\libs\boost\include\boost-1_55;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">c:\libs\stlsoft-1.9.117\include;c:\libs\boost\include\boost-1_55;C:\Program Files\Microsoft SDKs\Windows\v7.0\Include;$(IncludePath)</IncludePath>
     <RunCodeAnalysis Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</RunCodeAnalysis>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\libs\boost\lib;$(LibraryPath)</LibraryPath>
     <CodeAnalysisIgnoreGeneratedCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CodeAnalysisIgnoreGeneratedCode>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\libs\boost\lib;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\libs\boost\lib64;$(LibraryPath)</LibraryPath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\libs\boost\lib64;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\libs\boost\lib64;C:\Program Files\Microsoft SDKs\Windows\v7.0\Lib;$(LibraryPath)</LibraryPath>
     <PostBuildEventUseInBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PostBuildEventUseInBuild>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NamedFolders</TargetName>
   </PropertyGroup>
@@ -268,9 +268,9 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="FarSettingsKeyWrapper.cpp" />
     <ClCompile Include="far\confirmations.cpp" />
     <ClCompile Include="far\FarCatalog.cpp" />
+    <ClCompile Include="far\FarSettingsKeyWrapper.cpp" />
     <ClCompile Include="far\far_impl.cpp" />
     <ClCompile Include="far\Menu2.cpp" />
     <ClCompile Include="far\MenuDialog.cpp" />
@@ -320,12 +320,12 @@
     <ClInclude Include="external\ScopeGuard.h" />
     <ClInclude Include="far3\far_utils2.h" />
     <ClInclude Include="far3\panel_types.h" />
-    <ClInclude Include="FarSettingsKeyWrapper.h" />
     <ClInclude Include="far\CatalogSequences.h" />
     <ClInclude Include="far\confirmations.h" />
     <ClInclude Include="far\EnumSettings.h" />
     <ClInclude Include="far\FarCatalog.h" />
     <ClInclude Include="far\farcolor.hpp" />
+    <ClInclude Include="far\FarSettingsKeyWrapper.h" />
     <ClInclude Include="far\far_impl.h" />
     <ClInclude Include="far\far_utils.h" />
     <ClInclude Include="far\lang.h" />
