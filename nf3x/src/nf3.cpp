@@ -89,13 +89,12 @@ HANDLE WINAPI  OpenW(const struct OpenInfo *pInfo) {
 			break;
 		case OPEN_RIGHTDISKMENU:
 		case OPEN_LEFTDISKMENU:
-			if (pInfo->Data == 0) {
+			if (*pInfo->Guid == nf::NF_DISKMENU_GUID) {
 				return new nf::Panel::CPanel();
 			} else {
 				//we get "nf:catalogname"
 				//so, open "cd:catalogname/*"
-				nf::DiskMenuHelper menu_helper;
-				return nf::OpenFromCommandLine(menu_helper.GetCommand(static_cast<unsigned int>(pInfo->Data)).c_str()).first;
+				return nf::OpenFromCommandLine(nf::DiskMenuHelper::GetCommand(pInfo->Guid).c_str()).first;
 			}
 		break;
 		case OPEN_DIALOG:

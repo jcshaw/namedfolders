@@ -9,6 +9,7 @@
 #include "stlcatalogs.h"
 
 wchar_t const* nf::sc::CATALOG_PROPERTY_SHOW_IN_DISK_MENU = L"show_in_disk_menu";
+wchar_t const* nf::sc::CATALOG_PROPERTY_SHOW_IN_DISK_MENU_GUID = L"show_in_disk_menu_guid";
 wchar_t const* nf::sc::CATALOG_PROPERTY_FLAG_ADD_TO_WIN7_BY_DEFAULT = L"flag_add_to_win7_lib_by_default";
 wchar_t const* nf::sc::CATALOG_PROPERTY_DEFAULT_WIN7_LIB = L"default_win7_lib";
 

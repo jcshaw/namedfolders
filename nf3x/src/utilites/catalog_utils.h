@@ -10,6 +10,7 @@
 namespace nf {
 namespace sc {
 	extern wchar_t const* CATALOG_PROPERTY_SHOW_IN_DISK_MENU;
+	extern wchar_t const* CATALOG_PROPERTY_SHOW_IN_DISK_MENU_GUID;
 	extern wchar_t const* CATALOG_PROPERTY_FLAG_ADD_TO_WIN7_BY_DEFAULT;
 	extern wchar_t const* CATALOG_PROPERTY_DEFAULT_WIN7_LIB;
 	bool IsCatalogExist(tstring const& pathCatalog);

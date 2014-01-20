@@ -32,8 +32,8 @@ namespace {
 	}
 }
 
-nf::sc::CCatalog::CCatalog() 
-{
+nf::sc::CCatalog::CCatalog() {
+	_pFarCatalog.reset(new FarCatalog(tstring(), true));
 
 }
 

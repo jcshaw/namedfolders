@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <whatsnew>
+<version product_name="Named Folders" version="4.1.0.285" date="?.01.2014"> 
+<item type="-">Исправлена проблема с двумя экземплярами FAR, #69. В некоторых случаях при запуске второго экземпляра список
+шоткатов был пуст.</item>
+<item type="-">Восстановлена возможность показа каталога в меню дисков. Добавлена возможность показывать не только корневые
+каталоги, но и вложенные.</item>
+</version>
+
 <version product_name="Named Folders" version="4.0.0.284 beta 1" date="29.08.2013"> 
 <item type="!">NF 4.X работает только под FAR 3. В FAR 2.X можно использовать NF 3.X</item>
 <item type="!">Все ярлыки теперь хранятся не в реестре, а в sqlite.</item>
